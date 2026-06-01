@@ -1,0 +1,168 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 19 * * 1-6" # Daily smoke, UTC 19:00 (KST 04:00) Mon-Sat
+    - cron: "0 19 * * 0" # Weekly full, UTC 19:00 (KST 04:00) Sunday
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Nightly scope to run"
+        required: true
+        type: choice
+        default: full
+        options:
+          - smoke
+          - full
+          - testcontainers
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  statuses: read
+
+concurrency:
+  group: nightly-tests
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  TESTCONTAINERS_RYUK_DISABLED: "true"
+  DOCKER_HOST: "unix:///var/run/docker.sock"
+
+jobs:
+  plan:
+    name: Plan Nightly Scope
+    runs-on: ubuntu-latest
+    outputs:
+      scope: ${{ steps.plan.outputs.scope }}
+      run_smoke: ${{ steps.plan.outputs.run_smoke }}
+      run_full: ${{ steps.plan.outputs.run_full }}
+      run_testcontainers: ${{ steps.plan.outputs.run_testcontainers }}
+    steps:
+      - id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            scope="${{ inputs.scope }}"
+          elif [[ "${{ github.event.schedule }}" == "0 19 * * 0" ]]; then
+            scope="full"
+          else
+            scope="smoke"
+          fi
+
+          case "$scope" in
+            smoke)
+              run_smoke="true"
+              run_full="false"
+              run_testcontainers="true"
+              ;;
+            full)
+              run_smoke="true"
+              run_full="true"
+              run_testcontainers="true"
+              ;;
+            testcontainers)
+              run_smoke="false"
+              run_full="false"
+              run_testcontainers="true"
+              ;;
+            *)
+              echo "Unsupported scope: $scope" >&2
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "scope=$scope"
+            echo "run_smoke=$run_smoke"
+            echo "run_full=$run_full"
+            echo "run_testcontainers=$run_testcontainers"
+          } >> "$GITHUB_OUTPUT"
+
+  smoke:
+    name: Smoke / lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: plan
+    if: ${{ needs.plan.outputs.run_smoke == 'true' }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Check module tidiness
+        run: make tidy-check
+
+      - name: Vet
+        run: make vet
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9.2.1
+        with:
+          version: v2.12.2
+          args: --timeout=5m
+
+  testcontainers:
+    name: Testcontainers / full test pass
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: plan
+    if: ${{ needs.plan.outputs.run_testcontainers == 'true' }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check Docker for Testcontainers
+        run: |
+          docker version
+          docker info
+
+      - name: Test with Testcontainers
+        run: |
+          for attempt in 1 2 3; do
+            make test && break
+            echo "Attempt $attempt failed"
+            [ "$attempt" -lt 3 ] && sleep 10 || exit 1
+          done
+
+  race:
+    name: Race / Testcontainers
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: plan
+    if: ${{ needs.plan.outputs.run_full == 'true' }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check Docker for Testcontainers
+        run: |
+          docker version
+          docker info
+
+      - name: Race test with Testcontainers
+        run: |
+          for attempt in 1 2 3; do
+            make race && break
+            echo "Attempt $attempt failed"
+            [ "$attempt" -lt 3 ] && sleep 10 || exit 1
+          done
+
