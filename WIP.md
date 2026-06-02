@@ -1,5 +1,9 @@
 # WIP
 
+Snapshot: 2026-06-02 KST
+Scope: open GitHub issues assigned to `debop`.
+Open count: 0 issues.
+
 ## Current Milestone
 
 Bootstrap a thin workshop repository that demonstrates `bluetape-go` packages in
