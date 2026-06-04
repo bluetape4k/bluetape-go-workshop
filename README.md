@@ -18,6 +18,7 @@ are useful, while keeping handlers compatible with `net/http`.
 | Example | Purpose | bluetape-go packages |
 |---|---|---|
 | [`examples/leader-redis-web`](examples/leader-redis-web) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
+| [`examples/resilience-http-web`](examples/resilience-http-web) | HTTP service that composes retry, timeout, circuit breaker, bulkhead, and event hooks. | `resilience` |
 
 ## Run the Leader Example
 
@@ -35,6 +36,24 @@ curl http://localhost:8080/healthz
 curl http://localhost:8080/leader
 curl -X POST http://localhost:8080/campaign
 curl -X POST http://localhost:8080/resign
+```
+
+## Run the Resilience Example
+
+Start a catalog service locally, then run the service:
+
+```bash
+export CATALOG_URL=http://localhost:9090
+go run ./examples/resilience-http-web
+```
+
+Useful endpoints:
+
+```bash
+curl http://localhost:8081/healthz
+curl http://localhost:8081/catalog/book-1
+curl -X POST 'http://localhost:8081/orders?delay=25ms'
+curl http://localhost:8081/events
 ```
 
 ## Development

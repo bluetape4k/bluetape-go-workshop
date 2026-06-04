@@ -12,3 +12,4 @@ and this project uses semantic versioning once the first tag is published.
 - Initial workshop repository for runnable `bluetape-go` web application examples.
 - Chi-based Redis leader election HTTP example with Testcontainers-backed integration tests.
 - CI and Nightly workflows that run uncached container-backed tests.
+- Resilience HTTP web example for retry, timeout, circuit breaker, bulkhead, and event hooks.
