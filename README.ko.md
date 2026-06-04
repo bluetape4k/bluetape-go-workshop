@@ -17,8 +17,15 @@
 
 | 예제 | 목적 | bluetape-go package |
 |---|---|---|
+| [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | 안전한 serialization과 compression 선택 기준을 보여주는 versioned product cache snapshot 예제입니다. | `serialization`, `compression` |
+| [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
+| [`examples/invitation-codecs`](examples/invitation-codecs) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | Redis 기반 leader election을 수행하고 leader 상태를 노출하는 최소 chi 기반 HTTP service입니다. | `leader`, `leader/redis`, `testcontainers/redis` |
+| [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs) | Redis leader election으로 migration gate와 cache warmer job을 조정하는 예제입니다. | `leader`, `leader/redis`, `testing/concurrency` |
+| [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout) | bounded goroutine, cancellation, panic capture, stress test를 포함한 product detail fan-out 예제입니다. | `concurrency`, `testing/concurrency` |
+| [`examples/order-pipeline-testcontainers`](examples/order-pipeline-testcontainers) | repository Testcontainers fixture로 PostgreSQL, Redis, NATS 통합 흐름을 검증하는 예제입니다. | `testcontainers/postgres`, `testcontainers/redis`, `testcontainers/nats` |
 | [`examples/resilience-http-web`](examples/resilience-http-web) | retry, timeout, circuit breaker, bulkhead, event hook을 조합하는 HTTP service입니다. | `resilience` |
+| [`examples/leader-group-web`](examples/leader-group-web) | Redis 기반 bounded multi-leader group election을 노출하는 HTTP service입니다. | `leader`, `leader/redis`, `testing/concurrency` |
 
 ## Leader 예제 실행
 
@@ -56,6 +63,25 @@ curl -X POST 'http://localhost:8081/orders?delay=25ms'
 curl http://localhost:8081/events
 ```
 
+## Leader Group 예제 실행
+
+Redis를 먼저 실행한 뒤 service를 시작합니다:
+
+```bash
+export REDIS_ADDR=localhost:6379
+export MAX_LEADERS=2
+go run ./examples/leader-group-web
+```
+
+주요 endpoint:
+
+```bash
+curl http://localhost:8082/healthz
+curl http://localhost:8082/group
+curl -X POST http://localhost:8082/campaign
+curl -X POST http://localhost:8082/resign
+```
+
 ## 개발
 
 자주 쓰는 명령:
@@ -83,7 +109,7 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | bluetape-go milestone | Workshop 예제 방향 |
 |---|---|
 | `0.1.0` | Redis leader election web service. |
-| `0.2.0` | HTTP client/service resilience 예제. |
+| `0.2.0` | HTTP client/service resilience 예제와 bounded leader group coordination. |
 | `0.3.0` | Near-cache와 Redis invalidation 예제. |
 | `0.4.0` | State와 workflow 예제. |
 | `0.5.0` | Batch processing 예제. |
