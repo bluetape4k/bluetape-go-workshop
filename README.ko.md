@@ -18,6 +18,7 @@
 | 예제 | 목적 | bluetape-go package |
 |---|---|---|
 | [`examples/leader-redis-web`](examples/leader-redis-web) | Redis 기반 leader election을 수행하고 leader 상태를 노출하는 최소 chi 기반 HTTP service입니다. | `leader`, `leader/redis`, `testcontainers/redis` |
+| [`examples/resilience-http-web`](examples/resilience-http-web) | retry, timeout, circuit breaker, bulkhead, event hook을 조합하는 HTTP service입니다. | `resilience` |
 
 ## Leader 예제 실행
 
@@ -35,6 +36,24 @@ curl http://localhost:8080/healthz
 curl http://localhost:8080/leader
 curl -X POST http://localhost:8080/campaign
 curl -X POST http://localhost:8080/resign
+```
+
+## Resilience 예제 실행
+
+Catalog service를 로컬에서 먼저 실행한 뒤 service를 시작합니다:
+
+```bash
+export CATALOG_URL=http://localhost:9090
+go run ./examples/resilience-http-web
+```
+
+주요 endpoint:
+
+```bash
+curl http://localhost:8081/healthz
+curl http://localhost:8081/catalog/book-1
+curl -X POST 'http://localhost:8081/orders?delay=25ms'
+curl http://localhost:8081/events
 ```
 
 ## 개발

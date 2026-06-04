@@ -1,8 +1,8 @@
 # WIP
 
-Snapshot: 2026-06-02 KST
+Snapshot: 2026-06-04 KST
 Scope: open GitHub issues assigned to `debop`.
-Open count: 0 issues.
+Open count: 8 issues.
 
 ## Current Milestone
 
@@ -16,10 +16,13 @@ real web application shapes.
 - Use `chi` as the default lightweight web framework when examples need routing
   or middleware.
 - Run Testcontainers-backed tests in local CI, GitHub CI, and Nightly.
+- Finish `0.2.0` resilience examples before closing the corresponding
+  `bluetape-go` Epic.
 
 ## Next Examples
 
-- Add resilience examples after `bluetape-go` provides the first resilience package.
+- Add LeaderGroupElector group coordination examples after the resilience HTTP
+  example lands.
 - Add near-cache examples after cache coordination packages exist.
 - Add state, workflow, and batch examples when their APIs stabilize.
 
@@ -29,3 +32,6 @@ real web application shapes.
 - Start with one Redis leader web example so the workshop does not outrun the library.
 - Prefer lightweight `chi` examples over full-stack framework abstractions.
 - Use `-count=1` in test commands so Go's test cache cannot hide Testcontainers execution.
+- For Go feature examples, include stress validation with `GoroutineStressTester`
+  and `AsyncJobTester` when concurrency, goroutine, async, cancellation, or
+  shared-state behavior is involved.
