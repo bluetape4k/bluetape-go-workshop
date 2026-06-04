@@ -2,7 +2,7 @@
 
 Snapshot: 2026-06-04 KST
 Scope: open GitHub issues assigned to `debop`.
-Open count: 8 issues.
+Open count: 7 issues.
 
 ## Current Milestone
 
@@ -16,13 +16,11 @@ real web application shapes.
 - Use `chi` as the default lightweight web framework when examples need routing
   or middleware.
 - Run Testcontainers-backed tests in local CI, GitHub CI, and Nightly.
-- Finish `0.2.0` resilience examples before closing the corresponding
-  `bluetape-go` Epic.
+- Finish `0.1.0` foundation examples and `0.2.0` leader group examples before
+  closing their workshop milestones.
 
 ## Next Examples
 
-- Add LeaderGroupElector group coordination examples after the resilience HTTP
-  example lands.
 - Add near-cache examples after cache coordination packages exist.
 - Add state, workflow, and batch examples when their APIs stabilize.
 
@@ -35,3 +33,5 @@ real web application shapes.
 - For Go feature examples, include stress validation with `GoroutineStressTester`
   and `AsyncJobTester` when concurrency, goroutine, async, cancellation, or
   shared-state behavior is involved.
+- Keep examples scenario-first: each example should solve one business-shaped
+  problem rather than cataloging every helper function.
