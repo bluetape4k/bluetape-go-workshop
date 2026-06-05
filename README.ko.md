@@ -20,6 +20,7 @@
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | 안전한 serialization과 compression 선택 기준을 보여주는 versioned product cache snapshot 예제입니다. | `serialization`, `compression` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
+| [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | SKU refresh job에서 retry, attempt별 timeout, event visibility, diagram 기반 outcome을 보여주는 예제입니다. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | Redis 기반 leader election을 수행하고 leader 상태를 노출하는 최소 chi 기반 HTTP service입니다. | `leader`, `leader/redis`, `testcontainers/redis` |
 | [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs) | Redis leader election으로 migration gate와 cache warmer job을 조정하는 예제입니다. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout) | bounded goroutine, cancellation, panic capture, stress test를 포함한 product detail fan-out 예제입니다. | `concurrency`, `testing/concurrency` |
@@ -109,6 +110,7 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | bluetape-go milestone | Workshop 예제 방향 |
 |---|---|
 | `0.1.0` | Redis leader election web service. |
+| `0.1.1` | Quality-closure resilience primitive을 위한 focused retry/timeout 예제. |
 | `0.2.0` | HTTP client/service resilience 예제와 bounded leader group coordination. |
 | `0.3.0` | Near-cache와 Redis invalidation 예제. |
 | `0.4.0` | State와 workflow 예제. |
