@@ -1,5 +1,5 @@
 digraph CatalogRefreshPolicySequence {
-  graph [rankdir=LR, bgcolor="transparent", splines=ortho, nodesep=0.45, ranksep=0.8]
+  graph [rankdir=LR, bgcolor="transparent", splines=ortho, fontnames=svg, nodesep=0.45, ranksep=0.8]
   node [shape=box, style="rounded,filled", fontname="Comic Mono", fontsize=12, margin="0.14,0.10", color="#526d7a", penwidth=1.4]
   edge [fontname="Comic Mono", fontsize=10, color="#47616f", penwidth=1.6, arrowsize=0.75]
 

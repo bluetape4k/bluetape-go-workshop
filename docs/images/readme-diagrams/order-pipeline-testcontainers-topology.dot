@@ -7,6 +7,7 @@ digraph G {
     nodesep=0.45,
     ranksep=0.7,
     splines=ortho,
+    fontnames=svg,
     fontname="Architects Daughter",
     label="Order Pipeline Testcontainers Topology",
     labelloc=t,
