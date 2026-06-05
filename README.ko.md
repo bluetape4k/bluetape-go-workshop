@@ -30,6 +30,7 @@
 | [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs/README.ko.md) | [English](examples/leader-coordination-jobs/README.md) \| [한국어](examples/leader-coordination-jobs/README.ko.md) | Redis leader election으로 migration gate와 cache warmer job을 조정하는 예제입니다. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout/README.ko.md) | [English](examples/product-enrichment-fanout/README.md) \| [한국어](examples/product-enrichment-fanout/README.ko.md) | bounded goroutine, cancellation, panic capture, stress test를 포함한 product detail fan-out 예제입니다. | `concurrency`, `testing/concurrency` |
 | [`examples/order-pipeline-testcontainers`](examples/order-pipeline-testcontainers/README.ko.md) | [English](examples/order-pipeline-testcontainers/README.md) \| [한국어](examples/order-pipeline-testcontainers/README.ko.md) | repository Testcontainers fixture로 PostgreSQL, Redis, NATS 통합 흐름을 검증하는 예제입니다. | `testcontainers/postgres`, `testcontainers/redis`, `testcontainers/nats` |
+| [`examples/catalog-near-cache-redis`](examples/catalog-near-cache-redis/README.ko.md) | [English](examples/catalog-near-cache-redis/README.md) \| [한국어](examples/catalog-near-cache-redis/README.ko.md) | catalog peer를 위한 Redis near-cache invalidation과 cold-miss stampede coordination 예제입니다. | `cache`, `cache/redisnear`, `cache/rediscoord`, `testcontainers/redis` |
 | [`examples/resilience-http-web`](examples/resilience-http-web/README.ko.md) | [English](examples/resilience-http-web/README.md) \| [한국어](examples/resilience-http-web/README.ko.md) | retry, timeout, circuit breaker, bulkhead, event hook을 조합하는 HTTP service입니다. | `resilience` |
 | [`examples/leader-group-web`](examples/leader-group-web/README.ko.md) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | Redis 기반 bounded multi-leader group election을 노출하는 HTTP service입니다. | `leader`, `leader/redis`, `testing/concurrency` |
 
@@ -117,6 +118,6 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.1.0` | Redis leader election web service. |
 | `0.1.1` | Quality-closure resilience primitive을 위한 focused retry/timeout 예제. |
 | `0.2.0` | HTTP client/service resilience, payment authorization guard, bounded leader group coordination 예제. |
-| `0.3.0` | Near-cache와 Redis invalidation 예제. |
+| `0.3.0` | Near-cache, Redis invalidation, stampede coordination 예제. |
 | `0.4.0` | State와 workflow 예제. |
 | `0.5.0` | Batch processing 예제. |

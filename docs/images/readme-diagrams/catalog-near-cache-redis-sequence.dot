@@ -1,0 +1,24 @@
+digraph CatalogNearCacheRedisSequence {
+  graph [rankdir=LR, bgcolor="transparent", splines=ortho, fontnames=svg, nodesep=0.50, ranksep=0.70]
+  node [shape=box, style="rounded,filled", fontname="Comic Mono", fontsize=12, margin="0.16,0.10", color="#48758d", penwidth=1.5]
+  edge [fontname="Comic Mono", fontsize=10, color="#47616f", penwidth=1.7, arrowsize=0.8]
+
+  peer_a [label="Peer A", fillcolor="#d7ecf2"]
+  coord_a [label="Stampede A", fillcolor="#f7e5aa", color="#b99b5d"]
+  redis [label="Redis", fillcolor="#f5d3df", color="#b95f7a"]
+  store [label="Store", fillcolor="#dbe8d4", color="#5d8a62"]
+  coord_b [label="Stampede B", fillcolor="#f7e5aa", color="#b99b5d"]
+  peer_b [label="Peer B", fillcolor="#d7ecf2"]
+
+  peer_a -> coord_a [xlabel="GetProduct cold"]
+  coord_a -> redis [xlabel="acquire lock"]
+  coord_a -> store [xlabel="Load once"]
+  store -> coord_a [xlabel="Product"]
+  coord_a -> redis [xlabel="publish result"]
+  peer_b -> coord_b [xlabel="same cold SKU"]
+  coord_b -> redis [xlabel="wait result"]
+  redis -> coord_b [xlabel="result envelope"]
+  coord_b -> peer_b [xlabel="Product"]
+  peer_a -> redis [xlabel="Set v2 event"]
+  redis -> peer_b [xlabel="invalidate local"]
+}

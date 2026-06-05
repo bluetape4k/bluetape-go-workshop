@@ -1,0 +1,17 @@
+graph 1 9.5404 3.2903
+node shopper 0.86312 0.90903 1.7263 0.59583 "Catalog request\nSKU lookup" rounded,filled box #48758d #d7ecf2
+node peer_a 3.296 2.9924 1.445 0.59583 "Peer A\nlocal memory" rounded,filled box #b99b5d #f7e5aa
+node peer_b 3.296 0.90903 1.445 0.59583 "Peer B\nlocal memory" rounded,filled box #b99b5d #f7e5aa
+node redis 5.7288 2.3951 1.7263 0.59583 "Redis\nPub/Sub + locks" rounded,filled box #b95f7a #f5d3df
+node store 8.4898 1.6451 2.1012 0.59583 "Authoritative store\nproduct projection" rounded,filled box #5d8a62 #dbe8d4
+node invalidation 8.4898 0.29792 1.9137 0.59583 "Invalidation\npeer B evicts SKU" rounded,filled box #8a6bb0 #eadcf5
+edge shopper peer_b 4 1.7346 0.90903 1.7346 0.90903 2.4201 0.90903 2.4201 0.90903 solid #47616f
+edge peer_a redis 7 3.7765 2.6855 3.7765 2.5831 3.7765 2.4944 3.7765 2.4944 3.7765 2.4944 4.7086 2.4944 4.7086 2.4944 solid #47616f
+edge peer_a store 7 2.8182 2.6872 2.8182 2.3064 2.8182 1.7047 2.8182 1.7047 2.8182 1.7047 7.2828 1.7047 7.2828 1.7047 solid #47616f
+edge peer_b redis 7 3.0543 1.2168 3.0543 1.6254 3.0543 2.2958 3.0543 2.2958 3.0543 2.2958 4.7099 2.2958 4.7099 2.2958 solid #47616f
+edge peer_b store 7 3.2904 1.2156 3.2904 1.3946 3.2904 1.5856 3.2904 1.5856 3.2904 1.5856 7.2845 1.5856 7.2845 1.5856 solid #47616f
+edge redis store 7 6.0126 2.0894 6.0126 1.9536 6.0126 1.8239 6.0126 1.8239 6.0126 1.8239 7.2852 1.8239 7.2852 1.8239 solid #47616f
+edge redis invalidation 7 5.4432 2.0873 5.4432 1.5269 5.4432 0.39722 5.4432 0.39722 5.4432 0.39722 7.379 0.39722 7.379 0.39722 solid #47616f
+edge store peer_b 7 7.4341 1.4664 5.9805 1.4664 3.5404 1.4664 3.5404 1.4664 3.5404 1.4664 3.5404 1.3606 3.5404 1.3606 solid #47616f
+edge invalidation peer_b 7 7.524 0.19861 6.0204 0.19861 3.2904 0.19861 3.2904 0.19861 3.2904 0.19861 3.2904 0.45678 3.2904 0.45678 solid #47616f
+stop

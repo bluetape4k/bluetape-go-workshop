@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="760" viewBox="0 0 1420 760" role="img" aria-labelledby="title desc">
+  <title id="title">Catalog Near-Cache Redis Scenario</title>
+  <desc id="desc">Two catalog peers share Redis Pub/Sub invalidation and Redis stampede coordination so one peer write evicts another peer local cache and cold miss bursts run one backing load.</desc>
+  <defs>
+    <marker id="scenario-neutral" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <marker id="scenario-load" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+    </marker>
+    <marker id="scenario-invalidate" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/>
+    </marker>
+    <marker id="scenario-write" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
+    </marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono'; font-size: 15px; fill: #536d7d; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 24px; fill: #243845; }
+      .card-text { font-family: 'Comic Mono'; font-size: 15px; fill: #344b59; }
+      .label { font-family: 'Comic Mono'; font-size: 13px; fill: #35505f; }
+      .small { font-family: 'Comic Mono'; font-size: 12px; fill: #536d7d; }
+      .neutral { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#scenario-neutral); }
+      .load { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#scenario-load); }
+      .invalidate { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#scenario-invalidate); }
+      .write { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-write); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1420" height="760" fill="#fbfaf6"/>
+  <text class="title" x="710" y="58" text-anchor="middle">Catalog Near-Cache Scenario</text>
+  <text class="subtitle" x="710" y="91" text-anchor="middle">Redis carries both cross-peer invalidation and cold-miss coordination; local memory keeps repeated reads fast.</text>
+
+  <g transform="translate(60 240)">
+    <rect width="180" height="110" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="card-title" x="90" y="44" text-anchor="middle">Catalog Read</text>
+    <text class="card-text" x="90" y="74" text-anchor="middle">SKU lookup</text>
+  </g>
+
+  <g transform="translate(310 210)">
+    <rect width="220" height="150" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="card-title" x="110" y="52" text-anchor="middle">Peer B</text>
+    <text class="card-text" x="110" y="84" text-anchor="middle">local memory cache</text>
+    <text class="card-text" x="110" y="108" text-anchor="middle">may hold Product v1</text>
+  </g>
+
+  <g transform="translate(620 210)">
+    <rect width="220" height="150" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
+    <text class="card-title" x="110" y="52" text-anchor="middle">Redis</text>
+    <text class="card-text" x="110" y="84" text-anchor="middle">Pub/Sub events</text>
+    <text class="card-text" x="110" y="108" text-anchor="middle">locks and results</text>
+  </g>
+
+  <g transform="translate(1040 210)">
+    <rect width="260" height="150" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/>
+    <text class="card-title" x="130" y="52" text-anchor="middle">Authoritative Store</text>
+    <text class="card-text" x="130" y="84" text-anchor="middle">Store.Load / Store.Put</text>
+    <text class="card-text" x="130" y="108" text-anchor="middle">source of Product v2</text>
+  </g>
+
+  <g transform="translate(310 500)">
+    <rect width="220" height="130" rx="12" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="card-title" x="110" y="48" text-anchor="middle">Peer A</text>
+    <text class="card-text" x="110" y="80" text-anchor="middle">writes Product v2</text>
+    <text class="card-text" x="110" y="104" text-anchor="middle">origin id = peer-a</text>
+  </g>
+
+  <g transform="translate(670 500)">
+    <rect width="260" height="130" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
+    <text class="card-title" x="130" y="48" text-anchor="middle">Peer B Invalidation</text>
+    <text class="card-text" x="130" y="80" text-anchor="middle">origin-filtered event</text>
+    <text class="card-text" x="130" y="104" text-anchor="middle">deletes stale local SKU</text>
+  </g>
+
+  <path class="neutral" d="M 240 295 L 310 295"/>
+  <text class="label" x="275" y="275" text-anchor="middle">GetProduct</text>
+
+  <path class="neutral" d="M 530 260 L 620 260"/>
+  <text class="label" x="575" y="240" text-anchor="middle">cold miss</text>
+
+  <path class="load" d="M 840 260 L 1040 260"/>
+  <text class="label" x="940" y="240" text-anchor="middle">single owner loads</text>
+
+  <path class="load" d="M 1170 210 L 1170 160 L 420 160 L 420 210"/>
+  <text class="label" x="795" y="143" text-anchor="middle">Product v1 returns to local memory</text>
+
+  <path class="write" d="M 420 500 L 420 470 L 1030 470 L 1030 330 L 1040 330"/>
+  <rect x="604" y="446" width="188" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="698" y="462" text-anchor="middle">PutProduct updates store</text>
+
+  <path class="write" d="M 530 525 L 585 525 L 585 315 L 620 315"/>
+  <rect x="471" y="432" width="92" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="517" y="448" text-anchor="middle">publish Set</text>
+
+  <path class="invalidate" d="M 730 360 L 730 500"/>
+  <rect x="735" y="425" width="104" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="787" y="441" text-anchor="middle">event fan-out</text>
+
+  <path class="invalidate" d="M 670 565 L 575 565 L 575 335 L 530 335"/>
+  <rect x="557" y="581" width="128" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="621" y="597" text-anchor="middle">evict stale SKU</text>
+
+  <path class="load" d="M 530 300 L 585 300 L 585 405 L 1170 405 L 1170 360"/>
+  <rect x="743" y="421" width="270" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="878" y="437" text-anchor="middle">next Peer B read reloads Product v2</text>
+
+  <rect x="185" y="682" width="1070" height="42" rx="12" fill="#edf1e9" stroke="#5d8a62"/>
+  <text class="subtitle" x="720" y="709" text-anchor="middle">Tests prove peer A writes invalidate peer B and cold bursts share one backing loader.</text>
+</svg>
