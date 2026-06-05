@@ -1,6 +1,6 @@
 # invitation-codecs
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `codec`를 사용해 invitation link, callback state, partner reference를 다루는
 예제입니다.

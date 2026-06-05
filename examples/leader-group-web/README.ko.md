@@ -1,6 +1,6 @@
 # leader-group-web
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 Redis `LeaderGroupElector`를 HTTP service로 노출하는 예제입니다.
 

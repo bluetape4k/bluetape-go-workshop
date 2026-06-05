@@ -1,6 +1,6 @@
 # cache-snapshot-codecs
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `serialization`과 `compression`을 함께 사용하는 versioned cache snapshot
 예제입니다.

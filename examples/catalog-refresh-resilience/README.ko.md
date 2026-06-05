@@ -1,6 +1,6 @@
 # catalog-refresh-resilience
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `bluetape-go/resilience` retry와 timeout policy를 사용하는 SKU refresh 예제입니다.
 

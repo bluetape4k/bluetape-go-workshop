@@ -1,6 +1,6 @@
 # resilience-http-web
 
-[한국어](README.ko.md)
+[English](README.md) | [한국어](README.ko.md)
 
 HTTP service example that composes `bluetape-go/resilience` retry, timeout,
 circuit breaker, bulkhead, and event hooks.

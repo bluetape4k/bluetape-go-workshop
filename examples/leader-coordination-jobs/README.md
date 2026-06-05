@@ -1,6 +1,6 @@
 # leader-coordination-jobs
 
-[한국어](README.ko.md)
+[English](README.md) | [한국어](README.ko.md)
 
 Redis leader election examples for a deployment migration gate and a periodic
 cache warmer.

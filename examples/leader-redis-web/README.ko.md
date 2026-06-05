@@ -1,6 +1,6 @@
 # leader-redis-web
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `bluetape-go` Redis leader election을 사용하는 최소 chi 기반 HTTP service입니다.
 
