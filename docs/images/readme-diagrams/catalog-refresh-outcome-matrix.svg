@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-labelledby="title desc">
+  <title id="title">Catalog Refresh Outcome Matrix</title>
+  <desc id="desc">Three tested outcomes for retry success, timeout failure, and invalid input.</desc>
+  <defs>
+    <style>
+      .title { font-family: 'Architects Daughter', cursive; font-size: 34px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #506878; }
+      .card-title { font-family: 'Architects Daughter', cursive; font-size: 23px; fill: #243845; }
+      .card-text { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #344b59; }
+      .chip { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1280" height="560" fill="#fbfaf6"/>
+  <text class="title" x="640" y="58" text-anchor="middle">Catalog Refresh Outcomes</text>
+  <text class="subtitle" x="640" y="88" text-anchor="middle">Each row is intentionally covered by a focused Go test.</text>
+
+  <g transform="translate(72 132)">
+    <rect x="0" y="0" width="350" height="312" rx="14" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="card-title" x="175" y="56" text-anchor="middle">Transient Failure</text>
+    <text class="card-text" x="175" y="104" text-anchor="middle">Attempt 1 returns an upstream error.</text>
+    <text class="card-text" x="175" y="132" text-anchor="middle">Retry schedules a second attempt.</text>
+    <text class="card-text" x="175" y="160" text-anchor="middle">Attempt 2 returns the product.</text>
+    <rect x="52" y="220" width="246" height="42" rx="10" fill="#ffffff" stroke="#88aebd"/>
+    <text class="chip" x="175" y="247" text-anchor="middle">TestRefreshRetriesTransientFailure</text>
+  </g>
+
+  <g transform="translate(465 132)">
+    <rect x="0" y="0" width="350" height="312" rx="14" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="card-title" x="175" y="56" text-anchor="middle">Slow Provider</text>
+    <text class="card-text" x="175" y="104" text-anchor="middle">Source observes the timeout context.</text>
+    <text class="card-text" x="175" y="132" text-anchor="middle">Timeout is visible through errors.Is.</text>
+    <text class="card-text" x="175" y="160" text-anchor="middle">Retry exhaustion keeps the last cause.</text>
+    <rect x="48" y="220" width="254" height="42" rx="10" fill="#ffffff" stroke="#d29a88"/>
+    <text class="chip" x="175" y="247" text-anchor="middle">TestRefreshReportsPolicyTimeout</text>
+  </g>
+
+  <g transform="translate(858 132)">
+    <rect x="0" y="0" width="350" height="312" rx="14" fill="#d8ead4" stroke="#5d8a62" stroke-width="2"/>
+    <text class="card-title" x="175" y="56" text-anchor="middle">Invalid Input</text>
+    <text class="card-text" x="175" y="104" text-anchor="middle">Blank SKU fails before policies run.</text>
+    <text class="card-text" x="175" y="132" text-anchor="middle">Nil source fails before policies run.</text>
+    <text class="card-text" x="175" y="160" text-anchor="middle">No hidden retry side effects.</text>
+    <rect x="66" y="220" width="218" height="42" rx="10" fill="#ffffff" stroke="#8fb990"/>
+    <text class="chip" x="175" y="247" text-anchor="middle">TestRefreshRejectsInvalidInput</text>
+  </g>
+
+  <rect x="206" y="494" width="868" height="38" rx="12" fill="#efe7d2" stroke="#b99b5d"/>
+  <text class="subtitle" x="640" y="519" text-anchor="middle">The example verifies behavior through typed errors and low-cardinality events, not sleeps or logs.</text>
+</svg>

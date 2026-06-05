@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1340" height="620" viewBox="0 0 1340 620" role="img" aria-labelledby="title desc">
+  <title id="title">Catalog Refresh Scenario Flow</title>
+  <desc id="desc">SKU refresh job passes through retry and timeout policies, calls a flaky catalog provider, updates a storefront read model, and emits resilience events.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <style>
+      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .card-title { font-family: 'Architects Daughter', cursive; font-size: 24px; fill: #243845; }
+      .card-text { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #344b59; }
+      .label { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+      .route { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arrow); }
+      .route-soft { fill: none; stroke: #8b789b; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1340" height="620" fill="#fbfaf6"/>
+  <text class="title" x="670" y="58" text-anchor="middle">SKU Refresh With Explicit Policy Boundaries</text>
+  <text class="subtitle" x="670" y="88" text-anchor="middle">Domain code stays plain; resilience policies own retry, timeout, and event decisions.</text>
+
+  <g transform="translate(72 192)">
+    <rect width="210" height="146" rx="14" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="card-title" x="105" y="56" text-anchor="middle">Refresh Job</text>
+    <text class="card-text" x="105" y="92" text-anchor="middle">SKU request</text>
+    <text class="card-text" x="105" y="116" text-anchor="middle">from schedule</text>
+  </g>
+
+  <g transform="translate(370 172)">
+    <rect width="250" height="186" rx="14" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="card-title" x="125" y="56" text-anchor="middle">Policy Wrapper</text>
+    <text class="card-text" x="125" y="92" text-anchor="middle">retry is outermost</text>
+    <text class="card-text" x="125" y="116" text-anchor="middle">timeout per attempt</text>
+    <text class="card-text" x="125" y="140" text-anchor="middle">events are synchronous</text>
+  </g>
+
+  <g transform="translate(730 192)">
+    <rect width="230" height="146" rx="14" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="card-title" x="115" y="56" text-anchor="middle">Catalog Source</text>
+    <text class="card-text" x="115" y="92" text-anchor="middle">flaky upstream</text>
+    <text class="card-text" x="115" y="116" text-anchor="middle">error or product</text>
+  </g>
+
+  <g transform="translate(1048 168)">
+    <rect width="230" height="158" rx="14" fill="#d8ead4" stroke="#5d8a62" stroke-width="2"/>
+    <text class="card-title" x="115" y="56" text-anchor="middle">Read Model</text>
+    <text class="card-text" x="115" y="94" text-anchor="middle">fresh product</text>
+    <text class="card-text" x="115" y="118" text-anchor="middle">only after success</text>
+  </g>
+
+  <g transform="translate(1058 398)">
+    <rect width="220" height="106" rx="14" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
+    <text class="card-title" x="110" y="44" text-anchor="middle">Events</text>
+    <text class="card-text" x="110" y="72" text-anchor="middle">retry / timeout</text>
+  </g>
+
+  <path class="route" d="M 282 265 L 370 265"/>
+  <text class="label" x="326" y="246" text-anchor="middle">Refresh(sku)</text>
+  <path class="route" d="M 620 265 L 730 265"/>
+  <text class="label" x="675" y="246" text-anchor="middle">attempt</text>
+  <path class="route" d="M 960 265 L 1048 247"/>
+  <text class="label" x="1008" y="226" text-anchor="middle">success</text>
+  <path class="route-soft" d="M 620 314 L 684 314 L 684 451 L 1058 451"/>
+  <text class="label" x="820" y="432" text-anchor="middle">OnEvent(event)</text>
+
+  <rect x="192" y="540" width="956" height="38" rx="12" fill="#efe7d2" stroke="#b99b5d"/>
+  <text class="subtitle" x="670" y="565" text-anchor="middle">The source is injected as a function so tests can prove retry and timeout without a web server.</text>
+</svg>

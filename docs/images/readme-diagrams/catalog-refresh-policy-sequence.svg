@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="660" viewBox="0 0 1380 660" role="img" aria-labelledby="title desc">
+  <title id="title">Catalog Refresh Policy Sequence</title>
+  <desc id="desc">Retry wraps timeout. Attempt one fails, retry schedules attempt two, and attempt two gets a fresh timeout context before returning the product.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <style>
+      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .actor { font-family: 'Architects Daughter', cursive; font-size: 22px; fill: #243845; }
+      .detail { font-family: 'Comic Mono', monospace; font-size: 14px; fill: #344b59; }
+      .msg { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+      .lifeline { stroke: #9aaeb8; stroke-width: 2; stroke-dasharray: 7 7; }
+      .call { stroke: #47616f; stroke-width: 3; marker-end: url(#arrow); }
+      .return { stroke: #8b789b; stroke-width: 3; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1380" height="660" fill="#fbfaf6"/>
+  <text class="title" x="690" y="58" text-anchor="middle">Retry Is Outer, Timeout Is Per Attempt</text>
+  <text class="subtitle" x="690" y="88" text-anchor="middle">The second provider call receives a new deadline context instead of reusing the failed attempt.</text>
+
+  <g transform="translate(80 134)">
+    <rect width="176" height="76" rx="10" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="actor" x="88" y="36" text-anchor="middle">Caller</text>
+    <text class="detail" x="88" y="58" text-anchor="middle">Refresh SKU</text>
+  </g>
+  <g transform="translate(330 134)">
+    <rect width="190" height="76" rx="10" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="actor" x="95" y="36" text-anchor="middle">Retry</text>
+    <text class="detail" x="95" y="58" text-anchor="middle">outer policy</text>
+  </g>
+  <g transform="translate(600 134)">
+    <rect width="200" height="76" rx="10" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="actor" x="100" y="36" text-anchor="middle">Timeout</text>
+    <text class="detail" x="100" y="58" text-anchor="middle">per attempt</text>
+  </g>
+  <g transform="translate(880 134)">
+    <rect width="200" height="76" rx="10" fill="#f4c7c0" stroke="#ba705c" stroke-width="2"/>
+    <text class="actor" x="100" y="36" text-anchor="middle">Source</text>
+    <text class="detail" x="100" y="58" text-anchor="middle">catalog provider</text>
+  </g>
+  <g transform="translate(1158 134)">
+    <rect width="190" height="76" rx="10" fill="#d8ead4" stroke="#5d8a62" stroke-width="2"/>
+    <text class="actor" x="95" y="36" text-anchor="middle">Product</text>
+    <text class="detail" x="95" y="58" text-anchor="middle">read model</text>
+  </g>
+
+  <line class="lifeline" x1="168" y1="210" x2="168" y2="574"/>
+  <line class="lifeline" x1="425" y1="210" x2="425" y2="574"/>
+  <line class="lifeline" x1="700" y1="210" x2="700" y2="574"/>
+  <line class="lifeline" x1="980" y1="210" x2="980" y2="574"/>
+  <line class="lifeline" x1="1253" y1="210" x2="1253" y2="574"/>
+
+  <line class="call" x1="168" y1="260" x2="415" y2="260"/>
+  <text class="msg" x="292" y="242" text-anchor="middle">Refresh(ctx, sku)</text>
+  <line class="call" x1="425" y1="318" x2="690" y2="318"/>
+  <text class="msg" x="557" y="300" text-anchor="middle">attempt 1</text>
+  <line class="call" x1="700" y1="374" x2="970" y2="374"/>
+  <text class="msg" x="835" y="356" text-anchor="middle">source(deadline ctx)</text>
+  <line class="return" x1="980" y1="424" x2="435" y2="424"/>
+  <text class="msg" x="708" y="404" text-anchor="middle">transient error -> retry event</text>
+  <line class="call" x1="425" y1="486" x2="690" y2="486"/>
+  <text class="msg" x="557" y="468" text-anchor="middle">attempt 2</text>
+  <line class="call" x1="700" y1="534" x2="970" y2="534"/>
+  <text class="msg" x="835" y="516" text-anchor="middle">fresh timeout context</text>
+  <line class="call" x1="980" y1="574" x2="1243" y2="574"/>
+  <text class="msg" x="1112" y="554" text-anchor="middle">product success</text>
+
+  <rect x="216" y="614" width="948" height="32" rx="11" fill="#efe7d2" stroke="#b99b5d"/>
+  <text class="subtitle" x="690" y="635" text-anchor="middle">Sequence tests assert retry events and timeout errors instead of relying on log output.</text>
+</svg>

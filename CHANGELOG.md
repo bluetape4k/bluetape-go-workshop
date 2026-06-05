@@ -14,3 +14,4 @@ and this project uses semantic versioning once the first tag is published.
 - CI and Nightly workflows that run uncached container-backed tests.
 - Resilience HTTP web example for retry, timeout, circuit breaker, bulkhead, and event hooks.
 - Foundation workshop examples for serialization/compression, core/collections, codecs, leader jobs, concurrency fan-out, Testcontainers, and leader group coordination.
+- Catalog refresh resilience example for retry, per-attempt timeout, typed error checks, event visibility, and README diagrams.

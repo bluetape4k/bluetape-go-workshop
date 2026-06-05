@@ -20,6 +20,7 @@ are useful, while keeping handlers compatible with `net/http`.
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
+| [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
 | [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs) | Migration gate and cache warmer jobs guarded by Redis leader election. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout) | Product detail fan-out with bounded goroutines, cancellation, panic capture, and stress tests. | `concurrency`, `testing/concurrency` |
@@ -109,6 +110,7 @@ Nightly workflows run these tests against real containers.
 | bluetape-go milestone | Workshop example direction |
 |---|---|
 | `0.1.0` | Redis leader election web service. |
+| `0.1.1` | Focused retry and timeout examples for quality-closure resilience primitives. |
 | `0.2.0` | Resilience examples for HTTP clients and services; bounded leader group coordination. |
 | `0.3.0` | Near-cache and Redis invalidation examples. |
 | `0.4.0` | State and workflow examples. |
