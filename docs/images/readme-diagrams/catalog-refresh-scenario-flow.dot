@@ -1,5 +1,5 @@
 digraph CatalogRefreshScenario {
-  graph [rankdir=LR, bgcolor="transparent", splines=ortho, nodesep=0.7, ranksep=0.9]
+  graph [rankdir=LR, bgcolor="transparent", splines=ortho, fontnames=svg, nodesep=0.7, ranksep=0.9]
   node [shape=box, style="rounded,filled", fontname="Comic Mono", fontsize=12, margin="0.16,0.10", color="#48758d", penwidth=1.5]
   edge [fontname="Comic Mono", fontsize=10, color="#47616f", penwidth=1.7, arrowsize=0.8]
 
