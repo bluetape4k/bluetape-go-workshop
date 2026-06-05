@@ -1,6 +1,6 @@
 # leader-redis-web
 
-[한국어](README.ko.md)
+[English](README.md) | [한국어](README.ko.md)
 
 Minimal chi-based HTTP service that uses `bluetape-go` Redis leader election.
 

@@ -1,6 +1,6 @@
 # order-intake-cleanup
 
-[한국어](README.ko.md)
+[English](README.md) | [한국어](README.ko.md)
 
 Partner order feed cleanup example for `core` and `collections`.
 

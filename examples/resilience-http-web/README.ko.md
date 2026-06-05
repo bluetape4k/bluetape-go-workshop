@@ -1,6 +1,6 @@
 # resilience-http-web
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `bluetape-go/resilience`의 retry, timeout, circuit breaker, bulkhead, event hook을
 조합하는 HTTP service 예제입니다.

@@ -1,6 +1,6 @@
 # invitation-codecs
 
-[한국어](README.ko.md)
+[English](README.md) | [한국어](README.ko.md)
 
 Invitation link and partner reference examples for `codec`.
 

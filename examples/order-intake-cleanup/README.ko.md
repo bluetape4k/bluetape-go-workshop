@@ -1,6 +1,6 @@
 # order-intake-cleanup
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `core`와 `collections`를 사용해 partner order feed를 정리하는 예제입니다.
 

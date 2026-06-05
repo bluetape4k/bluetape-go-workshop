@@ -1,6 +1,6 @@
 # product-enrichment-fanout
 
-[English](README.md)
+[English](README.md) | [한국어](README.ko.md)
 
 `concurrency`와 `testing/concurrency`를 사용하는 product detail enrichment
 예제입니다.
