@@ -1,0 +1,66 @@
+digraph G {
+  graph [
+    rankdir=LR,
+    bgcolor="#fffdf8",
+    margin=0.18,
+    pad=0.18,
+    nodesep=0.5,
+    ranksep=0.75,
+    splines=ortho,
+    fontname="Architects Daughter",
+    label="bluetape-go-workshop Example Map",
+    labelloc=t,
+    fontsize=30,
+    fontcolor="#24313f"
+  ];
+  node [
+    shape=rect,
+    style="rounded,filled",
+    penwidth=2,
+    fontname="Comic Mono",
+    fontsize=16,
+    color="#6b7280",
+    fontcolor="#24313f",
+    margin="0.16,0.12"
+  ];
+  edge [
+    color="#64748b",
+    penwidth=2,
+    arrowsize=0.75,
+    fontname="Comic Mono",
+    fontsize=12,
+    fontcolor="#475569"
+  ];
+
+  workshop [label="Workshop\nrunnable examples", fillcolor="#fef3c7", fontname="Architects Daughter", fontsize=20, width=2.4, height=1.0];
+  data [label="Data shaping\ncodec + cleanup", fillcolor="#dbeafe", width=2.1, height=0.9];
+  leadership [label="Coordination\nleader patterns", fillcolor="#dcfce7", width=2.1, height=0.9];
+  runtime [label="Runtime safety\nconcurrency + resilience", fillcolor="#fce7f3", width=2.35, height=0.9];
+  integration [label="Integration tests\nreal containers", fillcolor="#e0e7ff", width=2.1, height=0.9];
+
+  snapshot [label="cache-snapshot-codecs\nversioned + compressed", fillcolor="#eff6ff"];
+  invites [label="invitation-codecs\nURL-safe encodings", fillcolor="#eff6ff"];
+  cleanup [label="order-intake-cleanup\nvalidate + group", fillcolor="#eff6ff"];
+  singleLeader [label="leader-redis-web\nsingle leader API", fillcolor="#f0fdf4"];
+  groupLeader [label="leader-group-web\nbounded leaders", fillcolor="#f0fdf4"];
+  jobs [label="leader-coordination-jobs\nmigration + warmer", fillcolor="#f0fdf4"];
+  refresh [label="catalog-refresh-resilience\nretry + timeout", fillcolor="#fdf2f8"];
+  enrich [label="product-enrichment-fanout\nbounded fan-out", fillcolor="#fdf2f8"];
+  http [label="resilience-http-web\nHTTP policies", fillcolor="#fdf2f8"];
+  pipeline [label="order-pipeline-testcontainers\nPostgres + Redis + NATS", fillcolor="#eef2ff"];
+
+  workshop -> data;
+  workshop -> leadership;
+  workshop -> runtime;
+  workshop -> integration;
+  data -> snapshot;
+  data -> invites;
+  data -> cleanup;
+  leadership -> singleLeader;
+  leadership -> groupLeader;
+  leadership -> jobs;
+  runtime -> refresh;
+  runtime -> enrich;
+  runtime -> http;
+  integration -> pipeline;
+}

@@ -1,7 +1,18 @@
 # resilience-http-web
 
+[한국어](README.ko.md)
+
 HTTP service example that composes `bluetape-go/resilience` retry, timeout,
 circuit breaker, bulkhead, and event hooks.
+
+## Scenario
+
+![Concurrency and resilience flow](../../docs/images/readme-diagrams/concurrency-resilience-flow.png)
+
+Use this example when an HTTP service needs separate policies for outbound calls
+and inbound handler pressure. Catalog requests go through retry, timeout, and a
+circuit breaker. Order creation is protected by a reject-mode bulkhead so the
+handler can return a typed rejection quickly.
 
 ## Run
 

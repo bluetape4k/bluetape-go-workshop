@@ -1,0 +1,14 @@
+graph 1 6.7639 7.3671
+node clients 3.6493 6.2922 3.2 0.74 "Clients or jobs\ncampaign / resign" rounded,filled rect #64748b #fef3c7
+node api 3.6493 5.1078 3.2 0.74 "chi HTTP service\nnet/http handlers" rounded,filled rect #64748b #dbeafe
+node elector 3.6493 3.9233 3.2 0.74 "bluetape-go leader\nElector / GroupElector" rounded,filled rect #64748b #dcfce7
+node redis 2.5521 2.7389 3.32 0.74 "Redis\nlease keys + group slots" rounded,filled rect #64748b #fee2e2
+node outcome 3.6493 1.5544 4.07 0.74 "Owned work\nsingle leader or up to N slots" rounded,filled rect #64748b #e0e7ff
+node guard 3.6493 0.37 4.445 0.74 "Guardrail\nuse queues for durable work units" rounded,filled rect #64748b #f8fafc
+edge clients api 4 3.6493 5.9109 3.6493 5.9109 3.6493 5.6346 3.6493 5.6346 solid #64748b
+edge api elector 4 3.6493 4.7265 3.6493 4.7265 3.6493 4.4501 3.6493 4.4501 solid #64748b
+edge elector redis 4 3.1307 3.542 3.1307 3.542 3.1307 3.2657 3.1307 3.2657 solid #64748b
+edge elector outcome 4 4.7307 3.5427 4.7307 3.5427 4.7307 2.0842 4.7307 2.0842 solid #64748b
+edge redis outcome 4 2.9132 2.3576 2.9132 2.3576 2.9132 2.0812 2.9132 2.0812 solid #64748b
+edge outcome guard 4 3.6493 1.1732 3.6493 1.1732 3.6493 0.89678 3.6493 0.89678 solid #64748b
+stop

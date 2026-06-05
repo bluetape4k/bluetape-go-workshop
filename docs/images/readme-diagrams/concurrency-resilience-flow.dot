@@ -1,0 +1,38 @@
+digraph G {
+  graph [
+    rankdir=TB,
+    bgcolor="#fffdf8",
+    margin=0.18,
+    pad=0.18,
+    nodesep=0.35,
+    ranksep=0.45,
+    splines=ortho,
+    fontname="Architects Daughter",
+    label="Concurrency and Resilience Flow",
+    labelloc=t,
+    fontsize=30,
+    fontcolor="#24313f"
+  ];
+  node [
+    shape=rect,
+    style="rounded,filled",
+    penwidth=2,
+    fontname="Comic Mono",
+    fontsize=16,
+    color="#64748b",
+    fontcolor="#24313f",
+    margin="0.16,0.12"
+  ];
+  edge [color="#64748b", penwidth=2, arrowsize=0.75];
+
+  request [label="Request context\none product or order", fillcolor="#fef3c7", width=3.3];
+  fanout [label="Bounded fan-out\nconcurrency.Group", fillcolor="#dbeafe", width=3.3];
+  policies [label="Policy boundary\nretry / timeout / breaker / bulkhead", fillcolor="#dcfce7", width=3.3];
+  required [label="Required work\nprice + inventory + catalog", fillcolor="#fee2e2", width=3.3];
+  optional [label="Optional work\nrecommendations + reviews", fillcolor="#fce7f3", width=3.3];
+  response [label="Result\nview + typed errors + events", fillcolor="#e0e7ff", width=3.3];
+
+  request -> fanout -> policies;
+  policies -> required -> response;
+  policies -> optional -> response;
+}

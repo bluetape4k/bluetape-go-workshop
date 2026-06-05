@@ -13,20 +13,24 @@ The default web style is lightweight and close to the Go standard library:
 examples use [`chi`](https://github.com/go-chi/chi) when routing and middleware
 are useful, while keeping handlers compatible with `net/http`.
 
+## Example Map
+
+![Workshop example map](docs/images/readme-diagrams/workshop-example-map.png)
+
 ## Examples
 
-| Example | Purpose | bluetape-go packages |
-|---|---|---|
-| [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
-| [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
-| [`examples/invitation-codecs`](examples/invitation-codecs) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
-| [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
-| [`examples/leader-redis-web`](examples/leader-redis-web) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
-| [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs) | Migration gate and cache warmer jobs guarded by Redis leader election. | `leader`, `leader/redis`, `testing/concurrency` |
-| [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout) | Product detail fan-out with bounded goroutines, cancellation, panic capture, and stress tests. | `concurrency`, `testing/concurrency` |
-| [`examples/order-pipeline-testcontainers`](examples/order-pipeline-testcontainers) | PostgreSQL, Redis, and NATS integration flow using repository Testcontainers fixtures. | `testcontainers/postgres`, `testcontainers/redis`, `testcontainers/nats` |
-| [`examples/resilience-http-web`](examples/resilience-http-web) | HTTP service that composes retry, timeout, circuit breaker, bulkhead, and event hooks. | `resilience` |
-| [`examples/leader-group-web`](examples/leader-group-web) | HTTP service for Redis-backed bounded multi-leader group election. | `leader`, `leader/redis`, `testing/concurrency` |
+| Example | Korean | Purpose | bluetape-go packages |
+|---|---|---|---|
+| [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | [한국어](examples/cache-snapshot-codecs/README.ko.md) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
+| [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
+| [`examples/invitation-codecs`](examples/invitation-codecs) | [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
+| [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
+| [`examples/leader-redis-web`](examples/leader-redis-web) | [한국어](examples/leader-redis-web/README.ko.md) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
+| [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs) | [한국어](examples/leader-coordination-jobs/README.ko.md) | Migration gate and cache warmer jobs guarded by Redis leader election. | `leader`, `leader/redis`, `testing/concurrency` |
+| [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout) | [한국어](examples/product-enrichment-fanout/README.ko.md) | Product detail fan-out with bounded goroutines, cancellation, panic capture, and stress tests. | `concurrency`, `testing/concurrency` |
+| [`examples/order-pipeline-testcontainers`](examples/order-pipeline-testcontainers) | [한국어](examples/order-pipeline-testcontainers/README.ko.md) | PostgreSQL, Redis, and NATS integration flow using repository Testcontainers fixtures. | `testcontainers/postgres`, `testcontainers/redis`, `testcontainers/nats` |
+| [`examples/resilience-http-web`](examples/resilience-http-web) | [한국어](examples/resilience-http-web/README.ko.md) | HTTP service that composes retry, timeout, circuit breaker, bulkhead, and event hooks. | `resilience` |
+| [`examples/leader-group-web`](examples/leader-group-web) | [한국어](examples/leader-group-web/README.ko.md) | HTTP service for Redis-backed bounded multi-leader group election. | `leader`, `leader/redis`, `testing/concurrency` |
 
 ## Run the Leader Example
 
