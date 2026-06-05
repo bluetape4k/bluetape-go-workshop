@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="780" viewBox="0 0 1420 780" role="img" aria-labelledby="title desc">
+  <title id="title">Catalog Near-Cache Redis Architecture</title>
+  <desc id="desc">A catalog peer composes cache.NewMemory, redisnear.NewPubSub, and rediscoord.NewStampedeCache around a caller-owned Redis client and authoritative store.</desc>
+  <defs>
+    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <marker id="arch-cache" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+    </marker>
+    <marker id="arch-redis" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
+    </marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono'; font-size: 15px; fill: #536d7d; }
+      .layer { font-family: 'Architects Daughter'; font-size: 19px; fill: #49606d; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 23px; fill: #243845; }
+      .card-text { font-family: 'Comic Mono'; font-size: 14px; fill: #344b59; }
+      .label { font-family: 'Comic Mono'; font-size: 13px; fill: #35505f; }
+      .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arch-main); }
+      .cache { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#arch-cache); }
+      .redis { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#arch-redis); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1420" height="780" fill="#fbfaf6"/>
+  <text class="title" x="710" y="58" text-anchor="middle">Catalog Near-Cache Architecture</text>
+  <text class="subtitle" x="710" y="91" text-anchor="middle">The example peer is a small composition boundary, not a reusable catalog framework.</text>
+
+  <rect x="40" y="155" width="1320" height="108" rx="18" fill="#f4f9fb" stroke="#c8dce5"/>
+  <text class="layer" x="75" y="176">Example domain boundary</text>
+  <rect x="40" y="315" width="1320" height="146" rx="18" fill="#fbf7e7" stroke="#e6d8a8"/>
+  <text class="layer" x="75" y="332">bluetape-go cache composition</text>
+  <rect x="40" y="515" width="1320" height="120" rx="18" fill="#f7f0f8" stroke="#dcc9e8"/>
+  <text class="layer" x="75" y="548">Store and Redis</text>
+
+  <g transform="translate(82 190)">
+    <rect width="240" height="120" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="card-title" x="120" y="45" text-anchor="middle">Peer API</text>
+    <text class="card-text" x="120" y="76" text-anchor="middle">GetProduct</text>
+    <text class="card-text" x="120" y="100" text-anchor="middle">PutProduct</text>
+  </g>
+
+  <g transform="translate(415 337)">
+    <rect width="270" height="140" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="card-title" x="135" y="48" text-anchor="middle">StampedeCache</text>
+    <text class="card-text" x="135" y="80" text-anchor="middle">owner token per key</text>
+    <text class="card-text" x="135" y="104" text-anchor="middle">result envelope waiters</text>
+  </g>
+
+  <g transform="translate(765 337)">
+    <rect width="270" height="140" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
+    <text class="card-title" x="135" y="48" text-anchor="middle">NearCache Pub/Sub</text>
+    <text class="card-text" x="135" y="80" text-anchor="middle">origin id filtering</text>
+    <text class="card-text" x="135" y="104" text-anchor="middle">local delete on peer event</text>
+  </g>
+
+  <g transform="translate(1110 177)">
+    <rect width="250" height="120" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/>
+    <text class="card-title" x="125" y="45" text-anchor="middle">Memory Cache</text>
+    <text class="card-text" x="125" y="76" text-anchor="middle">cache.NewMemory</text>
+    <text class="card-text" x="125" y="100" text-anchor="middle">per peer TTL entries</text>
+  </g>
+
+  <g transform="translate(1110 532)">
+    <rect width="250" height="120" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
+    <text class="card-title" x="125" y="45" text-anchor="middle">Redis Client</text>
+    <text class="card-text" x="125" y="76" text-anchor="middle">Pub/Sub channel</text>
+    <text class="card-text" x="125" y="100" text-anchor="middle">lock + result keys</text>
+  </g>
+
+  <g transform="translate(415 552)">
+    <rect width="270" height="110" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/>
+    <text class="card-title" x="135" y="42" text-anchor="middle">Store</text>
+    <text class="card-text" x="135" y="72" text-anchor="middle">authoritative projection</text>
+    <text class="card-text" x="135" y="96" text-anchor="middle">LoadCount proves misses</text>
+  </g>
+
+  <path class="main" d="M 322 250 L 370 250 L 370 407 L 415 407"/>
+  <rect x="317" y="219" width="92" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="363" y="235" text-anchor="middle">GetOrLoad</text>
+
+  <path class="cache" d="M 685 407 L 765 407"/>
+  <rect x="652" y="371" width="146" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="725" y="387" text-anchor="middle">cache read/write</text>
+
+  <path class="cache" d="M 1035 377 L 1085 377 L 1085 237 L 1110 237"/>
+  <rect x="1039" y="315" width="112" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="1095" y="331" text-anchor="middle">local entries</text>
+
+  <path class="redis" d="M 900 477 L 900 592 L 1110 592"/>
+  <rect x="914" y="558" width="164" height="22" rx="7" fill="#f7f0f8"/>
+  <text class="label" x="996" y="574" text-anchor="middle">invalidation channel</text>
+
+  <path class="redis" d="M 550 477 L 550 505 L 1235 505 L 1235 532"/>
+  <rect x="789" y="477" width="162" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="870" y="493" text-anchor="middle">lock and result keys</text>
+
+  <path class="main" d="M 550 477 L 550 552"/>
+  <rect x="563" y="520" width="106" height="22" rx="7" fill="#f7f0f8"/>
+  <text class="label" x="616" y="536" text-anchor="middle">owner loader</text>
+
+  <path class="main" d="M 202 310 L 202 607 L 415 607"/>
+  <rect x="201" y="622" width="198" height="22" rx="7" fill="#f7f0f8"/>
+  <text class="label" x="300" y="638" text-anchor="middle">PutProduct writes source</text>
+
+  <path class="redis" d="M 322 270 L 370 270 L 370 330 L 900 330 L 900 337"/>
+  <rect x="532" y="303" width="196" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="630" y="319" text-anchor="middle">Set publishes invalidation</text>
+
+  <rect x="236" y="704" width="948" height="42" rx="12" fill="#edf1e9" stroke="#5d8a62"/>
+  <text class="subtitle" x="710" y="731" text-anchor="middle">Redis clients remain caller-owned; Peer.Close only stops the near-cache subscriber.</text>
+</svg>

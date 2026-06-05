@@ -30,6 +30,7 @@ are useful, while keeping handlers compatible with `net/http`.
 | [`examples/leader-coordination-jobs`](examples/leader-coordination-jobs) | [English](examples/leader-coordination-jobs/README.md) \| [한국어](examples/leader-coordination-jobs/README.ko.md) | Migration gate and cache warmer jobs guarded by Redis leader election. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/product-enrichment-fanout`](examples/product-enrichment-fanout) | [English](examples/product-enrichment-fanout/README.md) \| [한국어](examples/product-enrichment-fanout/README.ko.md) | Product detail fan-out with bounded goroutines, cancellation, panic capture, and stress tests. | `concurrency`, `testing/concurrency` |
 | [`examples/order-pipeline-testcontainers`](examples/order-pipeline-testcontainers) | [English](examples/order-pipeline-testcontainers/README.md) \| [한국어](examples/order-pipeline-testcontainers/README.ko.md) | PostgreSQL, Redis, and NATS integration flow using repository Testcontainers fixtures. | `testcontainers/postgres`, `testcontainers/redis`, `testcontainers/nats` |
+| [`examples/catalog-near-cache-redis`](examples/catalog-near-cache-redis) | [English](examples/catalog-near-cache-redis/README.md) \| [한국어](examples/catalog-near-cache-redis/README.ko.md) | Redis near-cache invalidation and cold-miss stampede coordination for catalog peers. | `cache`, `cache/redisnear`, `cache/rediscoord`, `testcontainers/redis` |
 | [`examples/resilience-http-web`](examples/resilience-http-web) | [English](examples/resilience-http-web/README.md) \| [한국어](examples/resilience-http-web/README.ko.md) | HTTP service that composes retry, timeout, circuit breaker, bulkhead, and event hooks. | `resilience` |
 | [`examples/leader-group-web`](examples/leader-group-web) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | HTTP service for Redis-backed bounded multi-leader group election. | `leader`, `leader/redis`, `testing/concurrency` |
 
@@ -117,6 +118,6 @@ Nightly workflows run these tests against real containers.
 | `0.1.0` | Redis leader election web service. |
 | `0.1.1` | Focused retry and timeout examples for quality-closure resilience primitives. |
 | `0.2.0` | Resilience examples for HTTP clients, services, payment authorization guards, and bounded leader group coordination. |
-| `0.3.0` | Near-cache and Redis invalidation examples. |
+| `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
 | `0.4.0` | State and workflow examples. |
 | `0.5.0` | Batch processing examples. |

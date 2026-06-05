@@ -49,6 +49,7 @@ digraph G {
   enrich [label="product-enrichment-fanout\nbounded fan-out", fillcolor="#fdf2f8"];
   http [label="resilience-http-web\nHTTP policies", fillcolor="#fdf2f8"];
   pipeline [label="order-pipeline-testcontainers\nPostgres + Redis + NATS", fillcolor="#eef2ff"];
+  catalogCache [label="catalog-near-cache-redis\nnear-cache + stampede", fillcolor="#eef2ff"];
 
   workshop -> data;
   workshop -> leadership;
@@ -64,4 +65,5 @@ digraph G {
   runtime -> enrich;
   runtime -> http;
   integration -> pipeline;
+  integration -> catalogCache;
 }
