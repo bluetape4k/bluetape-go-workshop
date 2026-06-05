@@ -1,5 +1,7 @@
 # catalog-refresh-resilience
 
+[한국어](README.ko.md)
+
 SKU refresh example for `bluetape-go/resilience` retry and timeout policies.
 
 This example models a catalog refresh worker that updates a storefront read

@@ -1,0 +1,14 @@
+graph 1 7.4867 6.1826
+node request 3.8058 5.1078 3.3 0.74 "Request context\none product or order" rounded,filled rect #64748b #fef3c7
+node fanout 3.8058 3.9233 3.3 0.74 "Bounded fan-out\nconcurrency.Group" rounded,filled rect #64748b #dbeafe
+node policies 3.8058 2.7389 4.82 0.74 "Policy boundary\nretry / timeout / breaker / bulkhead" rounded,filled rect #64748b #dcfce7
+node required 1.8475 1.5544 3.695 0.74 "Required work\nprice + inventory + catalog" rounded,filled rect #64748b #fee2e2
+node optional 5.7642 1.5544 3.445 0.74 "Optional work\nrecommendations + reviews" rounded,filled rect #64748b #fce7f3
+node response 3.8058 0.37 3.82 0.74 "Result\nview + typed errors + events" rounded,filled rect #64748b #e0e7ff
+edge request fanout 4 3.8058 4.7265 3.8058 4.7265 3.8058 4.4501 3.8058 4.4501 solid #64748b
+edge fanout policies 4 3.8058 3.542 3.8058 3.542 3.8058 3.2657 3.8058 3.2657 solid #64748b
+edge policies required 4 2.5454 2.3576 2.5454 2.3576 2.5454 2.0812 2.5454 2.0812 solid #64748b
+edge policies optional 4 5.1288 2.3576 5.1288 2.3576 5.1288 2.0812 5.1288 2.0812 solid #64748b
+edge required response 4 2.7954 1.1732 2.7954 1.1732 2.7954 0.89678 2.7954 0.89678 solid #64748b
+edge optional response 4 4.8788 1.1732 4.8788 1.1732 4.8788 0.89678 4.8788 0.89678 solid #64748b
+stop

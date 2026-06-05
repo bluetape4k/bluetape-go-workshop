@@ -1,0 +1,37 @@
+digraph G {
+  graph [
+    rankdir=TB,
+    bgcolor="#fffdf8",
+    margin=0.18,
+    pad=0.18,
+    nodesep=0.35,
+    ranksep=0.45,
+    splines=ortho,
+    fontname="Architects Daughter",
+    label="Leadership Coordination Topology",
+    labelloc=t,
+    fontsize=30,
+    fontcolor="#24313f"
+  ];
+  node [
+    shape=rect,
+    style="rounded,filled",
+    penwidth=2,
+    fontname="Comic Mono",
+    fontsize=16,
+    color="#64748b",
+    fontcolor="#24313f",
+    margin="0.16,0.12"
+  ];
+  edge [color="#64748b", penwidth=2, arrowsize=0.75];
+
+  clients [label="Clients or jobs\ncampaign / resign", fillcolor="#fef3c7", width=3.2];
+  api [label="chi HTTP service\nnet/http handlers", fillcolor="#dbeafe", width=3.2];
+  elector [label="bluetape-go leader\nElector / GroupElector", fillcolor="#dcfce7", width=3.2];
+  redis [label="Redis\nlease keys + group slots", fillcolor="#fee2e2", width=3.2];
+  outcome [label="Owned work\nsingle leader or up to N slots", fillcolor="#e0e7ff", width=3.2];
+  guard [label="Guardrail\nuse queues for durable work units", fillcolor="#f8fafc", width=3.2];
+
+  clients -> api -> elector -> redis -> outcome -> guard;
+  elector -> outcome;
+}

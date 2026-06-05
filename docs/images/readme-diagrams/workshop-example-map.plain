@@ -1,0 +1,31 @@
+graph 1 11.387 12.57
+node workshop 1.311 4.6894 2.6221 1.0317 "Workshop\nrunnable examples" rounded,filled rect #6b7280 #fef3c7
+node data 5.0321 9.6339 2.195 0.9 "Data shaping\ncodec + cleanup" rounded,filled rect #6b7280 #dbeafe
+node leadership 5.0321 5.9256 2.195 0.9 "Coordination\nleader patterns" rounded,filled rect #6b7280 #dcfce7
+node runtime 5.0321 3.4533 3.32 0.9 "Runtime safety\nconcurrency + resilience" rounded,filled rect #6b7280 #fce7f3
+node integration 5.0321 1.5228 2.445 0.9 "Integration tests\nreal containers" rounded,filled rect #6b7280 #e0e7ff
+node snapshot 9.4146 11.495 3.07 0.74 "cache-snapshot-codecs\nversioned + compressed" rounded,filled rect #6b7280 #eff6ff
+node invites 9.4146 10.259 2.57 0.74 "invitation-codecs\nURL-safe encodings" rounded,filled rect #6b7280 #eff6ff
+node cleanup 9.4146 9.0228 2.82 0.74 "order-intake-cleanup\nvalidate + group" rounded,filled rect #6b7280 #eff6ff
+node singleLeader 9.4146 7.7867 2.445 0.74 "leader-redis-web\nsingle leader API" rounded,filled rect #6b7280 #f0fdf4
+node groupLeader 9.4146 6.5506 2.32 0.74 "leader-group-web\nbounded leaders" rounded,filled rect #6b7280 #f0fdf4
+node jobs 9.4146 5.3144 3.32 0.74 "leader-coordination-jobs\nmigration + warmer" rounded,filled rect #6b7280 #f0fdf4
+node refresh 9.4146 4.0783 3.57 0.74 "catalog-refresh-resilience\nretry + timeout" rounded,filled rect #6b7280 #fdf2f8
+node enrich 9.4146 2.8422 3.445 0.74 "product-enrichment-fanout\nbounded fan-out" rounded,filled rect #6b7280 #fdf2f8
+node http 9.4146 1.6061 2.695 0.74 "resilience-http-web\nHTTP policies" rounded,filled rect #6b7280 #fdf2f8
+node pipeline 9.4146 0.37 3.945 0.74 "order-pipeline-testcontainers\nPostgres + Redis + NATS" rounded,filled rect #6b7280 #eef2ff
+edge workshop data 7 1.3176 5.2186 1.3176 6.4941 1.3176 9.6339 1.3176 9.6339 1.3176 9.6339 3.7764 9.6339 3.7764 9.6339 solid #64748b
+edge workshop leadership 7 2.6312 5.0749 3.699 5.0749 5.026 5.0749 5.026 5.0749 5.026 5.0749 5.026 5.3191 5.026 5.3191 solid #64748b
+edge workshop runtime 7 2.6315 4.311 3.1622 4.311 3.651 4.311 3.651 4.311 3.651 4.311 3.651 4.0585 3.651 4.0585 solid #64748b
+edge workshop integration 7 1.3176 4.163 1.3176 3.2625 1.3176 1.5228 1.3176 1.5228 1.3176 1.5228 3.6542 1.5228 3.6542 1.5228 solid #64748b
+edge data snapshot 7 6.1407 10.019 6.9633 10.019 7.9426 10.019 7.9426 10.019 7.9426 10.019 7.9426 10.969 7.9426 10.969 solid #64748b
+edge data invites 4 6.138 9.9539 6.138 9.9539 7.9721 9.9539 7.9721 9.9539 solid #64748b
+edge data cleanup 4 6.138 9.2883 6.138 9.2883 7.8474 9.2883 7.8474 9.2883 solid #64748b
+edge leadership singleLeader 7 5.026 6.3856 5.026 6.9367 5.026 7.7867 5.026 7.7867 5.026 7.7867 8.0342 7.7867 8.0342 7.7867 solid #64748b
+edge leadership groupLeader 4 6.138 6.2781 6.138 6.2781 8.0976 6.2781 8.0976 6.2781 solid #64748b
+edge leadership jobs 4 6.138 5.58 6.138 5.58 7.5948 5.58 7.5948 5.58 solid #64748b
+edge runtime refresh 4 6.7014 3.8058 6.7014 3.8058 7.4723 3.8058 7.4723 3.8058 solid #64748b
+edge runtime enrich 4 6.7014 3.1078 6.7014 3.1078 7.5345 3.1078 7.5345 3.1078 solid #64748b
+edge runtime http 7 6.4704 2.9915 6.4704 2.4439 6.4704 1.6044 6.4704 1.6044 6.4704 1.6044 7.9083 1.6044 7.9083 1.6044 solid #64748b
+edge integration pipeline 7 6.2676 1.1544 6.9006 1.1544 7.5399 1.1544 7.5399 1.1544 7.5399 1.1544 7.5399 0.89924 7.5399 0.89924 solid #64748b
+stop
