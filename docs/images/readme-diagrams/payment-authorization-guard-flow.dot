@@ -1,0 +1,22 @@
+digraph PaymentAuthorizationGuardFlow {
+  graph [rankdir=LR, bgcolor="transparent", splines=ortho, fontnames=svg, nodesep=0.7, ranksep=0.8]
+  node [shape=box, style="rounded,filled", fontname="Comic Mono", fontsize=12, margin="0.16,0.10", color="#48758d", penwidth=1.5]
+  edge [fontname="Comic Mono", fontsize=10, color="#47616f", penwidth=1.7, arrowsize=0.8]
+
+  order [label="Order workflow\nAuthorize payment", fillcolor="#d7ecf2"]
+  breaker [label="Circuit breaker\nrejects when open", fillcolor="#f7e5aa"]
+  bulkhead [label="Bulkhead\none in-flight call", fillcolor="#dbe8d4"]
+  gateway [label="Payment gateway\nprovider call", fillcolor="#f9dacd"]
+  open [label="Circuit open\nno gateway call", fillcolor="#f5d3df", color="#b95f7a"]
+  overflow [label="Capacity full\nbulkhead rejected", fillcolor="#eadcf5", color="#8a6bb0"]
+  events [label="Synchronous events\ntransition / rejection", fillcolor="#efe7d2", color="#b99b5d"]
+
+  order -> breaker [xlabel="Authorize"]
+  breaker -> bulkhead [xlabel="closed / half-open"]
+  bulkhead -> gateway [xlabel="permit acquired"]
+  gateway -> order [xlabel="approved or failed"]
+  breaker -> open [xlabel="open"]
+  bulkhead -> overflow [xlabel="overflow"]
+  breaker -> events [xlabel="OnEvent"]
+  bulkhead -> events [xlabel="OnEvent"]
+}

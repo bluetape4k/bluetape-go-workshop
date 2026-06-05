@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="720" viewBox="0 0 1420 720" role="img" aria-labelledby="title desc">
+  <title id="title">Payment Authorization Guard Flow</title>
+  <desc id="desc">An order workflow calls a circuit breaker, then a bulkhead, then a payment gateway. Open circuits and bulkhead overflow reject before the gateway is called and emit synchronous events.</desc>
+  <defs>
+    <marker id="arrow-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <marker id="arrow-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+    </marker>
+    <marker id="arrow-reject" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
+    </marker>
+    <marker id="arrow-overflow" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/>
+    </marker>
+    <marker id="arrow-event" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/>
+    </marker>
+    <style>
+      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .card-title { font-family: 'Architects Daughter', cursive; font-size: 24px; fill: #243845; }
+      .card-text { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #344b59; }
+      .label { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+      .legend { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #465b66; }
+      .route-main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arrow-main); }
+      .route-success { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#arrow-success); }
+      .route-reject { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#arrow-reject); }
+      .route-overflow { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#arrow-overflow); }
+      .route-event { fill: none; stroke: #a78335; stroke-width: 3; marker-end: url(#arrow-event); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1420" height="720" fill="#fbfaf6"/>
+  <text class="title" x="710" y="58" text-anchor="middle">Payment Authorization Guard</text>
+  <text class="subtitle" x="710" y="90" text-anchor="middle">The circuit breaker rejects known-bad traffic before the bulkhead or gateway; the bulkhead rejects capacity overflow.</text>
+
+  <g transform="translate(70 216)">
+    <rect width="220" height="150" rx="14" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="card-title" x="110" y="57" text-anchor="middle">Order Workflow</text>
+    <text class="card-text" x="110" y="93" text-anchor="middle">non-sensitive</text>
+    <text class="card-text" x="110" y="117" text-anchor="middle">authorization request</text>
+  </g>
+
+  <g transform="translate(386 196)">
+    <rect width="250" height="190" rx="14" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="card-title" x="125" y="58" text-anchor="middle">Circuit Breaker</text>
+    <text class="card-text" x="125" y="94" text-anchor="middle">failure threshold = 2</text>
+    <text class="card-text" x="125" y="118" text-anchor="middle">open timeout = 250ms</text>
+    <text class="card-text" x="125" y="142" text-anchor="middle">outermost policy</text>
+  </g>
+
+  <g transform="translate(748 216)">
+    <rect width="230" height="150" rx="14" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/>
+    <text class="card-title" x="115" y="57" text-anchor="middle">Bulkhead</text>
+    <text class="card-text" x="115" y="93" text-anchor="middle">one in-flight call</text>
+    <text class="card-text" x="115" y="117" text-anchor="middle">Wait = false</text>
+  </g>
+
+  <g transform="translate(1116 216)">
+    <rect width="230" height="150" rx="14" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="card-title" x="115" y="57" text-anchor="middle">Payment Gateway</text>
+    <text class="card-text" x="115" y="93" text-anchor="middle">provider call</text>
+    <text class="card-text" x="115" y="117" text-anchor="middle">approved or failed</text>
+  </g>
+
+  <g transform="translate(406 462)">
+    <rect width="220" height="116" rx="14" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
+    <text class="card-title" x="110" y="45" text-anchor="middle">Circuit Open</text>
+    <text class="card-text" x="110" y="77" text-anchor="middle">ErrCircuitOpen</text>
+    <text class="card-text" x="110" y="101" text-anchor="middle">gateway not called</text>
+  </g>
+
+  <g transform="translate(748 462)">
+    <rect width="230" height="116" rx="14" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
+    <text class="card-title" x="115" y="45" text-anchor="middle">Capacity Full</text>
+    <text class="card-text" x="115" y="77" text-anchor="middle">ErrBulkheadRejected</text>
+    <text class="card-text" x="115" y="101" text-anchor="middle">second call rejected</text>
+  </g>
+
+  <g transform="translate(1116 472)">
+    <rect width="230" height="100" rx="14" fill="#efe7d2" stroke="#a78335" stroke-width="2"/>
+    <text class="card-title" x="115" y="41" text-anchor="middle">OnEvent</text>
+    <text class="card-text" x="115" y="71" text-anchor="middle">transition / rejection</text>
+  </g>
+
+  <path class="route-main" d="M 290 291 L 386 291"/>
+  <text class="label" x="338" y="268" text-anchor="middle">Authorize</text>
+  <path class="route-main" d="M 636 291 L 748 291"/>
+  <text class="label" x="692" y="268" text-anchor="middle">closed / half-open</text>
+  <path class="route-success" d="M 978 291 L 1116 291"/>
+  <text class="label" x="1047" y="268" text-anchor="middle">permit acquired</text>
+  <path class="route-success" d="M 1231 216 L 1231 156 L 165 156 L 165 216"/>
+  <text class="label" x="710" y="139" text-anchor="middle">approved or failed result returns to workflow</text>
+
+  <path class="route-reject" d="M 516 386 L 516 462"/>
+  <text class="label" x="570" y="444" text-anchor="middle">open</text>
+  <path class="route-overflow" d="M 863 366 L 863 462"/>
+  <text class="label" x="926" y="421" text-anchor="middle">overflow</text>
+  <path class="route-event" d="M 636 360 L 664 360 L 664 406 L 1231 406 L 1231 472"/>
+  <text class="label" x="850" y="390" text-anchor="middle">circuit rejection event</text>
+  <path class="route-event" d="M 863 578 L 863 606 L 1231 606 L 1231 572"/>
+  <text class="label" x="1048" y="628" text-anchor="middle">bulkhead event</text>
+
+  <rect x="188" y="632" width="1044" height="42" rx="12" fill="#edf1e9" stroke="#5d8a62"/>
+  <text class="subtitle" x="710" y="659" text-anchor="middle">Policy order in tests: resilience.Run(ctx, operation, breaker, bulkhead).</text>
+</svg>

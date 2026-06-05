@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="780" viewBox="0 0 1420 780" role="img" aria-labelledby="title desc">
+  <title id="title">Payment Authorization Guard Sequence</title>
+  <desc id="desc">Sequence diagram for successful authorization and rejection paths through Authorizer, circuit breaker, bulkhead, payment gateway, and event sink.</desc>
+  <defs>
+    <marker id="seq-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <marker id="seq-return" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+    </marker>
+    <marker id="seq-reject" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
+    </marker>
+    <marker id="seq-event" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/>
+    </marker>
+    <style>
+      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .actor { font-family: 'Architects Daughter', cursive; font-size: 19px; fill: #243845; }
+      .label { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+      .small { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #536d7d; }
+      .lifeline { stroke: #a9bac5; stroke-width: 2; stroke-dasharray: 7 7; }
+      .main { fill: none; stroke: #47616f; stroke-width: 2.7; marker-end: url(#seq-main); }
+      .return { fill: none; stroke: #4f8b63; stroke-width: 2.7; stroke-dasharray: 8 6; marker-end: url(#seq-return); }
+      .reject { fill: none; stroke: #b95f7a; stroke-width: 2.7; marker-end: url(#seq-reject); }
+      .event { fill: none; stroke: #a78335; stroke-width: 2.7; marker-end: url(#seq-event); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1420" height="780" fill="#fbfaf6"/>
+  <text class="title" x="710" y="58" text-anchor="middle">Payment Authorization Sequence</text>
+  <text class="subtitle" x="710" y="90" text-anchor="middle">The normal path reaches the gateway; rejection paths return before the gateway or second gateway call runs.</text>
+
+  <g transform="translate(54 136)">
+    <rect width="170" height="58" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="actor" x="85" y="36" text-anchor="middle">Order Workflow</text>
+  </g>
+  <g transform="translate(282 136)">
+    <rect width="170" height="58" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="actor" x="85" y="36" text-anchor="middle">Authorizer</text>
+  </g>
+  <g transform="translate(510 136)">
+    <rect width="170" height="58" rx="8" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
+    <text class="actor" x="85" y="36" text-anchor="middle">Circuit Breaker</text>
+  </g>
+  <g transform="translate(738 136)">
+    <rect width="170" height="58" rx="8" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
+    <text class="actor" x="85" y="36" text-anchor="middle">Bulkhead</text>
+  </g>
+  <g transform="translate(966 136)">
+    <rect width="170" height="58" rx="8" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="actor" x="85" y="36" text-anchor="middle">Gateway</text>
+  </g>
+  <g transform="translate(1194 136)">
+    <rect width="170" height="58" rx="8" fill="#efe7d2" stroke="#a78335" stroke-width="2"/>
+    <text class="actor" x="85" y="36" text-anchor="middle">OnEvent</text>
+  </g>
+
+  <path class="lifeline" d="M 139 194 L 139 690"/>
+  <path class="lifeline" d="M 367 194 L 367 690"/>
+  <path class="lifeline" d="M 595 194 L 595 690"/>
+  <path class="lifeline" d="M 823 194 L 823 690"/>
+  <path class="lifeline" d="M 1051 194 L 1051 690"/>
+  <path class="lifeline" d="M 1279 194 L 1279 690"/>
+
+  <path class="main" d="M 139 230 L 367 230"/>
+  <rect x="188" y="196" width="132" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="254" y="213" text-anchor="middle">Authorize</text>
+
+  <path class="main" d="M 367 268 L 470 268 L 470 304 L 367 304"/>
+  <rect x="390" y="232" width="86" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="433" y="249" text-anchor="middle">validate</text>
+
+  <path class="main" d="M 367 336 L 595 336"/>
+  <rect x="438" y="309" width="86" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="481" y="326" text-anchor="middle">beforeCall</text>
+
+  <path class="main" d="M 595 376 L 823 376"/>
+  <rect x="650" y="342" width="118" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="709" y="359" text-anchor="middle">closed path</text>
+
+  <path class="main" d="M 823 416 L 1051 416"/>
+  <rect x="875" y="382" width="124" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="937" y="399" text-anchor="middle">gateway call</text>
+
+  <path class="return" d="M 1051 456 L 823 456"/>
+  <rect x="886" y="422" width="102" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="937" y="439" text-anchor="middle">auth/error</text>
+
+  <path class="event" d="M 595 500 L 1279 500"/>
+  <rect x="826" y="466" width="190" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="921" y="483" text-anchor="middle">transition or rejection event</text>
+
+  <path class="event" d="M 823 540 L 1279 540"/>
+  <rect x="950" y="506" width="102" height="23" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="1001" y="523" text-anchor="middle">bulkhead event</text>
+
+  <rect x="74" y="572" width="1280" height="108" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
+  <text class="small" x="96" y="602">Rejection alternatives</text>
+  <path class="reject" d="M 595 624 L 367 624"/>
+  <rect x="425" y="590" width="130" height="23" rx="7" fill="#fff7f3"/>
+  <text class="label" x="490" y="607" text-anchor="middle">ErrCircuitOpen</text>
+  <path class="reject" d="M 823 654 L 367 654"/>
+  <rect x="528" y="628" width="174" height="23" rx="7" fill="#fff7f3"/>
+  <text class="label" x="615" y="645" text-anchor="middle">ErrBulkheadRejected</text>
+  <path class="reject" d="M 367 680 L 139 680"/>
+  <rect x="202" y="646" width="102" height="23" rx="7" fill="#fff7f3"/>
+  <text class="label" x="253" y="663" text-anchor="middle">return error</text>
+
+  <rect x="238" y="722" width="944" height="36" rx="11" fill="#edf1e9" stroke="#5d8a62"/>
+  <text class="subtitle" x="710" y="745" text-anchor="middle">Tests prove the open-circuit and overflow paths by counting gateway calls.</text>
+</svg>
