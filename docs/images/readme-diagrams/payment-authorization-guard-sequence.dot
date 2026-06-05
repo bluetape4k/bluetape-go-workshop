@@ -1,0 +1,24 @@
+digraph PaymentAuthorizationGuardSequence {
+  graph [rankdir=LR, bgcolor="transparent", splines=ortho, fontnames=svg, nodesep=0.45, ranksep=0.6]
+  node [shape=box, style="rounded,filled", fontname="Comic Mono", fontsize=11, margin="0.14,0.08", color="#48758d", penwidth=1.3]
+  edge [fontname="Comic Mono", fontsize=10, color="#47616f", penwidth=1.6, arrowsize=0.75]
+
+  order [label="Order workflow", fillcolor="#d7ecf2"]
+  authorizer [label="Authorizer", fillcolor="#f7e5aa", color="#b99b5d"]
+  breaker [label="Circuit breaker", fillcolor="#f5d3df", color="#b95f7a"]
+  bulkhead [label="Bulkhead", fillcolor="#eadcf5", color="#8a6bb0"]
+  gateway [label="Payment gateway", fillcolor="#f9dacd", color="#ba705c"]
+  events [label="OnEvent sink", fillcolor="#efe7d2", color="#a78335"]
+
+  order -> authorizer [xlabel="Authorize(request, gateway)"]
+  authorizer -> authorizer [xlabel="validate request"]
+  authorizer -> breaker [xlabel="beforeCall"]
+  breaker -> bulkhead [xlabel="closed path"]
+  bulkhead -> gateway [xlabel="permit acquired"]
+  gateway -> bulkhead [xlabel="authorization or error"]
+  breaker -> events [xlabel="transition / rejection"]
+  bulkhead -> events [xlabel="accepted / rejected"]
+  breaker -> authorizer [xlabel="ErrCircuitOpen"]
+  bulkhead -> authorizer [xlabel="ErrBulkheadRejected"]
+  authorizer -> order [xlabel="result or error"]
+}

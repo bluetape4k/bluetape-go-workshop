@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="780" viewBox="0 0 1480 780" role="img" aria-labelledby="title desc">
+  <title id="title">Payment Authorization Guard Architecture</title>
+  <desc id="desc">Layered architecture for the payment authorization guard example: caller workflow, validation, authorizer boundary, resilience policies, gateway function, and event sink.</desc>
+  <defs>
+    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+    </marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+    </marker>
+    <marker id="arch-event" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/>
+    </marker>
+    <style>
+      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .band-label { font-family: 'Architects Daughter', cursive; font-size: 20px; fill: #35505f; }
+      .card-title { font-family: 'Architects Daughter', cursive; font-size: 23px; fill: #243845; }
+      .card-text { font-family: 'Comic Mono', monospace; font-size: 14px; fill: #344b59; }
+      .label { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+      .route-main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arch-main); }
+      .route-success { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#arch-success); }
+      .route-event { fill: none; stroke: #a78335; stroke-width: 3; marker-end: url(#arch-event); }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1480" height="780" fill="#fbfaf6"/>
+  <text class="title" x="740" y="58" text-anchor="middle">Payment Authorization Guard Architecture</text>
+  <text class="subtitle" x="740" y="90" text-anchor="middle">The example owns only validation and policy wiring; callers own workflow, gateway behavior, and event handling.</text>
+
+  <rect class="band" x="54" y="142" width="1372" height="142"/>
+  <text class="band-label" x="92" y="178">Caller boundary</text>
+  <g transform="translate(92 190)">
+    <rect width="220" height="92" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
+    <text class="card-title" x="110" y="39" text-anchor="middle">Order Workflow</text>
+    <text class="card-text" x="110" y="66" text-anchor="middle">calls Authorize</text>
+  </g>
+  <g transform="translate(1162 190)">
+    <rect width="240" height="92" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/>
+    <text class="card-title" x="120" y="39" text-anchor="middle">Event Sink</text>
+    <text class="card-text" x="120" y="66" text-anchor="middle">logs or metrics bridge</text>
+  </g>
+
+  <rect class="band" x="54" y="326" width="1372" height="184"/>
+  <text class="band-label" x="92" y="362">Example domain boundary</text>
+  <g transform="translate(340 386)">
+    <rect width="236" height="104" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/>
+    <text class="card-title" x="118" y="39" text-anchor="middle">Request Validation</text>
+    <text class="card-text" x="118" y="66" text-anchor="middle">merchant / order / amount</text>
+    <text class="card-text" x="118" y="88" text-anchor="middle">no payment secrets</text>
+  </g>
+  <g transform="translate(636 370)">
+    <rect width="244" height="136" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
+    <text class="card-title" x="122" y="45" text-anchor="middle">Authorizer</text>
+    <text class="card-text" x="122" y="74" text-anchor="middle">owns policy instances</text>
+    <text class="card-text" x="122" y="96" text-anchor="middle">runs breaker, bulkhead</text>
+    <text class="card-text" x="122" y="118" text-anchor="middle">wraps gateway errors</text>
+  </g>
+  <g transform="translate(1092 384)">
+    <rect width="246" height="106" rx="12" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="card-title" x="123" y="41" text-anchor="middle">Gateway Function</text>
+    <text class="card-text" x="123" y="69" text-anchor="middle">caller supplied dependency</text>
+    <text class="card-text" x="123" y="91" text-anchor="middle">provider call only</text>
+  </g>
+
+  <rect class="band" x="54" y="554" width="1372" height="126"/>
+  <text class="band-label" x="92" y="590">Resilience policy boundary</text>
+  <g transform="translate(636 614)">
+    <rect width="244" height="72" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
+    <text class="card-title" x="122" y="31" text-anchor="middle">Circuit Breaker</text>
+    <text class="card-text" x="122" y="55" text-anchor="middle">outer admission gate</text>
+  </g>
+  <g transform="translate(954 614)">
+    <rect width="244" height="72" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
+    <text class="card-title" x="122" y="31" text-anchor="middle">Bulkhead</text>
+    <text class="card-text" x="122" y="55" text-anchor="middle">bounded in-flight calls</text>
+  </g>
+
+  <path class="route-main" d="M 312 236 L 340 236 L 340 438"/>
+  <text class="label" x="292" y="318" text-anchor="middle">request</text>
+  <path class="route-main" d="M 576 438 L 636 438"/>
+  <text class="label" x="606" y="420" text-anchor="middle">validated</text>
+  <path class="route-main" d="M 880 438 L 1092 438"/>
+  <text class="label" x="986" y="420" text-anchor="middle">gateway dependency</text>
+  <path class="route-success" d="M 1092 438 L 1060 438 L 1060 126 L 34 126 L 34 236 L 92 236"/>
+  <text class="label" x="740" y="120" text-anchor="middle">Authorization or wrapped gateway error</text>
+
+  <path class="route-main" d="M 758 506 L 758 614"/>
+  <text class="label" x="810" y="560" text-anchor="middle">outer policy</text>
+  <path class="route-main" d="M 880 650 L 954 650"/>
+  <text class="label" x="917" y="632" text-anchor="middle">inner policy</text>
+  <path class="route-main" d="M 1198 650 L 1246 650 L 1246 490"/>
+  <text class="label" x="1272" y="579" text-anchor="middle">permit path</text>
+  <path class="route-event" d="M 758 614 L 758 532 L 1410 532 L 1410 236 L 1402 236"/>
+  <text class="label" x="1080" y="514" text-anchor="middle">transition / rejection events</text>
+  <path class="route-event" d="M 1198 650 L 1362 650 L 1362 282"/>
+
+  <rect x="248" y="714" width="984" height="36" rx="11" fill="#edf1e9" stroke="#5d8a62"/>
+  <text class="subtitle" x="740" y="737" text-anchor="middle">No reusable payment abstraction is exported; the package remains a scenario-focused workshop example.</text>
+</svg>

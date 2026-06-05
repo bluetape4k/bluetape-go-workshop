@@ -24,12 +24,30 @@ authorizer owns the circuit breaker and bulkhead, while the gateway remains a
 plain function supplied by the caller. That keeps tests focused on policy
 behavior instead of dependency injection infrastructure.
 
+## Architecture
+
+![Payment authorization guard architecture](../../docs/images/readme-diagrams/payment-authorization-guard-architecture.png)
+
+The example boundary is intentionally narrow. `Authorizer` owns request
+validation and the two resilience policy instances. The caller still owns the
+order workflow, gateway function, and event sink, so the example does not grow a
+reusable payment abstraction.
+
 ## Policy Wiring
 
 `resilience.Run(ctx, operation, breaker, bulkhead)` applies the circuit breaker
 as the outer policy and the bulkhead as the inner policy. With that order, an
 open circuit rejects before acquiring a bulkhead permit and before invoking the
 gateway.
+
+## Sequence
+
+![Payment authorization guard sequence](../../docs/images/readme-diagrams/payment-authorization-guard-sequence.png)
+
+The normal path validates the request, admits through the circuit breaker, takes
+a bulkhead permit, and calls the gateway. The rejection paths are deliberately
+shorter: an open circuit returns `ErrCircuitOpen`, while a full bulkhead returns
+`ErrBulkheadRejected` before the overflow gateway function runs.
 
 ```go
 authorization, err := authorizer.Authorize(ctx, request, gateway)

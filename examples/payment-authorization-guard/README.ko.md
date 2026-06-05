@@ -24,11 +24,29 @@ Authorizer는 circuit breaker와 bulkhead를 소유하고, gateway는 caller가 
 function으로 남깁니다. 그래서 test는 dependency injection infrastructure가 아니라
 policy behavior에 집중할 수 있습니다.
 
+## Architecture
+
+![Payment authorization guard architecture](../../docs/images/readme-diagrams/payment-authorization-guard-architecture.png)
+
+Example boundary는 의도적으로 좁게 둡니다. `Authorizer`는 request validation과 두
+resilience policy instance만 소유합니다. Order workflow, gateway function, event
+sink는 여전히 caller가 소유하므로, 예제가 reusable payment abstraction으로 커지지
+않습니다.
+
 ## Policy Wiring
 
 `resilience.Run(ctx, operation, breaker, bulkhead)`는 circuit breaker를 outer
 policy로, bulkhead를 inner policy로 적용합니다. 이 순서에서는 open circuit이
 bulkhead permit을 얻거나 gateway를 호출하기 전에 요청을 거절합니다.
+
+## Sequence
+
+![Payment authorization guard sequence](../../docs/images/readme-diagrams/payment-authorization-guard-sequence.png)
+
+Normal path는 request를 validate하고, circuit breaker admission을 통과한 뒤,
+bulkhead permit을 얻어 gateway를 호출합니다. Rejection path는 더 짧습니다. Open
+circuit은 `ErrCircuitOpen`을 반환하고, full bulkhead는 overflow gateway function이
+실행되기 전에 `ErrBulkheadRejected`를 반환합니다.
 
 ```go
 authorization, err := authorizer.Authorize(ctx, request, gateway)
