@@ -17,6 +17,21 @@ are useful, while keeping handlers compatible with `net/http`.
 
 ![Workshop example map](docs/images/readme-diagrams/workshop-example-map.png)
 
+## v0.3.0 Cache Examples
+
+Read the cache examples as a small progression:
+
+| Start here | README | Use when |
+|---|---|---|
+| [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | You need a portable cache snapshot format, versioned serialization envelope, and measured compression tradeoff. |
+| [`examples/catalog-near-cache-redis`](examples/catalog-near-cache-redis) | [English](examples/catalog-near-cache-redis/README.md) \| [한국어](examples/catalog-near-cache-redis/README.ko.md) | You need multiple catalog peers to share Redis invalidation and coordinate cold misses so one backing loader runs. |
+
+`cache-snapshot-codecs` is the local payload/storage side of the story:
+serializing a product snapshot safely and compressing it with an explicit
+tradeoff. `catalog-near-cache-redis` is the distributed runtime side: local
+memory stays fast, Redis Pub/Sub invalidates stale peers, and Redis locks/result
+envelopes prevent a cold burst from stampeding the backing store.
+
 ## Examples
 
 | Example | README | Purpose | bluetape-go packages |
