@@ -17,6 +17,21 @@
 
 ![Workshop example map](docs/images/readme-diagrams/workshop-example-map.png)
 
+## v0.3.0 Cache 예제
+
+Cache 예제는 작은 흐름으로 읽으면 됩니다.
+
+| 먼저 볼 예제 | README | 사용할 때 |
+|---|---|---|
+| [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs/README.ko.md) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | portable cache snapshot format, versioned serialization envelope, 측정 가능한 compression tradeoff가 필요할 때 봅니다. |
+| [`examples/catalog-near-cache-redis`](examples/catalog-near-cache-redis/README.ko.md) | [English](examples/catalog-near-cache-redis/README.md) \| [한국어](examples/catalog-near-cache-redis/README.ko.md) | 여러 catalog peer가 Redis invalidation을 공유하고 cold miss를 조정해 backing loader를 한 번만 실행해야 할 때 봅니다. |
+
+`cache-snapshot-codecs`는 local payload/storage 쪽 예제입니다. Product snapshot을
+안전하게 serialize하고, compression 선택을 명시적인 tradeoff로 남깁니다.
+`catalog-near-cache-redis`는 distributed runtime 쪽 예제입니다. Local memory는 빠른
+read path로 유지하고, Redis Pub/Sub는 stale peer를 invalidate하며, Redis
+lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습니다.
+
 ## 예제
 
 | 예제 | README | 목적 | bluetape-go package |
