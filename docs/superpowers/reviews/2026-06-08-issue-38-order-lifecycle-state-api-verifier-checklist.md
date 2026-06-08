@@ -28,11 +28,14 @@ Spec and plan are satisfied by the current staged diff.
 |---|---|---|
 | Gin routes expose current state and transition commands | `server.go:115-128` registers Gin routes for health, current state, transition command, and can-transition inquiry. | PASS |
 | State machine models order lifecycle | `server.go:138-151` defines draft, submitted, paid, packed, shipped, and cancelled transitions with final states. | PASS |
-| Payment guard rejects non-positive totals | `server.go:154-160` and `server_test.go:93-114`. | PASS |
-| Invalid transition, guard, final-state, and concurrent errors map to HTTP responses | `server.go:250-264`; tests cover invalid, guard, final, and concurrent cases in `server_test.go:75-211`. | PASS |
+| Payment guard rejects non-positive totals | `server.go:154-160` and `server_test.go:122-143`, `server_test.go:181-202`. | PASS |
+| Invalid transition, guard, final-state, and concurrent errors map to HTTP responses | `server.go:250-264`; tests cover invalid, guard, final, and concurrent cases in `server_test.go:98-202`, `server_test.go:248-286`, `server_test.go:319-364`. | PASS |
 | Tests cover allowed transitions | `server_test.go:43-73`. | PASS |
-| Tests cover bad requests and unknown events | `server_test.go:144-164`. | PASS |
-| Tests cover concurrent request safety | `server_test.go:166-211`; `go test -race -count=1 ./examples/order-lifecycle-state-api/...` passed. | PASS |
+| Tests cover can-transition false, guard, final, and unknown-event paths | `server_test.go:98-161`, `server_test.go:275-285`. | PASS |
+| Tests cover cancel from every allowed source state | `server_test.go:204-246`. | PASS |
+| Tests cover default options and normalized event input | `server_test.go:75-96`. | PASS |
+| Tests cover bad requests and unknown events | `server_test.go:288-317`. | PASS |
+| Tests cover concurrent request safety | `server_test.go:319-364`; `go test -race -count=1 ./examples/order-lifecycle-state-api/...` passed. | PASS |
 | README explains when finite state machine is enough without workflow runner | `README.md:62-74`; localized pair mirrors the content. | PASS |
 | README includes scenario, Architecture, and Sequence Diagram using bluetape4k-diagram rules | `README.md:9-16`, `README.md:76-91`; script emits PNG/SVG/dot/plain/graphviz assets and gate summaries. | PASS |
 | Root README navigation and web framework wording updated | Root `README.md` and `README.ko.md` include the new example and clarify Gin for framework-visible public APIs. | PASS |
