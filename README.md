@@ -52,6 +52,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/order-lifecycle-state-api`](examples/order-lifecycle-state-api) | [English](examples/order-lifecycle-state-api/README.md) \| [한국어](examples/order-lifecycle-state-api/README.ko.md) | Gin API that exposes an in-memory order lifecycle finite state machine and transition commands. | `state` |
 | [`examples/payment-authorization-state`](examples/payment-authorization-state) | [English](examples/payment-authorization-state/README.md) \| [한국어](examples/payment-authorization-state/README.ko.md) | Gin API for payment authorization transitions with app-layer idempotent retry behavior. | `state` |
 | [`examples/fulfillment-workflow-runner`](examples/fulfillment-workflow-runner) | [English](examples/fulfillment-workflow-runner/README.md) \| [한국어](examples/fulfillment-workflow-runner/README.ko.md) | Gin API that composes sequential, parallel, and conditional fulfillment workflow runners. | `workflow`, `workreport` |
+| [`examples/compensation-workflow`](examples/compensation-workflow) | [English](examples/compensation-workflow/README.md) \| [한국어](examples/compensation-workflow/README.ko.md) | Gin API that runs fulfillment steps and reverses completed side effects when later workflow steps fail. | `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Gin API that turns work reports and failure policies into deterministic operations output. | `workreport` |
 
 ## Run the Leader Example
@@ -163,6 +164,23 @@ curl -X POST http://localhost:8086/payments/current/transitions \
   -d '{"event":"authorize","idempotency_key":"auth-1"}'
 ```
 
+## Run the Compensation Workflow Example
+
+Run the service locally:
+
+```bash
+go run ./examples/compensation-workflow
+```
+
+Useful endpoints:
+
+```bash
+curl http://localhost:8087/healthz
+curl -X POST http://localhost:8087/compensation/fulfillment \
+  -H 'Content-Type: application/json' \
+  -d '{"order_id":"order-1001","stock_available":true,"payment_authorized":true,"shipment_provider_available":false}'
+```
+
 ## Run the Operations Report Policy Example
 
 Run the service locally:
@@ -210,5 +228,5 @@ Nightly workflows run these tests against real containers.
 | `0.1.1` | Focused retry and timeout examples for quality-closure resilience primitives. |
 | `0.2.0` | Resilience examples for HTTP clients, services, payment authorization guards, and bounded leader group coordination. |
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
-| `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, a fulfillment workflow runner, and operations report policy API. |
+| `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, fulfillment workflow runner, compensation workflow, and operations report policy APIs. |
 | `0.5.0` | Batch processing examples. |

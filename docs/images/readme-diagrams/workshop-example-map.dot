@@ -52,6 +52,7 @@ digraph G {
   orderState [label="order-lifecycle-state-api\nfinite state commands", fillcolor="#f5f3ff"];
   paymentState [label="payment-authorization-state\nidempotent transitions", fillcolor="#f5f3ff"];
   fulfillment [label="fulfillment-workflow-runner\nworkflow composition", fillcolor="#f5f3ff"];
+  compensation [label="compensation-workflow\nreverse cleanup", fillcolor="#f5f3ff"];
   reports [label="operations-report-policy\nworkreport policies", fillcolor="#f5f3ff"];
   pipeline [label="order-pipeline-testcontainers\nPostgres + Redis + NATS", fillcolor="#eef2ff"];
   catalogCache [label="catalog-near-cache-redis\nnear-cache + stampede", fillcolor="#eef2ff"];
@@ -73,6 +74,7 @@ digraph G {
   stateflow -> orderState;
   stateflow -> paymentState;
   stateflow -> fulfillment;
+  stateflow -> compensation;
   stateflow -> reports;
   integration -> pipeline;
   integration -> catalogCache;
