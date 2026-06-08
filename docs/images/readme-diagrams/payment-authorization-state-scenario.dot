@@ -1,0 +1,18 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fbfaf6", margin=0.2, nodesep=0.7, ranksep=0.8];
+  node [shape=box, style="rounded,filled", fontname="Architects Daughter", fontsize=18, color="#48758d", fillcolor="#d7ecf2"];
+  edge [fontname="Comic Mono", fontsize=11, color="#47616f", fontcolor="#35505f", penwidth=2];
+  requested [label="requested"];
+  authorized [label="authorized", fillcolor="#dbe8d4", color="#5d8a62"];
+  captured [label="captured final", fillcolor="#edf1e9", color="#5d8a62"];
+  failed [label="failed final", fillcolor="#f5d3df", color="#b95f7a"];
+  cancelled [label="cancelled final", fillcolor="#efe7d2", color="#a78335"];
+  idem [label="idempotency key", fillcolor="#eadcf5", color="#8a6bb0"];
+  requested -> authorized [label="authorize"];
+  authorized -> captured [label="capture"];
+  requested -> failed [label="fail"];
+  authorized -> failed [label="fail"];
+  requested -> cancelled [label="cancel"];
+  authorized -> cancelled [label="cancel"];
+  idem -> authorized [label="same key replay"];
+}

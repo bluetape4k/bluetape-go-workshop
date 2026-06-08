@@ -1,0 +1,15 @@
+graph 1 13.826 3.8472
+node client 0.78819 0.36111 1.5764 0.5 "HTTP Client" rounded,filled box #48758d #d7ecf2
+node gin 4.434 1.5556 1.4931 0.5 "Gin Router" rounded,filled box #b99b5d #f7e5aa
+node handler 8.3663 1.9722 2.1493 0.5 "Payment Handler" rounded,filled box #5d8a62 #dbe8d4
+node idem 12.606 3.5972 2.441 0.5 "Idempotency Store" rounded,filled box #8a6bb0 #eadcf5
+node machine 12.606 1.9722 1.7639 0.5 "state.Machine" rounded,filled box #b95f7a #f5d3df
+node response 12.606 0.25 1.6389 0.5 "Stable JSON" rounded,filled box #5d8a62 #edf1e9
+edge client gin 4 1.5782 0.61735 2.1452 0.80452 2.9157 1.0589 3.5114 1.2555 "POST transition" 2.6319 1.2577 solid #47616f
+edge gin handler 4 5.1869 1.6344 5.7284 1.6922 6.4761 1.772 7.1089 1.8395 "bind JSON" 6.2361 1.8898 solid #47616f
+edge handler idem 7 8.6168 2.2288 8.8903 2.5079 9.3679 2.9441 9.8715 3.1667 10.285 3.3493 10.764 3.4558 11.203 3.5174 "check replay" 10.413 3.5664 solid #47616f
+edge handler idem 7 9.0815 2.2283 9.6003 2.4192 10.323 2.6883 10.955 2.934 11.233 3.0422 11.536 3.1639 11.805 3.2733 "store success" 10.413 3.0226 solid #47616f
+edge handler machine 10 9.4473 1.9416 9.5899 1.9385 9.7343 1.9358 9.8715 1.934 10.353 1.9279 10.473 1.9284 10.955 1.934 11.145 1.9362 11.348 1.9399 11.544 1.9441 transition 10.413 2.0226 solid #47616f
+edge handler response 4 9.0062 1.7162 9.7507 1.4118 10.994 0.90335 11.804 0.57237 snapshot 10.413 1.4046 solid #47616f
+edge response client 4 11.782 0.25764 9.672 0.27752 4.018 0.3308 1.7564 0.35212 "200 / 409 / 408" 6.2361 0.4043 solid #47616f
+stop

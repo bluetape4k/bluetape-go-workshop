@@ -50,6 +50,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/resilience-http-web`](examples/resilience-http-web/README.ko.md) | [English](examples/resilience-http-web/README.md) \| [한국어](examples/resilience-http-web/README.ko.md) | retry, timeout, circuit breaker, bulkhead, event hook을 조합하는 HTTP service입니다. | `resilience` |
 | [`examples/leader-group-web`](examples/leader-group-web/README.ko.md) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | Redis 기반 bounded multi-leader group election을 노출하는 HTTP service입니다. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/order-lifecycle-state-api`](examples/order-lifecycle-state-api/README.ko.md) | [English](examples/order-lifecycle-state-api/README.md) \| [한국어](examples/order-lifecycle-state-api/README.ko.md) | In-memory 주문 lifecycle finite state machine과 transition command를 노출하는 Gin API입니다. | `state` |
+| [`examples/payment-authorization-state`](examples/payment-authorization-state/README.ko.md) | [English](examples/payment-authorization-state/README.md) \| [한국어](examples/payment-authorization-state/README.ko.md) | Payment authorization transition과 application-layer idempotent retry 동작을 보여주는 Gin API입니다. | `state` |
 | [`examples/fulfillment-workflow-runner`](examples/fulfillment-workflow-runner/README.ko.md) | [English](examples/fulfillment-workflow-runner/README.md) \| [한국어](examples/fulfillment-workflow-runner/README.ko.md) | Sequential, parallel, conditional fulfillment workflow runner를 조합하는 Gin API입니다. | `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy/README.ko.md) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Work report와 failure policy를 deterministic operations output으로 투영하는 Gin API입니다. | `workreport` |
 
@@ -144,6 +145,24 @@ curl -X POST http://localhost:8084/fulfillment/run \
   -d '{"order_id":"order-1001","stock_available":true,"payment_authorized":true,"requires_shipment":true}'
 ```
 
+## Payment Authorization State 예제 실행
+
+Service를 로컬에서 실행합니다:
+
+```bash
+go run ./examples/payment-authorization-state
+```
+
+주요 endpoint:
+
+```bash
+curl http://localhost:8086/healthz
+curl http://localhost:8086/payments/current
+curl -X POST http://localhost:8086/payments/current/transitions \
+  -H 'Content-Type: application/json' \
+  -d '{"event":"authorize","idempotency_key":"auth-1"}'
+```
+
 ## Operations Report Policy 예제 실행
 
 Service를 로컬에서 실행합니다:
@@ -191,5 +210,5 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.1.1` | Quality-closure resilience primitive을 위한 focused retry/timeout 예제. |
 | `0.2.0` | HTTP client/service resilience, payment authorization guard, bounded leader group coordination 예제. |
 | `0.3.0` | Near-cache, Redis invalidation, stampede coordination 예제. |
-| `0.4.0` | Gin order lifecycle state API, fulfillment workflow runner, operations report policy API를 포함한 state/workflow 예제. |
+| `0.4.0` | Gin order lifecycle과 payment authorization state API, fulfillment workflow runner, operations report policy API를 포함한 state/workflow 예제. |
 | `0.5.0` | Batch processing 예제. |
