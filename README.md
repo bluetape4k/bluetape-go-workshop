@@ -9,9 +9,10 @@ packages. The library repository should stay focused on stable packages; this
 workshop shows how those packages behave inside real HTTP services and
 container-backed integration tests.
 
-The default web style is lightweight and close to the Go standard library:
-examples use [`chi`](https://github.com/go-chi/chi) when routing and middleware
-are useful, while keeping handlers compatible with `net/http`.
+The default web style stays lightweight. Public HTTP API examples use
+[`Gin`](https://github.com/gin-gonic/gin) when the framework is part of the
+lesson, while compatibility-focused examples use
+[`chi`](https://github.com/go-chi/chi) or plain `net/http` handlers.
 
 ## Example Map
 
@@ -48,6 +49,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/catalog-near-cache-redis`](examples/catalog-near-cache-redis) | [English](examples/catalog-near-cache-redis/README.md) \| [한국어](examples/catalog-near-cache-redis/README.ko.md) | Redis near-cache invalidation and cold-miss stampede coordination for catalog peers. | `cache`, `cache/redisnear`, `cache/rediscoord`, `testcontainers/redis` |
 | [`examples/resilience-http-web`](examples/resilience-http-web) | [English](examples/resilience-http-web/README.md) \| [한국어](examples/resilience-http-web/README.ko.md) | HTTP service that composes retry, timeout, circuit breaker, bulkhead, and event hooks. | `resilience` |
 | [`examples/leader-group-web`](examples/leader-group-web) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | HTTP service for Redis-backed bounded multi-leader group election. | `leader`, `leader/redis`, `testing/concurrency` |
+| [`examples/order-lifecycle-state-api`](examples/order-lifecycle-state-api) | [English](examples/order-lifecycle-state-api/README.md) \| [한국어](examples/order-lifecycle-state-api/README.ko.md) | Gin API that exposes an in-memory order lifecycle finite state machine and transition commands. | `state` |
 
 ## Run the Leader Example
 
@@ -104,6 +106,25 @@ curl -X POST http://localhost:8082/campaign
 curl -X POST http://localhost:8082/resign
 ```
 
+## Run the Order Lifecycle State API Example
+
+Run the service locally:
+
+```bash
+go run ./examples/order-lifecycle-state-api
+```
+
+Useful endpoints:
+
+```bash
+curl http://localhost:8083/healthz
+curl http://localhost:8083/orders/current
+curl http://localhost:8083/orders/current/transitions/pay/can
+curl -X POST http://localhost:8083/orders/current/transitions \
+  -H 'Content-Type: application/json' \
+  -d '{"event":"submit"}'
+```
+
 ## Development
 
 Common commands:
@@ -134,5 +155,5 @@ Nightly workflows run these tests against real containers.
 | `0.1.1` | Focused retry and timeout examples for quality-closure resilience primitives. |
 | `0.2.0` | Resilience examples for HTTP clients, services, payment authorization guards, and bounded leader group coordination. |
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
-| `0.4.0` | State and workflow examples. |
+| `0.4.0` | State and workflow examples, starting with a Gin order lifecycle state API. |
 | `0.5.0` | Batch processing examples. |
