@@ -50,6 +50,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/resilience-http-web`](examples/resilience-http-web) | [English](examples/resilience-http-web/README.md) \| [한국어](examples/resilience-http-web/README.ko.md) | HTTP service that composes retry, timeout, circuit breaker, bulkhead, and event hooks. | `resilience` |
 | [`examples/leader-group-web`](examples/leader-group-web) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | HTTP service for Redis-backed bounded multi-leader group election. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/order-lifecycle-state-api`](examples/order-lifecycle-state-api) | [English](examples/order-lifecycle-state-api/README.md) \| [한국어](examples/order-lifecycle-state-api/README.ko.md) | Gin API that exposes an in-memory order lifecycle finite state machine and transition commands. | `state` |
+| [`examples/payment-authorization-state`](examples/payment-authorization-state) | [English](examples/payment-authorization-state/README.md) \| [한국어](examples/payment-authorization-state/README.ko.md) | Gin API for payment authorization transitions with app-layer idempotent retry behavior. | `state` |
 | [`examples/fulfillment-workflow-runner`](examples/fulfillment-workflow-runner) | [English](examples/fulfillment-workflow-runner/README.md) \| [한국어](examples/fulfillment-workflow-runner/README.ko.md) | Gin API that composes sequential, parallel, and conditional fulfillment workflow runners. | `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Gin API that turns work reports and failure policies into deterministic operations output. | `workreport` |
 
@@ -144,6 +145,24 @@ curl -X POST http://localhost:8084/fulfillment/run \
   -d '{"order_id":"order-1001","stock_available":true,"payment_authorized":true,"requires_shipment":true}'
 ```
 
+## Run the Payment Authorization State Example
+
+Run the service locally:
+
+```bash
+go run ./examples/payment-authorization-state
+```
+
+Useful endpoints:
+
+```bash
+curl http://localhost:8086/healthz
+curl http://localhost:8086/payments/current
+curl -X POST http://localhost:8086/payments/current/transitions \
+  -H 'Content-Type: application/json' \
+  -d '{"event":"authorize","idempotency_key":"auth-1"}'
+```
+
 ## Run the Operations Report Policy Example
 
 Run the service locally:
@@ -191,5 +210,5 @@ Nightly workflows run these tests against real containers.
 | `0.1.1` | Focused retry and timeout examples for quality-closure resilience primitives. |
 | `0.2.0` | Resilience examples for HTTP clients, services, payment authorization guards, and bounded leader group coordination. |
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
-| `0.4.0` | State and workflow examples, including a Gin order lifecycle state API, fulfillment workflow runner, and operations report policy API. |
+| `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, a fulfillment workflow runner, and operations report policy API. |
 | `0.5.0` | Batch processing examples. |

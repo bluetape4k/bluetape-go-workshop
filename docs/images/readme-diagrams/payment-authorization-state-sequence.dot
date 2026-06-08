@@ -1,0 +1,17 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fbfaf6", margin=0.2, nodesep=0.7, ranksep=0.9];
+  node [shape=box, style="rounded,filled", fontname="Architects Daughter", fontsize=18, color="#48758d", fillcolor="#d7ecf2"];
+  edge [fontname="Comic Mono", fontsize=11, color="#47616f", fontcolor="#35505f", penwidth=2];
+  client [label="Client"];
+  handler [label="Handler", fillcolor="#f7e5aa", color="#b99b5d"];
+  idem [label="Idempotency Store", fillcolor="#eadcf5", color="#8a6bb0"];
+  machine [label="state.Machine", fillcolor="#dbe8d4", color="#5d8a62"];
+  response [label="Response Mapper", fillcolor="#efe7d2", color="#a78335"];
+  client -> handler [label="POST event + key"];
+  handler -> idem [label="lookup key"];
+  idem -> response [label="replay if same event"];
+  handler -> machine [label="Transition(ctx,event)"];
+  machine -> idem [label="store success"];
+  machine -> response [label="result or error"];
+  response -> client [label="stable JSON"];
+}

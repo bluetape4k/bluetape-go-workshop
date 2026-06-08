@@ -1,41 +1,43 @@
-graph 1 11.387 17.514
-node workshop 1.311 7.7867 2.6221 1.0317 "Workshop\nrunnable examples" rounded,filled rect #6b7280 #fef3c7
-node data 5.0321 14.578 2.195 0.9 "Data shaping\ncodec + cleanup" rounded,filled rect #6b7280 #dbeafe
-node leadership 5.0321 10.87 2.195 0.9 "Coordination\nleader patterns" rounded,filled rect #6b7280 #dcfce7
-node runtime 5.0321 7.7867 3.32 0.9 "Runtime safety\nconcurrency + resilience" rounded,filled rect #6b7280 #fce7f3
-node stateflow 5.0321 4.6894 2.32 0.9 "State + workflow\nreports" rounded,filled rect #6b7280 #ede9fe
+graph 1 11.387 18.75
+node workshop 1.311 9.0228 2.6221 1.0317 "Workshop\nrunnable examples" rounded,filled rect #6b7280 #fef3c7
+node data 5.0321 15.814 2.195 0.9 "Data shaping\ncodec + cleanup" rounded,filled rect #6b7280 #dbeafe
+node leadership 5.0321 12.106 2.195 0.9 "Coordination\nleader patterns" rounded,filled rect #6b7280 #dcfce7
+node runtime 5.0321 9.0228 3.32 0.9 "Runtime safety\nconcurrency + resilience" rounded,filled rect #6b7280 #fce7f3
+node stateflow 5.0321 5.3144 2.32 0.9 "State + workflow\nreports" rounded,filled rect #6b7280 #ede9fe
 node integration 5.0321 1.6061 2.445 0.9 "Integration tests\nreal containers" rounded,filled rect #6b7280 #e0e7ff
-node snapshot 9.4146 16.439 3.07 0.74 "cache-snapshot-codecs\nversioned + compressed" rounded,filled rect #6b7280 #eff6ff
-node invites 9.4146 15.203 2.57 0.74 "invitation-codecs\nURL-safe encodings" rounded,filled rect #6b7280 #eff6ff
-node cleanup 9.4146 13.967 2.82 0.74 "order-intake-cleanup\nvalidate + group" rounded,filled rect #6b7280 #eff6ff
-node singleLeader 9.4146 12.731 2.445 0.74 "leader-redis-web\nsingle leader API" rounded,filled rect #6b7280 #f0fdf4
-node groupLeader 9.4146 11.495 2.32 0.74 "leader-group-web\nbounded leaders" rounded,filled rect #6b7280 #f0fdf4
-node jobs 9.4146 10.259 3.32 0.74 "leader-coordination-jobs\nmigration + warmer" rounded,filled rect #6b7280 #f0fdf4
-node refresh 9.4146 9.0228 3.57 0.74 "catalog-refresh-resilience\nretry + timeout" rounded,filled rect #6b7280 #fdf2f8
-node enrich 9.4146 7.7867 3.445 0.74 "product-enrichment-fanout\nbounded fan-out" rounded,filled rect #6b7280 #fdf2f8
-node http 9.4146 6.5506 2.695 0.74 "resilience-http-web\nHTTP policies" rounded,filled rect #6b7280 #fdf2f8
-node orderState 9.4146 5.3144 3.445 0.74 "order-lifecycle-state-api\nfinite state commands" rounded,filled rect #6b7280 #f5f3ff
+node snapshot 9.4146 17.676 3.07 0.74 "cache-snapshot-codecs\nversioned + compressed" rounded,filled rect #6b7280 #eff6ff
+node invites 9.4146 16.439 2.57 0.74 "invitation-codecs\nURL-safe encodings" rounded,filled rect #6b7280 #eff6ff
+node cleanup 9.4146 15.203 2.82 0.74 "order-intake-cleanup\nvalidate + group" rounded,filled rect #6b7280 #eff6ff
+node singleLeader 9.4146 13.967 2.445 0.74 "leader-redis-web\nsingle leader API" rounded,filled rect #6b7280 #f0fdf4
+node groupLeader 9.4146 12.731 2.32 0.74 "leader-group-web\nbounded leaders" rounded,filled rect #6b7280 #f0fdf4
+node jobs 9.4146 11.495 3.32 0.74 "leader-coordination-jobs\nmigration + warmer" rounded,filled rect #6b7280 #f0fdf4
+node refresh 9.4146 10.259 3.57 0.74 "catalog-refresh-resilience\nretry + timeout" rounded,filled rect #6b7280 #fdf2f8
+node enrich 9.4146 9.0228 3.445 0.74 "product-enrichment-fanout\nbounded fan-out" rounded,filled rect #6b7280 #fdf2f8
+node http 9.4146 7.7867 2.695 0.74 "resilience-http-web\nHTTP policies" rounded,filled rect #6b7280 #fdf2f8
+node orderState 9.4146 6.5506 3.445 0.74 "order-lifecycle-state-api\nfinite state commands" rounded,filled rect #6b7280 #f5f3ff
+node paymentState 9.4146 5.3144 3.695 0.74 "payment-authorization-state\nidempotent transitions" rounded,filled rect #6b7280 #f5f3ff
 node fulfillment 9.4146 4.0783 3.695 0.74 "fulfillment-workflow-runner\nworkflow composition" rounded,filled rect #6b7280 #f5f3ff
 node reports 9.4146 2.8422 3.32 0.74 "operations-report-policy\nworkreport policies" rounded,filled rect #6b7280 #f5f3ff
 node pipeline 9.4146 1.6061 3.945 0.74 "order-pipeline-testcontainers\nPostgres + Redis + NATS" rounded,filled rect #6b7280 #eef2ff
 node catalogCache 9.4146 0.37 3.32 0.74 "catalog-near-cache-redis\nnear-cache + stampede" rounded,filled rect #6b7280 #eef2ff
-edge workshop data 7 0.87319 8.3139 0.87319 9.9097 0.87319 14.578 0.87319 14.578 0.87319 14.578 3.7768 14.578 3.7768 14.578 solid #64748b
-edge workshop leadership 7 1.7482 8.3132 1.7482 9.1938 1.7482 10.87 1.7482 10.87 1.7482 10.87 3.7787 10.87 3.7787 10.87 solid #64748b
-edge workshop runtime 4 2.6334 7.7867 2.6334 7.7867 3.2162 7.7867 3.2162 7.7867 solid #64748b
-edge workshop stateflow 7 1.7482 7.2578 1.7482 6.3732 1.7482 4.6894 1.7482 4.6894 1.7482 4.6894 3.7142 4.6894 3.7142 4.6894 solid #64748b
-edge workshop integration 7 0.87319 7.2597 0.87319 5.7651 0.87319 1.6061 0.87319 1.6061 0.87319 1.6061 3.655 1.6061 3.655 1.6061 solid #64748b
-edge data snapshot 7 6.1407 14.963 6.9633 14.963 7.9426 14.963 7.9426 14.963 7.9426 14.963 7.9426 15.913 7.9426 15.913 solid #64748b
-edge data invites 4 6.138 14.898 6.138 14.898 7.9721 14.898 7.9721 14.898 solid #64748b
-edge data cleanup 4 6.138 14.233 6.138 14.233 7.8474 14.233 7.8474 14.233 solid #64748b
-edge leadership singleLeader 7 5.026 11.33 5.026 11.881 5.026 12.731 5.026 12.731 5.026 12.731 8.0342 12.731 8.0342 12.731 solid #64748b
-edge leadership groupLeader 4 6.138 11.223 6.138 11.223 8.0976 11.223 8.0976 11.223 solid #64748b
-edge leadership jobs 4 6.138 10.524 6.138 10.524 7.5948 10.524 7.5948 10.524 solid #64748b
-edge runtime refresh 7 6.4149 8.2505 6.4149 8.6012 6.4149 9.0228 6.4149 9.0228 6.4149 9.0228 7.4715 9.0228 7.4715 9.0228 solid #64748b
-edge runtime enrich 4 6.7014 7.7867 6.7014 7.7867 7.5345 7.7867 7.5345 7.7867 solid #64748b
-edge runtime http 7 6.4704 7.3229 6.4704 6.9721 6.4704 6.5506 6.4704 6.5506 6.4704 6.5506 7.9083 6.5506 7.9083 6.5506 solid #64748b
-edge stateflow orderState 4 6.2008 5.0419 6.2008 5.0419 7.5343 5.0419 7.5343 5.0419 solid #64748b
-edge stateflow fulfillment 4 6.2008 4.3439 6.2008 4.3439 7.4089 4.3439 7.4089 4.3439 solid #64748b
-edge stateflow reports 7 5.026 4.2281 5.026 3.6809 5.026 2.8422 5.026 2.8422 5.026 2.8422 7.5967 2.8422 7.5967 2.8422 solid #64748b
+edge workshop data 7 0.87319 9.5501 0.87319 11.146 0.87319 15.814 0.87319 15.814 0.87319 15.814 3.7768 15.814 3.7768 15.814 solid #64748b
+edge workshop leadership 7 1.7482 9.5493 1.7482 10.43 1.7482 12.106 1.7482 12.106 1.7482 12.106 3.7787 12.106 3.7787 12.106 solid #64748b
+edge workshop runtime 4 2.6334 9.0228 2.6334 9.0228 3.2162 9.0228 3.2162 9.0228 solid #64748b
+edge workshop stateflow 7 1.7482 8.4954 1.7482 7.4716 1.7482 5.3144 1.7482 5.3144 1.7482 5.3144 3.7142 5.3144 3.7142 5.3144 solid #64748b
+edge workshop integration 7 0.87319 8.4953 0.87319 6.8009 0.87319 1.6061 0.87319 1.6061 0.87319 1.6061 3.655 1.6061 3.655 1.6061 solid #64748b
+edge data snapshot 7 6.1407 16.199 6.9633 16.199 7.9426 16.199 7.9426 16.199 7.9426 16.199 7.9426 17.149 7.9426 17.149 solid #64748b
+edge data invites 4 6.138 16.134 6.138 16.134 7.9721 16.134 7.9721 16.134 solid #64748b
+edge data cleanup 4 6.138 15.469 6.138 15.469 7.8474 15.469 7.8474 15.469 solid #64748b
+edge leadership singleLeader 7 5.026 12.566 5.026 13.117 5.026 13.967 5.026 13.967 5.026 13.967 8.0342 13.967 8.0342 13.967 solid #64748b
+edge leadership groupLeader 4 6.138 12.459 6.138 12.459 8.0976 12.459 8.0976 12.459 solid #64748b
+edge leadership jobs 4 6.138 11.761 6.138 11.761 7.5948 11.761 7.5948 11.761 solid #64748b
+edge runtime refresh 7 6.4149 9.4866 6.4149 9.8373 6.4149 10.259 6.4149 10.259 6.4149 10.259 7.4715 10.259 7.4715 10.259 solid #64748b
+edge runtime enrich 4 6.7014 9.0228 6.7014 9.0228 7.5345 9.0228 7.5345 9.0228 solid #64748b
+edge runtime http 7 6.4704 8.559 6.4704 8.2082 6.4704 7.7867 6.4704 7.7867 6.4704 7.7867 7.9083 7.7867 7.9083 7.7867 solid #64748b
+edge stateflow orderState 7 5.026 5.7782 5.026 6.129 5.026 6.5506 5.026 6.5506 5.026 6.5506 7.5339 6.5506 7.5339 6.5506 solid #64748b
+edge stateflow paymentState 4 6.2008 5.3144 6.2008 5.3144 7.4089 5.3144 7.4089 5.3144 solid #64748b
+edge stateflow fulfillment 7 5.4149 4.8506 5.4149 4.4999 5.4149 4.0783 5.4149 4.0783 5.4149 4.0783 7.409 4.0783 7.409 4.0783 solid #64748b
+edge stateflow reports 7 4.651 4.8552 4.651 4.1403 4.651 2.8422 4.651 2.8422 4.651 2.8422 7.5956 2.8422 7.5956 2.8422 solid #64748b
 edge integration pipeline 4 6.2645 1.6061 6.2645 1.6061 7.2824 1.6061 7.2824 1.6061 solid #64748b
 edge integration catalogCache 7 5.026 1.1423 5.026 0.79156 5.026 0.37 5.026 0.37 5.026 0.37 7.5967 0.37 7.5967 0.37 solid #64748b
 stop
