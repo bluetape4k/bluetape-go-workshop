@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="840" viewBox="0 0 1480 840" role="img" aria-labelledby="title desc">
+  <title id="title">Order Lifecycle State API Architecture</title>
+  <desc id="desc">Architecture diagram for the Gin order lifecycle state API showing client routes, handlers, state machine, guard, and error mapping boundaries.</desc>
+  <defs>
+    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
+    <marker id="arch-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #243845; }
+      .subtitle, .detail, .label { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #243845; }
+      .band-label { font-size: 21px; }
+      .card-title { font-size: 23px; }
+      .detail { font-size: 14px; }
+      .label { font-size: 13px; }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arch-main); }
+      .success { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#arch-success); }
+      .error { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#arch-error); }
+    </style>
+  </defs>
+  <rect width="1480" height="840" fill="#fbfaf6"/>
+  <text class="title" x="740" y="58" text-anchor="middle">Order Lifecycle State API Architecture</text>
+  <text class="subtitle" x="740" y="92" text-anchor="middle">Gin owns HTTP routing; bluetape-go/state owns lifecycle legality and concurrent transition safety.</text>
+
+  <rect class="band" x="58" y="140" width="1364" height="146"/><text class="band-label" x="94" y="178">Client boundary</text>
+  <g transform="translate(96 190)"><rect width="242" height="74" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="121" y="32" text-anchor="middle">HTTP Client</text><text class="detail" x="121" y="56" text-anchor="middle">curl, browser, test</text></g>
+  <g transform="translate(1128 184)"><rect width="246" height="86" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="123" y="35" text-anchor="middle">JSON Response</text><text class="detail" x="123" y="60" text-anchor="middle">snapshot or error code</text></g>
+
+  <rect class="band" x="58" y="326" width="1364" height="196"/><text class="band-label" x="94" y="364">Gin API boundary</text>
+  <g transform="translate(254 394)"><rect width="242" height="90" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="121" y="35" text-anchor="middle">Gin Router</text><text class="detail" x="121" y="62" text-anchor="middle">health, current, command</text></g>
+  <g transform="translate(620 384)"><rect width="258" height="110" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="129" y="40" text-anchor="middle">Order Handlers</text><text class="detail" x="129" y="68" text-anchor="middle">parse events</text><text class="detail" x="129" y="90" text-anchor="middle">map state errors</text></g>
+  <g transform="translate(974 394)"><rect width="252" height="90" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="126" y="35" text-anchor="middle">Error Mapper</text><text class="detail" x="126" y="62" text-anchor="middle">400, 408, 409, 500</text></g>
+
+  <rect class="band" x="58" y="562" width="1364" height="158"/><text class="band-label" x="94" y="600">Lifecycle boundary</text>
+  <g transform="translate(420 622)"><rect width="276" height="82" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="138" y="34" text-anchor="middle">state.Machine</text><text class="detail" x="138" y="60" text-anchor="middle">states, events, final states</text></g>
+  <g transform="translate(784 622)"><rect width="276" height="82" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="138" y="34" text-anchor="middle">Payment Guard</text><text class="detail" x="138" y="60" text-anchor="middle">requires positive total</text></g>
+
+  <path class="main" d="M 338 227 L 375 227 L 375 394"/><text class="label" x="422" y="309" text-anchor="middle">GET / POST</text>
+  <path class="main" d="M 496 439 L 620 439"/><text class="label" x="558" y="420" text-anchor="middle">route</text>
+  <path class="main" d="M 749 494 L 749 622 L 696 622"/><text class="label" x="690" y="558" text-anchor="middle">State / Transition</text>
+  <path class="main" d="M 696 663 L 784 663"/><text class="label" x="740" y="644" text-anchor="middle">pay guard</text>
+  <path class="error" d="M 878 439 L 974 439"/><text class="label" x="926" y="420" text-anchor="middle">sentinel error</text>
+  <path class="success" d="M 878 410 L 1128 226"/><text class="label" x="1015" y="305" text-anchor="middle">snapshot</text>
+  <path class="error" d="M 1100 394 L 1160 270"/><text class="label" x="1150" y="347" text-anchor="middle">problem JSON</text>
+  <path class="success" d="M 1128 227 L 338 227"/>
+
+  <rect x="190" y="764" width="1100" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="789" text-anchor="middle">The example keeps one process-local order for focused lifecycle learning.</text>
+</svg>

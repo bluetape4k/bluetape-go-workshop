@@ -9,9 +9,10 @@
 그 package들이 HTTP service와 container-backed integration test 안에서 어떻게
 동작하는지 보여줍니다.
 
-기본 web style은 lightweight 방향으로 둡니다. Routing과 middleware가 필요할 때는
-[`chi`](https://github.com/go-chi/chi)를 사용하되, handler는 `net/http`와
-호환되게 유지합니다.
+기본 web style은 lightweight 방향으로 둡니다. Framework 자체가 학습 포인트인
+public HTTP API 예제는 [`Gin`](https://github.com/gin-gonic/gin)을 사용하고,
+호환성 중심 예제는 [`chi`](https://github.com/go-chi/chi)나 plain `net/http`
+handler를 사용합니다.
 
 ## Example Map
 
@@ -48,6 +49,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/catalog-near-cache-redis`](examples/catalog-near-cache-redis/README.ko.md) | [English](examples/catalog-near-cache-redis/README.md) \| [한국어](examples/catalog-near-cache-redis/README.ko.md) | catalog peer를 위한 Redis near-cache invalidation과 cold-miss stampede coordination 예제입니다. | `cache`, `cache/redisnear`, `cache/rediscoord`, `testcontainers/redis` |
 | [`examples/resilience-http-web`](examples/resilience-http-web/README.ko.md) | [English](examples/resilience-http-web/README.md) \| [한국어](examples/resilience-http-web/README.ko.md) | retry, timeout, circuit breaker, bulkhead, event hook을 조합하는 HTTP service입니다. | `resilience` |
 | [`examples/leader-group-web`](examples/leader-group-web/README.ko.md) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | Redis 기반 bounded multi-leader group election을 노출하는 HTTP service입니다. | `leader`, `leader/redis`, `testing/concurrency` |
+| [`examples/order-lifecycle-state-api`](examples/order-lifecycle-state-api/README.ko.md) | [English](examples/order-lifecycle-state-api/README.md) \| [한국어](examples/order-lifecycle-state-api/README.ko.md) | In-memory 주문 lifecycle finite state machine과 transition command를 노출하는 Gin API입니다. | `state` |
 
 ## Leader 예제 실행
 
@@ -104,6 +106,25 @@ curl -X POST http://localhost:8082/campaign
 curl -X POST http://localhost:8082/resign
 ```
 
+## Order Lifecycle State API 예제 실행
+
+Service를 로컬에서 실행합니다:
+
+```bash
+go run ./examples/order-lifecycle-state-api
+```
+
+주요 endpoint:
+
+```bash
+curl http://localhost:8083/healthz
+curl http://localhost:8083/orders/current
+curl http://localhost:8083/orders/current/transitions/pay/can
+curl -X POST http://localhost:8083/orders/current/transitions \
+  -H 'Content-Type: application/json' \
+  -d '{"event":"submit"}'
+```
+
 ## 개발
 
 자주 쓰는 명령:
@@ -134,5 +155,5 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.1.1` | Quality-closure resilience primitive을 위한 focused retry/timeout 예제. |
 | `0.2.0` | HTTP client/service resilience, payment authorization guard, bounded leader group coordination 예제. |
 | `0.3.0` | Near-cache, Redis invalidation, stampede coordination 예제. |
-| `0.4.0` | State와 workflow 예제. |
+| `0.4.0` | Gin order lifecycle state API에서 시작하는 state와 workflow 예제. |
 | `0.5.0` | Batch processing 예제. |

@@ -1,0 +1,18 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fbfaf6", margin=0.2, nodesep=0.7, ranksep=0.9];
+  node [shape=box, style="rounded,filled", fontname="Architects Daughter", fontsize=18, color="#48758d", fillcolor="#d7ecf2"];
+  edge [fontname="Comic Mono", fontsize=11, color="#47616f", fontcolor="#35505f", penwidth=2];
+  client [label="Client"];
+  handler [label="Gin Handler", fillcolor="#f7e5aa", color="#b99b5d"];
+  machine [label="state.Machine", fillcolor="#eadcf5", color="#8a6bb0"];
+  guard [label="Pay Guard", fillcolor="#f5d3df", color="#b95f7a"];
+  mapper [label="Response Mapper", fillcolor="#dbe8d4", color="#5d8a62"];
+  client -> handler [label="POST submit"];
+  handler -> machine [label="Transition(submit)"];
+  machine -> mapper [label="draft -> submitted", color="#4f8b63", fontcolor="#3f704f"];
+  client -> handler [label="GET pay/can"];
+  handler -> machine [label="CanTransition(pay)"];
+  machine -> guard [label="evaluate total"];
+  guard -> mapper [label="allowed or guard error"];
+  mapper -> client [label="200 or 409", color="#b95f7a", fontcolor="#8d4c63"];
+}

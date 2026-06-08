@@ -1,0 +1,19 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fbfaf6", margin=0.2, nodesep=0.75, ranksep=0.85];
+  node [shape=box, style="rounded,filled", fontname="Architects Daughter", fontsize=18, color="#48758d", fillcolor="#d7ecf2"];
+  edge [fontname="Comic Mono", fontsize=11, color="#47616f", fontcolor="#35505f", penwidth=2];
+  client [label="HTTP Client"];
+  gin [label="Gin Router", fillcolor="#f7e5aa", color="#b99b5d"];
+  handlers [label="Order Handlers", fillcolor="#dbe8d4", color="#5d8a62"];
+  machine [label="state.Machine", fillcolor="#eadcf5", color="#8a6bb0"];
+  guard [label="Payment Guard", fillcolor="#f5d3df", color="#b95f7a"];
+  errors [label="JSON Error Mapper", fillcolor="#efe7d2", color="#a78335"];
+  client -> gin [label="GET/POST"];
+  gin -> handlers [label="route"];
+  handlers -> machine [label="State, Transition"];
+  machine -> guard [label="pay"];
+  guard -> machine [label="allow/reject"];
+  machine -> errors [label="sentinel errors", color="#a78335", fontcolor="#7a6128"];
+  handlers -> client [label="snapshot/response", color="#4f8b63", fontcolor="#3f704f"];
+  errors -> client [label="400/409/408", color="#b95f7a", fontcolor="#8d4c63"];
+}
