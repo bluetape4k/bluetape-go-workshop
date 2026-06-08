@@ -1,0 +1,12 @@
+graph 1 16.59 1.5556
+node client 0.42361 0.55556 0.84722 0.5 Client rounded,filled box #48758d #d7ecf2
+node handler 2.8542 1.3056 1.5139 0.5 "Gin Handler" rounded,filled box #b99b5d #f7e5aa
+node steps 7.3837 1.3056 2.0451 0.5 "Checklist Steps" rounded,filled box #5d8a62 #dbe8d4
+node aggregate 11.007 1.3056 2.2014 0.5 "Aggregate(policy)" rounded,filled box #8a6bb0 #eadcf5
+node mapper 15.266 0.55556 2.6493 0.5 "Project + summarize" rounded,filled box #a78335 #efe7d2
+edge client handler 4 0.85055 0.68449 1.1448 0.77632 1.5519 0.90341 1.9213 1.0187 POST 1.4722 1.0191 solid #47616f
+edge handler steps 4 3.6165 1.3056 4.3138 1.3056 5.3652 1.3056 6.1779 1.3056 "run until policy stops" 4.9861 1.3941 solid #47616f
+edge steps aggregate 4 8.4087 1.3056 8.8176 1.3056 9.2942 1.3056 9.7259 1.3056 reports 9.1562 1.3941 solid #47616f
+edge aggregate mapper 4 12.11 1.1124 12.612 1.0235 13.215 0.91661 13.758 0.82034 "root status" 13.024 1.1083 solid #47616f
+edge mapper client 10 13.971 0.29892 13.135 0.15335 12.017 0 11.021 0 2.8403 0 2.8403 0 2.8403 0 2.2054 8.6351e-17 1.4998 0.18641 1.0184 0.34327 "stable JSON" 7.3837 0.088542 solid #47616f
+stop

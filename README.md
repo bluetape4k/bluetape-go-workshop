@@ -51,6 +51,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/leader-group-web`](examples/leader-group-web) | [English](examples/leader-group-web/README.md) \| [한국어](examples/leader-group-web/README.ko.md) | HTTP service for Redis-backed bounded multi-leader group election. | `leader`, `leader/redis`, `testing/concurrency` |
 | [`examples/order-lifecycle-state-api`](examples/order-lifecycle-state-api) | [English](examples/order-lifecycle-state-api/README.md) \| [한국어](examples/order-lifecycle-state-api/README.ko.md) | Gin API that exposes an in-memory order lifecycle finite state machine and transition commands. | `state` |
 | [`examples/fulfillment-workflow-runner`](examples/fulfillment-workflow-runner) | [English](examples/fulfillment-workflow-runner/README.md) \| [한국어](examples/fulfillment-workflow-runner/README.ko.md) | Gin API that composes sequential, parallel, and conditional fulfillment workflow runners. | `workflow`, `workreport` |
+| [`examples/operations-report-policy`](examples/operations-report-policy) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Gin API that turns work reports and failure policies into deterministic operations output. | `workreport` |
 
 ## Run the Leader Example
 
@@ -143,6 +144,23 @@ curl -X POST http://localhost:8084/fulfillment/run \
   -d '{"order_id":"order-1001","stock_available":true,"payment_authorized":true,"requires_shipment":true}'
 ```
 
+## Run the Operations Report Policy Example
+
+Run the service locally:
+
+```bash
+go run ./examples/operations-report-policy
+```
+
+Useful endpoints:
+
+```bash
+curl http://localhost:8085/healthz
+curl -X POST http://localhost:8085/operations/report \
+  -H 'Content-Type: application/json' \
+  -d '{"run_id":"release-1001","policy":"continue_on_failure","products_valid":true}'
+```
+
 ## Development
 
 Common commands:
@@ -173,5 +191,5 @@ Nightly workflows run these tests against real containers.
 | `0.1.1` | Focused retry and timeout examples for quality-closure resilience primitives. |
 | `0.2.0` | Resilience examples for HTTP clients, services, payment authorization guards, and bounded leader group coordination. |
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
-| `0.4.0` | State and workflow examples, including a Gin order lifecycle state API and fulfillment workflow runner. |
+| `0.4.0` | State and workflow examples, including a Gin order lifecycle state API, fulfillment workflow runner, and operations report policy API. |
 | `0.5.0` | Batch processing examples. |

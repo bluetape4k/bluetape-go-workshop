@@ -1,0 +1,15 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fbfaf6", margin=0.2, nodesep=0.7, ranksep=0.9];
+  node [shape=box, style="rounded,filled", fontname="Architects Daughter", fontsize=18, color="#48758d", fillcolor="#d7ecf2"];
+  edge [fontname="Comic Mono", fontsize=11, color="#47616f", fontcolor="#35505f", penwidth=2];
+  client [label="Client"];
+  handler [label="Gin Handler", fillcolor="#f7e5aa", color="#b99b5d"];
+  steps [label="Checklist Steps", fillcolor="#dbe8d4", color="#5d8a62"];
+  aggregate [label="Aggregate(policy)", fillcolor="#eadcf5", color="#8a6bb0"];
+  mapper [label="Project + summarize", fillcolor="#efe7d2", color="#a78335"];
+  client -> handler [label="POST"];
+  handler -> steps [label="run until policy stops"];
+  steps -> aggregate [label="reports"];
+  aggregate -> mapper [label="root status"];
+  mapper -> client [label="stable JSON"];
+}
