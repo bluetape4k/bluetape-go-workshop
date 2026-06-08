@@ -1,0 +1,18 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fbfaf6", margin=0.2, nodesep=0.7, ranksep=0.9];
+  node [shape=box, style="rounded,filled", fontname="Architects Daughter", fontsize=18, color="#48758d", fillcolor="#d7ecf2"];
+  edge [fontname="Comic Mono", fontsize=11, color="#47616f", fontcolor="#35505f", penwidth=2];
+  client [label="Client"];
+  handler [label="Gin Handler", fillcolor="#f7e5aa", color="#b99b5d"];
+  sequential [label="Sequential", fillcolor="#eadcf5", color="#8a6bb0"];
+  parallel [label="Parallel risk checks", fillcolor="#dbe8d4", color="#5d8a62"];
+  conditional [label="Conditional shipment", fillcolor="#efe7d2", color="#a78335"];
+  mapper [label="Response mapper", fillcolor="#edf1e9", color="#5d8a62"];
+  client -> handler [label="POST /fulfillment/run"];
+  handler -> sequential [label="Run(ctx)"];
+  sequential -> parallel [label="after validate"];
+  parallel -> conditional [label="both branches ok"];
+  conditional -> mapper [label="report tree"];
+  parallel -> mapper [label="failed or cancelled", color="#b95f7a", fontcolor="#8d4c63"];
+  mapper -> client [label="200 / 409 / 408"];
+}

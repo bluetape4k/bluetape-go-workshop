@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="820" viewBox="0 0 1480 820" role="img" aria-labelledby="title desc">
+  <title id="title">Fulfillment Workflow Scenario</title>
+  <desc id="desc">Scenario flow for the fulfillment workflow runner showing sequential validation, parallel risk checks, conditional shipment, failure, and cancellation paths.</desc>
+  <defs>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
+    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #243845; }
+      .subtitle, .detail, .label { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 24px; fill: #243845; }
+      .detail { font-size: 14px; }
+      .label { font-size: 13px; }
+      .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#scenario-main); }
+      .success { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#scenario-success); }
+      .error { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-error); }
+    </style>
+  </defs>
+  <rect width="1480" height="820" fill="#fbfaf6"/>
+  <text class="title" x="740" y="58" text-anchor="middle">Fulfillment Workflow Scenario</text>
+  <text class="subtitle" x="740" y="92" text-anchor="middle">A request-scoped workflow validates an order, runs risk checks in parallel, then conditionally creates shipment.</text>
+
+  <g transform="translate(76 190)"><rect width="220" height="104" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="110" y="42" text-anchor="middle">Request</text><text class="detail" x="110" y="70" text-anchor="middle">order + scenario flags</text></g>
+  <g transform="translate(374 190)"><rect width="230" height="104" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="115" y="42" text-anchor="middle">validate-order</text><text class="detail" x="115" y="70" text-anchor="middle">sequential first step</text></g>
+
+  <g transform="translate(700 120)"><rect width="250" height="104" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="125" y="42" text-anchor="middle">reserve-inventory</text><text class="detail" x="125" y="70" text-anchor="middle">stock branch</text></g>
+  <g transform="translate(700 310)"><rect width="250" height="104" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="125" y="42" text-anchor="middle">authorize-payment</text><text class="detail" x="125" y="70" text-anchor="middle">payment branch</text></g>
+  <rect x="658" y="112" width="334" height="330" rx="16" fill="none" stroke="#d8e2e8" stroke-width="2"/>
+  <text class="label" x="825" y="470" text-anchor="middle">Parallel risk-checks use StopOnFailure</text>
+
+  <g transform="translate(1080 190)"><rect width="230" height="104" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="115" y="42" text-anchor="middle">shipment-decision</text><text class="detail" x="115" y="70" text-anchor="middle">conditional branch</text></g>
+  <g transform="translate(960 584)"><rect width="230" height="88" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="115" y="38" text-anchor="middle">create-shipment</text><text class="detail" x="115" y="64" text-anchor="middle">requires shipment</text></g>
+  <g transform="translate(1210 584)"><rect width="210" height="88" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="105" y="38" text-anchor="middle">shipment-skipped</text><text class="detail" x="105" y="64" text-anchor="middle">pickup or digital</text></g>
+
+  <g transform="translate(286 584)"><rect width="314" height="96" rx="12" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/><text class="card-title" x="157" y="39" text-anchor="middle">Failed or Cancelled</text><text class="detail" x="157" y="67" text-anchor="middle">409 for branch failure</text><text class="detail" x="157" y="87" text-anchor="middle">408 for caller cancellation</text></g>
+
+  <path class="main" d="M 296 242 L 374 242"/><text class="label" x="335" y="222" text-anchor="middle">POST</text>
+  <path class="main" d="M 604 242 L 658 242 L 658 172 L 700 172"/><text class="label" x="650" y="154" text-anchor="middle">parallel</text>
+  <path class="main" d="M 604 242 L 658 242 L 658 362 L 700 362"/>
+  <path class="success" d="M 950 172 L 1010 172 L 1010 242 L 1080 242"/>
+  <path class="success" d="M 950 362 L 1010 362 L 1010 242"/>
+  <path class="success" d="M 1195 294 L 1195 510 L 1075 510 L 1075 584"/><text class="label" x="1104" y="531" text-anchor="middle">true</text>
+  <path class="success" d="M 1230 294 L 1230 510 L 1315 510 L 1315 584"/><text class="label" x="1284" y="531" text-anchor="middle">false</text>
+  <path class="error" d="M 825 414 L 825 632 L 600 632"/><text class="label" x="726" y="615" text-anchor="middle">failure cancels sibling</text>
+  <path class="error" d="M 489 294 L 489 584"/><text class="label" x="530" y="458" text-anchor="middle">caller cancelled</text>
+
+  <rect x="280" y="746" width="920" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="771" text-anchor="middle">The response returns a stable workreport tree without runtime timestamps.</text>
+</svg>
