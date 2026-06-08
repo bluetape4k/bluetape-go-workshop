@@ -1,0 +1,14 @@
+graph 1 17.608 2.2222
+node client 0.78819 0.36111 1.5764 0.5 "HTTP Client" rounded,filled box #48758d #d7ecf2
+node gin 3.934 1.1528 1.4931 0.5 "Gin Router" rounded,filled box #b99b5d #f7e5aa
+node handler 7.6319 1.1528 2.3472 0.5 "Fulfillment Handler" rounded,filled box #5d8a62 #dbe8d4
+node workflow 12.7 1.9722 2.3993 0.5 "workflow runners" rounded,filled box #8a6bb0 #eadcf5
+node workreport 16.476 1.9722 2.2639 0.5 "workreport tree" rounded,filled box #a78335 #efe7d2
+node response 12.7 0.25 1.6389 0.5 "Stable JSON" rounded,filled box #5d8a62 #edf1e9
+edge client gin 4 1.5809 0.55884 2.014 0.66881 2.5554 0.80627 3.0082 0.92125 "POST /run" 2.3819 0.93968 solid #47616f
+edge gin handler 4 4.6862 1.1528 5.1413 1.1528 5.7386 1.1528 6.2752 1.1528 "bind JSON" 5.5694 1.2413 solid #47616f
+edge handler workflow 4 8.8084 1.3418 9.5571 1.4635 10.534 1.6223 11.319 1.75 "build per request" 10.153 1.7957 solid #47616f
+edge handler response 4 8.8084 0.94453 9.6832 0.78783 10.869 0.57541 11.698 0.4269 "project timestamps out" 10.153 0.94931 solid #47616f
+edge workflow workreport 4 13.905 1.9722 14.304 1.9722 14.752 1.9722 15.16 1.9722 reports 14.622 2.0608 solid #47616f
+edge response client 4 11.876 0.25757 9.7536 0.27742 4.0382 0.33085 1.7593 0.35216 "200/409/408" 5.5694 0.40931 solid #47616f
+stop

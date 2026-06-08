@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="840" viewBox="0 0 1480 840" role="img" aria-labelledby="title desc">
+  <title id="title">Fulfillment Workflow Runner Architecture</title>
+  <desc id="desc">Architecture diagram for the Gin fulfillment workflow runner showing request binding, workflow composition, report projection, and HTTP response mapping.</desc>
+  <defs>
+    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
+    <marker id="arch-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #243845; }
+      .subtitle, .detail, .label { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #243845; }
+      .band-label { font-size: 21px; }
+      .card-title { font-size: 23px; }
+      .detail { font-size: 14px; }
+      .label { font-size: 13px; }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arch-main); }
+      .success { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#arch-success); }
+      .error { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#arch-error); }
+    </style>
+  </defs>
+  <rect width="1480" height="840" fill="#fbfaf6"/>
+  <text class="title" x="740" y="58" text-anchor="middle">Fulfillment Workflow Runner Architecture</text>
+  <text class="subtitle" x="740" y="92" text-anchor="middle">Gin owns the HTTP boundary; workflow runners own execution order; workreport owns result shape.</text>
+
+  <rect class="band" x="58" y="140" width="1364" height="146"/><text class="band-label" x="94" y="178">HTTP boundary</text>
+  <g transform="translate(96 190)"><rect width="242" height="74" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="121" y="32" text-anchor="middle">HTTP Client</text><text class="detail" x="121" y="56" text-anchor="middle">curl, browser, test</text></g>
+  <g transform="translate(1110 184)"><rect width="264" height="86" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="132" y="35" text-anchor="middle">Stable JSON</text><text class="detail" x="132" y="60" text-anchor="middle">report tree, no timestamps</text></g>
+
+  <rect class="band" x="58" y="326" width="1364" height="196"/><text class="band-label" x="94" y="364">Gin API boundary</text>
+  <g transform="translate(250 394)"><rect width="242" height="90" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="121" y="35" text-anchor="middle">Gin Router</text><text class="detail" x="121" y="62" text-anchor="middle">health, fulfillment/run</text></g>
+  <g transform="translate(612 384)"><rect width="276" height="110" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="138" y="40" text-anchor="middle">Fulfillment Handler</text><text class="detail" x="138" y="68" text-anchor="middle">bind JSON</text><text class="detail" x="138" y="90" text-anchor="middle">map report status</text></g>
+  <g transform="translate(994 394)"><rect width="232" height="90" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="116" y="35" text-anchor="middle">Report Projector</text><text class="detail" x="116" y="62" text-anchor="middle">stable DTO</text></g>
+
+  <rect class="band" x="58" y="562" width="1364" height="158"/><text class="band-label" x="94" y="600">Workflow boundary</text>
+  <g transform="translate(220 622)"><rect width="246" height="82" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="123" y="34" text-anchor="middle">Sequential</text><text class="detail" x="123" y="60" text-anchor="middle">validate then compose</text></g>
+  <g transform="translate(616 622)"><rect width="246" height="82" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="123" y="34" text-anchor="middle">Parallel</text><text class="detail" x="123" y="60" text-anchor="middle">risk checks</text></g>
+  <g transform="translate(1010 622)"><rect width="246" height="82" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="123" y="34" text-anchor="middle">Conditional</text><text class="detail" x="123" y="60" text-anchor="middle">shipment branch</text></g>
+
+  <path class="main" d="M 338 227 L 371 227 L 371 394"/><text class="label" x="420" y="309" text-anchor="middle">POST /run</text>
+  <path class="main" d="M 492 439 L 612 439"/><text class="label" x="552" y="420" text-anchor="middle">bind</text>
+  <path class="main" d="M 750 494 L 750 548 L 343 548 L 343 622"/><text class="label" x="525" y="530" text-anchor="middle">build per request</text>
+  <path class="main" d="M 466 663 L 616 663"/><text class="label" x="541" y="644" text-anchor="middle">after validate</text>
+  <path class="main" d="M 862 663 L 1010 663"/><text class="label" x="936" y="644" text-anchor="middle">all ok</text>
+  <path class="success" d="M 1133 622 L 1133 548 L 994 548 L 994 484"/><text class="label" x="1074" y="532" text-anchor="middle">report tree</text>
+  <path class="success" d="M 1226 439 L 1300 439 L 1300 270"/><text class="label" x="1336" y="355" text-anchor="middle">200/409/408</text>
+  <path class="success" d="M 1110 227 L 338 227"/>
+  <path class="error" d="M 739 622 L 739 548 L 994 548"/><text class="label" x="862" y="530" text-anchor="middle">failed/cancelled</text>
+
+  <rect x="238" y="764" width="1004" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="789" text-anchor="middle">No durable engine, retry scheduler, database, queue, or mutable workflow context map is introduced.</text>
+</svg>

@@ -1,0 +1,19 @@
+graph 1 18.917 3.2376
+node request 1.2153 1.4459 2.4306 0.5 "Fulfillment Request" rounded,filled box #48758d #d7ecf2
+node validate 4.967 1.4459 1.7951 0.5 "validate-order" rounded,filled box #b99b5d #f7e5aa
+node inventory 8.4948 2.0293 2.2951 0.5 "reserve-inventory" rounded,filled box #5d8a62 #dbe8d4
+node payment 8.4948 0.8765 2.316 0.5 "authorize-payment" rounded,filled box #b95f7a #f5d3df
+node decision 13.007 2.4182 2.1806 0.5 "shipment-decision" rounded,filled box #8a6bb0 #eadcf5
+node ship 17.847 2.9876 2.0764 0.5 "create-shipment" rounded,filled box #5d8a62 #edf1e9
+node skip 17.847 1.8348 2.1389 0.5 "shipment-skipped" rounded,filled box #a78335 #efe7d2
+node failed 13.007 0.8765 3.0972 0.5 "failed / cancelled report" rounded,filled box #d8b2a8 #fff7f3
+edge request validate 4 2.4331 1.4459 2.9021 1.4459 3.435 1.4459 3.8896 1.4459 sequential 3.25 1.5345 solid #47616f
+edge validate inventory 4 5.8686 1.5939 6.262 1.6595 6.7329 1.7379 7.1658 1.8101 parallel 6.6007 1.8436 solid #47616f
+edge validate payment 7 5.5657 1.1903 5.782 1.1072 6.0319 1.0243 6.2674 0.97719 6.553 0.92006 6.8633 0.88791 7.1587 0.87097 parallel 6.6007 1.0657 solid #47616f
+edge inventory decision 4 9.6461 2.1279 10.283 2.1832 11.079 2.2522 11.734 2.309 ok 10.556 2.3355 solid #47616f
+edge inventory failed 4 9.5039 1.7734 10.189 1.5973 11.102 1.3625 11.823 1.1773 "stock fail" 10.556 1.712 solid #b95f7a
+edge payment decision 10 9.6538 0.79148 10.108 0.7999 10.624 0.86425 11.056 1.0605 11.285 1.1648 11.261 1.3034 11.458 1.4598 11.743 1.6852 12.084 1.9024 12.371 2.0729 ok 10.556 1.1491 solid #47616f
+edge payment failed 7 8.8694 0.62102 9.1705 0.42437 9.6194 0.16852 10.056 0.060527 10.882 -0.14411 11.83 0.23068 12.42 0.53747 "payment fail" 10.556 0.14907 solid #b95f7a
+edge decision ship 4 14.101 2.546 14.85 2.6346 15.849 2.7529 16.625 2.8447 "requires shipment" 15.667 2.892 solid #47616f
+edge decision skip 4 14.101 2.2873 14.841 2.1975 15.825 2.0782 16.597 1.9847 "pickup / digital" 15.667 2.2673 solid #47616f
+stop

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="900" viewBox="0 0 1480 900" role="img" aria-labelledby="title desc">
+  <title id="title">Fulfillment Workflow Runner Sequence</title>
+  <desc id="desc">Sequence diagram showing the Gin handler running a sequential workflow, parallel risk checks, conditional shipment, and response mapping.</desc>
+  <defs>
+    <marker id="seq-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="seq-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
+    <marker id="seq-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #243845; }
+      .subtitle, .label, .small { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .actor { font-family: 'Architects Daughter'; font-size: 20px; fill: #243845; }
+      .label { font-size: 13px; }
+      .small { font-size: 12px; }
+      .lifeline { stroke: #a9bac5; stroke-width: 2; stroke-dasharray: 7 7; }
+      .main { fill: none; stroke: #47616f; stroke-width: 2.8; marker-end: url(#seq-main); }
+      .success { fill: none; stroke: #4f8b63; stroke-width: 2.8; marker-end: url(#seq-success); }
+      .error { fill: none; stroke: #b95f7a; stroke-width: 2.8; marker-end: url(#seq-error); }
+    </style>
+  </defs>
+  <rect width="1480" height="900" fill="#fbfaf6"/>
+  <text class="title" x="740" y="58" text-anchor="middle">Fulfillment Workflow Sequence</text>
+  <text class="subtitle" x="740" y="92" text-anchor="middle">A request-scoped runner preserves branch reports while HTTP status mapping stays outside workflow execution.</text>
+
+  <g transform="translate(98 142)"><rect width="170" height="60" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="actor" x="85" y="38" text-anchor="middle">Client</text></g>
+  <g transform="translate(355 142)"><rect width="190" height="60" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Gin Handler</text></g>
+  <g transform="translate(640 142)"><rect width="190" height="60" rx="8" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Sequential</text></g>
+  <g transform="translate(900 142)"><rect width="190" height="60" rx="8" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Parallel</text></g>
+  <g transform="translate(1178 142)"><rect width="210" height="60" rx="8" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="actor" x="105" y="38" text-anchor="middle">Conditional</text></g>
+  <path class="lifeline" d="M 183 202 L 183 726"/>
+  <path class="lifeline" d="M 450 202 L 450 726"/>
+  <path class="lifeline" d="M 735 202 L 735 726"/>
+  <path class="lifeline" d="M 995 202 L 995 726"/>
+  <path class="lifeline" d="M 1283 202 L 1283 726"/>
+
+  <path class="main" d="M 183 250 L 450 250"/><rect x="242" y="220" width="150" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="317" y="237" text-anchor="middle">POST run</text>
+  <path class="main" d="M 450 304 L 735 304"/><rect x="510" y="274" width="166" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="593" y="291" text-anchor="middle">Run(ctx)</text>
+  <path class="success" d="M 735 358 L 450 358"/><rect x="504" y="328" width="178" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="593" y="345" text-anchor="middle">validate-order ok</text>
+  <path class="main" d="M 735 412 L 995 412"/><rect x="782" y="382" width="166" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="865" y="399" text-anchor="middle">risk-checks</text>
+  <path class="success" d="M 995 466 L 735 466"/><rect x="772" y="436" width="184" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="864" y="453" text-anchor="middle">branch reports</text>
+  <path class="main" d="M 735 520 L 1283 520"/><rect x="908" y="490" width="202" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="1009" y="507" text-anchor="middle">shipment-decision</text>
+  <path class="success" d="M 1283 574 L 735 574"/><rect x="900" y="544" width="218" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="1009" y="561" text-anchor="middle">create or skip report</text>
+  <path class="success" d="M 735 628 L 450 628"/><rect x="496" y="598" width="194" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="593" y="615" text-anchor="middle">workreport tree</text>
+  <path class="success" d="M 450 682 L 183 682"/><rect x="231" y="652" width="172" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="317" y="669" text-anchor="middle">200 JSON</text>
+
+  <rect x="120" y="738" width="1240" height="84" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
+  <text class="small" x="144" y="768">Failure path</text>
+  <text class="label" x="688" y="766" text-anchor="middle">risk check failure cancels siblings</text>
+  <text class="label" x="1044" y="766" text-anchor="middle">caller cancellation returns cancelled report</text>
+  <path class="error" d="M 995 798 L 183 798"/><rect x="504" y="784" width="178" height="23" rx="7" fill="#fff7f3"/><text class="label" x="593" y="801" text-anchor="middle">409 / 408 JSON</text>
+
+  <rect x="258" y="842" width="964" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="867" text-anchor="middle">Tests assert completed, failed, skipped, and cancelled report trees.</text>
+</svg>
