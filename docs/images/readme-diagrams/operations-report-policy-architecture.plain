@@ -1,0 +1,14 @@
+graph 1 25.108 1.6389
+node client 0.78819 0.59722 1.5764 0.5 "HTTP Client" rounded,filled box #48758d #d7ecf2
+node gin 5.1007 1.3889 1.4931 0.5 "Gin Router" rounded,filled box #b99b5d #f7e5aa
+node handler 9.1632 1.3889 2.4097 0.5 "Operations Handler" rounded,filled box #5d8a62 #dbe8d4
+node aggregate 14.486 1.3889 2.8472 0.5 "workreport.Aggregate" rounded,filled box #8a6bb0 #eadcf5
+node projector 19.075 1.3889 2.7743 0.5 "Stable DTO Projector" rounded,filled box #a78335 #efe7d2
+node response 23.799 0.59722 2.6181 0.5 "JSON + HTTP status" rounded,filled box #5d8a62 #edf1e9
+edge client gin 4 1.583 0.74151 2.3141 0.8766 3.4065 1.0784 4.1768 1.2208 "POST /operations/report" 2.9653 1.2435 solid #47616f
+edge gin handler 4 5.8499 1.3889 6.3859 1.3889 7.1282 1.3889 7.7729 1.3889 "bind + validate" 6.9028 1.4774 solid #47616f
+edge handler aggregate 4 10.372 1.3889 11.112 1.3889 12.072 1.3889 12.876 1.3889 "child reports + policy" 11.715 1.4774 solid #47616f
+edge aggregate projector 4 15.912 1.3889 16.416 1.3889 16.987 1.3889 17.503 1.3889 "report tree" 16.799 1.4774 solid #47616f
+edge projector response 4 20.466 1.1567 21.045 1.0591 21.719 0.94544 22.308 0.84613 "summary counts" 21.476 1.1525 solid #47616f
+edge response client 10 22.485 0.34221 21.545 0.17989 20.243 0 19.089 0 5.0868 0 5.0868 0 5.0868 0 3.9327 9.2519e-17 2.6203 0.21518 1.7555 0.38721 "200 / 207 / 409 / 408" 11.715 0.088542 solid #47616f
+stop

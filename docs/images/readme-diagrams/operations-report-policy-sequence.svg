@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="820" viewBox="0 0 1380 820" role="img" aria-labelledby="title desc">
+  <title id="title">Operations Report Policy Sequence</title>
+  <desc id="desc">Sequence diagram for validating a request, executing checklist steps, aggregating by failure policy, and projecting a stable report response.</desc>
+  <defs>
+    <marker id="seq-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="seq-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 36px; fill: #243845; }
+      .subtitle, .label, .small { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .actor { font-family: 'Architects Daughter'; font-size: 20px; fill: #243845; }
+      .label { font-size: 12px; }
+      .small { font-size: 12px; }
+      .lifeline { stroke: #a9bac5; stroke-width: 2; stroke-dasharray: 7 7; }
+      .main { fill: none; stroke: #47616f; stroke-width: 2.8; marker-end: url(#seq-main); }
+      .error { fill: none; stroke: #b95f7a; stroke-width: 2.8; marker-end: url(#seq-error); }
+    </style>
+  </defs>
+  <rect width="1380" height="820" fill="#fbfaf6"/>
+  <text class="title" x="690" y="58" text-anchor="middle">Operations Report Policy Sequence</text>
+  <text class="subtitle" x="690" y="92" text-anchor="middle">The report body is deterministic even though workreport timestamps are created at runtime.</text>
+
+  <g transform="translate(80 134)"><rect width="176" height="58" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="actor" x="88" y="37" text-anchor="middle">Client</text></g>
+  <g transform="translate(334 134)"><rect width="176" height="58" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="actor" x="88" y="37" text-anchor="middle">Handler</text></g>
+  <g transform="translate(588 134)"><rect width="176" height="58" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="actor" x="88" y="37" text-anchor="middle">Checklist</text></g>
+  <g transform="translate(842 134)"><rect width="176" height="58" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="actor" x="88" y="37" text-anchor="middle">Aggregate</text></g>
+  <g transform="translate(1096 134)"><rect width="196" height="58" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="actor" x="98" y="37" text-anchor="middle">Projector</text></g>
+
+  <line class="lifeline" x1="168" y1="192" x2="168" y2="700"/>
+  <line class="lifeline" x1="422" y1="192" x2="422" y2="700"/>
+  <line class="lifeline" x1="676" y1="192" x2="676" y2="700"/>
+  <line class="lifeline" x1="930" y1="192" x2="930" y2="700"/>
+  <line class="lifeline" x1="1194" y1="192" x2="1194" y2="700"/>
+
+  <path class="main" d="M 168 238 L 422 238"/><text class="label" x="295" y="220" text-anchor="middle">POST /operations/report</text>
+  <path class="main" d="M 422 302 L 676 302"/><text class="label" x="549" y="284" text-anchor="middle">run steps with policy</text>
+  <path class="main" d="M 676 366 L 930 366"/><text class="label" x="803" y="348" text-anchor="middle">child reports</text>
+  <path class="main" d="M 930 430 L 1194 430"/><text class="label" x="1062" y="412" text-anchor="middle">root report</text>
+  <path class="main" d="M 1194 494 L 422 494"/><text class="label" x="808" y="476" text-anchor="middle">stable DTO + summary counts</text>
+  <path class="main" d="M 422 558 L 168 558"/><text class="label" x="295" y="540" text-anchor="middle">200 / 207 / 409 / 408</text>
+  <path class="error" d="M 676 622 L 514 622 L 514 686 L 930 686"/><text class="label" x="720" y="667" text-anchor="middle">stop_on_failure omits later steps</text>
+
+  <rect x="256" y="740" width="868" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
+  <text class="subtitle" x="690" y="765" text-anchor="middle">The retry branch stays partial when a failed attempt remains visible.</text>
+</svg>

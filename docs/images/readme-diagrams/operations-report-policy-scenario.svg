@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="780" viewBox="0 0 1380 780" role="img" aria-labelledby="title desc">
+  <title id="title">Operations Report Policy Scenario</title>
+  <desc id="desc">Scenario flow for an operations checklist that chooses a failure policy, records retry evidence, marks skipped work, and returns a stable summary.</desc>
+  <defs>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 36px; fill: #243845; }
+      .subtitle, .detail, .label { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 22px; fill: #243845; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#scenario-main); }
+      .error { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-error); }
+    </style>
+  </defs>
+  <rect width="1380" height="780" fill="#fbfaf6"/>
+  <text class="title" x="690" y="58" text-anchor="middle">Operations Report Policy Scenario</text>
+  <text class="subtitle" x="690" y="92" text-anchor="middle">The caller chooses whether non-completed work stops the run or remains visible in a partial report.</text>
+
+  <g transform="translate(64 184)"><rect width="218" height="92" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="109" y="38" text-anchor="middle">Run Request</text><text class="detail" x="109" y="63" text-anchor="middle">run_id + flags</text></g>
+  <g transform="translate(364 184)"><rect width="220" height="92" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">Failure Policy</text><text class="detail" x="110" y="63" text-anchor="middle">stop or continue</text></g>
+  <g transform="translate(676 126)"><rect width="240" height="92" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="120" y="36" text-anchor="middle">load snapshot</text><text class="detail" x="120" y="62" text-anchor="middle">completed</text></g>
+  <g transform="translate(676 280)"><rect width="240" height="92" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="120" y="36" text-anchor="middle">validate products</text><text class="detail" x="120" y="62" text-anchor="middle">may fail</text></g>
+  <g transform="translate(998 126)"><rect width="250" height="92" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="125" y="36" text-anchor="middle">notify retry</text><text class="detail" x="125" y="62" text-anchor="middle">failed attempt + retry</text></g>
+  <g transform="translate(998 280)"><rect width="250" height="92" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="125" y="36" text-anchor="middle">refresh index</text><text class="detail" x="125" y="62" text-anchor="middle">completed or aborted</text></g>
+  <g transform="translate(536 548)"><rect width="308" height="98" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="154" y="39" text-anchor="middle">Stable Summary</text><text class="detail" x="154" y="66" text-anchor="middle">root + descendants counted</text></g>
+
+  <path class="main" d="M 282 230 L 364 230"/><text class="label" x="323" y="211" text-anchor="middle">POST</text>
+  <path class="main" d="M 584 230 L 628 230 L 628 172 L 676 172"/>
+  <path class="main" d="M 796 218 L 796 280"/>
+  <path class="main" d="M 916 172 L 998 172"/>
+  <path class="main" d="M 916 326 L 998 326"/>
+  <path class="main" d="M 1123 372 L 1123 597 L 844 597"/>
+  <path class="main" d="M 796 372 L 796 548"/>
+  <path class="error" d="M 676 326 L 626 326 L 626 548"/><text class="label" x="560" y="433" text-anchor="middle">stop on failure</text>
+
+  <rect x="254" y="704" width="872" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
+  <text class="subtitle" x="690" y="729" text-anchor="middle">Skipped work is represented as aborted with a caller-defined reason.</text>
+</svg>
