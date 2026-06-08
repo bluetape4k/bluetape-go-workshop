@@ -156,13 +156,13 @@ cat > "$out_dir/order-lifecycle-state-api-scenario.svg" <<SVG
   <path class="main" d="M 900 236 L 980 236"/><text class="label" x="940" y="216" text-anchor="middle">pack</text>
   <path class="success" d="M 1190 236 L 1250 236"/><text class="label" x="1220" y="216" text-anchor="middle">ship</text>
 
-  <g transform="translate(578 404)"><rect width="324" height="104" rx="12" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/><text class="card-title" x="162" y="41" text-anchor="middle">Guard Rejection</text><text class="detail" x="162" y="70" text-anchor="middle">pay fails when total_cents &lt;= 0</text><text class="detail" x="162" y="92" text-anchor="middle">state remains submitted</text></g>
-  <path class="cancel" d="M 485 294 L 485 456 L 578 456"/><text class="label" x="531" y="438" text-anchor="middle">guard error</text>
+  <g transform="translate(82 404)"><rect width="324" height="104" rx="12" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/><text class="card-title" x="162" y="41" text-anchor="middle">Guard Rejection</text><text class="detail" x="162" y="70" text-anchor="middle">pay fails when total_cents &lt;= 0</text><text class="detail" x="162" y="92" text-anchor="middle">state remains submitted</text></g>
+  <path class="cancel" d="M 485 294 L 485 456 L 406 456"/><text class="label" x="446" y="438" text-anchor="middle">guard error</text>
 
   <g transform="translate(532 606)"><rect width="416" height="104" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="208" y="41" text-anchor="middle">Cancelled</text><text class="detail" x="208" y="70" text-anchor="middle">final state from draft, submitted, or paid</text><text class="detail" x="208" y="92" text-anchor="middle">later commands return 409 Conflict</text></g>
-  <path class="cancel" d="M 185 294 L 185 658 L 532 658"/><text class="label" x="254" y="639" text-anchor="middle">cancel</text>
-  <path class="cancel" d="M 485 294 L 485 590 L 600 590 L 600 606"/><text class="label" x="542" y="573" text-anchor="middle">cancel</text>
-  <path class="cancel" d="M 795 294 L 960 294 L 960 658 L 948 658"/><text class="label" x="998" y="477" text-anchor="middle">cancel</text>
+  <path class="cancel" d="M 185 294 L 185 370 L 48 370 L 48 658 L 532 658"/><text class="label" x="254" y="639" text-anchor="middle">cancel</text>
+  <path class="cancel" d="M 540 294 L 540 590 L 600 590 L 600 606"/><text class="label" x="572" y="573" text-anchor="middle">cancel</text>
+  <path class="cancel" d="M 795 294 L 795 606"/><text class="label" x="836" y="453" text-anchor="middle">cancel</text>
 
   <rect x="288" y="752" width="904" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="777" text-anchor="middle">The README scenario is intentionally in-memory: it teaches lifecycle safety, not persistence.</text>
 </svg>
@@ -250,30 +250,30 @@ cat > "$out_dir/order-lifecycle-state-api-sequence.svg" <<SVG
   <text class="title" x="740" y="58" text-anchor="middle">Order Lifecycle API Sequence</text>
   <text class="subtitle" x="740" y="92" text-anchor="middle">The handler delegates all lifecycle legality to state.Machine, then maps sentinel errors to HTTP status codes.</text>
 
-  <g transform="translate(90 142)"><rect width="180" height="60" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="actor" x="90" y="38" text-anchor="middle">Client</text></g>
-  <g transform="translate(380 142)"><rect width="190" height="60" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Gin Handler</text></g>
-  <g transform="translate(685 142)"><rect width="210" height="60" rx="8" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="actor" x="105" y="38" text-anchor="middle">state.Machine</text></g>
-  <g transform="translate(1010 142)"><rect width="190" height="60" rx="8" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Pay Guard</text></g>
-  <path class="lifeline" d="M 180 202 L 180 728"/>
-  <path class="lifeline" d="M 475 202 L 475 728"/>
-  <path class="lifeline" d="M 790 202 L 790 728"/>
-  <path class="lifeline" d="M 1105 202 L 1105 728"/>
+  <g transform="translate(185 142)"><rect width="180" height="60" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="actor" x="90" y="38" text-anchor="middle">Client</text></g>
+  <g transform="translate(475 142)"><rect width="190" height="60" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Gin Handler</text></g>
+  <g transform="translate(780 142)"><rect width="210" height="60" rx="8" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="actor" x="105" y="38" text-anchor="middle">state.Machine</text></g>
+  <g transform="translate(1105 142)"><rect width="190" height="60" rx="8" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Pay Guard</text></g>
+  <path class="lifeline" d="M 275 202 L 275 728"/>
+  <path class="lifeline" d="M 570 202 L 570 728"/>
+  <path class="lifeline" d="M 885 202 L 885 728"/>
+  <path class="lifeline" d="M 1200 202 L 1200 728"/>
 
-  <path class="main" d="M 180 250 L 475 250"/><rect x="252" y="220" width="150" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="327" y="237" text-anchor="middle">POST submit</text>
-  <path class="main" d="M 475 294 L 790 294"/><rect x="548" y="264" width="170" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="633" y="281" text-anchor="middle">Transition(submit)</text>
-  <path class="success" d="M 790 338 L 475 338"/><rect x="540" y="308" width="185" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="632" y="325" text-anchor="middle">draft -> submitted</text>
-  <path class="success" d="M 475 382 L 180 382"/><rect x="248" y="352" width="158" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="327" y="369" text-anchor="middle">200 snapshot</text>
+  <path class="main" d="M 275 250 L 570 250"/><rect x="347" y="220" width="150" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="422" y="237" text-anchor="middle">POST submit</text>
+  <path class="main" d="M 570 294 L 885 294"/><rect x="643" y="264" width="170" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="728" y="281" text-anchor="middle">Transition(submit)</text>
+  <path class="success" d="M 885 338 L 570 338"/><rect x="635" y="308" width="185" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="727" y="325" text-anchor="middle">draft -> submitted</text>
+  <path class="success" d="M 570 382 L 275 382"/><rect x="343" y="352" width="158" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="422" y="369" text-anchor="middle">200 snapshot</text>
 
-  <path class="main" d="M 180 440 L 475 440"/><rect x="235" y="410" width="184" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="327" y="427" text-anchor="middle">GET pay/can</text>
-  <path class="main" d="M 475 484 L 790 484"/><rect x="536" y="454" width="194" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="633" y="471" text-anchor="middle">CanTransition(pay)</text>
-  <path class="main" d="M 790 528 L 1105 528"/><rect x="872" y="498" width="150" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="947" y="515" text-anchor="middle">check total</text>
-  <path class="success" d="M 1105 572 L 790 572"/><rect x="866" y="542" width="164" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="948" y="559" text-anchor="middle">allowed or error</text>
-  <path class="success" d="M 790 616 L 475 616"/><rect x="546" y="586" width="174" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="633" y="603" text-anchor="middle">allowed response</text>
+  <path class="main" d="M 275 440 L 570 440"/><rect x="330" y="410" width="184" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="422" y="427" text-anchor="middle">GET pay/can</text>
+  <path class="main" d="M 570 484 L 885 484"/><rect x="631" y="454" width="194" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="728" y="471" text-anchor="middle">CanTransition(pay)</text>
+  <path class="main" d="M 885 528 L 1200 528"/><rect x="967" y="498" width="150" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="1042" y="515" text-anchor="middle">check total</text>
+  <path class="success" d="M 1200 572 L 885 572"/><rect x="961" y="542" width="164" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="1043" y="559" text-anchor="middle">allowed or error</text>
+  <path class="success" d="M 885 616 L 570 616"/><rect x="641" y="586" width="174" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="728" y="603" text-anchor="middle">allowed response</text>
 
-  <rect x="84" y="670" width="1220" height="78" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
-  <text class="small" x="108" y="700">Conflict path</text>
-  <path class="error" d="M 475 724 L 180 724"/><rect x="238" y="694" width="178" height="23" rx="7" fill="#fff7f3"/><text class="label" x="327" y="711" text-anchor="middle">409 error JSON</text>
-  <text class="label" x="726" y="712" text-anchor="middle">invalid transition, guard rejection, final state, or concurrent transition conflict</text>
+  <rect x="130" y="670" width="1220" height="78" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
+  <text class="small" x="154" y="700">Conflict path</text>
+  <path class="error" d="M 570 724 L 275 724"/><rect x="333" y="694" width="178" height="23" rx="7" fill="#fff7f3"/><text class="label" x="422" y="711" text-anchor="middle">409 error JSON</text>
+  <text class="label" x="820" y="712" text-anchor="middle">invalid transition, guard rejection, final state, or concurrent transition conflict</text>
 
   <rect x="248" y="794" width="984" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="819" text-anchor="middle">Tests drive this sequence with allowed, invalid, guard, final-state, bad-request, and concurrent requests.</text>
 </svg>

@@ -48,7 +48,7 @@ No findings.
 Evidence:
 
 - User-controlled transition input is parsed through Gin JSON binding and a closed event parser before reaching the state machine: `server.go:171-184`, `server.go:233-247`.
-- Unknown events and malformed JSON return `400` instead of flowing into dynamic execution: `server.go:171-181`.
+- Unknown events and malformed JSON return `400` instead of flowing into dynamic execution: `server.go:171-181`; tests cover POST and can-transition unknown-event paths in `server_test.go:145-161`, `server_test.go:288-317`.
 - The example has no database, no secrets, no auth boundary, and no unsafe deserialization path.
 
 ## Tier 2: Ops/SRE Reliability
@@ -82,7 +82,7 @@ Evidence:
 - Exported public types/constants have English comments: `server.go:15-47`, `server.go:56-63`, `server.go:71-77`, `server.go:103-134`.
 - The server preserves context propagation from request handlers into `state.Machine`: `server.go:184`, `server.go:205`.
 - `errors.Is` is used for bluetape-go/state sentinel errors: `server.go:250-264`.
-- Production concurrency quick scan hit only the intended concurrency test goroutine: `server_test.go:176-180`.
+- Production concurrency quick scan hit only the intended concurrency test goroutine: `server_test.go:329-333`.
 - `make ci` passed after lint fixes.
 
 ## Tier 5: Tests, Types, Silent Failure
@@ -93,12 +93,15 @@ Evidence:
 
 - Health and initial state: `server_test.go:20-41`.
 - Allowed transition path and can-transition inquiry: `server_test.go:43-73`.
-- Invalid transition keeps state unchanged: `server_test.go:75-91`.
-- Guard rejection keeps state unchanged: `server_test.go:93-114`.
-- Final state rejects further transitions: `server_test.go:116-142`.
-- Malformed JSON and unknown events return `400`: `server_test.go:144-164`.
-- Concurrent duplicate transition is race-safe and leaves one valid state: `server_test.go:166-211`.
-- Request tests use `httptest.NewRequestWithContext`: `server_test.go:243-253`.
+- Default options and normalized event input: `server_test.go:75-96`.
+- Can-transition unavailable, guard rejection, and unknown-event paths: `server_test.go:98-161`.
+- Invalid transition keeps state unchanged: `server_test.go:163-179`.
+- Guard rejection keeps state unchanged: `server_test.go:181-202`.
+- Cancel from draft, submitted, and paid reaches a final state: `server_test.go:204-246`.
+- Final state rejects further transitions and can-transition reports unavailable: `server_test.go:248-286`.
+- Malformed JSON, missing event, and unknown events return `400`: `server_test.go:288-317`.
+- Concurrent duplicate transition is race-safe and leaves one valid state: `server_test.go:319-364`.
+- Request tests use `httptest.NewRequestWithContext`: `server_test.go:396-406`.
 
 ## Tier 6: Performance/Stability
 
