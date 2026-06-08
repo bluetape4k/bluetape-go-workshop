@@ -122,8 +122,11 @@ cat > "$out_dir/payment-authorization-state-scenario.svg" <<SVG
   <title id="title">Payment Authorization State Scenario</title>
   <desc id="desc">Payment authorization states showing requested, authorized, captured, failed, cancelled, and idempotent replay behavior.</desc>
   <defs>
-    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
     <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="scenario-cancel" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/></marker>
+    <marker id="scenario-replay" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file://${font_architects}') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file://${font_comic}') format('truetype'); }
@@ -133,28 +136,31 @@ cat > "$out_dir/payment-authorization-state-scenario.svg" <<SVG
       .card-title { font-family: 'Architects Daughter'; font-size: 23px; fill: #243845; }
       .detail { font-size: 13px; }
       .label { font-size: 12px; }
-      .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#scenario-main); }
+      .main { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#scenario-main); }
+      .success { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#scenario-success); }
       .error { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-error); }
+      .cancel { fill: none; stroke: #a78335; stroke-width: 3; marker-end: url(#scenario-cancel); }
+      .replay { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#scenario-replay); }
     </style>
   </defs>
   <rect width="1380" height="780" fill="#fbfaf6"/>
   <text class="title" x="690" y="58" text-anchor="middle">Payment Authorization State Scenario</text>
   <text class="subtitle" x="690" y="92" text-anchor="middle">The state machine protects legal payment commands while the handler makes successful retries idempotent.</text>
 
-  <g transform="translate(102 304)"><rect width="220" height="92" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">requested</text><text class="detail" x="110" y="63" text-anchor="middle">initial state</text></g>
-  <g transform="translate(448 304)"><rect width="220" height="92" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">authorized</text><text class="detail" x="110" y="63" text-anchor="middle">positive amount</text></g>
-  <g transform="translate(798 146)"><rect width="220" height="92" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">captured</text><text class="detail" x="110" y="63" text-anchor="middle">final success</text></g>
-  <g transform="translate(798 304)"><rect width="220" height="92" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">failed</text><text class="detail" x="110" y="63" text-anchor="middle">final failure</text></g>
-  <g transform="translate(798 462)"><rect width="220" height="92" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">cancelled</text><text class="detail" x="110" y="63" text-anchor="middle">final stop</text></g>
-  <g transform="translate(1058 304)"><rect width="220" height="92" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">idempotency</text><text class="detail" x="110" y="63" text-anchor="middle">same key replays</text></g>
+  <g transform="translate(96 318)"><rect width="220" height="92" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">requested</text><text class="detail" x="110" y="63" text-anchor="middle">initial state</text></g>
+  <g transform="translate(520 324)"><rect width="220" height="92" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">authorized</text><text class="detail" x="110" y="63" text-anchor="middle">positive amount</text></g>
+  <g transform="translate(982 302)"><rect width="220" height="92" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">captured</text><text class="detail" x="110" y="63" text-anchor="middle">final success</text></g>
+  <g transform="translate(968 128)"><rect width="220" height="92" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">failed</text><text class="detail" x="110" y="63" text-anchor="middle">final failure</text></g>
+  <g transform="translate(956 528)"><rect width="220" height="92" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">cancelled</text><text class="detail" x="110" y="63" text-anchor="middle">final stop</text></g>
+  <g transform="translate(140 554)"><rect width="220" height="92" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">idempotency</text><text class="detail" x="110" y="63" text-anchor="middle">same key replays</text></g>
 
-  <path class="main" d="M 322 350 L 448 350"/><text class="label" x="385" y="330" text-anchor="middle">authorize</text>
-  <path class="main" d="M 668 350 L 730 350 L 730 192 L 798 192"/><text class="label" x="724" y="174" text-anchor="middle">capture</text>
-  <path class="error" d="M 322 386 L 388 386 L 388 430 L 760 430 L 760 372 L 798 372"/><text class="label" x="574" y="452" text-anchor="middle">fail from requested</text>
-  <path class="error" d="M 668 386 L 724 386 L 724 350 L 798 350"/><text class="label" x="718" y="332" text-anchor="middle">fail from authorized</text>
-  <path class="main" d="M 322 350 L 388 350 L 388 508 L 798 508"/><text class="label" x="520" y="530" text-anchor="middle">cancel</text>
-  <path class="main" d="M 668 372 L 730 372 L 730 508 L 798 508"/>
-  <path class="main" d="M 1058 350 C 986 276 792 276 668 326"/><text class="label" x="890" y="274" text-anchor="middle">successful retry returns original response</text>
+  <path class="main" d="M 316 364 L 520 368"/><text class="label" x="418" y="342" text-anchor="middle">authorize</text>
+  <path class="success" d="M 740 362 L 982 348"/><text class="label" x="858" y="334" text-anchor="middle">capture</text>
+  <path class="error" d="M 316 344 C 520 258 720 188 968 174"/><text class="label" x="640" y="202" text-anchor="middle">fail from requested</text>
+  <path class="error" d="M 740 340 C 816 274 880 210 968 190"/><text class="label" x="852" y="266" text-anchor="middle">fail from authorized</text>
+  <path class="cancel" d="M 316 390 C 510 488 708 568 956 574"/><text class="label" x="604" y="545" text-anchor="middle">cancel from requested</text>
+  <path class="cancel" d="M 740 398 C 820 466 876 536 956 574"/><text class="label" x="840" y="506" text-anchor="middle">cancel from authorized</text>
+  <path class="replay" d="M 360 594 C 430 530 472 438 520 390"/><text class="label" x="432" y="514" text-anchor="middle">successful retry returns original response</text>
 
   <rect x="276" y="686" width="828" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
   <text class="subtitle" x="690" y="711" text-anchor="middle">Production APIs need durable payment state and durable idempotency storage.</text>
@@ -167,6 +173,8 @@ cat > "$out_dir/payment-authorization-state-architecture.svg" <<SVG
   <desc id="desc">Architecture for the payment authorization state example showing Gin, handler idempotency, state machine transitions, and stable JSON responses.</desc>
   <defs>
     <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="arch-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="arch-response" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file://${font_architects}') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file://${font_comic}') format('truetype'); }
@@ -180,6 +188,8 @@ cat > "$out_dir/payment-authorization-state-architecture.svg" <<SVG
       .label { font-size: 12px; }
       .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arch-main); }
+      .request { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#arch-request); }
+      .response { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#arch-response); }
     </style>
   </defs>
   <rect width="1380" height="760" fill="#fbfaf6"/>
@@ -198,13 +208,13 @@ cat > "$out_dir/payment-authorization-state-architecture.svg" <<SVG
   <rect class="band" x="68" y="514" width="1244" height="106"/><text class="band-label" x="102" y="550">bluetape-go boundary</text>
   <g transform="translate(546 558)"><rect width="288" height="50" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="144" y="33" text-anchor="middle">state.Machine</text></g>
 
-  <path class="main" d="M 338 223 L 361 223 L 361 372"/><text class="label" x="406" y="296" text-anchor="middle">POST</text>
+  <path class="request" d="M 338 223 L 361 223 L 361 372"/><text class="label" x="406" y="296" text-anchor="middle">request: POST</text>
   <path class="main" d="M 476 410 L 574 410"/><text class="label" x="525" y="391" text-anchor="middle">lookup</text>
   <path class="main" d="M 704 448 L 704 558"/><text class="label" x="744" y="506" text-anchor="middle">miss</text>
   <path class="main" d="M 834 583 L 1047 448"/><text class="label" x="965" y="519" text-anchor="middle">result</text>
   <path class="main" d="M 834 410 L 932 410"/><text class="label" x="883" y="391" text-anchor="middle">conflict</text>
-  <path class="main" d="M 1162 410 L 1218 410 L 1218 266"/><text class="label" x="1251" y="338" text-anchor="middle">response</text>
-  <path class="main" d="M 1044 225 L 338 225"/>
+  <path class="response" d="M 1162 410 L 1218 410 L 1218 266"/><text class="label" x="1256" y="338" text-anchor="middle">response</text>
+  <path class="response" d="M 1044 225 L 338 225"/>
 
   <rect x="268" y="684" width="844" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
   <text class="subtitle" x="690" y="709" text-anchor="middle">The in-memory store is a teaching boundary, not production payment infrastructure.</text>

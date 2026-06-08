@@ -3,6 +3,8 @@
   <desc id="desc">Architecture for the payment authorization state example showing Gin, handler idempotency, state machine transitions, and stable JSON responses.</desc>
   <defs>
     <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
+    <marker id="arch-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="arch-response" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -16,6 +18,8 @@
       .label { font-size: 12px; }
       .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .main { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#arch-main); }
+      .request { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#arch-request); }
+      .response { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#arch-response); }
     </style>
   </defs>
   <rect width="1380" height="760" fill="#fbfaf6"/>
@@ -34,13 +38,13 @@
   <rect class="band" x="68" y="514" width="1244" height="106"/><text class="band-label" x="102" y="550">bluetape-go boundary</text>
   <g transform="translate(546 558)"><rect width="288" height="50" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="144" y="33" text-anchor="middle">state.Machine</text></g>
 
-  <path class="main" d="M 338 223 L 361 223 L 361 372"/><text class="label" x="406" y="296" text-anchor="middle">POST</text>
+  <path class="request" d="M 338 223 L 361 223 L 361 372"/><text class="label" x="406" y="296" text-anchor="middle">request: POST</text>
   <path class="main" d="M 476 410 L 574 410"/><text class="label" x="525" y="391" text-anchor="middle">lookup</text>
   <path class="main" d="M 704 448 L 704 558"/><text class="label" x="744" y="506" text-anchor="middle">miss</text>
   <path class="main" d="M 834 583 L 1047 448"/><text class="label" x="965" y="519" text-anchor="middle">result</text>
   <path class="main" d="M 834 410 L 932 410"/><text class="label" x="883" y="391" text-anchor="middle">conflict</text>
-  <path class="main" d="M 1162 410 L 1218 410 L 1218 266"/><text class="label" x="1251" y="338" text-anchor="middle">response</text>
-  <path class="main" d="M 1044 225 L 338 225"/>
+  <path class="response" d="M 1162 410 L 1218 410 L 1218 266"/><text class="label" x="1256" y="338" text-anchor="middle">response</text>
+  <path class="response" d="M 1044 225 L 338 225"/>
 
   <rect x="268" y="684" width="844" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
   <text class="subtitle" x="690" y="709" text-anchor="middle">The in-memory store is a teaching boundary, not production payment infrastructure.</text>
