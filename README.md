@@ -56,6 +56,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Milestone integration Gin API that combines order state transitions, fulfillment workflow execution, report projection, and compensation. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Gin API that turns work reports and failure policies into deterministic operations output. | `workreport` |
 | [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | Local batch job that imports CSV rows in chunks, persists checkpoints, restarts after a partial writer crash, and skips duplicate boundary rows. | `batch` |
+| [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Local batch worker that retries transient ticket failures and records permanent ticket failures as dead letters. | `batch` |
 
 ## Run the Leader Example
 
@@ -228,6 +229,18 @@ go run ./examples/chunked-csv-import-checkpoint
 The first run fails after partially committing the second chunk and leaves the
 checkpoint at `next_row=2`. The restart run restores that checkpoint, skips the
 duplicate customer at the chunk boundary, and completes with `next_row=5`.
+
+## Run the Retry Dead-Letter Batch Worker Example
+
+Run the local batch demonstration:
+
+```bash
+go run ./examples/retry-dead-letter-batch-worker
+```
+
+The run retries `ticket-1002` once, records `ticket-1003` in the dead-letter
+list, skips that permanent item, and completes with `read=4`, `write=3`,
+`retry=1`, and `skip=1`.
 
 ## Development
 

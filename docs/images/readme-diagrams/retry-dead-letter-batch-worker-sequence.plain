@@ -1,0 +1,19 @@
+graph 1 8.9826 12.136
+node start 4.4913 11.134 2.9121 0.59417 "Open reader + writer" rounded,filled rect #b99b5d #fef3c7
+node read1 4.4913 9.9562 2.1725 0.59417 "Read ticket-1001" rounded,filled rect #5d8a62 #dcfce7
+node read2 4.4913 8.7787 2.2871 0.59417 "Read ticket-1002" rounded,filled rect #4f7e9d #dbeafe
+node retry 4.4913 7.4242 2.7037 0.94833 "Retry transient\nattempt 2 succeeds" rounded,filled rect #48758d #e0f2fe
+node flush1 4.4913 6.0696 1.9433 0.59417 "Write chunk 1" rounded,filled rect #8a6bb0 #f3e8ff
+node permanent 4.4913 4.715 2.2662 0.94833 "Read ticket-1003\nrecord DLT" rounded,filled rect #bf6672 #fee2e2
+node skip 4.4913 3.3604 2.7558 0.59417 "Skip permanent item" rounded,filled rect #b95f7a #ffe4e6
+node final 4.4913 2.0058 2.3496 0.94833 "Read ticket-1004\nwrite final chunk" rounded,filled rect #5d8a62 #dcfce7
+node done 4.4913 0.47417 2.4746 0.94833 "Report completed\nretry=1 skip=1" rounded,filled rect #8a6bb0 #ede9fe
+edge start read1 4 4.4913 10.824 4.4913 10.824 4.4913 10.418 4.4913 10.418 solid black
+edge read1 read2 4 4.4913 9.6469 4.4913 9.6469 4.4913 9.2407 4.4913 9.2407 solid #5d8a62
+edge read2 retry 4 4.4913 8.4714 4.4913 8.4714 4.4913 8.0656 4.4913 8.0656 solid #48758d
+edge retry flush1 4 4.4913 6.939 4.4913 6.939 4.4913 6.5331 4.4913 6.5331 solid #5d8a62
+edge flush1 permanent 4 4.4913 5.7622 4.4913 5.7622 4.4913 5.3564 4.4913 5.3564 solid #b95f7a
+edge permanent skip 4 4.4913 4.2298 4.4913 4.2298 4.4913 3.824 4.4913 3.824 solid #b95f7a
+edge skip final 4 4.4913 3.053 4.4913 3.053 4.4913 2.6473 4.4913 2.6473 solid #5d8a62
+edge final done 4 4.4913 1.5212 4.4913 1.5212 4.4913 1.1155 4.4913 1.1155 solid #8a6bb0
+stop
