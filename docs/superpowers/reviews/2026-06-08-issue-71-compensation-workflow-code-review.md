@@ -17,6 +17,7 @@
 | Iteration | Finding | Resolution |
 |---|---|---|
 | 1 | P1 candidate: caller cancellation after a reversible forward step could leave cleanup unrun if compensation used the cancelled request context. | Fixed by running registered compensation with `context.WithoutCancel(ctx)` when the forward report is cancelled after side effects, and by adding `TestCompensationRunCancellationAfterSideEffectStillCleansUp`. |
+| 2 | Diagram review finding: final README diagrams looked like raw Graphviz evidence and missed the workshop baseline decorator frame, visual bands, footer, and richer route context. | Reworked final scenario, architecture, and sequence SVG/PNG assets as decorated hand-authored README diagrams while keeping Graphviz `.dot`, `.plain`, and `*-graphviz.*` files as route evidence. Re-rendered and visually inspected all three PNGs. |
 
 ## 7-Tier Findings
 
@@ -44,6 +45,7 @@ Additional diagram checks:
 
 ```bash
 rg -n ">[0-9]+<|>[0-9]+\\.<|undefined|Actor [0-9]|source to target" docs/images/readme-diagrams/compensation-workflow-*.svg || true
+rg -n "Inter|Arial|Helvetica" docs/images/readme-diagrams/compensation-workflow-*.svg || true
 rg -n "!\\[.*\\]\\(([^)]*\\.svg|[^)]*-graphviz|[^)]*\\.dot|[^)]*\\.plain)\\)" README.md README.ko.md examples/compensation-workflow/README.md examples/compensation-workflow/README.ko.md || true
 ```
 
