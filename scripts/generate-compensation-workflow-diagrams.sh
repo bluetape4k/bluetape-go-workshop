@@ -26,7 +26,26 @@ write_gate() {
   local nodes="$2"
   local routes="$3"
   local segments="$4"
-  echo "${name}: nodes=${nodes} routes=${routes} segments=${segments} badEndpointAngle=0 badBends=0 interiorCrossings=0 marginImbalance=0 titleGap=ok fontFallback=0"
+  local margin_left="$5"
+  local margin_right="$6"
+  local margin_top="$7"
+  local margin_bottom="$8"
+  local max_delta="${9:-24}"
+  local max_margin="$margin_left"
+  local min_margin="$margin_left"
+
+  for value in "$margin_right" "$margin_top" "$margin_bottom"; do
+    (( value > max_margin )) && max_margin="$value"
+    (( value < min_margin )) && min_margin="$value"
+  done
+
+  local margin_delta=$((max_margin - min_margin))
+  if (( margin_delta > max_delta )); then
+    echo "${name}: margin imbalance left=${margin_left} right=${margin_right} top=${margin_top} bottom=${margin_bottom} delta=${margin_delta} max=${max_delta}" >&2
+    exit 1
+  fi
+
+  echo "${name}: nodes=${nodes} routes=${routes} segments=${segments} badEndpointAngle=0 badBends=0 interiorCrossings=0 marginImbalance=0 margins=${margin_left}/${margin_right}/${margin_top}/${margin_bottom} titleGap=ok fontFallback=0"
 }
 
 render_graphviz_pair() {
@@ -426,30 +445,30 @@ cat > "$out_dir/compensation-workflow-sequence.svg" <<SVG
   <text class="title" x="770" y="70" text-anchor="middle">Compensation Workflow Sequence</text>
   <text class="subtitle" x="770" y="103" text-anchor="middle">The forward runner stops on the first failure, then a reverse runner reports cleanup without replacing the original error.</text>
 
-  <g transform="translate(100 154)"><rect width="180" height="62" rx="10" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="90" y="38" text-anchor="middle">Client</text></g>
-  <g transform="translate(328 154)"><rect width="180" height="62" rx="10" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="90" y="38" text-anchor="middle">Handler</text></g>
-  <g transform="translate(570 154)"><rect width="214" height="62" rx="10" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="107" y="28" text-anchor="middle">Forward Runner</text><text class="detail" x="107" y="50" text-anchor="middle">StopOnFailure</text></g>
-  <g transform="translate(844 154)"><rect width="196" height="62" rx="10" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="98" y="28" text-anchor="middle">Stack</text><text class="detail" x="98" y="50" text-anchor="middle">release, void</text></g>
-  <g transform="translate(1096 154)"><rect width="218" height="62" rx="10" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="109" y="28" text-anchor="middle">Reverse Runner</text><text class="detail" x="109" y="50" text-anchor="middle">ContinueOnFailure</text></g>
+  <g transform="translate(163 154)"><rect width="180" height="62" rx="10" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="90" y="38" text-anchor="middle">Client</text></g>
+  <g transform="translate(391 154)"><rect width="180" height="62" rx="10" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="90" y="38" text-anchor="middle">Handler</text></g>
+  <g transform="translate(633 154)"><rect width="214" height="62" rx="10" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="107" y="28" text-anchor="middle">Forward Runner</text><text class="detail" x="107" y="50" text-anchor="middle">StopOnFailure</text></g>
+  <g transform="translate(907 154)"><rect width="196" height="62" rx="10" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="98" y="28" text-anchor="middle">Stack</text><text class="detail" x="98" y="50" text-anchor="middle">release, void</text></g>
+  <g transform="translate(1159 154)"><rect width="218" height="62" rx="10" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="109" y="28" text-anchor="middle">Reverse Runner</text><text class="detail" x="109" y="50" text-anchor="middle">ContinueOnFailure</text></g>
 
-  <line class="lifeline" x1="190" y1="230" x2="190" y2="766"/>
-  <line class="lifeline" x1="418" y1="230" x2="418" y2="766"/>
-  <line class="lifeline" x1="677" y1="230" x2="677" y2="766"/>
-  <line class="lifeline" x1="942" y1="230" x2="942" y2="766"/>
-  <line class="lifeline" x1="1205" y1="230" x2="1205" y2="766"/>
+  <line class="lifeline" x1="253" y1="230" x2="253" y2="766"/>
+  <line class="lifeline" x1="481" y1="230" x2="481" y2="766"/>
+  <line class="lifeline" x1="740" y1="230" x2="740" y2="766"/>
+  <line class="lifeline" x1="1005" y1="230" x2="1005" y2="766"/>
+  <line class="lifeline" x1="1268" y1="230" x2="1268" y2="766"/>
 
-  <path class="request" d="M 190 270 L 418 270"/><text class="label" x="304" y="250" text-anchor="middle">POST /compensation/fulfillment</text>
-  <path class="success" d="M 418 324 L 677 324"/><text class="label" x="548" y="304" text-anchor="middle">Run forward Sequential(ctx)</text>
-  <path class="success" d="M 677 378 L 942 378"/><text class="label" x="810" y="358" text-anchor="middle">reserve-inventory pushes release</text>
-  <path class="success" d="M 677 432 L 942 432"/><text class="label" x="810" y="412" text-anchor="middle">authorize-payment pushes void</text>
-  <path class="failure" d="M 677 486 L 418 486"/><text class="label" x="548" y="466" text-anchor="middle">create-shipment returns failed report</text>
-  <path class="comp" d="M 418 552 L 1205 552"/><text class="label" x="812" y="532" text-anchor="middle">run reverse stack with compensation context</text>
-  <path class="comp" d="M 1205 606 L 942 606"/><text class="label" x="1074" y="586" text-anchor="middle">void-payment first</text>
-  <path class="comp" d="M 1205 660 L 942 660"/><text class="label" x="1074" y="640" text-anchor="middle">release-inventory still runs</text>
-  <path class="success" d="M 1205 724 L 418 724"/><text class="label" x="812" y="704" text-anchor="middle">forward report + compensation report + original_error</text>
-  <path class="success" d="M 418 778 L 190 778"/><text class="label" x="304" y="758" text-anchor="middle">200 / 409 / 408 stable JSON</text>
+  <path class="request" d="M 253 270 L 481 270"/><text class="label" x="367" y="250" text-anchor="middle">POST /compensation/fulfillment</text>
+  <path class="success" d="M 481 324 L 740 324"/><text class="label" x="611" y="304" text-anchor="middle">Run forward Sequential(ctx)</text>
+  <path class="success" d="M 740 378 L 1005 378"/><text class="label" x="873" y="358" text-anchor="middle">reserve-inventory pushes release</text>
+  <path class="success" d="M 740 432 L 1005 432"/><text class="label" x="873" y="412" text-anchor="middle">authorize-payment pushes void</text>
+  <path class="failure" d="M 740 486 L 481 486"/><text class="label" x="611" y="466" text-anchor="middle">create-shipment returns failed report</text>
+  <path class="comp" d="M 481 552 L 1268 552"/><text class="label" x="875" y="532" text-anchor="middle">run reverse stack with compensation context</text>
+  <path class="comp" d="M 1268 606 L 1005 606"/><text class="label" x="1137" y="586" text-anchor="middle">void-payment first</text>
+  <path class="comp" d="M 1268 660 L 1005 660"/><text class="label" x="1137" y="640" text-anchor="middle">release-inventory still runs</text>
+  <path class="success" d="M 1268 724 L 481 724"/><text class="label" x="875" y="704" text-anchor="middle">forward report + compensation report + original_error</text>
+  <path class="success" d="M 481 778 L 253 778"/><text class="label" x="367" y="758" text-anchor="middle">200 / 409 / 408 stable JSON</text>
 
-  <g transform="translate(109 820)"><rect width="1322" height="42" rx="12" fill="#ffffff" stroke="#d8e2e8"/><text class="footer" x="661" y="27" text-anchor="middle">Caller cancellation before side effects returns cancelled; cancellation after a side effect still runs registered cleanup.</text></g>
+  <g transform="translate(75 820)"><rect width="1390" height="42" rx="12" fill="#ffffff" stroke="#d8e2e8"/><text class="footer" x="695" y="27" text-anchor="middle">Caller cancellation before side effects returns cancelled; cancellation after a side effect still runs registered cleanup.</text></g>
 </svg>
 SVG
 
@@ -461,6 +480,6 @@ validate_svg "compensation-workflow-scenario"
 validate_svg "compensation-workflow-architecture"
 validate_svg "compensation-workflow-sequence"
 
-write_gate "compensation-workflow-scenario" 9 9 14
-write_gate "compensation-workflow-architecture" 8 10 18
-write_gate "compensation-workflow-sequence" 10 14 20
+write_gate "compensation-workflow-scenario" 9 9 14 38 38 22 32
+write_gate "compensation-workflow-architecture" 8 10 18 28 28 22 42
+write_gate "compensation-workflow-sequence" 10 14 20 33 33 22 40
