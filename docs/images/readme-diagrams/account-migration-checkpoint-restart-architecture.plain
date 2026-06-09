@@ -1,0 +1,18 @@
+graph 1 19.56 6.2365
+node cli 0.78938 2.8353 1.5788 0.94833 "go run\nlocal demo" rounded,filled rect #48758d #d7ecf2
+node job 5.0244 2.8353 2.4121 0.94833 "batch.Job\naccount-migration" rounded,filled rect #b99b5d #fef3c7
+node step 8.7281 2.8353 1.8287 0.94833 "batch.Step\nchunk size 2" rounded,filled rect #78944d #ecfccb
+node reader 18.167 2.6964 2.4954 0.94833 "MigrationReader\nCheckpointReader" rounded,filled rect #4f7e9d #dbeafe
+node processor 13.067 3.4881 3.1204 0.94833 "AccountProcessor\nnormalize + crash hook" rounded,filled rect #5d8a62 #dcfce7
+node writer 13.067 0.47417 2.9017 0.94833 "TargetAccountWriter\nchunk commits" rounded,filled rect #8a6bb0 #f3e8ff
+node checkpoint 13.067 5.0575 2.6412 0.94833 "CheckpointStore\naccount-migration-v1" rounded,filled rect #48758d #e0f2fe
+node target 18.167 0.47417 2.7871 0.94833 "TargetAccountStore\nunique IDs" rounded,filled rect #c07a42 #fff7ed
+edge cli job 4 1.5897 2.8353 2.1653 2.8353 2.9612 2.8353 3.6405 2.8353 "first + restart" 2.6985 2.9342 solid black
+edge job step 4 6.2419 2.8353 6.6931 2.8353 7.2024 2.8353 7.641 2.8353 "one step" 7.0221 2.9342 solid black
+edge step reader 7 9.6549 2.6959 10.193 2.6208 10.887 2.5361 11.507 2.4985 13.313 2.3889 15.398 2.4877 16.744 2.5807 "read/restore" 13.067 2.5974 solid #3f6f8f
+edge step processor 4 9.6563 2.9737 10.144 3.0476 10.761 3.141 11.335 3.2279 process 10.575 3.2802 solid #5d8a62
+edge step writer 7 9.1327 2.3516 9.3751 2.0779 9.7068 1.7472 10.059 1.5263 10.482 1.2613 10.98 1.0522 11.447 0.89251 write 10.575 1.6252 solid #8a6bb0
+edge step checkpoint 10 9.6556 3.3181 9.7908 3.3892 9.9286 3.4615 10.059 3.5297 10.701 3.8654 10.862 3.9502 11.507 4.2797 11.646 4.3504 11.791 4.4243 11.936 4.4972 "save cursor" 10.575 4.1626 solid #48758d
+edge writer target 4 14.528 0.47417 15.174 0.47417 15.937 0.47417 16.596 0.47417 put 15.7 0.57312 solid #c07a42
+edge checkpoint reader 4 14.126 4.5711 14.95 4.1877 16.099 3.6526 16.959 3.2522 "restore cursor" 15.7 4.1874 solid #48758d
+stop

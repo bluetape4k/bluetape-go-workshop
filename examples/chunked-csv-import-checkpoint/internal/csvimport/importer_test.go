@@ -235,6 +235,7 @@ func assertCheckpoint(t *testing.T, checkpoint *Checkpoint, nextRow int) {
 	t.Helper()
 	if checkpoint == nil {
 		t.Fatalf("checkpoint = nil, want next_row %d", nextRow)
+		return
 	}
 	if checkpoint.NextRow != nextRow {
 		t.Fatalf("checkpoint next_row = %d, want %d", checkpoint.NextRow, nextRow)

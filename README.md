@@ -56,6 +56,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Milestone integration Gin API that combines order state transitions, fulfillment workflow execution, report projection, and compensation. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Gin API that turns work reports and failure policies into deterministic operations output. | `workreport` |
 | [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | Local batch job that imports CSV rows in chunks, persists checkpoints, restarts after a partial writer crash, and skips duplicate boundary rows. | `batch` |
+| [`examples/account-migration-checkpoint-restart`](examples/account-migration-checkpoint-restart) | [English](examples/account-migration-checkpoint-restart/README.md) \| [한국어](examples/account-migration-checkpoint-restart/README.ko.md) | Local account migration batch job that fails at a known account, restarts from a saved checkpoint, and proves the completed chunk is not reprocessed. | `batch` |
 | [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Local batch worker that retries transient ticket failures and records permanent ticket failures as dead letters. | `batch` |
 
 ## Run the Leader Example
@@ -229,6 +230,18 @@ go run ./examples/chunked-csv-import-checkpoint
 The first run fails after partially committing the second chunk and leaves the
 checkpoint at `next_row=2`. The restart run restores that checkpoint, skips the
 duplicate customer at the chunk boundary, and completes with `next_row=5`.
+
+## Run the Account Migration Checkpoint Restart Example
+
+Run the local batch demonstration:
+
+```bash
+go run ./examples/account-migration-checkpoint-restart
+```
+
+The first run writes `acct-1001` and `acct-1002`, saves
+`next_index=2`, and fails on `acct-1003`. The restart run restores that cursor,
+reads only `acct-1003` through `acct-1005`, and completes with `next_index=5`.
 
 ## Run the Retry Dead-Letter Batch Worker Example
 
