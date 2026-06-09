@@ -1,0 +1,20 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="#fffdf8", margin=0.18, pad=0.18, nodesep=0.44, ranksep=0.58, splines=ortho, fontname="Architects Daughter", label="Chunked CSV Import Checkpoint Sequence", labelloc=t, fontsize=30];
+  node [shape=rect, style="rounded,filled", penwidth=2, fontname="Architects Daughter", fontsize=18, color="#64748b", fontcolor="#263645", margin="0.18,0.12"];
+  edge [penwidth=2.4, arrowsize=0.75, fontname="Comic Mono", fontsize=11, fontcolor="#425466"];
+  start [label="First run", fillcolor="#fef3c7", color="#b99b5d"];
+  restore0 [label="No checkpoint", fillcolor="#dbeafe", color="#4f7e9d"];
+  write1 [label="Write chunk 1\nsave next_row=2", fillcolor="#dcfce7", color="#5d8a62"];
+  fail [label="Chunk 2 crash\ncust-1003 committed", fillcolor="#fee2e2", color="#bf6672"];
+  restart [label="Restart run", fillcolor="#ede9fe", color="#8a6bb0"];
+  restore2 [label="Restore next_row=2", fillcolor="#e0f2fe", color="#48758d"];
+  replay [label="Replay chunk 2\nskip duplicate", fillcolor="#f3e8ff", color="#8a6bb0"];
+  finish [label="Write remaining\nsave next_row=5", fillcolor="#dcfce7", color="#5d8a62"];
+  start -> restore0;
+  restore0 -> write1 [color="#5d8a62"];
+  write1 -> fail [color="#b95f7a"];
+  fail -> restart [color="#8a6bb0"];
+  restart -> restore2 [color="#48758d"];
+  restore2 -> replay [color="#8a6bb0"];
+  replay -> finish [color="#5d8a62"];
+}

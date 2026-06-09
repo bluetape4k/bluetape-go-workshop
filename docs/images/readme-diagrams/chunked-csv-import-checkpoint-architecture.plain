@@ -1,0 +1,18 @@
+graph 1 20.019 6.2365
+node cli 0.78938 2.8353 1.5788 0.94833 "go run\nlocal demo" rounded,filled rect #48758d #d7ecf2
+node job 4.6546 2.8353 2.7975 0.94833 "batch.Job\ncustomer-csv-import" rounded,filled rect #b99b5d #fef3c7
+node step 8.551 2.8353 1.8287 0.94833 "batch.Step\nchunk size 2" rounded,filled rect #78944d #ecfccb
+node reader 18.771 2.6964 2.4954 0.94833 "CSVReader\nCheckpointReader" rounded,filled rect #4f7e9d #dbeafe
+node processor 13.541 3.4881 2.5996 0.94833 "Processor\nvalidate + normalize" rounded,filled rect #5d8a62 #dcfce7
+node writer 13.541 0.47417 2.2975 0.94833 "CustomerWriter\nidempotent by ID" rounded,filled rect #8a6bb0 #f3e8ff
+node store 13.541 5.0575 3.2975 0.94833 "MemoryCheckpointStore\ncustomer-csv-import" rounded,filled rect #48758d #e0f2fe
+node sink 18.771 0.47417 2.11 0.94833 "CustomerSink\nunique commits" rounded,filled rect #c07a42 #fff7ed
+edge cli job 4 1.5891 2.8353 2.0184 2.8353 2.5657 2.8353 3.0779 2.8353 "run twice" 2.4173 2.9342 solid black
+edge job step 4 6.0652 2.8353 6.5258 2.8353 7.0305 2.8353 7.4632 2.8353 "one step" 6.845 2.9342 solid black
+edge step reader 7 9.4776 2.7179 10.145 2.6381 11.073 2.5398 11.893 2.4985 13.778 2.4033 15.956 2.5015 17.345 2.5904 "read/restore" 13.541 2.5974 solid #3f6f8f
+edge step processor 4 9.4751 2.955 10.201 3.0504 11.231 3.1859 12.071 3.2964 process 10.679 3.2997 solid #5d8a62
+edge step writer 7 8.9455 2.3505 9.1868 2.073 9.5208 1.7387 9.8821 1.5263 10.599 1.1048 11.495 0.84322 12.219 0.68627 "write chunks" 10.679 1.6252 solid #8a6bb0
+edge step store 7 9.4222 3.3232 9.5739 3.4044 9.7315 3.4855 9.8821 3.5575 10.6 3.9005 11.417 4.2412 12.095 4.511 "save after commit" 10.679 4.3544 solid #48758d
+edge writer sink 4 14.703 0.47417 15.545 0.47417 16.686 0.47417 17.543 0.47417 upsert 16.357 0.57312 solid #c07a42
+edge store reader 4 14.627 4.5711 15.472 4.1877 16.65 3.6526 17.533 3.2522 "restore next_row" 16.357 4.1874 solid #48758d
+stop

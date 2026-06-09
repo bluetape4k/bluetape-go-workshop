@@ -55,6 +55,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/compensation-workflow`](examples/compensation-workflow) | [English](examples/compensation-workflow/README.md) \| [한국어](examples/compensation-workflow/README.ko.md) | Gin API that runs fulfillment steps and reverses completed side effects when later workflow steps fail. | `workflow`, `workreport` |
 | [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Milestone integration Gin API that combines order state transitions, fulfillment workflow execution, report projection, and compensation. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Gin API that turns work reports and failure policies into deterministic operations output. | `workreport` |
+| [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | Local batch job that imports CSV rows in chunks, persists checkpoints, restarts after a partial writer crash, and skips duplicate boundary rows. | `batch` |
 
 ## Run the Leader Example
 
@@ -216,6 +217,18 @@ curl -X POST http://localhost:8085/operations/report \
   -d '{"run_id":"release-1001","policy":"continue_on_failure","products_valid":true}'
 ```
 
+## Run the Chunked CSV Import Checkpoint Example
+
+Run the local batch demonstration:
+
+```bash
+go run ./examples/chunked-csv-import-checkpoint
+```
+
+The first run fails after partially committing the second chunk and leaves the
+checkpoint at `next_row=2`. The restart run restores that checkpoint, skips the
+duplicate customer at the chunk boundary, and completes with `next_row=5`.
+
 ## Development
 
 Common commands:
@@ -247,4 +260,4 @@ Nightly workflows run these tests against real containers.
 | `0.2.0` | Resilience examples for HTTP clients, services, payment authorization guards, and bounded leader group coordination. |
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
 | `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, fulfillment workflow runner, compensation workflow, operations report policy APIs, and an order fulfillment integration example. |
-| `0.5.0` | Batch processing examples. |
+| `0.5.0` | Batch processing examples for chunked CSV checkpoint/restart, batch operations APIs, scheduled execution, retry/dead-letter behavior, and milestone integration. |

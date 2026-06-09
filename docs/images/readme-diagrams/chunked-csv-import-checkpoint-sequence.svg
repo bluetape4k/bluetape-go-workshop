@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Chunked CSV Import Checkpoint Sequence</title>
+  <desc id="desc">Sequence diagram showing first run checkpoint save, simulated crash, restart, duplicate skip, and final checkpoint.</desc>
+  <defs>
+    <marker id="seq-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="seq-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
+    <marker id="seq-red" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="seq-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
+      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 22px; fill: #24313f; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .footer { font-size: 13px; }
+      .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
+      .lifeline { stroke: #cbd8e2; stroke-width: 2; stroke-dasharray: 7 8; }
+      .blue { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#seq-blue); }
+      .green { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#seq-green); }
+      .red { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#seq-red); }
+      .purple { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#seq-purple); }
+    </style>
+  </defs>
+  <rect width="1500" height="900" fill="#fbfaf6"/>
+  <rect class="frame" x="44" y="34" width="1412" height="832"/>
+  <text class="title" x="750" y="82" text-anchor="middle">Chunked CSV Import Checkpoint Sequence</text>
+  <text class="subtitle" x="750" y="116" text-anchor="middle">Checkpoint save happens only after a chunk commit; restart reads from the previous safe cursor.</text>
+
+  <g transform="translate(124 162)"><rect width="172" height="58" rx="10" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="86" y="36" text-anchor="middle">Job</text></g>
+  <g transform="translate(362 162)"><rect width="188" height="58" rx="10" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="94" y="36" text-anchor="middle">Reader</text></g>
+  <g transform="translate(616 162)"><rect width="204" height="58" rx="10" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="102" y="36" text-anchor="middle">Writer</text></g>
+  <g transform="translate(892 162)"><rect width="204" height="58" rx="10" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="102" y="36" text-anchor="middle">Checkpoint</text></g>
+  <g transform="translate(1162 162)"><rect width="184" height="58" rx="10" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="92" y="36" text-anchor="middle">Sink</text></g>
+  <line class="lifeline" x1="210" y1="236" x2="210" y2="778"/>
+  <line class="lifeline" x1="456" y1="236" x2="456" y2="778"/>
+  <line class="lifeline" x1="718" y1="236" x2="718" y2="778"/>
+  <line class="lifeline" x1="994" y1="236" x2="994" y2="778"/>
+  <line class="lifeline" x1="1254" y1="236" x2="1254" y2="778"/>
+
+  <path class="blue" d="M 210 276 L 456 276"/><text class="label" x="333" y="256" text-anchor="middle">open and read rows 0..1</text>
+  <path class="green" d="M 456 326 L 718 326"/><text class="label" x="587" y="306" text-anchor="middle">process chunk 1</text>
+  <path class="green" d="M 718 376 L 1254 376"/><text class="label" x="986" y="356" text-anchor="middle">commit cust-1001, cust-1002</text>
+  <path class="blue" d="M 718 426 L 994 426"/><text class="label" x="856" y="406" text-anchor="middle">save next_row=2</text>
+  <path class="blue" d="M 210 486 L 456 486"/><text class="label" x="333" y="466" text-anchor="middle">read rows 2..3</text>
+  <path class="red" d="M 718 536 L 1254 536"/><text class="label" x="986" y="516" text-anchor="middle">commit cust-1003 then crash</text>
+  <path class="red" d="M 718 586 L 210 586"/><text class="label" x="464" y="566" text-anchor="middle">failed report, checkpoint remains 2</text>
+  <path class="purple" d="M 210 646 L 994 646"/><text class="label" x="602" y="626" text-anchor="middle">restart loads next_row=2</text>
+  <path class="purple" d="M 456 696 L 718 696"/><text class="label" x="587" y="676" text-anchor="middle">replay rows 2..4</text>
+  <path class="purple" d="M 718 746 L 1254 746"/><text class="label" x="986" y="726" text-anchor="middle">skip duplicate cust-1003; commit remaining</text>
+  <path class="green" d="M 718 802 L 994 802"/><text class="label" x="856" y="782" text-anchor="middle">save next_row=5</text>
+
+  <g transform="translate(134 834)"><rect width="1232" height="24" rx="12" fill="#ffffff" stroke="#d8e2e8"/><text class="footer" x="616" y="18" text-anchor="middle">No duplicate customer is committed even though the failed chunk is intentionally replayed.</text></g>
+</svg>

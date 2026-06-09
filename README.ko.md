@@ -55,6 +55,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/compensation-workflow`](examples/compensation-workflow/README.ko.md) | [English](examples/compensation-workflow/README.md) \| [한국어](examples/compensation-workflow/README.ko.md) | Fulfillment step을 실행하고 뒤 workflow step이 실패하면 완료된 side effect를 되돌리는 Gin API입니다. | `workflow`, `workreport` |
 | [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration/README.ko.md) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Order state transition, fulfillment workflow execution, report projection, compensation을 합친 milestone 통합 Gin API입니다. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy/README.ko.md) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Work report와 failure policy를 deterministic operations output으로 투영하는 Gin API입니다. | `workreport` |
+| [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint/README.ko.md) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | CSV row를 chunk 단위로 import하고 checkpoint 저장, partial writer crash 이후 restart, boundary duplicate skip을 보여주는 local batch job입니다. | `batch` |
 
 ## Leader 예제 실행
 
@@ -216,6 +217,18 @@ curl -X POST http://localhost:8085/operations/report \
   -d '{"run_id":"release-1001","policy":"continue_on_failure","products_valid":true}'
 ```
 
+## Chunked CSV Import Checkpoint 예제 실행
+
+Local batch demonstration을 실행합니다:
+
+```bash
+go run ./examples/chunked-csv-import-checkpoint
+```
+
+첫 실행은 두 번째 chunk를 부분 commit한 뒤 실패하고 checkpoint를 `next_row=2`에
+둡니다. Restart 실행은 이 checkpoint를 restore하고, chunk boundary의 duplicate
+customer를 skip한 뒤 `next_row=5`로 완료합니다.
+
 ## 개발
 
 자주 쓰는 명령:
@@ -247,4 +260,4 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.2.0` | HTTP client/service resilience, payment authorization guard, bounded leader group coordination 예제. |
 | `0.3.0` | Near-cache, Redis invalidation, stampede coordination 예제. |
 | `0.4.0` | Gin order lifecycle과 payment authorization state API, fulfillment workflow runner, compensation workflow, operations report policy API, order fulfillment integration을 포함한 state/workflow 예제. |
-| `0.5.0` | Batch processing 예제. |
+| `0.5.0` | Chunked CSV checkpoint/restart, batch operations API, scheduled execution, retry/dead-letter behavior, milestone integration을 포함한 batch processing 예제. |

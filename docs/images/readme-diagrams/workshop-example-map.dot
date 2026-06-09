@@ -38,6 +38,7 @@ digraph G {
   leadership [label="Coordination\nleader patterns", fillcolor="#dcfce7", width=2.1, height=0.9];
   runtime [label="Runtime safety\nconcurrency + resilience", fillcolor="#fce7f3", width=2.35, height=0.9];
   stateflow [label="State + workflow\nreports", fillcolor="#ede9fe", width=2.1, height=0.9];
+  batch [label="Batch processing\ncheckpoint + restart", fillcolor="#fff7ed", width=2.3, height=0.9];
   integration [label="Integration tests\nreal containers", fillcolor="#e0e7ff", width=2.1, height=0.9];
 
   snapshot [label="cache-snapshot-codecs\nversioned + compressed", fillcolor="#eff6ff"];
@@ -55,6 +56,7 @@ digraph G {
   compensation [label="compensation-workflow\nreverse cleanup", fillcolor="#f5f3ff"];
   fulfillmentIntegration [label="order-fulfillment-integration\nstate + workflow + reports", fillcolor="#f5f3ff"];
   reports [label="operations-report-policy\nworkreport policies", fillcolor="#f5f3ff"];
+  csvCheckpoint [label="chunked-csv-import-checkpoint\nCSV restart + dedupe", fillcolor="#fffbeb"];
   pipeline [label="order-pipeline-testcontainers\nPostgres + Redis + NATS", fillcolor="#eef2ff"];
   catalogCache [label="catalog-near-cache-redis\nnear-cache + stampede", fillcolor="#eef2ff"];
 
@@ -62,6 +64,7 @@ digraph G {
   workshop -> leadership;
   workshop -> runtime;
   workshop -> stateflow;
+  workshop -> batch;
   workshop -> integration;
   data -> snapshot;
   data -> invites;
@@ -78,6 +81,7 @@ digraph G {
   stateflow -> compensation;
   stateflow -> fulfillmentIntegration;
   stateflow -> reports;
+  batch -> csvCheckpoint;
   integration -> pipeline;
   integration -> catalogCache;
 }
