@@ -1,0 +1,21 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="#fffdf8", margin=0.2, pad=0.18, nodesep=0.44, ranksep=0.56, splines=ortho, fontname="Architects Daughter", label="Order Fulfillment Integration Sequence", labelloc=t, fontsize=30];
+  node [shape=rect, style="rounded,filled", penwidth=2, fontname="Architects Daughter", fontsize=18, color="#64748b", fontcolor="#263645", margin="0.18,0.12"];
+  edge [penwidth=2.5, arrowsize=0.75, fontname="Comic Mono", fontsize=11, fontcolor="#425466"];
+  client [label="Client", fillcolor="#dbeafe", color="#4f7e9d"];
+  handler [label="Handler", fillcolor="#fef3c7", color="#b99b5d"];
+  forward [label="Forward runner\nStopOnFailure", fillcolor="#dcfce7", color="#5d8a62"];
+  state [label="State machine", fillcolor="#ecfccb", color="#78944d"];
+  stack [label="Compensation stack", fillcolor="#f3e8ff", color="#8a6bb0"];
+  reverse [label="Reverse runner\nContinueOnFailure", fillcolor="#ede9fe", color="#8a6bb0"];
+  response [label="Stable JSON", fillcolor="#e0f2fe", color="#48758d"];
+  client -> handler [label="POST order", color="#3f6f8f"];
+  handler -> forward [label="Run(ctx)", color="#5d8a62"];
+  forward -> state [label="submit/pay/pack/ship", color="#5d8a62"];
+  forward -> stack [label="push release + void", color="#8a6bb0"];
+  forward -> handler [label="failure report", color="#b95f7a"];
+  handler -> reverse [label="reverse stack", color="#8a6bb0"];
+  reverse -> state [label="cancel", color="#b95f7a"];
+  handler -> response [label="summary + report", color="#48758d"];
+  response -> client [label="200 / 409 / 408", color="#5d8a62"];
+}

@@ -53,6 +53,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/payment-authorization-state`](examples/payment-authorization-state/README.ko.md) | [English](examples/payment-authorization-state/README.md) \| [한국어](examples/payment-authorization-state/README.ko.md) | Payment authorization transition과 application-layer idempotent retry 동작을 보여주는 Gin API입니다. | `state` |
 | [`examples/fulfillment-workflow-runner`](examples/fulfillment-workflow-runner/README.ko.md) | [English](examples/fulfillment-workflow-runner/README.md) \| [한국어](examples/fulfillment-workflow-runner/README.ko.md) | Sequential, parallel, conditional fulfillment workflow runner를 조합하는 Gin API입니다. | `workflow`, `workreport` |
 | [`examples/compensation-workflow`](examples/compensation-workflow/README.ko.md) | [English](examples/compensation-workflow/README.md) \| [한국어](examples/compensation-workflow/README.ko.md) | Fulfillment step을 실행하고 뒤 workflow step이 실패하면 완료된 side effect를 되돌리는 Gin API입니다. | `workflow`, `workreport` |
+| [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration/README.ko.md) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Order state transition, fulfillment workflow execution, report projection, compensation을 합친 milestone 통합 Gin API입니다. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy/README.ko.md) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Work report와 failure policy를 deterministic operations output으로 투영하는 Gin API입니다. | `workreport` |
 
 ## Leader 예제 실행
@@ -181,6 +182,23 @@ curl -X POST http://localhost:8087/compensation/fulfillment \
   -d '{"order_id":"order-1001","stock_available":true,"payment_authorized":true,"shipment_provider_available":false}'
 ```
 
+## Order Fulfillment Integration 예제 실행
+
+Service를 로컬에서 실행합니다:
+
+```bash
+go run ./examples/order-fulfillment-integration
+```
+
+주요 endpoint:
+
+```bash
+curl http://localhost:8088/healthz
+curl -X POST http://localhost:8088/orders/fulfillment \
+  -H 'Content-Type: application/json' \
+  -d '{"order_id":"order-1001","total_cents":2599,"stock_available":true,"payment_authorized":true,"shipment_provider_available":false}'
+```
+
 ## Operations Report Policy 예제 실행
 
 Service를 로컬에서 실행합니다:
@@ -228,5 +246,5 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.1.1` | Quality-closure resilience primitive을 위한 focused retry/timeout 예제. |
 | `0.2.0` | HTTP client/service resilience, payment authorization guard, bounded leader group coordination 예제. |
 | `0.3.0` | Near-cache, Redis invalidation, stampede coordination 예제. |
-| `0.4.0` | Gin order lifecycle과 payment authorization state API, fulfillment workflow runner, compensation workflow, operations report policy API를 포함한 state/workflow 예제. |
+| `0.4.0` | Gin order lifecycle과 payment authorization state API, fulfillment workflow runner, compensation workflow, operations report policy API, order fulfillment integration을 포함한 state/workflow 예제. |
 | `0.5.0` | Batch processing 예제. |

@@ -1,0 +1,16 @@
+graph 1 21.363 4.4726
+node client 0.84667 0.8075 1.6933 0.59417 "HTTP client" rounded,filled rect #4f7e9d #dbeafe
+node gin 5.0765 0.8075 2.8496 0.94833 "Gin router\n/ orders / fulfillment" rounded,filled rect #b99b5d #fef3c7
+node run 9.8271 1.7242 2.1725 0.94833 "orderRun\nrequest scoped" rounded,filled rect #8a6bb0 #ede9fe
+node machine 14.698 3.2936 2.1308 0.94833 "state.Machine\norder lifecycle" rounded,filled rect #5d8a62 #dcfce7
+node workflow 14.698 1.7242 3.2767 0.94833 "workflow.Sequential\nforward + compensation" rounded,filled rect #78944d #ecfccb
+node stack 20.016 2.2103 2.6933 0.94833 "compensation stack\nvoid + release" rounded,filled rect #8a6bb0 #f3e8ff
+node report 20.016 0.47417 2.6517 0.94833 "workreport.Report\nstable projection" rounded,filled rect #48758d #e0f2fe
+edge client gin 4 1.7058 0.8075 2.213 0.8075 2.8742 0.8075 3.4757 0.8075 "JSON request" 2.6725 0.90646 solid #3f6f8f
+edge gin run 4 6.5138 1.0838 7.1684 1.2108 7.9378 1.3602 8.5689 1.4827 "bind + validate" 7.621 1.5266 solid #3f6f8f
+edge run machine 4 10.922 2.0744 11.676 2.3188 12.683 2.6452 13.465 2.8988 transitions 11.986 2.7018 solid #5d8a62
+edge run workflow 4 10.922 1.7242 11.5 1.7242 12.227 1.7242 12.887 1.7242 "run steps" 11.986 1.8231 solid #5d8a62
+edge workflow stack 4 16.349 1.8746 17.033 1.9375 17.823 2.0101 18.493 2.0716 "register cleanup" 17.503 2.1381 solid #8a6bb0
+edge workflow report 4 16.349 1.3372 17.042 1.1736 17.843 0.98437 18.518 0.82488 "nested tree" 17.503 1.3101 solid #5d8a62
+edge report gin 4 18.677 0.50378 15.932 0.56514 9.6338 0.70594 6.6774 0.77202 "status mapping" 11.986 0.76661 solid #48758d
+stop

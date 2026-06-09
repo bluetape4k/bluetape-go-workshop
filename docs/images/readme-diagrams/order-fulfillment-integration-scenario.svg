@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1540" height="940" viewBox="0 0 1540 940" role="img" aria-labelledby="title desc">
+  <title id="title">Order Fulfillment Integration Scenario</title>
+  <desc id="desc">Integrated order fulfillment scenario showing lifecycle transitions, workflow steps, compensation cleanup, and report projection.</desc>
+  <defs>
+    <marker id="scenario-state" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
+    <marker id="scenario-side" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="scenario-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="scenario-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
+      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .band-label { font-size: 22px; }
+      .card-title { font-size: 23px; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .footer { font-size: 13px; }
+      .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .state { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#scenario-state); }
+      .side { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#scenario-side); }
+      .failure { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-failure); }
+      .comp { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#scenario-comp); }
+    </style>
+  </defs>
+  <rect width="1540" height="940" fill="#fbfaf6"/>
+  <rect class="frame" x="44" y="34" width="1452" height="872"/>
+  <text class="title" x="770" y="82" text-anchor="middle">Order Fulfillment Integration Scenario</text>
+  <text class="subtitle" x="770" y="116" text-anchor="middle">State transitions, workflow steps, workreport projection, and compensation are shown as one request-scoped fulfillment run.</text>
+
+  <rect class="band" x="84" y="158" width="1372" height="228"/><text class="band-label" x="114" y="194">Forward lifecycle + side effects</text>
+  <g transform="translate(118 244)"><rect width="184" height="78" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="92" y="32" text-anchor="middle">submit-order</text><text class="detail" x="92" y="56" text-anchor="middle">draft -> submitted</text></g>
+  <g transform="translate(392 232)"><rect width="220" height="102" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="110" y="36" text-anchor="middle">reserve-inventory</text><text class="detail" x="110" y="62" text-anchor="middle">side effect</text><text class="detail" x="110" y="82" text-anchor="middle">push release</text></g>
+  <g transform="translate(704 232)"><rect width="230" height="102" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="115" y="36" text-anchor="middle">authorize-payment</text><text class="detail" x="115" y="62" text-anchor="middle">submitted -> paid</text><text class="detail" x="115" y="82" text-anchor="middle">push void</text></g>
+  <g transform="translate(1026 244)"><rect width="174" height="78" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="87" y="32" text-anchor="middle">pack-order</text><text class="detail" x="87" y="56" text-anchor="middle">paid -> packed</text></g>
+  <g transform="translate(1282 244)"><rect width="142" height="78" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="71" y="32" text-anchor="middle">ship</text><text class="detail" x="71" y="56" text-anchor="middle">packed -> shipped</text></g>
+
+  <rect class="band" x="84" y="428" width="1372" height="252"/><text class="band-label" x="114" y="464">Failure branch + reverse cleanup</text>
+  <g transform="translate(210 528)"><rect width="244" height="94" rx="12" fill="#ffe4e6" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="122" y="35" text-anchor="middle">Original failure</text><text class="detail" x="122" y="61" text-anchor="middle">invalid transition or</text><text class="detail" x="122" y="80" text-anchor="middle">shipment provider down</text></g>
+  <g transform="translate(606 516)"><rect width="236" height="118" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="118" y="36" text-anchor="middle">void-payment</text><text class="detail" x="118" y="62" text-anchor="middle">reverse step 1</text><text class="detail" x="118" y="82" text-anchor="middle">may fail</text><text class="detail" x="118" y="102" text-anchor="middle">ContinueOnFailure</text></g>
+  <g transform="translate(984 516)"><rect width="246" height="118" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="123" y="36" text-anchor="middle">release-inventory</text><text class="detail" x="123" y="62" text-anchor="middle">reverse step 2</text><text class="detail" x="123" y="82" text-anchor="middle">runs after void</text><text class="detail" x="123" y="102" text-anchor="middle">clears stock hold</text></g>
+  <g transform="translate(650 704)"><rect width="240" height="62" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="120" y="28" text-anchor="middle">cancel order</text><text class="detail" x="120" y="50" text-anchor="middle">state -> cancelled</text></g>
+
+  <rect class="band" x="84" y="790" width="1372" height="64"/><text class="footer" x="770" y="828" text-anchor="middle">Response includes final state, state_history, effects, summary, original_error, and the projected workreport tree.</text>
+
+  <path class="state" d="M 302 283 L 392 283"/><text class="label" x="347" y="263" text-anchor="middle">state</text>
+  <path class="side" d="M 612 283 L 704 283"/><text class="label" x="658" y="263" text-anchor="middle">side effect</text>
+  <path class="state" d="M 934 283 L 1026 283"/><text class="label" x="980" y="263" text-anchor="middle">state</text>
+  <path class="state" d="M 1200 283 L 1282 283"/><text class="label" x="1241" y="263" text-anchor="middle">state</text>
+  <path class="failure" d="M 1353 322 L 1353 406 L 332 406 L 332 528"/><text class="label" x="842" y="396" text-anchor="middle">later failure preserves original_error</text>
+  <path class="comp" d="M 454 575 L 606 575"/><text class="label" x="530" y="554" text-anchor="middle">reverse stack</text>
+  <path class="comp" d="M 842 575 L 984 575"/><text class="label" x="913" y="554" text-anchor="middle">continue cleanup</text>
+  <path class="failure" d="M 1107 634 L 1107 735 L 890 735"/><text class="label" x="1030" y="724" text-anchor="middle">finalize failure state</text>
+  <path class="state" d="M 770 766 L 770 790"/><text class="label" x="890" y="778" text-anchor="middle">stable projection</text>
+</svg>

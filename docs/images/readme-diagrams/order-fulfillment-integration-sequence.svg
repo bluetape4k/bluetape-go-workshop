@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1540" height="940" viewBox="0 0 1540 940" role="img" aria-labelledby="title desc">
+  <title id="title">Order Fulfillment Integration Sequence</title>
+  <desc id="desc">Sequence diagram for order fulfillment integration request handling.</desc>
+  <defs>
+    <marker id="seq-http" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="seq-state" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
+    <marker id="seq-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="seq-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
+      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 22px; fill: #24313f; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .footer { font-size: 13px; }
+      .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
+      .lifeline { stroke: #cbd8e2; stroke-width: 2; stroke-dasharray: 7 8; }
+      .http { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#seq-http); }
+      .state { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#seq-state); }
+      .failure { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#seq-failure); }
+      .comp { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#seq-comp); }
+    </style>
+  </defs>
+  <rect width="1540" height="940" fill="#fbfaf6"/>
+  <rect class="frame" x="44" y="34" width="1452" height="872"/>
+  <text class="title" x="770" y="82" text-anchor="middle">Order Fulfillment Integration Sequence</text>
+  <text class="subtitle" x="770" y="116" text-anchor="middle">A single POST drives forward work, optional reverse compensation, cancellation-safe cleanup, and stable report projection.</text>
+
+  <g transform="translate(142 166)"><rect width="174" height="60" rx="10" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="87" y="37" text-anchor="middle">Client</text></g>
+  <g transform="translate(382 166)"><rect width="174" height="60" rx="10" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="87" y="37" text-anchor="middle">Handler</text></g>
+  <g transform="translate(626 166)"><rect width="208" height="60" rx="10" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="104" y="28" text-anchor="middle">Forward</text><text class="detail" x="104" y="49" text-anchor="middle">StopOnFailure</text></g>
+  <g transform="translate(898 166)"><rect width="190" height="60" rx="10" fill="#ecfccb" stroke="#78944d" stroke-width="2"/><text class="card-title" x="95" y="28" text-anchor="middle">State</text><text class="detail" x="95" y="49" text-anchor="middle">lifecycle</text></g>
+  <g transform="translate(1154 166)"><rect width="220" height="60" rx="10" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="110" y="28" text-anchor="middle">Compensation</text><text class="detail" x="110" y="49" text-anchor="middle">reverse stack</text></g>
+  <line class="lifeline" x1="229" y1="244" x2="229" y2="784"/>
+  <line class="lifeline" x1="469" y1="244" x2="469" y2="784"/>
+  <line class="lifeline" x1="730" y1="244" x2="730" y2="784"/>
+  <line class="lifeline" x1="993" y1="244" x2="993" y2="784"/>
+  <line class="lifeline" x1="1264" y1="244" x2="1264" y2="784"/>
+
+  <path class="http" d="M 229 286 L 469 286"/><text class="label" x="349" y="266" text-anchor="middle">POST order fulfillment</text>
+  <path class="state" d="M 469 340 L 730 340"/><text class="label" x="600" y="320" text-anchor="middle">Run forward workflow</text>
+  <path class="state" d="M 730 394 L 993 394"/><text class="label" x="862" y="374" text-anchor="middle">submit, pay, pack, ship</text>
+  <path class="comp" d="M 730 448 L 1264 448"/><text class="label" x="997" y="428" text-anchor="middle">reserve pushes release; payment pushes void</text>
+  <path class="failure" d="M 730 512 L 469 512"/><text class="label" x="600" y="492" text-anchor="middle">invalid transition or shipment failure</text>
+  <path class="comp" d="M 469 578 L 1264 578"/><text class="label" x="867" y="558" text-anchor="middle">Run reverse stack with ContinueOnFailure</text>
+  <path class="comp" d="M 1264 638 L 993 638"/><text class="label" x="1129" y="618" text-anchor="middle">void-payment</text>
+  <path class="comp" d="M 1264 692 L 993 692"/><text class="label" x="1129" y="672" text-anchor="middle">release-inventory</text>
+  <path class="failure" d="M 1264 746 L 993 746"/><text class="label" x="1129" y="726" text-anchor="middle">cancel when legal</text>
+  <path class="http" d="M 469 806 L 229 806"/><text class="label" x="349" y="786" text-anchor="middle">state, summary, report, original_error</text>
+
+  <g transform="translate(132 850)"><rect width="1276" height="40" rx="12" fill="#ffffff" stroke="#d8e2e8"/><text class="footer" x="638" y="26" text-anchor="middle">Cancellation before side effects returns 408; cancellation after reservation still releases inventory before returning.</text></g>
+</svg>
