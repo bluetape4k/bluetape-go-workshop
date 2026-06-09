@@ -1,0 +1,6 @@
+customer_id,email,tier
+cust-1001,ALICE@example.com,gold
+cust-1002,bob@example.com,silver
+cust-1003,CAROL@example.com,gold
+cust-1004,dave@example.com,bronze
+cust-1005,erin@example.com,silver
