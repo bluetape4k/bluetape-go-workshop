@@ -15,7 +15,7 @@ digraph G {
   step -> reader [label="read/restore", color="#3f6f8f"];
   step -> processor [label="process", color="#5d8a62"];
   step -> writer [label="write chunks", color="#8a6bb0"];
-  step -> store [label="save after commit", color="#48758d"];
+  writer -> store [label="save after committed chunk", color="#48758d"];
   writer -> sink [label="upsert", color="#c07a42"];
   store -> reader [label="restore next_row", color="#48758d"];
 }

@@ -112,7 +112,7 @@ digraph G {
   step -> reader [label="read/restore", color="#3f6f8f"];
   step -> processor [label="process", color="#5d8a62"];
   step -> writer [label="write chunks", color="#8a6bb0"];
-  step -> store [label="save after commit", color="#48758d"];
+  writer -> store [label="save after committed chunk", color="#48758d"];
   writer -> sink [label="upsert", color="#c07a42"];
   store -> reader [label="restore next_row", color="#48758d"];
 }
@@ -258,7 +258,7 @@ cat > "$out_dir/chunked-csv-import-checkpoint-architecture.svg" <<SVG
   <path class="green" d="M 378 469 L 482 469"/><text class="label" x="430" y="449" text-anchor="middle">rows</text>
   <path class="purple" d="M 718 469 L 822 469"/><text class="label" x="770" y="449" text-anchor="middle">customers</text>
   <path class="amber" d="M 1072 469 L 1182 469"/><text class="label" x="1127" y="449" text-anchor="middle">upsert</text>
-  <path class="blue" d="M 947 518 L 947 632 L 668 632 L 668 674"/><text class="label" x="820" y="622" text-anchor="middle">save after committed chunk</text>
+  <path class="blue" d="M 947 518 L 947 590 L 508 590 L 508 652"/><text class="label" x="728" y="580" text-anchor="middle">save after committed chunk</text>
   <path class="purple" d="M 830 674 L 668 674"/><text class="label" x="749" y="654" text-anchor="middle">restore on restart</text>
 </svg>
 SVG
