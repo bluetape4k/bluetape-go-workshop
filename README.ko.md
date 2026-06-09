@@ -56,6 +56,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration/README.ko.md) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Order state transition, fulfillment workflow execution, report projection, compensation을 합친 milestone 통합 Gin API입니다. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy/README.ko.md) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Work report와 failure policy를 deterministic operations output으로 투영하는 Gin API입니다. | `workreport` |
 | [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint/README.ko.md) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | CSV row를 chunk 단위로 import하고 checkpoint 저장, partial writer crash 이후 restart, boundary duplicate skip을 보여주는 local batch job입니다. | `batch` |
+| [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker/README.ko.md) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Transient ticket failure는 retry하고 permanent ticket failure는 dead letter로 기록하는 local batch worker입니다. | `batch` |
 
 ## Leader 예제 실행
 
@@ -228,6 +229,18 @@ go run ./examples/chunked-csv-import-checkpoint
 첫 실행은 두 번째 chunk를 부분 commit한 뒤 실패하고 checkpoint를 `next_row=2`에
 둡니다. Restart 실행은 이 checkpoint를 restore하고, chunk boundary의 duplicate
 customer를 skip한 뒤 `next_row=5`로 완료합니다.
+
+## Retry Dead-Letter Batch Worker 예제 실행
+
+Local batch demonstration을 실행합니다:
+
+```bash
+go run ./examples/retry-dead-letter-batch-worker
+```
+
+실행은 `ticket-1002`를 한 번 retry하고, `ticket-1003`을 dead-letter list에
+기록한 뒤 permanent item으로 skip합니다. 최종 report는 `read=4`, `write=3`,
+`retry=1`, `skip=1`로 완료됩니다.
 
 ## 개발
 

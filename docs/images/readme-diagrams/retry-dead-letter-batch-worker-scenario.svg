@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="860" viewBox="0 0 1500 860" role="img" aria-labelledby="title desc">
+  <title id="title">Retry Dead-Letter Batch Worker Scenario</title>
+  <desc id="desc">Scenario showing successful ticket processing, transient retry, permanent dead-letter capture, skip accounting, and final batch report.</desc>
+  <defs>
+    <marker id="sc-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#48758d"/></marker>
+    <marker id="sc-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
+    <marker id="sc-red" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="sc-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
+      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #425466; }
+      .subtitle { font-size: 15px; }
+      .card-title { font-family: 'Architects Daughter'; font-size: 23px; fill: #24313f; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .footer { font-size: 13px; }
+      .frame { fill: #fffdf8; stroke: #d8e2e8; stroke-width: 2; }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 18; }
+      .blue { fill: none; stroke: #48758d; stroke-width: 3; marker-end: url(#sc-blue); }
+      .green { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#sc-green); }
+      .red { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#sc-red); }
+      .purple { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#sc-purple); }
+    </style>
+  </defs>
+  <rect width="1500" height="860" fill="#f7f3ea"/>
+  <rect class="frame" x="44" y="34" width="1412" height="792" rx="20"/>
+  <text class="title" x="750" y="82" text-anchor="middle">Retry Dead-Letter Batch Worker Scenario</text>
+  <text class="subtitle" x="750" y="116" text-anchor="middle">A bounded batch retry handles transient work while permanent items become inspectable dead letters.</text>
+
+  <rect class="band" x="82" y="158" width="1336" height="164"/><text class="card-title" x="112" y="196">Input queue</text>
+  <g transform="translate(168 214)"><rect width="250" height="74" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="125" y="31" text-anchor="middle">Ticket queue</text><text class="detail" x="125" y="54" text-anchor="middle">4 deterministic items</text></g>
+  <g transform="translate(606 202)"><rect width="274" height="98" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="137" y="34" text-anchor="middle">ticket-1002</text><text class="detail" x="137" y="58" text-anchor="middle">provider throttled</text><text class="detail" x="137" y="78" text-anchor="middle">transient once</text></g>
+  <g transform="translate(1082 202)"><rect width="250" height="98" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="125" y="34" text-anchor="middle">ticket-1003</text><text class="detail" x="125" y="58" text-anchor="middle">blocked address</text><text class="detail" x="125" y="78" text-anchor="middle">permanent failure</text></g>
+
+  <rect class="band" x="82" y="374" width="1336" height="178"/><text class="card-title" x="112" y="412">Policy outcomes</text>
+  <g transform="translate(250 448)"><rect width="250" height="74" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="125" y="31" text-anchor="middle">Processed</text><text class="detail" x="125" y="54" text-anchor="middle">ticket-1001, 1004</text></g>
+  <g transform="translate(624 438)"><rect width="250" height="94" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="125" y="33" text-anchor="middle">RetryPolicy</text><text class="detail" x="125" y="57" text-anchor="middle">attempt 1 fails</text><text class="detail" x="125" y="77" text-anchor="middle">attempt 2 succeeds</text></g>
+  <g transform="translate(1000 438)"><rect width="268" height="94" rx="12" fill="#ffe4e6" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="134" y="33" text-anchor="middle">DeadLetter</text><text class="detail" x="134" y="57" text-anchor="middle">reason + attempts</text><text class="detail" x="134" y="77" text-anchor="middle">then SkipPolicy</text></g>
+
+  <rect class="band" x="82" y="606" width="1336" height="110"/><text class="card-title" x="112" y="642">Final batch report</text>
+  <g transform="translate(486 652)"><rect width="528" height="44" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="264" y="29" text-anchor="middle">read=4 write=3 retry=1 skip=1 completed</text></g>
+
+  <rect class="band" x="82" y="762" width="1336" height="36"/><text class="footer" x="750" y="786" text-anchor="middle">The dead-letter list is teaching evidence, not durable production storage.</text>
+
+  <path class="blue" d="M 418 251 L 606 251"/><text class="label" x="512" y="231" text-anchor="middle">read + classify</text>
+  <path class="blue" d="M 880 251 L 1082 251"/><text class="label" x="981" y="231" text-anchor="middle">next item</text>
+  <path class="green" d="M 293 288 L 293 448"/><text class="label" x="344" y="366" text-anchor="middle">success path</text>
+  <path class="blue" d="M 743 300 L 743 438"/><text class="label" x="808" y="366" text-anchor="middle">retry transient</text>
+  <path class="red" d="M 1207 300 L 1207 438"/><text class="label" x="1276" y="366" text-anchor="middle">record DLT</text>
+  <path class="purple" d="M 749 532 L 749 652"/><text class="label" x="810" y="590" text-anchor="middle">report counts</text>
+</svg>

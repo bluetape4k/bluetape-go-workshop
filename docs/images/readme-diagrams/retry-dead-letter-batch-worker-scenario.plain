@@ -1,0 +1,17 @@
+graph 1 31.484 1.6532
+node queue 1.404 0.47417 2.8079 0.94833 "ticket queue\n4 deterministic items" rounded,filled rect #b99b5d #fef3c7
+node success 5.0035 0.47417 1.9746 0.94833 "ticket-1001\nsuccess once" rounded,filled rect #5d8a62 #dcfce7
+node transient 8.3167 0.47417 2.0475 0.94833 "ticket-1002\ntransient once" rounded,filled rect #4f7e9d #dbeafe
+node retry 12.869 0.47417 2.0162 0.94833 "retry attempt\nsucceeds" rounded,filled rect #48758d #e0f2fe
+node permanent 16.308 0.47417 2.2558 0.94833 "ticket-1003\nblocked address" rounded,filled rect #bf6672 #fee2e2
+node dlt 21.22 0.47417 2.5267 0.94833 "dead letter\nreason + attempts" rounded,filled rect #b95f7a #ffe4e6
+node final 25.147 0.47417 1.9746 0.94833 "ticket-1004\nsuccess once" rounded,filled rect #5d8a62 #dcfce7
+node report 29.601 0.47417 3.7663 0.94833 "batch report\nread=4 write=3 retry=1 skip=1" rounded,filled rect #8a6bb0 #ede9fe
+edge queue success 4 2.8193 0.47417 3.1587 0.47417 3.5175 0.47417 3.8436 0.47417 read 3.4121 0.57312 solid black
+edge success transient 4 6.0031 0.47417 6.3539 0.47417 6.7525 0.47417 7.1182 0.47417 write 6.6419 0.57312 solid #5d8a62
+edge transient retry 4 9.3517 0.47417 10.045 0.47417 10.962 0.47417 11.685 0.47417 ErrTransientTicket 10.601 0.57312 solid #48758d
+edge retry permanent 4 13.888 0.47417 14.239 0.47417 14.638 0.47417 15.008 0.47417 write 14.529 0.57312 solid #5d8a62
+edge permanent dlt 4 17.448 0.47417 18.141 0.47417 19.035 0.47417 19.777 0.47417 ErrPermanentTicket 18.696 0.57312 solid #b95f7a
+edge dlt final 4 22.494 0.47417 22.974 0.47417 23.518 0.47417 23.986 0.47417 "skip item" 23.321 0.57312 solid #b95f7a
+edge final report 4 26.143 0.47417 26.558 0.47417 27.056 0.47417 27.543 0.47417 complete 26.926 0.57312 solid #8a6bb0
+stop

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Retry Dead-Letter Batch Worker Architecture</title>
+  <desc id="desc">Architecture showing the CLI runner, batch job, ticket reader, processor classification, retry and skip policies, writer, processed sink, and dead-letter store.</desc>
+  <defs>
+    <marker id="ar-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#48758d"/></marker>
+    <marker id="ar-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
+    <marker id="ar-red" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="ar-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
+      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #425466; }
+      .subtitle { font-size: 15px; }
+      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .band-label { font-size: 22px; }
+      .card-title { font-size: 23px; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .footer { font-size: 13px; }
+      .frame { fill: #fffdf8; stroke: #d8e2e8; stroke-width: 2; }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 18; }
+      .blue { fill: none; stroke: #48758d; stroke-width: 3; marker-end: url(#ar-blue); }
+      .green { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#ar-green); }
+      .red { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#ar-red); }
+      .purple { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#ar-purple); }
+    </style>
+  </defs>
+  <rect width="1500" height="900" fill="#f7f3ea"/>
+  <rect class="frame" x="44" y="34" width="1412" height="832" rx="20"/>
+  <text class="title" x="750" y="82" text-anchor="middle">Retry Dead-Letter Batch Worker Architecture</text>
+  <text class="subtitle" x="750" y="116" text-anchor="middle">The example keeps batch primitives visible: reader, processor, retry policy, skip policy, writer, and DLT store.</text>
+
+  <rect class="band" x="82" y="158" width="1336" height="132"/><text class="band-label" x="112" y="194">Runnable demo</text>
+  <g transform="translate(174 210)"><rect width="224" height="58" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="112" y="35" text-anchor="middle">go run</text></g>
+  <g transform="translate(638 198)"><rect width="246" height="82" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="123" y="33" text-anchor="middle">batch.Job</text><text class="detail" x="123" y="59" text-anchor="middle">ticket-batch-worker</text></g>
+  <g transform="translate(1112 198)"><rect width="230" height="82" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="115" y="33" text-anchor="middle">Stable JSON</text><text class="detail" x="115" y="59" text-anchor="middle">no timestamps</text></g>
+
+  <rect class="band" x="82" y="342" width="1336" height="216"/><text class="band-label" x="112" y="378">batch.Step components</text>
+  <g transform="translate(144 430)"><rect width="226" height="80" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="113" y="32" text-anchor="middle">TicketReader</text><text class="detail" x="113" y="57" text-anchor="middle">in-memory queue</text></g>
+  <g transform="translate(480 418)"><rect width="254" height="104" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="127" y="35" text-anchor="middle">TicketProcessor</text><text class="detail" x="127" y="61" text-anchor="middle">classify failures</text><text class="detail" x="127" y="81" text-anchor="middle">track attempts</text></g>
+  <g transform="translate(854 418)"><rect width="246" height="104" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="123" y="35" text-anchor="middle">TicketWriter</text><text class="detail" x="123" y="61" text-anchor="middle">processed sink</text><text class="detail" x="123" y="81" text-anchor="middle">duplicate guard</text></g>
+  <g transform="translate(1194 430)"><rect width="176" height="80" rx="12" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="88" y="32" text-anchor="middle">Sink</text><text class="detail" x="88" y="57" text-anchor="middle">ordered writes</text></g>
+
+  <rect class="band" x="82" y="612" width="1336" height="126"/><text class="band-label" x="112" y="648">Policy and failure evidence</text>
+  <g transform="translate(324 666)"><rect width="250" height="50" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="125" y="32" text-anchor="middle">RetryPolicy</text></g>
+  <g transform="translate(646 666)"><rect width="250" height="50" rx="12" fill="#ffe4e6" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="125" y="32" text-anchor="middle">SkipPolicy</text></g>
+  <g transform="translate(968 666)"><rect width="286" height="50" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="143" y="32" text-anchor="middle">DeadLetterStore</text></g>
+
+  <rect class="band" x="82" y="802" width="1336" height="36"/><text class="footer" x="750" y="826" text-anchor="middle">Production replacement points: durable queue, persistent DLT, idempotent handlers, backoff jitter, metrics, alerting, and replay tooling.</text>
+
+  <path class="blue" d="M 398 239 L 638 239"/><text class="label" x="518" y="219" text-anchor="middle">run</text>
+  <path class="blue" d="M 884 239 L 1112 239"/><text class="label" x="998" y="219" text-anchor="middle">project report</text>
+  <path class="blue" d="M 761 280 L 761 322 L 257 322 L 257 430"/><text class="label" x="502" y="312" text-anchor="middle">read tickets</text>
+  <path class="green" d="M 370 470 L 480 470"/><text class="label" x="425" y="450" text-anchor="middle">tickets</text>
+  <path class="purple" d="M 734 470 L 854 470"/><text class="label" x="794" y="450" text-anchor="middle">processed</text>
+  <path class="purple" d="M 1100 470 L 1194 470"/><text class="label" x="1147" y="450" text-anchor="middle">write</text>
+  <path class="blue" d="M 575 522 L 575 642 L 449 642 L 449 666"/><text class="label" x="514" y="632" text-anchor="middle">transient</text>
+  <path class="red" d="M 638 522 L 638 642 L 771 642 L 771 666"/><text class="label" x="708" y="632" text-anchor="middle">permanent</text>
+  <path class="red" d="M 680 522 L 680 586 L 1111 586 L 1111 666"/><text class="label" x="908" y="576" text-anchor="middle">record reason + attempts</text>
+</svg>
