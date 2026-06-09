@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="840" viewBox="0 0 1480 840" role="img" aria-labelledby="title desc">
+  <title id="title">Compensation Workflow Architecture</title>
+  <desc id="desc">Layered architecture for a Gin compensation workflow example using workflow.Sequential and workreport.Report.</desc>
+  <defs>
+    <marker id="arch-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
+    <marker id="arch-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="arch-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
+      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
+      .subtitle { font-size: 15px; }
+      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .band-label { font-size: 22px; }
+      .card-title { font-size: 23px; }
+      .detail { font-size: 13px; }
+      .label { font-size: 12px; }
+      .footer { font-size: 13px; }
+      .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
+      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .request { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#arch-request); }
+      .success { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#arch-success); }
+      .comp { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#arch-comp); }
+      .failure { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#arch-failure); }
+    </style>
+  </defs>
+  <rect width="1480" height="840" fill="#fbfaf6"/>
+  <rect class="frame" x="44" y="24" width="1392" height="790"/>
+  <text class="title" x="740" y="70" text-anchor="middle">Compensation Workflow Architecture</text>
+  <text class="subtitle" x="740" y="103" text-anchor="middle">Gin owns the HTTP boundary; the run object owns the compensation stack; workflow and workreport own execution shape.</text>
+
+  <rect class="band" x="72" y="142" width="1336" height="134"/><text class="band-label" x="104" y="178">HTTP boundary</text>
+  <g transform="translate(112 190)"><rect width="222" height="62" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="111" y="28" text-anchor="middle">HTTP Client</text><text class="detail" x="111" y="50" text-anchor="middle">curl, browser, test</text></g>
+  <g transform="translate(1062 184)"><rect width="268" height="76" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="134" y="31" text-anchor="middle">Stable JSON</text><text class="detail" x="134" y="55" text-anchor="middle">original_error + report tree</text></g>
+
+  <rect class="band" x="72" y="314" width="1336" height="178"/><text class="band-label" x="104" y="350">Application boundary</text>
+  <g transform="translate(224 382)"><rect width="230" height="78" rx="12" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="115" y="31" text-anchor="middle">Gin Router</text><text class="detail" x="115" y="55" text-anchor="middle">health, compensation</text></g>
+  <g transform="translate(548 372)"><rect width="252" height="98" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="126" y="34" text-anchor="middle">Request Handler</text><text class="detail" x="126" y="58" text-anchor="middle">new run per request</text><text class="detail" x="126" y="78" text-anchor="middle">maps status</text></g>
+  <g transform="translate(902 372)"><rect width="254" height="98" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="127" y="34" text-anchor="middle">Compensation Stack</text><text class="detail" x="127" y="58" text-anchor="middle">registered by success</text><text class="detail" x="127" y="78" text-anchor="middle">reversed on failure</text></g>
+
+  <rect class="band" x="72" y="532" width="1336" height="146"/><text class="band-label" x="104" y="568">bluetape-go boundary</text>
+  <g transform="translate(226 600)"><rect width="314" height="66" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="157" y="29" text-anchor="middle">workflow.Sequential</text><text class="detail" x="157" y="51" text-anchor="middle">StopOnFailure / ContinueOnFailure</text></g>
+  <g transform="translate(714 600)"><rect width="264" height="66" rx="12" fill="#fee2e2" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="132" y="29" text-anchor="middle">Side-effect Flags</text><text class="detail" x="132" y="51" text-anchor="middle">inventory, payment, shipment</text></g>
+  <g transform="translate(1090 600)"><rect width="246" height="66" rx="12" fill="#ecfccb" stroke="#78944d" stroke-width="2"/><text class="card-title" x="123" y="29" text-anchor="middle">workreport.Report</text><text class="detail" x="123" y="51" text-anchor="middle">nested execution tree</text></g>
+
+  <path class="request" d="M 223 252 L 223 340 L 339 340 L 339 382"/><text class="label" x="280" y="366" text-anchor="middle">POST JSON</text>
+  <path class="request" d="M 454 421 L 548 421"/><text class="label" x="501" y="401" text-anchor="middle">bind + validate</text>
+  <path class="success" d="M 674 470 L 674 536 L 383 536 L 383 600"/><text class="label" x="528" y="552" text-anchor="middle">build forward runner</text>
+  <path class="success" d="M 540 633 L 714 633"/><text class="label" x="627" y="613" text-anchor="middle">successful steps mutate flags</text>
+  <path class="comp" d="M 800 421 L 902 421"/><text class="label" x="851" y="401" text-anchor="middle">push cleanup</text>
+  <path class="comp" d="M 1029 470 L 1029 520 L 500 520 L 500 600"/><text class="label" x="820" y="506" text-anchor="middle">reverse runner on failure</text>
+  <path class="success" d="M 978 633 L 1090 633"/><text class="label" x="1034" y="613" text-anchor="middle">project reports</text>
+  <path class="failure" d="M 846 600 L 846 560 L 1213 560 L 1213 600"/><text class="label" x="1030" y="548" text-anchor="middle">original failure remains visible</text>
+  <path class="success" d="M 1213 600 L 1213 260"/><text class="label" x="1260" y="430" text-anchor="middle">200 / 409 / 408</text>
+  <path class="success" d="M 1062 222 L 334 222"/><text class="label" x="698" y="204" text-anchor="middle">stable response</text>
+
+  <rect x="242" y="730" width="996" height="42" rx="12" fill="#ffffff" stroke="#d8e2e8"/>
+  <text class="footer" x="740" y="756" text-anchor="middle">No durable saga engine is introduced; durability and idempotent external commands are production concerns.</text>
+</svg>

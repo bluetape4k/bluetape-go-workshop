@@ -1,0 +1,56 @@
+digraph G {
+  graph [
+    rankdir=LR,
+    bgcolor="#fffdf8",
+    margin=0.2,
+    pad=0.18,
+    nodesep=0.62,
+    ranksep=0.82,
+    splines=true,
+    overlap=false,
+    outputorder=edgesfirst,
+    fontnames=svg,
+    fontname="Architects Daughter",
+    label="Compensation Workflow Scenario",
+    labelloc=t,
+    fontsize=32,
+    fontcolor="#24313f"
+  ];
+  node [
+    shape=rect,
+    style="rounded,filled",
+    penwidth=2,
+    fontname="Architects Daughter",
+    fontsize=19,
+    color="#64748b",
+    fontcolor="#263645",
+    margin="0.18,0.12"
+  ];
+  edge [
+    penwidth=2.6,
+    arrowsize=0.8,
+    fontname="Comic Mono",
+    fontsize=12,
+    fontcolor="#425466"
+  ];
+
+  request [label="Fulfillment\nrequest", fillcolor="#fef3c7", color="#b99b5d"];
+  reserve [label="reserve-inventory\nregister release", fillcolor="#dbeafe", color="#4f7e9d"];
+  authorize [label="authorize-payment\nregister void", fillcolor="#dbeafe", color="#4f7e9d"];
+  shipment [label="create-shipment\nmay fail", fillcolor="#fee2e2", color="#bf6672"];
+  complete [label="completed\nside effects kept", fillcolor="#dcfce7", color="#5d8a62"];
+  original [label="original error\npreserved", fillcolor="#ffe4e6", color="#b95f7a"];
+  void [label="void-payment\nreverse step 1", fillcolor="#f3e8ff", color="#8a6bb0"];
+  release [label="release-inventory\nreverse step 2", fillcolor="#f3e8ff", color="#8a6bb0"];
+  response [label="stable JSON\nforward + compensation", fillcolor="#e0f2fe", color="#48758d"];
+
+  request -> reserve [label="forward", color="#3f6f8f"];
+  reserve -> authorize [label="success", color="#3f6f8f"];
+  authorize -> shipment [label="success", color="#3f6f8f"];
+  shipment -> complete [label="shipment ok", color="#5d8a62", fontcolor="#426d46"];
+  shipment -> original [label="shipment failed", color="#b95f7a", fontcolor="#9f4d67"];
+  original -> void [label="compensate reverse", color="#8a6bb0", fontcolor="#745996"];
+  void -> release [label="continue on failure", color="#8a6bb0", fontcolor="#745996"];
+  release -> response [label="report both trees", color="#5d8a62", fontcolor="#426d46"];
+  complete -> response [label="200 OK", color="#5d8a62", fontcolor="#426d46"];
+}

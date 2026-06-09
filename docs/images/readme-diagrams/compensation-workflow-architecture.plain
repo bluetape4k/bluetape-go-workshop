@@ -1,0 +1,20 @@
+graph 1 26.196 7.1354
+node client 20.413 5.4028 1.7142 0.59417 "HTTP Client" rounded,filled rect #4f7e9d #dbeafe
+node gin 24.436 5.25 3.2975 0.94833 "Gin Router\n/compensation/fulfillment" rounded,filled rect #b99b5d #fef3c7
+node mapper 15.697 5.25 2.0579 0.94833 "Status + JSON\nmapper" rounded,filled rect #48758d #e0f2fe
+node handler 9.6581 3.7222 2.8079 0.94833 "Request Handler\nnew run per request" rounded,filled rect #8a6bb0 #ede9fe
+node stack 9.6581 2.1528 2.7454 0.94833 "Compensation Stack\nrelease + void" rounded,filled rect #8a6bb0 #f3e8ff
+node effects 9.6581 0.58333 3.61 0.94833 "Side-effect Flags\ninventory/payment/shipment" rounded,filled rect #b95f7a #ffe4e6
+node workflow 2.2859 5.2917 4.3496 0.94833 "workflow.Sequential\nStopOnFailure / ContinueOnFailure" rounded,filled rect #5d8a62 #dcfce7
+node report 9.6581 5.2917 2.9121 0.94833 "workreport.Report\nnested execution tree" rounded,filled rect #78944d #ecfccb
+edge client gin 4 21.279 5.3702 21.669 5.3553 22.148 5.3369 22.613 5.3192 request 22.029 5.4523 solid #3f6f8f
+edge gin handler 7 22.776 4.994 22.291 4.9232 21.76 4.8499 21.27 4.7917 17.69 4.3666 13.471 4.0149 11.24 3.8405 "bind + validate" 18.141 4.6466 solid #3f6f8f
+edge mapper client 4 16.74 5.2835 17.525 5.3091 18.601 5.3442 19.383 5.3697 "200 / 409 / 408 / 400" 18.141 5.4566 solid #5d8a62
+edge handler workflow 4 8.2406 4.0222 7.2223 4.2398 5.8213 4.5391 4.6356 4.7925 "forward runner" 6.1569 4.7926 solid #5d8a62
+edge handler workflow 7 8.2412 3.6033 7.2812 3.5622 5.9887 3.5867 4.8913 3.8854 4.2569 4.0581 3.6069 4.4114 3.1165 4.7207 "reverse runner on failure" 6.1569 3.9844 solid #8a6bb0
+edge stack workflow 7 8.2745 2.299 7.2948 2.4423 5.965 2.7174 4.8913 3.2326 4.1239 3.6009 3.3769 4.2323 2.8837 4.6991 "reverse order" 6.1569 3.3316 solid #8a6bb0
+edge workflow stack 7 2.4934 4.8071 2.8389 4.0174 3.6444 2.4787 4.8913 1.8576 5.8849 1.3627 7.1438 1.4681 8.1163 1.6803 "register successful steps" 6.1569 1.9566 solid #8a6bb0
+edge workflow effects 7 2.448 4.8045 2.7478 3.9106 3.5176 2.0204 4.8913 1.1493 5.7105 0.62978 6.771 0.46639 7.6823 0.44235 "mutate request-scoped flags" 6.1569 1.2483 solid #b95f7a
+edge workflow report 4 4.4735 5.2917 5.6118 5.2917 6.9819 5.2917 8.0257 5.2917 "forward report" 6.1569 5.3906 solid #5d8a62
+edge report mapper 4 11.127 5.2816 12.158 5.2744 13.525 5.265 14.492 5.2583 "original error + children" 13.065 5.3747 solid #5d8a62
+stop
