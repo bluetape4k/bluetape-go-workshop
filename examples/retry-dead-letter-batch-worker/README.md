@@ -77,8 +77,9 @@ go test -race -count=1 ./examples/retry-dead-letter-batch-worker/...
 ```
 
 The tests cover transient success after retry, permanent dead-letter capture,
-skip budget exhaustion, writer duplicate failure, caller cancellation, and
-timestamp-free report projection.
+skip budget exhaustion, writer duplicate failure, caller cancellation,
+timestamp-free report projection, concurrent run isolation, and concurrent
+store access under the race detector.
 
 ## Related Examples
 

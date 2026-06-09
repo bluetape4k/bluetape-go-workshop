@@ -3,9 +3,11 @@ package ticketworker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/bluetape4k/bluetape-go/batch"
@@ -187,10 +189,134 @@ func TestReportProjectionOmitsRuntimeTimestamps(t *testing.T) {
 	}
 }
 
+func TestConcurrentRunsRemainIsolatedAndDeterministic(t *testing.T) {
+	const (
+		workers    = 16
+		iterations = 12
+	)
+
+	errs := make(chan string, workers*iterations)
+	var wg sync.WaitGroup
+	for workerID := range workers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for iteration := range iterations {
+				result, err := Run(context.Background(), Options{ChunkSize: 1 + iteration%3})
+				if err != nil {
+					errs <- fmt.Sprintf("worker %d iteration %d: Run failed: %v", workerID, iteration, err)
+					continue
+				}
+				if err := verifyDefaultResult(result); err != nil {
+					errs <- fmt.Sprintf("worker %d iteration %d: %v", workerID, iteration, err)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	close(errs)
+
+	for msg := range errs {
+		t.Error(msg)
+	}
+}
+
+func TestStoresStressConcurrentWritesAndReads(t *testing.T) {
+	const (
+		workers    = 8
+		iterations = 50
+	)
+
+	sink := NewProcessedSink()
+	deadLetters := NewDeadLetterStore()
+	errs := make(chan string, workers*iterations)
+
+	var wg sync.WaitGroup
+	for workerID := range workers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for iteration := range iterations {
+				id := fmt.Sprintf("ticket-%02d-%03d", workerID, iteration)
+				ticket := ProcessedTicket{ID: id, Channel: "email", Address: id + "@example.com", Attempts: 1}
+				if err := sink.Put(ticket); err != nil {
+					errs <- fmt.Sprintf("put %s: %v", id, err)
+				}
+				deadLetters.Record(DeadLetter{TicketID: id, Reason: "stress", Attempts: 1})
+
+				_ = sink.List()
+				_ = deadLetters.List()
+			}
+		}()
+	}
+	wg.Wait()
+	close(errs)
+
+	for msg := range errs {
+		t.Error(msg)
+	}
+	processed := sink.List()
+	dead := deadLetters.List()
+	want := workers * iterations
+	if len(processed) != want || len(dead) != want {
+		t.Fatalf("processed/dead = %d/%d, want %d/%d", len(processed), len(dead), want, want)
+	}
+	if err := verifyUniqueProcessed(processed); err != nil {
+		t.Fatal(err)
+	}
+	if err := verifyUniqueDeadLetters(dead); err != nil {
+		t.Fatal(err)
+	}
+	if err := sink.Put(processed[0]); !errors.Is(err, ErrDuplicateTicket) {
+		t.Fatalf("duplicate write error = %v, want ErrDuplicateTicket", err)
+	}
+}
+
 func ids(tickets []ProcessedTicket) []string {
 	values := make([]string, 0, len(tickets))
 	for _, ticket := range tickets {
 		values = append(values, ticket.ID)
 	}
 	return values
+}
+
+func verifyDefaultResult(result Result) error {
+	if result.Status != batch.StatusCompleted {
+		return fmt.Errorf("status = %s, want completed", result.Status)
+	}
+	if result.ReadCount != 4 || result.WriteCount != 3 || result.RetryCount != 1 || result.SkipCount != 1 {
+		return fmt.Errorf("counts = read:%d write:%d retry:%d skip:%d, want 4/3/1/1", result.ReadCount, result.WriteCount, result.RetryCount, result.SkipCount)
+	}
+	if got := ids(result.Processed); !slices.Equal(got, []string{"ticket-1001", "ticket-1002", "ticket-1004"}) {
+		return fmt.Errorf("processed ids = %v", got)
+	}
+	if len(result.DeadLetters) != 1 || result.DeadLetters[0].TicketID != "ticket-1003" {
+		return fmt.Errorf("dead letters = %#v, want ticket-1003", result.DeadLetters)
+	}
+	if result.Processed[1].Attempts != 2 {
+		return fmt.Errorf("transient attempts = %d, want 2", result.Processed[1].Attempts)
+	}
+	return nil
+}
+
+func verifyUniqueProcessed(tickets []ProcessedTicket) error {
+	seen := make(map[string]struct{}, len(tickets))
+	for _, ticket := range tickets {
+		if _, exists := seen[ticket.ID]; exists {
+			return fmt.Errorf("duplicate processed ticket %q", ticket.ID)
+		}
+		seen[ticket.ID] = struct{}{}
+	}
+	return nil
+}
+
+func verifyUniqueDeadLetters(records []DeadLetter) error {
+	seen := make(map[string]struct{}, len(records))
+	for _, record := range records {
+		if _, exists := seen[record.TicketID]; exists {
+			return fmt.Errorf("duplicate dead letter %q", record.TicketID)
+		}
+		seen[record.TicketID] = struct{}{}
+	}
+	return nil
 }

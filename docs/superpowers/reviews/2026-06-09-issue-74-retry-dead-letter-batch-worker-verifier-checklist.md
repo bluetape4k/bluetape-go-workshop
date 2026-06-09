@@ -28,7 +28,9 @@ Refreshed before final commit:
 | `bash scripts/generate-retry-dead-letter-batch-worker-diagrams.sh` | PASS; scenario, architecture, and sequence gates all reported `badEndpointAngle=0`, `badBends=0`, `interiorCrossings=0`, `marginImbalance=0`, `margins=44/44/34/34`, `titleGap=ok`, `fontFallback=0`. |
 | PNG visual inspection | PASS; scenario, architecture, and sequence PNGs have decorator frames, balanced margins, readable labels, and line colors that distinguish paths. |
 | `go test -count=1 ./examples/retry-dead-letter-batch-worker/...` | PASS |
+| `go test -count=1 -run 'Stress\|Concurrent' ./examples/retry-dead-letter-batch-worker/internal/ticketworker` | PASS; concurrent run isolation and concurrent store access stress coverage. |
 | `go test -race -count=1 ./examples/retry-dead-letter-batch-worker/...` | PASS |
+| `go test -race -count=1 -run 'Stress\|Concurrent' ./examples/retry-dead-letter-batch-worker/internal/ticketworker` | PASS; stress coverage also passed with the race detector. |
 | `go run ./examples/retry-dead-letter-batch-worker` | PASS; deterministic JSON emitted expected counts and DLT entry. |
 | `go test -run '^$' ./examples/retry-dead-letter-batch-worker` | PASS |
 | `go vet ./examples/retry-dead-letter-batch-worker/...` | PASS |

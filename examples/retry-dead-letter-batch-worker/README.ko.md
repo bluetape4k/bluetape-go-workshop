@@ -76,8 +76,9 @@ go test -race -count=1 ./examples/retry-dead-letter-batch-worker/...
 ```
 
 테스트는 transient retry 후 성공, permanent dead-letter capture, skip budget
-exhaustion, writer duplicate failure, caller cancellation, timestamp-free report
-projection을 검증합니다.
+exhaustion, writer duplicate failure, caller cancellation, timestamp-free
+report projection, concurrent run isolation, race detector 기반 concurrent
+store access를 검증합니다.
 
 ## 관련 예제
 

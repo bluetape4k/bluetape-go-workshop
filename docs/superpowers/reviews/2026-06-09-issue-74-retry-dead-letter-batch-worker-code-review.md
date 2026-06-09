@@ -24,8 +24,8 @@ No P0/P1 blockers found.
 | 2 | Ops/SRE reliability | 0 | 0 | 0 | 0 | Retry and skip budgets are explicit; cancellation is not retried or dead-lettered; production durability caveats are documented. |
 | 3 | Structural impact | 0 | 0 | 0 | 0 | New isolated example plus README/map assets only; no shared bluetape-go API or module dependency changed. |
 | 4 | Go code quality | 0 | 0 | 0 | 0 | Uses `batch.RetryPolicy`, `batch.SkipPolicy`, `context.Context`, sentinel errors with `errors.Is`, and mutex-protected in-memory stores. |
-| 5 | Tests/types/silent failure | 0 | 0 | 0 | 0 | Tests cover transient retry success, permanent DLT, skip exhaustion, writer failure, cancellation, race, and stable report projection. |
-| 6 | Performance/stability | 0 | 0 | 0 | 0 | Fixture is bounded, retry attempts are bounded, no goroutines/timers/external IO are introduced, and race test passes. |
+| 5 | Tests/types/silent failure | 0 | 0 | 0 | 0 | Tests cover transient retry success, permanent DLT, skip exhaustion, writer failure, cancellation, bounded stress, race, and stable report projection. |
+| 6 | Performance/stability | 0 | 0 | 0 | 0 | Fixture is bounded, retry attempts are bounded, concurrent run/store stress is bounded, no goroutines/timers/external IO are introduced, and race test passes. |
 | 7 | Docs/evidence | 0 | 0 | 0 | 0 | EN/KO README include scenario, Architecture, Sequence Diagram, policy table, related examples, and production hardening. |
 
 ## Diagram Gate
@@ -56,7 +56,9 @@ CodeGraph was not initialized for this worktree. The gap was mitigated by direct
 Already run before this review:
 
 - `go test -count=1 ./examples/retry-dead-letter-batch-worker/...` PASS
+- `go test -count=1 -run 'Stress|Concurrent' ./examples/retry-dead-letter-batch-worker/internal/ticketworker` PASS
 - `go test -race -count=1 ./examples/retry-dead-letter-batch-worker/...` PASS
+- `go test -race -count=1 -run 'Stress|Concurrent' ./examples/retry-dead-letter-batch-worker/internal/ticketworker` PASS
 - `go run ./examples/retry-dead-letter-batch-worker` PASS; output reports `read=4 write=3 retry=1 skip=1` and one DLT entry for `ticket-1003`.
 - `go test -run '^$' ./examples/retry-dead-letter-batch-worker` PASS
 - `go vet ./examples/retry-dead-letter-batch-worker/...` PASS
