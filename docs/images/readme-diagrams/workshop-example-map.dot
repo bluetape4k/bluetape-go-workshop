@@ -57,6 +57,7 @@ digraph G {
   fulfillmentIntegration [label="order-fulfillment-integration\nstate + workflow + reports", fillcolor="#f5f3ff"];
   reports [label="operations-report-policy\nworkreport policies", fillcolor="#f5f3ff"];
   csvCheckpoint [label="chunked-csv-import-checkpoint\nCSV restart + dedupe", fillcolor="#fffbeb"];
+  accountMigration [label="account-migration-checkpoint-restart\naccount cursor restart", fillcolor="#fffbeb"];
   retryDlt [label="retry-dead-letter-batch-worker\nretry + dead letters", fillcolor="#fffbeb"];
   pipeline [label="order-pipeline-testcontainers\nPostgres + Redis + NATS", fillcolor="#eef2ff"];
   catalogCache [label="catalog-near-cache-redis\nnear-cache + stampede", fillcolor="#eef2ff"];
@@ -83,6 +84,7 @@ digraph G {
   stateflow -> fulfillmentIntegration;
   stateflow -> reports;
   batch -> csvCheckpoint;
+  batch -> accountMigration;
   batch -> retryDlt;
   integration -> pipeline;
   integration -> catalogCache;

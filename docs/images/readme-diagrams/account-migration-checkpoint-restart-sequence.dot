@@ -1,0 +1,20 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="#fffdf8", margin=0.18, pad=0.18, nodesep=0.44, ranksep=0.58, splines=ortho, fontname="Architects Daughter", label="Account Migration Checkpoint Restart Sequence", labelloc=t, fontsize=30];
+  node [shape=rect, style="rounded,filled", penwidth=2, fontname="Architects Daughter", fontsize=18, color="#64748b", fontcolor="#263645", margin="0.18,0.12"];
+  edge [penwidth=2.4, arrowsize=0.75, fontname="Comic Mono", fontsize=11, fontcolor="#425466"];
+  start [label="First run", fillcolor="#fef3c7", color="#b99b5d"];
+  load0 [label="Load checkpoint\nnot found", fillcolor="#dbeafe", color="#4f7e9d"];
+  save2 [label="Write acct-1001..1002\nsave next_index=2", fillcolor="#dcfce7", color="#5d8a62"];
+  crash [label="Read acct-1003\nprocessor crash", fillcolor="#fee2e2", color="#bf6672"];
+  restart [label="Restart run", fillcolor="#ede9fe", color="#8a6bb0"];
+  restore2 [label="Restore next_index=2", fillcolor="#e0f2fe", color="#48758d"];
+  writeRest [label="Write acct-1003..1005", fillcolor="#f3e8ff", color="#8a6bb0"];
+  save5 [label="Save next_index=5\ncompleted report", fillcolor="#dcfce7", color="#5d8a62"];
+  start -> load0;
+  load0 -> save2 [color="#5d8a62"];
+  save2 -> crash [color="#b95f7a"];
+  crash -> restart [color="#8a6bb0"];
+  restart -> restore2 [color="#48758d"];
+  restore2 -> writeRest [color="#8a6bb0"];
+  writeRest -> save5 [color="#5d8a62"];
+}

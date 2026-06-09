@@ -1,0 +1,21 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#fffdf8", margin=0.18, pad=0.18, nodesep=0.62, ranksep=0.82, splines=true, overlap=false, fontname="Architects Daughter", label="Account Migration Checkpoint Restart Architecture", labelloc=t, fontsize=30];
+  node [shape=rect, style="rounded,filled", penwidth=2, fontname="Architects Daughter", fontsize=18, color="#64748b", fontcolor="#263645", margin="0.18,0.12"];
+  edge [penwidth=2.6, arrowsize=0.8, fontname="Comic Mono", fontsize=12, fontcolor="#425466"];
+  cli [label="go run\nlocal demo", fillcolor="#d7ecf2", color="#48758d"];
+  job [label="batch.Job\naccount-migration", fillcolor="#fef3c7", color="#b99b5d"];
+  step [label="batch.Step\nchunk size 2", fillcolor="#ecfccb", color="#78944d"];
+  reader [label="MigrationReader\nCheckpointReader", fillcolor="#dbeafe", color="#4f7e9d"];
+  processor [label="AccountProcessor\nnormalize + crash hook", fillcolor="#dcfce7", color="#5d8a62"];
+  writer [label="TargetAccountWriter\nchunk commits", fillcolor="#f3e8ff", color="#8a6bb0"];
+  checkpoint [label="CheckpointStore\naccount-migration-v1", fillcolor="#e0f2fe", color="#48758d"];
+  target [label="TargetAccountStore\nunique IDs", fillcolor="#fff7ed", color="#c07a42"];
+  cli -> job [label="first + restart"];
+  job -> step [label="one step"];
+  step -> reader [label="read/restore", color="#3f6f8f"];
+  step -> processor [label="process", color="#5d8a62"];
+  step -> writer [label="write", color="#8a6bb0"];
+  writer -> target [label="put", color="#c07a42"];
+  step -> checkpoint [label="save cursor", color="#48758d"];
+  checkpoint -> reader [label="restore cursor", color="#48758d"];
+}

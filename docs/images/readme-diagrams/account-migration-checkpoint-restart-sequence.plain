@@ -1,0 +1,17 @@
+graph 1 9.7639 10.958
+node start 4.8819 9.9562 1.4329 0.59417 "First run" rounded,filled rect #b99b5d #fef3c7
+node load0 4.8819 8.6017 2.3183 0.94833 "Load checkpoint\nnot found" rounded,filled rect #4f7e9d #dbeafe
+node save2 4.8819 7.07 2.6621 0.94833 "Write acct-1001..1002\nsave next_index=2" rounded,filled rect #5d8a62 #dcfce7
+node crash 4.8819 5.5383 2.3704 0.94833 "Read acct-1003\nprocessor crash" rounded,filled rect #bf6672 #fee2e2
+node restart 4.8819 4.1837 1.7558 0.59417 "Restart run" rounded,filled rect #8a6bb0 #ede9fe
+node restore2 4.8819 3.0063 2.8808 0.59417 "Restore next_index=2" rounded,filled rect #48758d #e0f2fe
+node writeRest 4.8819 1.8288 2.7871 0.59417 "Write acct-1003..1005" rounded,filled rect #8a6bb0 #f3e8ff
+node save5 4.8819 0.47417 2.4954 0.94833 "Save next_index=5\ncompleted report" rounded,filled rect #5d8a62 #dcfce7
+edge start load0 4 4.8819 9.6489 4.8819 9.6489 4.8819 9.2431 4.8819 9.2431 solid black
+edge load0 save2 4 4.8819 8.117 4.8819 8.117 4.8819 7.7114 4.8819 7.7114 solid #5d8a62
+edge save2 crash 4 4.8819 6.5854 4.8819 6.5854 4.8819 6.1797 4.8819 6.1797 solid #b95f7a
+edge crash restart 4 4.8819 5.0531 4.8819 5.0531 4.8819 4.6473 4.8819 4.6473 solid #8a6bb0
+edge restart restore2 4 4.8819 3.8744 4.8819 3.8744 4.8819 3.4682 4.8819 3.4682 solid #48758d
+edge restore2 writeRest 4 4.8819 2.6969 4.8819 2.6969 4.8819 2.2907 4.8819 2.2907 solid #8a6bb0
+edge writeRest save5 4 4.8819 1.5214 4.8819 1.5214 4.8819 1.1156 4.8819 1.1156 solid #5d8a62
+stop

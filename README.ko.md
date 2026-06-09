@@ -56,6 +56,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/order-fulfillment-integration`](examples/order-fulfillment-integration/README.ko.md) | [English](examples/order-fulfillment-integration/README.md) \| [한국어](examples/order-fulfillment-integration/README.ko.md) | Order state transition, fulfillment workflow execution, report projection, compensation을 합친 milestone 통합 Gin API입니다. | `state`, `workflow`, `workreport` |
 | [`examples/operations-report-policy`](examples/operations-report-policy/README.ko.md) | [English](examples/operations-report-policy/README.md) \| [한국어](examples/operations-report-policy/README.ko.md) | Work report와 failure policy를 deterministic operations output으로 투영하는 Gin API입니다. | `workreport` |
 | [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint/README.ko.md) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | CSV row를 chunk 단위로 import하고 checkpoint 저장, partial writer crash 이후 restart, boundary duplicate skip을 보여주는 local batch job입니다. | `batch` |
+| [`examples/account-migration-checkpoint-restart`](examples/account-migration-checkpoint-restart/README.ko.md) | [English](examples/account-migration-checkpoint-restart/README.md) \| [한국어](examples/account-migration-checkpoint-restart/README.ko.md) | Account migration batch job이 지정 account에서 실패한 뒤 저장된 checkpoint부터 재시작하고 완료된 chunk를 다시 처리하지 않음을 증명합니다. | `batch` |
 | [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker/README.ko.md) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Transient ticket failure는 retry하고 permanent ticket failure는 dead letter로 기록하는 local batch worker입니다. | `batch` |
 
 ## Leader 예제 실행
@@ -229,6 +230,18 @@ go run ./examples/chunked-csv-import-checkpoint
 첫 실행은 두 번째 chunk를 부분 commit한 뒤 실패하고 checkpoint를 `next_row=2`에
 둡니다. Restart 실행은 이 checkpoint를 restore하고, chunk boundary의 duplicate
 customer를 skip한 뒤 `next_row=5`로 완료합니다.
+
+## Account Migration Checkpoint Restart 예제 실행
+
+Local batch demonstration을 실행합니다:
+
+```bash
+go run ./examples/account-migration-checkpoint-restart
+```
+
+첫 실행은 `acct-1001`, `acct-1002`를 write하고 `next_index=2`를 저장한 뒤
+`acct-1003`에서 실패합니다. Restart 실행은 이 cursor를 restore하고
+`acct-1003`부터 `acct-1005`까지만 읽은 뒤 `next_index=5`로 완료합니다.
 
 ## Retry Dead-Letter Batch Worker 예제 실행
 
