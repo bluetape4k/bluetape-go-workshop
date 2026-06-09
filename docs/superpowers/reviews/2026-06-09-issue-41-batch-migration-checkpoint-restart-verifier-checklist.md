@@ -18,6 +18,7 @@ Branch: `feat/issue-41-batch-migration-checkpoint-restart`
 | Documentation | PASS | Example README and README.ko include scenario, Architecture, Sequence Diagram, checkpoint contract, tests, and production hardening. |
 | Diagram skill compliance | PASS | Generated scenario, architecture, sequence PNGs have outer frame, balanced margins, semantic connector colors, and no visible overlap in visual inspection. |
 | Root navigation | PASS | `README.md`, `README.ko.md`, and `workshop-example-map.png` include `account-migration-checkpoint-restart`. |
+| CI lint follow-up | PASS | Existing CSV checkpoint test helper now returns explicitly after nil-check `t.Fatalf`, closing GitHub staticcheck `SA5011`. |
 | Repository-wide CI | PASS | `golangci-lint cache clean && make ci` passed in the feature worktree. |
 | CodeGraph | GAP | CodeGraph was unavailable because the repository is not initialized for codegraph; review used local diff and rg evidence instead. |
 
@@ -32,6 +33,8 @@ go test -race -count=1 ./examples/account-migration-checkpoint-restart/...
 go run ./examples/account-migration-checkpoint-restart
 go vet ./examples/account-migration-checkpoint-restart/...
 golangci-lint run ./examples/account-migration-checkpoint-restart/...
+golangci-lint run ./examples/chunked-csv-import-checkpoint/internal/csvimport --timeout=5m
+go test -count=1 ./examples/chunked-csv-import-checkpoint/internal/csvimport
 git diff --check
 go test -run '^$' ./examples/account-migration-checkpoint-restart/...
 golangci-lint cache clean && make ci

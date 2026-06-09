@@ -6,6 +6,7 @@ Scope:
 - `scripts/generate-account-migration-checkpoint-restart-diagrams.sh`
 - `docs/images/readme-diagrams/account-migration-checkpoint-restart-*`
 - root `README.md`, `README.ko.md`, and `workshop-example-map` assets
+- `examples/chunked-csv-import-checkpoint/internal/csvimport/importer_test.go` CI lint follow-up: explicit `return` after nil-check `t.Fatalf` to satisfy GitHub staticcheck `SA5011`.
 
 CodeGraph note: `CodeGraph not initialized in /Users/debop/work/bluetape4k/bluetape-go-workshop`; structural impact was reviewed from the branch diff, changed imports, and direct call surface.
 
@@ -63,6 +64,8 @@ Result:
 - `go run ./examples/account-migration-checkpoint-restart`: PASS
 - `go vet ./examples/account-migration-checkpoint-restart/...`: PASS
 - `golangci-lint run ./examples/account-migration-checkpoint-restart/...`: PASS
+- `golangci-lint run ./examples/chunked-csv-import-checkpoint/internal/csvimport --timeout=5m`: PASS
+- `go test -count=1 ./examples/chunked-csv-import-checkpoint/internal/csvimport`: PASS
 - `git diff --check`: PASS
 - `go test -run '^$' ./examples/account-migration-checkpoint-restart/...`: PASS
 - `golangci-lint cache clean && make ci`: PASS
