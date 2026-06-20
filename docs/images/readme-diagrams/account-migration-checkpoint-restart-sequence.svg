@@ -26,8 +26,8 @@
   <rect class="activation" x="1022.8" y="408" width="14" height="366" rx="6"/>
   <rect class="activation" x="1336" y="268" width="14" height="506" rx="6"/>
   <rect class="alt" x="64" y="542" width="1305" height="106" rx="16"/>
-  <rect class="label failLabel" x="88" y="528" width="230" height="28" rx="8"/>
-  <text class="msg failText" x="203" y="547" text-anchor="middle">alt failure / branch path</text>
+  <rect class="label failLabel" x="1088" y="528" width="230" height="28" rx="8"/>
+  <text class="msg failText" x="1203" y="547" text-anchor="middle">alt failure / branch path</text>
   <g id="message-1"><rect class="label callLabel" x="556.5" y="254" width="320" height="28" rx="8"/><circle cx="574.5" cy="268" r="12" fill="#3F7D9C"/><text class="badgeText" x="574.5" y="272" text-anchor="middle" fill="#fff">1</text><text class="msg callText" x="724.5" y="272" text-anchor="middle">first run loads key: not found</text><path class="call" d="M 90 276 H 1343"/></g>
   <g id="message-2"><rect class="label callLabel" x="132.3" y="290" width="228.6" height="28" rx="8"/><circle cx="150.3" cy="304" r="12" fill="#3F7D9C"/><text class="badgeText" x="150.3" y="308" text-anchor="middle" fill="#fff">2</text><text class="msg callText" x="254.6" y="308" text-anchor="middle">read acct-1001..1002</text><path class="call" d="M 90 326 H 403.2"/></g>
   <g id="message-3"><rect class="label returnLabel" x="484.9" y="340" width="150" height="28" rx="8"/><circle cx="502.9" cy="354" r="12" fill="#6E8F4F"/><text class="badgeText" x="502.9" y="358" text-anchor="middle" fill="#fff">3</text><text class="msg returnText" x="567.9" y="358" text-anchor="middle">normalize</text><path class="return" d="M 403.2 376 H 716.5"/></g>
