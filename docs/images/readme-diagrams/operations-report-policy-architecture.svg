@@ -38,7 +38,7 @@
   <path class="main" d="M 338 225 H 353 Q 365 225 365 237 V 366"/><text class="label" x="411" y="294" text-anchor="middle">POST</text>
   <path class="main" d="M 480 404 L 574 404"/><text class="label" x="527" y="385" text-anchor="middle">request</text>
   <path class="main" d="M 699 442 V 563 Q 699 575 711 575 H 764"/><text class="label" x="716" y="512" text-anchor="middle">reports</text>
-  <path class="main" d="M 902 546 H 1024 Q 1036 546 1036 534 V 442"/><text class="label" x="989" y="496" text-anchor="middle">root status</text>
+  <path class="main" d="M 902 546 V 526 Q 902 514 914 514 H 1024 Q 1036 514 1036 502 V 442"/><text class="label" x="989" y="496" text-anchor="middle">root status</text>
   <path class="main" d="M 1156 404 H 1206 Q 1218 404 1218 392 V 266"/><text class="label" x="1252" y="334" text-anchor="middle">status map</text>
   <path class="main" d="M 1044 225 L 338 225"/>
 
