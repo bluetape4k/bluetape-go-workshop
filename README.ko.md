@@ -18,6 +18,10 @@ handler를 사용합니다.
 
 ![Workshop example map](docs/images/readme-diagrams/workshop-example-map.png)
 
+이 map은 학습 경로를 고르는 기준입니다. 각 card는 실행 가능한 예제 module을
+가리키고, 더 자세한 scenario, architecture, sequence, flow diagram은 각 module
+README가 소유합니다.
+
 ## v0.3.0 Cache 예제
 
 Cache 예제는 작은 흐름으로 읽으면 됩니다.

@@ -18,6 +18,10 @@ lesson, while compatibility-focused examples use
 
 ![Workshop example map](docs/images/readme-diagrams/workshop-example-map.png)
 
+Use the map as a learning route selector. Each card points to runnable example
+modules, and each module README owns the deeper scenario, architecture,
+sequence, or flow diagrams for that behavior.
+
 ## v0.3.0 Cache Examples
 
 Read the cache examples as a small progression:
