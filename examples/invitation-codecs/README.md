@@ -15,7 +15,9 @@ separate security design.
 
 Use this example when values must cross URL, callback, or support boundaries
 without becoming unreadable. Each codec has a narrow job: Base62 for compact
-tokens, Base64URL for callback state, and Hex for diagnostic references.
+tokens, Base64URL for callback state, and Hex for diagnostic references. In the
+shared flow, this example owns the middle column: boundary values become
+portable non-secret strings.
 
 ## What It Demonstrates
 

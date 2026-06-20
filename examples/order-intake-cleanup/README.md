@@ -16,7 +16,8 @@ calls.
 Use this example when a partner feed needs deterministic cleanup before it can
 enter a domain pipeline. The code keeps validation, defaults, filtering,
 deduplication, and grouping as visible steps instead of hiding the whole feed in
-one helper call.
+one helper call. In the shared flow, this example owns the left column: raw
+partner rows become accepted orders grouped by channel.
 
 ## What It Demonstrates
 
