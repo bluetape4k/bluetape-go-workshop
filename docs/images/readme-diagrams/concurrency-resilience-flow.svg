@@ -32,11 +32,11 @@
 <text x="750.0" y="66" text-anchor="middle" font-family="Architects Daughter" font-size="43" font-weight="400" fill="#25313f">Concurrency and Resilience Flow</text>
 <text x="750.0" y="101" text-anchor="middle" font-family="Comic Mono" font-size="18" font-weight="400" fill="#475569">Bounded goroutines and typed resilience policies keep failures explicit.</text>
 <rect x="70" y="138" width="610" height="744" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
-<path d="M 100 196 C 235 170, 515 170, 650 196" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100 196 H 650" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="375" y="170" text-anchor="middle" font-family="Architects Daughter" font-size="31" font-weight="400" fill="#25313f">Product Fan-Out</text>
 <text x="375" y="209" text-anchor="middle" font-family="Comic Mono" font-size="16" font-weight="400" fill="#475569">product-enrichment-fanout</text>
 <rect x="820" y="138" width="610" height="744" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
-<path d="M 850 196 C 985 170, 1265 170, 1400 196" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 850 196 H 1400" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="1125" y="170" text-anchor="middle" font-family="Architects Daughter" font-size="31" font-weight="400" fill="#25313f">HTTP Resilience Boundary</text>
 <text x="1125" y="209" text-anchor="middle" font-family="Comic Mono" font-size="16" font-weight="400" fill="#475569">resilience-http-web</text>
 <rect x="118" y="245" width="514" height="104" rx="12" fill="#fef3c7" stroke="#64748b" stroke-width="2"/>
@@ -65,10 +65,10 @@
 <text x="375.0" y="794" text-anchor="middle" font-family="Comic Mono" font-size="23" font-weight="700" fill="#25313f">Product result</text>
 <text x="375.0" y="830" text-anchor="middle" font-family="Comic Mono" font-size="17" font-weight="400" fill="#25313f">required data plus OptionalErrors</text>
 <path d="M 375 349 L 375 392" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
-<path d="M 375 514 C 290 535, 236 540, 236 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<path d="M 375 514 C 460 535, 514 540, 514 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<path d="M 236 698 C 280 728, 325 740, 375 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<path d="M 514 698 C 470 728, 425 740, 375 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 375 514 V 538 Q 375 550 363 550 H 248 Q 236 550 236 562 V 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 375 514 V 538 Q 375 550 387 550 H 502 Q 514 550 514 562 V 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 236 698 V 728 Q 236 740 248 740 H 363 Q 375 740 375 752 V 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 514 698 V 728 Q 514 740 502 740 H 387 Q 375 740 375 752 V 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="375" y="868" text-anchor="middle" font-family="Comic Mono" font-size="16" font-weight="400" fill="#475569">stress tests verify bounded fan-out behavior</text>
 <rect x="868" y="245" width="514" height="104" rx="12" fill="#fef3c7" stroke="#64748b" stroke-width="2"/>
 <rect x="884" y="261" width="92" height="30" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
@@ -99,10 +99,10 @@
 <text x="994" y="794" text-anchor="start" font-family="Comic Mono" font-size="23" font-weight="700" fill="#25313f">events endpoint</text>
 <text x="1125.0" y="830" text-anchor="middle" font-family="Comic Mono" font-size="17" font-weight="400" fill="#25313f">low-cardinality policy events stay inspectable</text>
 <path d="M 1125 349 L 1125 392" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
-<path d="M 1125 514 C 1040 535, 986 540, 986 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<path d="M 1125 514 C 1210 535, 1264 540, 1264 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<path d="M 986 698 C 1030 728, 1075 740, 1125 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<path d="M 1264 698 C 1220 728, 1175 740, 1125 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1125 514 V 538 Q 1125 550 1113 550 H 998 Q 986 550 986 562 V 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1125 514 V 538 Q 1125 550 1137 550 H 1252 Q 1264 550 1264 562 V 566" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 986 698 V 728 Q 986 740 998 740 H 1113 Q 1125 740 1125 752 V 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1264 698 V 728 Q 1264 740 1252 740 H 1137 Q 1125 740 1125 752 V 755" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="1125" y="868" text-anchor="middle" font-family="Comic Mono" font-size="16" font-weight="400" fill="#475569">tests cover retry, half-open recovery, bulkhead rejection, and deadlines</text>
 <rect x="210" y="930" width="1080" height="52" rx="12" fill="#ffedd5" stroke="#f97316" stroke-width="1.8"/>
 <text x="750" y="963" text-anchor="middle" font-family="Comic Mono" font-size="17" font-weight="400" fill="#9a3412">Required failures stop the operation; optional and policy failures stay visible as typed results or events.</text>

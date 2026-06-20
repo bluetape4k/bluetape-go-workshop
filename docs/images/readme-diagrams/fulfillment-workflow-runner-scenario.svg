@@ -2,9 +2,9 @@
   <title id="title">Fulfillment Workflow Scenario</title>
   <desc id="desc">Scenario flow for the fulfillment workflow runner showing sequential validation, parallel risk checks, conditional shipment, failure, and cancellation paths.</desc>
   <defs>
-    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
-    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
-    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#47616f"/></marker>
+    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#4f8b63"/></marker>
+    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -37,15 +37,15 @@
 
   <g transform="translate(286 584)"><rect width="314" height="96" rx="12" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/><text class="card-title" x="157" y="39" text-anchor="middle">Failed or Cancelled</text><text class="detail" x="157" y="67" text-anchor="middle">409 for branch failure</text><text class="detail" x="157" y="87" text-anchor="middle">408 for caller cancellation</text></g>
 
-  <path class="main" d="M 296 242 L 374 242"/><text class="label" x="335" y="222" text-anchor="middle">POST</text>
-  <path class="main" d="M 604 242 L 658 242 L 658 172 L 700 172"/><text class="label" x="650" y="154" text-anchor="middle">parallel</text>
-  <path class="main" d="M 604 242 L 658 242 L 658 362 L 700 362"/>
-  <path class="success" d="M 950 172 L 1010 172 L 1010 242 L 1080 242"/>
-  <path class="success" d="M 950 362 L 1010 362 L 1010 242"/>
-  <path class="success" d="M 1195 294 L 1195 510 L 1075 510 L 1075 584"/><text class="label" x="1104" y="531" text-anchor="middle">true</text>
-  <path class="success" d="M 1230 294 L 1230 510 L 1315 510 L 1315 584"/><text class="label" x="1284" y="531" text-anchor="middle">false</text>
-  <path class="error" d="M 825 414 L 825 632 L 600 632"/><text class="label" x="726" y="615" text-anchor="middle">failure cancels sibling</text>
-  <path class="error" d="M 489 294 L 489 584"/><text class="label" x="530" y="458" text-anchor="middle">caller cancelled</text>
+  <path class="main" d="M 296 242 H 374"/><text class="label" x="335" y="222" text-anchor="middle">POST</text>
+  <path class="main" d="M 604 242 H 646 Q 658 242 658 230 V 184 Q 658 172 670 172 H 700"/><text class="label" x="650" y="154" text-anchor="middle">parallel</text>
+  <path class="main" d="M 604 242 H 646 Q 658 242 658 254 V 350 Q 658 362 670 362 H 700"/>
+  <path class="success" d="M 950 172 H 998 Q 1010 172 1010 184 V 230 Q 1010 242 1022 242 H 1080"/>
+  <path class="success" d="M 950 362 H 998 Q 1010 362 1010 350 V 242"/>
+  <path class="success" d="M 1195 294 V 498 Q 1195 510 1183 510 H 1087 Q 1075 510 1075 522 V 584"/><text class="label" x="1104" y="531" text-anchor="middle">true</text>
+  <path class="success" d="M 1230 294 V 498 Q 1230 510 1242 510 H 1303 Q 1315 510 1315 522 V 584"/><text class="label" x="1284" y="531" text-anchor="middle">false</text>
+  <path class="error" d="M 825 414 V 620 Q 825 632 813 632 H 600"/><text class="label" x="726" y="615" text-anchor="middle">failure cancels sibling</text>
+  <path class="error" d="M 489 294 V 584"/><text class="label" x="530" y="458" text-anchor="middle">caller cancelled</text>
 
   <rect x="280" y="746" width="920" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="771" text-anchor="middle">The response returns a stable workreport tree without runtime timestamps.</text>
 </svg>
