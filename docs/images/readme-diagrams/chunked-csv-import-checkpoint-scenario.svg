@@ -12,14 +12,14 @@
       .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
       .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
       .subtitle { font-size: 15px; }
-      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
-      .band-label { font-size: 22px; }
+      .layer-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .layer-label { font-size: 22px; }
       .card-title { font-size: 23px; }
       .detail { font-size: 13px; }
       .label { font-size: 12px; }
       .footer { font-size: 13px; }
       .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
-      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .layer { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .read { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#sc-read); }
       .ok { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#sc-ok); }
       .fail { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#sc-fail); }
@@ -31,23 +31,25 @@
   <text class="title" x="750" y="82" text-anchor="middle">Chunked CSV Import Checkpoint Scenario</text>
   <text class="subtitle" x="750" y="116" text-anchor="middle">The failed chunk is replayed from the previous checkpoint, so the writer must be idempotent by customer ID.</text>
 
-  <rect class="band" x="82" y="158" width="1336" height="224"/><text class="band-label" x="112" y="194">First run</text>
-  <g transform="translate(126 248)"><rect width="210" height="82" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="105" y="33" text-anchor="middle">customers.csv</text><text class="detail" x="105" y="58" text-anchor="middle">5 deterministic rows</text></g>
-  <g transform="translate(430 236)"><rect width="206" height="106" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="103" y="35" text-anchor="middle">chunk 1</text><text class="detail" x="103" y="61" text-anchor="middle">cust-1001</text><text class="detail" x="103" y="82" text-anchor="middle">cust-1002</text></g>
-  <g transform="translate(738 236)"><rect width="228" height="106" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="114" y="35" text-anchor="middle">checkpoint</text><text class="detail" x="114" y="61" text-anchor="middle">customer-csv-import</text><text class="detail" x="114" y="82" text-anchor="middle">next_row = 2</text></g>
-  <g transform="translate(1076 236)"><rect width="246" height="106" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="123" y="35" text-anchor="middle">chunk 2 crash</text><text class="detail" x="123" y="61" text-anchor="middle">cust-1003 committed</text><text class="detail" x="123" y="82" text-anchor="middle">checkpoint stays 2</text></g>
+  <rect class="layer" x="82" y="158" width="430" height="590"/><text class="layer-label" x="297" y="194" text-anchor="middle">First run</text>
+  <rect class="layer" x="552" y="158" width="430" height="590"/><text class="layer-label" x="767" y="194" text-anchor="middle">Restart run</text>
+  <rect class="layer" x="1022" y="158" width="396" height="590"/><text class="layer-label" x="1220" y="194" text-anchor="middle">Completion</text>
 
-  <rect class="band" x="82" y="432" width="1336" height="210"/><text class="band-label" x="112" y="468">Restart run</text>
-  <g transform="translate(202 512)"><rect width="238" height="86" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="119" y="34" text-anchor="middle">new reader</text><text class="detail" x="119" y="61" text-anchor="middle">restore next_row = 2</text></g>
-  <g transform="translate(584 500)"><rect width="280" height="110" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="140" y="34" text-anchor="middle">replay failed chunk</text><text class="detail" x="140" y="60" text-anchor="middle">skip duplicate cust-1003</text><text class="detail" x="140" y="82" text-anchor="middle">commit cust-1004</text></g>
-  <g transform="translate(1008 512)"><rect width="260" height="86" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="130" y="34" text-anchor="middle">complete import</text><text class="detail" x="130" y="61" text-anchor="middle">5 unique customers</text></g>
+  <g transform="translate(192 220)"><rect width="210" height="82" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="105" y="33" text-anchor="middle">customers.csv</text><text class="detail" x="105" y="58" text-anchor="middle">5 deterministic rows</text></g>
+  <g transform="translate(194 350)"><rect width="206" height="106" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="103" y="35" text-anchor="middle">chunk 1</text><text class="detail" x="103" y="61" text-anchor="middle">cust-1001</text><text class="detail" x="103" y="82" text-anchor="middle">cust-1002</text></g>
+  <g transform="translate(183 480)"><rect width="228" height="106" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="114" y="35" text-anchor="middle">checkpoint</text><text class="detail" x="114" y="61" text-anchor="middle">customer-csv-import</text><text class="detail" x="114" y="82" text-anchor="middle">next_row = 2</text></g>
+  <g transform="translate(174 610)"><rect width="246" height="106" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="123" y="35" text-anchor="middle">chunk 2 crash</text><text class="detail" x="123" y="61" text-anchor="middle">cust-1003 committed</text><text class="detail" x="123" y="82" text-anchor="middle">checkpoint stays 2</text></g>
 
-  <rect class="band" x="82" y="704" width="1336" height="56"/><text class="footer" x="750" y="738" text-anchor="middle">Checkpoint is a cursor over parsed data rows; idempotency belongs to the writer because a failed chunk can be replayed.</text>
+  <g transform="translate(648 480)"><rect width="238" height="86" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="119" y="34" text-anchor="middle">new reader</text><text class="detail" x="119" y="61" text-anchor="middle">restore next_row = 2</text></g>
+  <g transform="translate(627 610)"><rect width="280" height="110" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="140" y="34" text-anchor="middle">replay failed chunk</text><text class="detail" x="140" y="60" text-anchor="middle">skip duplicate cust-1003</text><text class="detail" x="140" y="82" text-anchor="middle">commit cust-1004</text></g>
+  <g transform="translate(1090 622)"><rect width="260" height="86" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="130" y="34" text-anchor="middle">complete import</text><text class="detail" x="130" y="61" text-anchor="middle">5 unique customers</text></g>
 
-  <path class="read" d="M 336 289 L 430 289"/><text class="label" x="383" y="269" text-anchor="middle">read rows</text>
-  <path class="ok" d="M 636 289 L 738 289"/><text class="label" x="687" y="269" text-anchor="middle">write ok</text>
-  <path class="fail" d="M 966 289 L 1076 289"/><text class="label" x="1021" y="269" text-anchor="middle">writer error</text>
-  <path class="restart" d="M 1199 342 V 392 Q 1199 404 1187 404 H 333 Q 321 404 321 416 V 512"/><text class="label" x="760" y="394" text-anchor="middle">process restarts with saved checkpoint</text>
-  <path class="restart" d="M 440 555 L 584 555"/><text class="label" x="512" y="535" text-anchor="middle">replay</text>
-  <path class="ok" d="M 864 555 L 1008 555"/><text class="label" x="936" y="535" text-anchor="middle">idempotent write</text>
+  <rect x="130" y="772" width="1240" height="36" rx="12" fill="#ffffff" stroke="#d8e2e8" stroke-width="2"/><text class="footer" x="750" y="796" text-anchor="middle">Checkpoint is a cursor over parsed data rows; idempotency belongs to the writer because a failed chunk can be replayed.</text>
+
+  <path class="read" d="M 297 302 V 350"/><text class="label" x="315" y="330" text-anchor="start">read rows</text>
+  <path class="ok" d="M 297 456 V 480"/><text class="label" x="315" y="474" text-anchor="start">write ok</text>
+  <path class="fail" d="M 297 586 V 610"/><text class="label" x="315" y="604" text-anchor="start">writer error</text>
+  <path class="restart" d="M 420 663 H 524 Q 536 663 536 651 V 535 Q 536 523 548 523 H 648"/><text class="label" x="500" y="640" text-anchor="middle">restart with checkpoint</text>
+  <path class="restart" d="M 767 566 V 610"/><text class="label" x="785" y="592" text-anchor="start">replay</text>
+  <path class="ok" d="M 907 665 H 1090"/><text class="label" x="998" y="645" text-anchor="middle">idempotent write</text>
 </svg>
