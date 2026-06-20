@@ -13,7 +13,18 @@ caller-owned, the authoritative store is an in-memory test projection, and
 
 ## Scenario
 
-![Catalog near-cache Redis scenario](../../docs/images/readme-diagrams/catalog-near-cache-redis-scenario.png)
+### Cold miss coordination
+
+![Catalog near-cache Redis cold-miss scenario](../../docs/images/readme-diagrams/catalog-near-cache-redis-cold-miss-scenario.png)
+
+When two peers miss the same SKU at the same time, Redis stampede coordination
+selects one owner loader. That owner runs `Store.Load`, stores the result
+envelope in Redis, and the waiting peer returns the same product without a
+second backing load.
+
+### Peer write invalidation
+
+![Catalog near-cache Redis invalidation scenario](../../docs/images/readme-diagrams/catalog-near-cache-redis-invalidation-scenario.png)
 
 Peer B may already have `Product v1` in its local memory cache. Peer A writes
 `Product v2` through `PutProduct`, updates the authoritative store, and publishes

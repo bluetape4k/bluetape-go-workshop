@@ -13,7 +13,17 @@ near-cache subscriber만 멈춥니다.
 
 ## Scenario
 
-![Catalog near-cache Redis scenario](../../docs/images/readme-diagrams/catalog-near-cache-redis-scenario.png)
+### Cold miss coordination
+
+![Catalog near-cache Redis cold-miss scenario](../../docs/images/readme-diagrams/catalog-near-cache-redis-cold-miss-scenario.png)
+
+두 peer가 같은 SKU를 동시에 miss하면 Redis stampede coordination이 owner loader
+하나를 고릅니다. Owner는 `Store.Load`를 실행하고 Redis result envelope를 저장하며,
+대기 중인 peer는 두 번째 backing load 없이 같은 product를 반환합니다.
+
+### Peer write invalidation
+
+![Catalog near-cache Redis invalidation scenario](../../docs/images/readme-diagrams/catalog-near-cache-redis-invalidation-scenario.png)
 
 Peer B는 이미 local memory cache에 `Product v1`을 가지고 있을 수 있습니다. Peer A가
 `PutProduct`로 `Product v2`를 쓰면 authoritative store가 갱신되고 Redis near-cache
