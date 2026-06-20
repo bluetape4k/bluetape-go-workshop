@@ -57,7 +57,7 @@
   <path class="request" d="M 314 442 H 374 Q 386 442 386 430 V 264 Q 386 252 398 252 H 450"/><text class="label" x="372" y="423" text-anchor="middle">POST</text>
   <path class="success" d="M 564 314 V 386"/><text class="label" x="616" y="356" text-anchor="middle">success</text>
   <path class="success" d="M 564 486 V 558"/><text class="label" x="616" y="528" text-anchor="middle">success</text>
-  <path class="success" d="M 678 608 H 744 Q 756 608 756 596 V 204 Q 756 192 768 192 H 1188 Q 1200 192 1200 204 V 273 Q 1200 285 1204 285"/><text class="label" x="982" y="212" text-anchor="middle">all forward steps complete</text>
+  <path class="success" d="M 678 608 H 744 Q 756 608 756 596 V 204 Q 756 192 768 192 H 1188 Q 1200 192 1200 204 V 273 H 1204"/><text class="label" x="982" y="212" text-anchor="middle">all forward steps complete</text>
 
   <path class="failure" d="M 678 608 H 744 Q 756 608 756 596 V 260 Q 756 248 768 248 H 832"/><text class="label" x="758" y="430" text-anchor="middle" transform="rotate(-90 758 430)">later step fails</text>
   <path class="comp" d="M 946 306 V 386"/><text class="label" x="1000" y="350" text-anchor="middle">reverse stack top</text>
