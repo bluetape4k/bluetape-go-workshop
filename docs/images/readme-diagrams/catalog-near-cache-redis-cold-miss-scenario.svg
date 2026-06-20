@@ -23,10 +23,10 @@
       .card-text { font-family: 'Comic Mono'; font-size: 15px; fill: #344b59; }
       .label { font-family: 'Comic Mono'; font-size: 13px; fill: #35505f; }
       .small { font-family: 'Comic Mono'; font-size: 12px; fill: #536d7d; }
-      .neutral { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#scenario-neutral); }
-      .load { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#scenario-load); }
-      .invalidate { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#scenario-invalidate); }
-      .write { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-write); }
+      .neutral { fill: none; stroke: #47616f; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-neutral); }
+      .load { fill: none; stroke: #4f8b63; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-load); }
+      .invalidate { fill: none; stroke: #8a6bb0; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-invalidate); }
+      .write { fill: none; stroke: #b95f7a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-write); }
     </style>
   </defs>
 
@@ -63,12 +63,12 @@
     <text class="card-text" x="140" y="108" text-anchor="middle">one LoadCount hit</text>
   </g>
 
-  <path class="neutral" d="M 302 265 H 474 Q 486 265 486 277 V 356 Q 486 368 498 368 H 560"/><rect x="350" y="235" width="132" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="416" y="251" text-anchor="middle">owner attempt</text>
-  <path class="neutral" d="M 302 530 H 410 Q 422 530 422 518 V 410 Q 422 398 434 398 H 560"/><rect x="336" y="500" width="136" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="404" y="516" text-anchor="middle">waiter attempt</text>
+  <path class="neutral" d="M 302 265 H 496 Q 508 265 508 277 V 356 Q 508 368 520 368 H 560"/><rect x="350" y="235" width="132" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="416" y="251" text-anchor="middle">owner attempt</text>
+  <path class="neutral" d="M 302 530 H 456 Q 468 530 468 518 V 420 Q 468 408 480 408 H 560"/><rect x="336" y="500" width="136" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="404" y="516" text-anchor="middle">waiter attempt</text>
   <path class="load" d="M 820 390 H 1030"/><rect x="878" y="360" width="132" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="944" y="376" text-anchor="middle">single loader</text>
   <path class="load" d="M 1170 315 V 250 Q 1170 238 1158 238 H 702 Q 690 238 690 250 V 315"/><rect x="842" y="210" width="144" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="914" y="226" text-anchor="middle">result stored</text>
-  <path class="load" d="M 560 350 H 330 Q 318 350 318 338 V 292 Q 318 280 306 280 H 302"/><rect x="390" y="320" width="108" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="444" y="336" text-anchor="middle">Product v1</text>
-  <path class="load" d="M 560 452 H 500 Q 488 452 488 464 V 560 Q 488 572 476 572 H 302"/><rect x="354" y="542" width="108" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="408" y="558" text-anchor="middle">same result</text>
+  <path class="load" d="M 650 315 V 176 Q 650 164 638 164 H 209 Q 197 164 197 176 V 200"/><rect x="375" y="136" width="108" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="429" y="152" text-anchor="middle">Product v1</text>
+  <path class="load" d="M 690 465 V 624 Q 690 636 678 636 H 209 Q 197 636 197 624 V 595"/><rect x="374" y="644" width="108" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="428" y="660" text-anchor="middle">same result</text>
 
   <rect x="185" y="682" width="1070" height="42" rx="12" fill="#edf1e9" stroke="#5d8a62"/>
   <text class="subtitle" x="720" y="709" text-anchor="middle">Test evidence: two peer reads share one Store.Load call for the same SKU.</text>
