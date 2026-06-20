@@ -11,6 +11,9 @@
 하나의 HTTP instance가 Redis-backed leadership을 노출하고 제어해야 하는 상황을
 보여줍니다. 이 service는 leader lifecycle이 잘 보이도록 API를 작게 유지합니다:
 health check, 현재 leadership state, campaign, resign.
+Topology diagram에서는 **Single Leader Web** lane이 이 예제에 해당합니다.
+chi handler가 `leader.Elector`를 호출하고, Redis가 lease token을 보관하며,
+election group 안에서 최대 하나의 local member만 leader로 보고됩니다.
 
 ## Run
 

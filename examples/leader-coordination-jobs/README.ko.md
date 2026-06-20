@@ -17,6 +17,10 @@ coordination task를 실행해야 할 때 유용합니다. 모든 job이 durable
 여러 replica가 실행 중이지만 하나의 instance만 coordination job을 소유해야 하는
 상황을 보여줍니다. migration gate는 leadership을 보유한 동안 한 번 실행되고,
 cache warmer는 같은 instance가 leader인 동안에만 반복 실행됩니다.
+Topology diagram에서는 **Coordination Jobs** lane이 이 예제에 해당합니다.
+여러 replica가 같은 process를 시작할 수 있지만 Redis-backed leadership이
+side effect를 보호하고, cancellation 또는 leadership 상실 시 worker loop가
+중지됩니다.
 
 ## What It Demonstrates
 

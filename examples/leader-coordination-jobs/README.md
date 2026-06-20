@@ -16,6 +16,9 @@ must be durably processed or retried independently.
 Use this example when several replicas are running but only one of them should
 own a coordination job. The migration gate runs once while leadership is held,
 and the cache warmer keeps looping only while the same instance remains leader.
+In the topology diagram this example owns the **Coordination Jobs** lane:
+replicas may start the same process, but Redis-backed leadership protects the
+side effects and cancellation or lost leadership stops the worker loop.
 
 ## What It Demonstrates
 
