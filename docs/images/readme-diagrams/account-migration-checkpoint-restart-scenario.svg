@@ -12,14 +12,14 @@
       .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
       .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
       .subtitle { font-size: 15px; }
-      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
-      .band-label { font-size: 22px; }
+      .layer-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .layer-label { font-size: 22px; }
       .card-title { font-size: 23px; }
       .detail { font-size: 13px; }
       .label { font-size: 12px; }
       .footer { font-size: 13px; }
       .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
-      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .layer { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .read { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#sc-read); }
       .ok { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#sc-ok); }
       .fail { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#sc-fail); }
@@ -31,23 +31,32 @@
   <text class="title" x="750" y="82" text-anchor="middle">Account Migration Checkpoint Restart Scenario</text>
   <text class="subtitle" x="750" y="116" text-anchor="middle">A saved source cursor lets the restart skip completed work and continue from the failed account.</text>
 
-  <rect class="band" x="82" y="158" width="1336" height="222"/><text class="band-label" x="112" y="194">First run</text>
-  <g transform="translate(126 240)"><rect width="214" height="94" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="107" y="35" text-anchor="middle">Legacy accounts</text><text class="detail" x="107" y="61" text-anchor="middle">acct-1001..1005</text></g>
-  <g transform="translate(430 240)"><rect width="218" height="94" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="109" y="35" text-anchor="middle">Chunk 1</text><text class="detail" x="109" y="61" text-anchor="middle">write acct-1001..1002</text></g>
-  <g transform="translate(752 240)"><rect width="218" height="94" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="109" y="35" text-anchor="middle">Checkpoint</text><text class="detail" x="109" y="61" text-anchor="middle">next_index = 2</text></g>
-  <g transform="translate(1082 240)"><rect width="242" height="94" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="121" y="35" text-anchor="middle">Crash point</text><text class="detail" x="121" y="61" text-anchor="middle">acct-1003 processor error</text></g>
+  <rect class="layer" x="84" y="158" width="370" height="594"/>
+  <text class="layer-label" x="269" y="196" text-anchor="middle">First run</text>
+  <rect class="layer" x="516" y="158" width="354" height="594"/>
+  <text class="layer-label" x="693" y="196" text-anchor="middle">Checkpoint handoff</text>
+  <rect class="layer" x="932" y="158" width="484" height="594"/>
+  <text class="layer-label" x="1174" y="196" text-anchor="middle">Restart run</text>
 
-  <rect class="band" x="82" y="432" width="1336" height="214"/><text class="band-label" x="112" y="468">Restart run</text>
-  <g transform="translate(202 512)"><rect width="238" height="88" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="119" y="35" text-anchor="middle">New process</text><text class="detail" x="119" y="62" text-anchor="middle">load account-migration-v1</text></g>
-  <g transform="translate(584 500)"><rect width="282" height="112" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="141" y="34" text-anchor="middle">Restore cursor</text><text class="detail" x="141" y="61" text-anchor="middle">read acct-1003..1005</text><text class="detail" x="141" y="84" text-anchor="middle">completed chunk is not read</text></g>
-  <g transform="translate(1010 512)"><rect width="260" height="88" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="130" y="35" text-anchor="middle">Complete</text><text class="detail" x="130" y="62" text-anchor="middle">checkpoint next_index = 5</text></g>
+  <g transform="translate(132 248)"><rect width="274" height="86" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="137" y="34" text-anchor="middle">Legacy accounts</text><text class="detail" x="137" y="60" text-anchor="middle">acct-1001..1005</text></g>
+  <g transform="translate(132 414)"><rect width="274" height="86" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="137" y="34" text-anchor="middle">Chunk 1</text><text class="detail" x="137" y="60" text-anchor="middle">write acct-1001..1002</text></g>
+  <g transform="translate(132 580)"><rect width="274" height="86" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="137" y="34" text-anchor="middle">Crash point</text><text class="detail" x="137" y="60" text-anchor="middle">acct-1003 processor error</text></g>
 
-  <rect class="band" x="82" y="704" width="1336" height="56"/><text class="footer" x="750" y="738" text-anchor="middle">The checkpoint key identifies one migration cursor; replacing the store changes persistence, not step behavior.</text>
+  <g transform="translate(568 300)"><rect width="250" height="90" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="125" y="34" text-anchor="middle">Checkpoint</text><text class="detail" x="125" y="60" text-anchor="middle">next_index = 2</text></g>
+  <g transform="translate(566 500)"><rect width="254" height="90" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="127" y="34" text-anchor="middle">Saved key</text><text class="detail" x="127" y="60" text-anchor="middle">account-migration-v1</text></g>
 
-  <path class="read" d="M 340 287 L 430 287"/><text class="label" x="385" y="267" text-anchor="middle">read</text>
-  <path class="ok" d="M 648 287 L 752 287"/><text class="label" x="700" y="267" text-anchor="middle">save after write</text>
-  <path class="fail" d="M 970 287 L 1082 287"/><text class="label" x="1026" y="267" text-anchor="middle">next account</text>
-  <path class="restart" d="M 1203 334 V 392 Q 1203 404 1191 404 H 333 Q 321 404 321 416 V 512"/><text class="label" x="760" y="394" text-anchor="middle">restart keeps checkpoint at 2</text>
-  <path class="restart" d="M 440 556 L 584 556"/><text class="label" x="512" y="536" text-anchor="middle">restore</text>
-  <path class="ok" d="M 866 556 L 1010 556"/><text class="label" x="938" y="536" text-anchor="middle">write remaining</text>
+  <g transform="translate(984 236)"><rect width="286" height="86" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="143" y="34" text-anchor="middle">New process</text><text class="detail" x="143" y="60" text-anchor="middle">load saved cursor</text></g>
+  <g transform="translate(984 398)"><rect width="322" height="108" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="161" y="34" text-anchor="middle">Restore cursor</text><text class="detail" x="161" y="61" text-anchor="middle">read acct-1003..1005</text><text class="detail" x="161" y="84" text-anchor="middle">completed chunk is not read</text></g>
+  <g transform="translate(984 590)"><rect width="286" height="86" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="143" y="34" text-anchor="middle">Complete</text><text class="detail" x="143" y="60" text-anchor="middle">checkpoint next_index = 5</text></g>
+
+  <path class="read" d="M 269 334 V 414"/><text class="label" x="318" y="378" text-anchor="middle">read</text>
+  <path class="ok" d="M 406 457 H 486 Q 498 457 498 445 V 345 Q 498 333 510 333 H 568"/><text class="label" x="507" y="392" text-anchor="middle" transform="rotate(-90 507 392)">save after write</text>
+  <path class="fail" d="M 269 500 V 580"/><text class="label" x="326" y="544" text-anchor="middle">next account</text>
+  <path class="restart" d="M 406 623 H 486 Q 498 623 498 611 V 545 Q 498 533 510 533 H 566"/><text class="label" x="504" y="594" text-anchor="middle" transform="rotate(-90 504 594)">checkpoint at 2</text>
+  <path class="restart" d="M 820 545 H 902 Q 914 545 914 533 V 279 Q 914 267 926 267 H 984"/><text class="label" x="920" y="410" text-anchor="middle" transform="rotate(-90 920 410)">restart reads key</text>
+  <path class="restart" d="M 1127 322 V 398"/><text class="label" x="1184" y="364" text-anchor="middle">restore</text>
+  <path class="ok" d="M 1145 506 V 590"/><text class="label" x="1206" y="552" text-anchor="middle">write remaining</text>
+
+  <rect x="214" y="784" width="1072" height="42" rx="12" fill="#ffffff" stroke="#d8e2e8"/>
+  <text class="footer" x="750" y="810" text-anchor="middle">The checkpoint key identifies one migration cursor; replacing the store changes persistence, not step behavior.</text>
 </svg>
