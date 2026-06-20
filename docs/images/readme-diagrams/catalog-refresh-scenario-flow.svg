@@ -3,7 +3,7 @@
   <desc id="desc">SKU refresh job passes through retry and timeout policies, calls a flaky catalog provider, updates a storefront read model, and emits resilience events.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+      <polygon points="1,1 7,4 1,7" fill="#47616f"/>
     </marker>
     <style>
       .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
@@ -58,9 +58,9 @@
   <text class="label" x="326" y="246" text-anchor="middle">Refresh(sku)</text>
   <path class="route" d="M 620 265 L 730 265"/>
   <text class="label" x="675" y="246" text-anchor="middle">attempt</text>
-  <path class="route" d="M 960 265 L 1048 247"/>
+  <path class="route" d="M 960 265 H 1039 Q 1048 265 1048 256 V 247"/>
   <text class="label" x="1008" y="226" text-anchor="middle">success</text>
-  <path class="route-soft" d="M 620 314 L 684 314 L 684 451 L 1058 451"/>
+  <path class="route-soft" d="M 620 314 H 672 Q 684 314 684 326 V 439 Q 684 451 696 451 H 1058"/>
   <text class="label" x="820" y="432" text-anchor="middle">OnEvent(event)</text>
 
   <rect x="192" y="540" width="956" height="38" rx="12" fill="#efe7d2" stroke="#b99b5d"/>

@@ -2,10 +2,10 @@
   <title id="title">Order Fulfillment Integration Scenario</title>
   <desc id="desc">Integrated order fulfillment scenario showing lifecycle transitions, workflow steps, compensation cleanup, and report projection.</desc>
   <defs>
-    <marker id="scenario-state" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="scenario-side" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="scenario-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="scenario-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="scenario-state" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="scenario-side" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="scenario-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <marker id="scenario-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -50,9 +50,9 @@
   <path class="side" d="M 612 283 L 704 283"/><text class="label" x="658" y="263" text-anchor="middle">side effect</text>
   <path class="state" d="M 934 283 L 1026 283"/><text class="label" x="980" y="263" text-anchor="middle">state</text>
   <path class="state" d="M 1200 283 L 1282 283"/><text class="label" x="1241" y="263" text-anchor="middle">state</text>
-  <path class="failure" d="M 1353 322 L 1353 406 L 332 406 L 332 528"/><text class="label" x="842" y="396" text-anchor="middle">later failure preserves original_error</text>
+  <path class="failure" d="M 1353 322 V 394 Q 1353 406 1341 406 H 344 Q 332 406 332 418 V 528"/><text class="label" x="842" y="396" text-anchor="middle">later failure preserves original_error</text>
   <path class="comp" d="M 454 575 L 606 575"/><text class="label" x="530" y="554" text-anchor="middle">reverse stack</text>
   <path class="comp" d="M 842 575 L 984 575"/><text class="label" x="913" y="554" text-anchor="middle">continue cleanup</text>
-  <path class="failure" d="M 1107 634 L 1107 735 L 890 735"/><text class="label" x="1030" y="724" text-anchor="middle">finalize failure state</text>
+  <path class="failure" d="M 1107 634 V 723 Q 1107 735 1095 735 H 890"/><text class="label" x="1030" y="724" text-anchor="middle">finalize failure state</text>
   <path class="state" d="M 770 766 L 770 790"/><text class="label" x="890" y="778" text-anchor="middle">stable projection</text>
 </svg>

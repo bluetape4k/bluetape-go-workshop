@@ -2,10 +2,10 @@
   <title id="title">Compensation Workflow Architecture</title>
   <desc id="desc">Layered architecture for a Gin compensation workflow example using workflow.Sequential and workreport.Report.</desc>
   <defs>
-    <marker id="arch-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="arch-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
-    <marker id="arch-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="arch-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="arch-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
+    <marker id="arch-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -45,14 +45,14 @@
   <g transform="translate(714 600)"><rect width="264" height="66" rx="12" fill="#fee2e2" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="132" y="29" text-anchor="middle">Side-effect Flags</text><text class="detail" x="132" y="51" text-anchor="middle">inventory, payment, shipment</text></g>
   <g transform="translate(1090 600)"><rect width="246" height="66" rx="12" fill="#ecfccb" stroke="#78944d" stroke-width="2"/><text class="card-title" x="123" y="29" text-anchor="middle">workreport.Report</text><text class="detail" x="123" y="51" text-anchor="middle">nested execution tree</text></g>
 
-  <path class="request" d="M 223 252 L 223 340 L 339 340 L 339 382"/><text class="label" x="280" y="366" text-anchor="middle">POST JSON</text>
+  <path class="request" d="M 223 252 V 328 Q 223 340 235 340 H 327 Q 339 340 339 352 V 382"/><text class="label" x="280" y="366" text-anchor="middle">POST JSON</text>
   <path class="request" d="M 454 421 L 548 421"/><text class="label" x="501" y="401" text-anchor="middle">bind + validate</text>
-  <path class="success" d="M 674 470 L 674 536 L 383 536 L 383 600"/><text class="label" x="528" y="552" text-anchor="middle">build forward runner</text>
+  <path class="success" d="M 674 470 V 524 Q 674 536 662 536 H 395 Q 383 536 383 548 V 600"/><text class="label" x="528" y="552" text-anchor="middle">build forward runner</text>
   <path class="success" d="M 540 633 L 714 633"/><text class="label" x="627" y="613" text-anchor="middle">successful steps mutate flags</text>
   <path class="comp" d="M 800 421 L 902 421"/><text class="label" x="851" y="401" text-anchor="middle">push cleanup</text>
-  <path class="comp" d="M 1029 470 L 1029 520 L 500 520 L 500 600"/><text class="label" x="820" y="506" text-anchor="middle">reverse runner on failure</text>
+  <path class="comp" d="M 1029 470 V 508 Q 1029 520 1017 520 H 512 Q 500 520 500 532 V 600"/><text class="label" x="820" y="506" text-anchor="middle">reverse runner on failure</text>
   <path class="success" d="M 978 633 L 1090 633"/><text class="label" x="1034" y="613" text-anchor="middle">project reports</text>
-  <path class="failure" d="M 846 600 L 846 560 L 1213 560 L 1213 600"/><text class="label" x="1030" y="548" text-anchor="middle">original failure remains visible</text>
+  <path class="failure" d="M 846 600 V 572 Q 846 560 858 560 H 1201 Q 1213 560 1213 572 V 600"/><text class="label" x="1030" y="548" text-anchor="middle">original failure remains visible</text>
   <path class="success" d="M 1213 600 L 1213 260"/><text class="label" x="1260" y="430" text-anchor="middle">200 / 409 / 408</text>
   <path class="success" d="M 1062 222 L 334 222"/><text class="label" x="698" y="204" text-anchor="middle">stable response</text>
 

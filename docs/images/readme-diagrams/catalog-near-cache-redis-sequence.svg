@@ -1,116 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="820" viewBox="0 0 1480 820" role="img" aria-labelledby="title desc">
-  <title id="title">Catalog Near-Cache Redis Sequence</title>
-  <desc id="desc">Sequence diagram showing a cold miss owner loading once, peer waiters receiving the Redis result envelope, and a later write invalidating the peer local cache.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1590" height="825" viewBox="-60 0 1590 825" role="img" aria-labelledby="title desc">
+  <title id="title">Near-Cache and Stampede Sequence</title>
+  <desc id="desc">Best-practices sequence diagram with participant cards, lifelines, activations, numbered labels, and branch frame.</desc>
   <defs>
-    <marker id="seq-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
-    </marker>
-    <marker id="seq-load" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
-    </marker>
-    <marker id="seq-redis" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
-    </marker>
-    <marker id="seq-invalidate" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/>
-    </marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#203040" flood-opacity="0.10"/></filter>
+    <marker id="arrow-call" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#3F7D9C" stroke="#3F7D9C" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-return" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#6E8F4F" stroke="#6E8F4F" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-async" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#755BC6" stroke="#755BC6" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-fail" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#B86868" stroke="#B86868" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
-      .title { font-family: 'Architects Daughter'; font-size: 36px; fill: #243845; }
-      .subtitle { font-family: 'Comic Mono'; font-size: 15px; fill: #536d7d; }
-      .actor { font-family: 'Architects Daughter'; font-size: 19px; fill: #243845; }
-      .label { font-family: 'Comic Mono'; font-size: 13px; fill: #35505f; }
-      .small { font-family: 'Comic Mono'; font-size: 12px; fill: #536d7d; }
-      .lifeline { stroke: #a9bac5; stroke-width: 2; stroke-dasharray: 7 7; }
-      .main { fill: none; stroke: #47616f; stroke-width: 2.7; marker-end: url(#seq-main); }
-      .load { fill: none; stroke: #4f8b63; stroke-width: 2.7; marker-end: url(#seq-load); }
-      .redis { fill: none; stroke: #b95f7a; stroke-width: 2.7; marker-end: url(#seq-redis); }
-      .invalidate { fill: none; stroke: #8a6bb0; stroke-width: 2.7; marker-end: url(#seq-invalidate); }
+      .canvas{fill:#fbfcf8}.title{font-family:'Architects Daughter';font-size:40px;fill:#263238}.subtitle,.detail,.footer{font-family:'Comic Mono';fill:#36464f}.subtitle{font-size:16px}.footer{font-size:14px;fill:#60727d}.cardTitle{font-family:'Architects Daughter';font-size:21px;fill:#1f3138}.role{font-family:'Comic Mono';font-size:12px;fill:#546a73}.card{fill:#ffffff;stroke-width:2;filter:url(#shadow)}.lifeline{stroke:#9aaab1;stroke-width:2;stroke-dasharray:7 8;stroke-linecap:round}.activation{fill:#e6f2ec;stroke:#5b7e67;stroke-width:1.5}.call,.return,.async,.fail{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.call{stroke:#3F7D9C;marker-end:url(#arrow-call)}.return{stroke:#6E8F4F;stroke-width:2.6;stroke-dasharray:8 6;marker-end:url(#arrow-return)}.async{stroke:#755BC6;marker-end:url(#arrow-async)}.fail{stroke:#B86868;marker-end:url(#arrow-fail)}.alt{fill:#eef7f0;fill-opacity:.14;stroke:#78909c;stroke-width:2.4;stroke-dasharray:12 7}.divider{stroke:#78909c;stroke-width:2;stroke-dasharray:10 8}rect.label{fill:#ffffff;stroke:#d7e0e4;stroke-width:1.3}.callLabel{stroke:#9cc2d1}.returnLabel{stroke:#b6c9a4}.asyncLabel{stroke:#b8a9d5}.failLabel{stroke:#d9abab}.badgeText,.msg{font-family:'Comic Mono';font-size:12px;font-weight:700}.msg{font-size:13px}.callText{fill:#2f6f8e}.returnText{fill:#55783F}.asyncText{fill:#674b91}.failText{fill:#9d4f4f}
     </style>
   </defs>
-
-  <rect x="0" y="0" width="1480" height="820" fill="#fbfaf6"/>
-  <text class="title" x="740" y="58" text-anchor="middle">Near-Cache and Stampede Sequence</text>
-  <text class="subtitle" x="740" y="91" text-anchor="middle">One peer owns the cold load; another peer waits for the Redis result, then later evicts stale local data after a write.</text>
-
-  <g transform="translate(55 138)">
-    <rect width="170" height="58" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Peer A</text>
-  </g>
-  <g transform="translate(285 138)">
-    <rect width="170" height="58" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Stampede A</text>
-  </g>
-  <g transform="translate(515 138)">
-    <rect width="170" height="58" rx="8" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Redis</text>
-  </g>
-  <g transform="translate(745 138)">
-    <rect width="170" height="58" rx="8" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Store</text>
-  </g>
-  <g transform="translate(975 138)">
-    <rect width="170" height="58" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Stampede B</text>
-  </g>
-  <g transform="translate(1205 138)">
-    <rect width="170" height="58" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Peer B</text>
-  </g>
-
-  <path class="lifeline" d="M 140 196 L 140 705"/>
-  <path class="lifeline" d="M 370 196 L 370 705"/>
-  <path class="lifeline" d="M 600 196 L 600 705"/>
-  <path class="lifeline" d="M 830 196 L 830 705"/>
-  <path class="lifeline" d="M 1060 196 L 1060 705"/>
-  <path class="lifeline" d="M 1290 196 L 1290 705"/>
-
-  <path class="main" d="M 140 235 L 370 235"/>
-  <rect x="194" y="205" width="126" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="257" y="222" text-anchor="middle">Get cold SKU</text>
-
-  <path class="redis" d="M 370 275 L 600 275"/>
-  <rect x="422" y="245" width="106" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="475" y="262" text-anchor="middle">acquire lock</text>
-
-  <path class="load" d="M 370 315 L 830 315"/>
-  <rect x="540" y="285" width="120" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="600" y="302" text-anchor="middle">Store.Load once</text>
-
-  <path class="load" d="M 830 355 L 370 355"/>
-  <rect x="546" y="325" width="108" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="600" y="342" text-anchor="middle">Product v1</text>
-
-  <path class="redis" d="M 370 395 L 600 395"/>
-  <rect x="415" y="365" width="140" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="485" y="382" text-anchor="middle">publish result</text>
-
-  <path class="main" d="M 1290 435 L 1060 435"/>
-  <rect x="1110" y="405" width="130" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="1175" y="422" text-anchor="middle">same cold SKU</text>
-
-  <path class="redis" d="M 1060 475 L 600 475"/>
-  <rect x="765" y="445" width="130" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="830" y="462" text-anchor="middle">wait envelope</text>
-
-  <path class="redis" d="M 600 515 L 1060 515"/>
-  <rect x="748" y="485" width="164" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="830" y="502" text-anchor="middle">result envelope</text>
-
-  <path class="load" d="M 1060 555 L 1290 555"/>
-  <rect x="1132" y="525" width="86" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="1175" y="542" text-anchor="middle">Product</text>
-
-  <rect x="70" y="592" width="1320" height="100" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
-  <text class="small" x="96" y="622">Write and invalidation path</text>
-  <path class="invalidate" d="M 140 650 L 600 650"/>
-  <rect x="286" y="620" width="168" height="23" rx="7" fill="#fff7f3"/>
-  <text class="label" x="370" y="637" text-anchor="middle">Set Product v2 event</text>
-  <path class="invalidate" d="M 600 675 L 1290 675"/>
-  <rect x="848" y="700" width="182" height="23" rx="7" fill="#fff7f3"/>
-  <text class="label" x="939" y="717" text-anchor="middle">delete Peer B local SKU</text>
-
-  <rect x="246" y="756" width="988" height="36" rx="11" fill="#edf1e9" stroke="#5d8a62"/>
-  <text class="subtitle" x="740" y="779" text-anchor="middle">The test waits while the owner loader is blocked, then proves the backing load count stays at one.</text>
+  <rect class="canvas" x="-60" y="0" width="1590" height="825"/>
+  <text class="title" x="735" y="64" text-anchor="middle">Near-Cache and Stampede Sequence</text>
+  <text class="subtitle" x="735" y="98" text-anchor="middle">One peer owns the cold load; another peer waits for the Redis result, then later evicts stale local data after a write.</text>
+  <g id="participant-1"><rect class="card" x="-5" y="160" width="190" height="78" rx="10" fill="#E8F3FF" stroke="#5B8DEF"/><text class="cardTitle" x="90" y="203" text-anchor="middle">Peer A</text><line class="lifeline" x1="90" y1="238" x2="90" y2="713"/></g>
+  <g id="participant-2"><rect class="card" x="253" y="160" width="190" height="78" rx="10" fill="#FFF3D9" stroke="#D6A441"/><text class="cardTitle" x="348" y="203" text-anchor="middle">Stampede A</text><line class="lifeline" x1="348" y1="238" x2="348" y2="713"/></g>
+  <g id="participant-3"><rect class="card" x="511" y="160" width="190" height="78" rx="10" fill="#EAF7EF" stroke="#58A978"/><image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBoZWlnaHQ9IjY0IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHdpZHRoPSI2NCI+PGcgdHJhbnNmb3JtPSJtYXRyaXgoLjg0ODMyNyAwIDAgLjg0ODMyNyAtNy44ODM1NzMgLTkuNDQ5NjkxKSI+PHVzZSB4bGluazpocmVmPSIjQiIgZmlsbD0iI2E0MWUxMSIvPjxwYXRoIGQ9Ik00NS41MzYgMzQuOTVjLTIuMDEzIDEuMDUtMTIuNDQgNS4zMzctMTQuNjYgNi40OTRzLTMuNDUzIDEuMTQ2LTUuMjA3LjMwOC0xMi44NS01LjMyLTE0Ljg1LTYuMjc2LTIuMDQtMS42MTMtLjA3Ny0yLjM4MmwxNS4zMzItNS45MzZjMi4zMzItLjgzNiAzLjE0LS44NjcgNS4xMjYtLjE0UzQzLjU1IDMxLjg3IDQ1LjUxIDMyLjZzMi4wMzcgMS4zMS4wMjQgMi4zNnoiIGZpbGw9IiNkODJjMjAiLz48dXNlIHhsaW5rOmhyZWY9IiNCIiB5PSItNi4yMTgiIGZpbGw9IiNhNDFlMTEiLz48dXNlIHhsaW5rOmhyZWY9IiNDIiBmaWxsPSIjZDgyYzIwIi8+PHBhdGggZD0iTTQ1LjUzNiAyNi4wOThjLTIuMDEzIDEuMDUtMTIuNDQgNS4zMzctMTQuNjYgNi40OTVzLTMuNDUzIDEuMTQ2LTUuMjA3LjMwOC0xMi44NS01LjMyLTE0Ljg1LTYuMjc2Yy0xLS40NzgtMS41MjQtLjg4LTEuNTI0LTEuMjZWMjEuNTVzMTQuNDQ3LTMuMTQ1IDE2Ljc4LTMuOTgyIDMuMTQtLjg2NyA1LjEyNi0uMTQgMTMuODUzIDIuODY4IDE1LjgxNCAzLjU4N3YzLjc2YzAgLjM3Ny0uNDUyLjgtMS40NzcgMS4zMjR6IiBmaWxsPSIjYTQxZTExIi8+PHVzZSB4bGluazpocmVmPSIjQyIgeT0iLTYuNDQ5IiBmaWxsPSIjZDgyYzIwIi8+PGcgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTI5LjA5NiAyMC43MTJsLTEuMTgyLTEuOTY1LTMuNzc0LS4zNCAyLjgxNi0xLjAxNi0uODQ1LTEuNTYgMi42MzYgMS4wMyAyLjQ4Ni0uODE0LS42NzIgMS42MTIgMi41MzQuOTUtMy4yNjguMzR6TTIyLjggMjQuNjI0bDguNzQtMS4zNDItMi42NCAzLjg3MnoiLz48ZWxsaXBzZSBjeD0iMjAuNDQ0IiByeD0iNC42NzIiIHJ5PSIxLjgxMSIgY3k9IjIxLjQwMiIvPjwvZz48cGF0aCBkPSJNNDIuMTMyIDIxLjEzOGwtNS4xNyAyLjA0Mi0uMDA0LTQuMDg3eiIgZmlsbD0iIzdhMGMwMCIvPjxwYXRoIGQ9Ik0zNi45NjMgMjMuMThsLS41Ni4yMi01LjE2Ni0yLjA0MiA1LjcyMy0yLjI2NHoiIGZpbGw9IiNhZDIxMTUiLz48L2c+PGRlZnMgPjxwYXRoIGlkPSJCIiBkPSJNNDUuNTM2IDM4Ljc2NGMtMi4wMTMgMS4wNS0xMi40NCA1LjMzNy0xNC42NiA2LjQ5NHMtMy40NTMgMS4xNDYtNS4yMDcuMzA4LTEyLjg1LTUuMzItMTQuODUtNi4yNzZjLTEtLjQ3OC0xLjUyNC0uODgtMS41MjQtMS4yNnYtMy44MTNzMTQuNDQ3LTMuMTQ1IDE2Ljc4LTMuOTgyIDMuMTQtLjg2NyA1LjEyNi0uMTQgMTMuODUzIDIuODY4IDE1LjgxNCAzLjU4N3YzLjc2YzAgLjM3Ny0uNDUyLjgtMS40NzcgMS4zMjR6Ii8+PHBhdGggaWQ9IkMiIGQ9Ik00NS41MzYgMjguNzMzYy0yLjAxMyAxLjA1LTEyLjQ0IDUuMzM3LTE0LjY2IDYuNDk0cy0zLjQ1MyAxLjE0Ni01LjIwNy4zMDgtMTIuODUtNS4zMi0xNC44NS02LjI3Ni0yLjA0LTEuNjEzLS4wNzctMi4zODJsMTUuMzMyLTUuOTM1YzIuMzMyLS44MzcgMy4xNC0uODY3IDUuMTI2LS4xNHMxMi4zNSA0Ljg1MyAxNC4zMTIgNS41NyAyLjAzNyAxLjMxLjAyNCAyLjM2eiIvPjwvZGVmcz48L3N2Zz4=" x="528" y="177" width="38" height="38"/><text class="cardTitle" x="632" y="203" text-anchor="middle">Redis</text><line class="lifeline" x1="606" y1="238" x2="606" y2="713"/></g>
+  <g id="participant-4"><rect class="card" x="769" y="160" width="190" height="78" rx="10" fill="#F1ECFF" stroke="#8A72D6"/><text class="cardTitle" x="864" y="203" text-anchor="middle">Store</text><line class="lifeline" x1="864" y1="238" x2="864" y2="713"/></g>
+  <g id="participant-5"><rect class="card" x="1027" y="160" width="190" height="78" rx="10" fill="#FDECEF" stroke="#DC6B82"/><text class="cardTitle" x="1122" y="203" text-anchor="middle">Stampede B</text><line class="lifeline" x1="1122" y1="238" x2="1122" y2="713"/></g>
+  <g id="participant-6"><rect class="card" x="1285" y="160" width="190" height="78" rx="10" fill="#E9F7F6" stroke="#45A7A1"/><text class="cardTitle" x="1380" y="203" text-anchor="middle">Peer B</text><line class="lifeline" x1="1380" y1="238" x2="1380" y2="713"/></g>
+  <rect class="activation" x="341" y="268" width="14" height="165" rx="6"/>
+  <rect class="activation" x="599" y="268" width="14" height="435" rx="6"/>
+  <rect class="activation" x="857" y="297" width="14" height="96" rx="6"/>
+  <rect class="activation" x="1115" y="417" width="14" height="176" rx="6"/>
+  <rect class="activation" x="1373" y="417" width="14" height="286" rx="6"/>
+  <rect class="alt" x="64" y="262" width="1342" height="315" rx="16"/>
+  <rect class="label failLabel" x="88" y="248" width="230" height="28" rx="8"/>
+  <text class="msg failText" x="203" y="267" text-anchor="middle">alt failure / branch path</text>
+  <g id="message-1"><rect class="label callLabel" x="144" y="254" width="150" height="28" rx="8"/><circle cx="162" cy="268" r="12" fill="#3F7D9C"/><text class="badgeText" x="162" y="272" text-anchor="middle" fill="#fff">1</text><text class="msg callText" x="227" y="272" text-anchor="middle">Get cold SKU</text><path class="call" d="M 90 235 H 348"/></g>
+  <g id="message-2"><rect class="label failLabel" x="402" y="254" width="150" height="28" rx="8"/><circle cx="420" cy="268" r="12" fill="#B86868"/><text class="badgeText" x="420" y="272" text-anchor="middle" fill="#fff">2</text><text class="msg failText" x="485" y="272" text-anchor="middle">acquire lock</text><path class="fail" d="M 348 275 H 606"/></g>
+  <g id="message-3"><rect class="label returnLabel" x="520.3" y="279" width="171.4" height="28" rx="8"/><circle cx="538.3" cy="293" r="12" fill="#6E8F4F"/><text class="badgeText" x="538.3" y="297" text-anchor="middle" fill="#fff">3</text><text class="msg returnText" x="614" y="297" text-anchor="middle">Store.Load once</text><path class="return" d="M 348 315 H 864"/></g>
+  <g id="message-4"><rect class="label returnLabel" x="531" y="319" width="150" height="28" rx="8"/><circle cx="549" cy="333" r="12" fill="#6E8F4F"/><text class="badgeText" x="549" y="337" text-anchor="middle" fill="#fff">4</text><text class="msg returnText" x="614" y="337" text-anchor="middle">Product v1</text><path class="return" d="M 864 355 H 348"/></g>
+  <g id="message-5"><rect class="label failLabel" x="397" y="359" width="160" height="28" rx="8"/><circle cx="415" cy="373" r="12" fill="#B86868"/><text class="badgeText" x="415" y="377" text-anchor="middle" fill="#fff">5</text><text class="msg failText" x="485" y="377" text-anchor="middle">publish result</text><path class="fail" d="M 348 395 H 606"/></g>
+  <g id="message-6"><rect class="label callLabel" x="1176" y="399" width="150" height="28" rx="8"/><circle cx="1194" cy="413" r="12" fill="#3F7D9C"/><text class="badgeText" x="1194" y="417" text-anchor="middle" fill="#fff">6</text><text class="msg callText" x="1259" y="417" text-anchor="middle">same cold SKU</text><path class="call" d="M 1380 435 H 1122"/></g>
+  <g id="message-7"><rect class="label failLabel" x="789" y="439" width="150" height="28" rx="8"/><circle cx="807" cy="453" r="12" fill="#B86868"/><text class="badgeText" x="807" y="457" text-anchor="middle" fill="#fff">7</text><text class="msg failText" x="872" y="457" text-anchor="middle">wait envelope</text><path class="fail" d="M 1122 475 H 606"/></g>
+  <g id="message-8"><rect class="label failLabel" x="778.3" y="479" width="171.4" height="28" rx="8"/><circle cx="796.3" cy="493" r="12" fill="#B86868"/><text class="badgeText" x="796.3" y="497" text-anchor="middle" fill="#fff">8</text><text class="msg failText" x="872" y="497" text-anchor="middle">result envelope</text><path class="fail" d="M 606 515 H 1122"/></g>
+  <g id="message-9"><rect class="label returnLabel" x="1176" y="519" width="150" height="28" rx="8"/><circle cx="1194" cy="533" r="12" fill="#6E8F4F"/><text class="badgeText" x="1194" y="537" text-anchor="middle" fill="#fff">9</text><text class="msg returnText" x="1259" y="537" text-anchor="middle">Product</text><path class="return" d="M 1122 555 H 1380"/></g>
+  <g id="message-10"><rect class="label asyncLabel" x="233.7" y="614" width="228.6" height="28" rx="8"/><circle cx="251.7" cy="628" r="12" fill="#755BC6"/><text class="badgeText" x="251.7" y="632" text-anchor="middle" fill="#fff">10</text><text class="msg asyncText" x="356" y="632" text-anchor="middle">Set Product v2 event</text><path class="async" d="M 90 650 H 606"/></g>
+  <g id="message-11"><rect class="label asyncLabel" x="861.6" y="639" width="262.9" height="28" rx="8"/><circle cx="879.6" cy="653" r="12" fill="#755BC6"/><text class="badgeText" x="879.6" y="657" text-anchor="middle" fill="#fff">11</text><text class="msg asyncText" x="1001" y="657" text-anchor="middle">delete Peer B local SKU</text><path class="async" d="M 606 675 H 1380"/></g>
+  <g><rect x="205.8" y="755" width="1058.4" height="42" rx="12" fill="#ffffff" stroke="#D6E3EF" stroke-width="1.6"/><text class="footer" x="735" y="782" text-anchor="middle">The test waits while the owner loader is blocked, then proves the backing load count stays at one.</text></g>
 </svg>

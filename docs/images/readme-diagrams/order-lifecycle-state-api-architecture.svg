@@ -2,9 +2,9 @@
   <title id="title">Order Lifecycle State API Architecture</title>
   <desc id="desc">Architecture diagram for the Gin order lifecycle state API showing client routes, handlers, state machine, guard, and error mapping boundaries.</desc>
   <defs>
-    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
-    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
-    <marker id="arch-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#47616f"/></marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#4f8b63"/></marker>
+    <marker id="arch-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -39,13 +39,13 @@
   <g transform="translate(420 622)"><rect width="276" height="82" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="138" y="34" text-anchor="middle">state.Machine</text><text class="detail" x="138" y="60" text-anchor="middle">states, events, final states</text></g>
   <g transform="translate(784 622)"><rect width="276" height="82" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="138" y="34" text-anchor="middle">Payment Guard</text><text class="detail" x="138" y="60" text-anchor="middle">requires positive total</text></g>
 
-  <path class="main" d="M 338 227 L 375 227 L 375 394"/><text class="label" x="422" y="309" text-anchor="middle">GET / POST</text>
+  <path class="main" d="M 338 227 H 363 Q 375 227 375 239 V 394"/><text class="label" x="422" y="309" text-anchor="middle">GET / POST</text>
   <path class="main" d="M 496 439 L 620 439"/><text class="label" x="558" y="420" text-anchor="middle">route</text>
-  <path class="main" d="M 749 494 L 749 622 L 696 622"/><text class="label" x="690" y="558" text-anchor="middle">State / Transition</text>
+  <path class="main" d="M 749 494 V 610 Q 749 622 737 622 H 696"/><text class="label" x="690" y="558" text-anchor="middle">State / Transition</text>
   <path class="main" d="M 696 663 L 784 663"/><text class="label" x="740" y="644" text-anchor="middle">pay guard</text>
   <path class="error" d="M 878 439 L 974 439"/><text class="label" x="926" y="420" text-anchor="middle">sentinel error</text>
-  <path class="success" d="M 878 410 L 1128 226"/><text class="label" x="1015" y="305" text-anchor="middle">snapshot</text>
-  <path class="error" d="M 1100 394 L 1160 270"/><text class="label" x="1150" y="347" text-anchor="middle">problem JSON</text>
+  <path class="success" d="M 878 410 H 1116 Q 1128 410 1128 398 V 226"/><text class="label" x="1015" y="305" text-anchor="middle">snapshot</text>
+  <path class="error" d="M 1100 394 H 1148 Q 1160 394 1160 382 V 270"/><text class="label" x="1150" y="347" text-anchor="middle">problem JSON</text>
   <path class="success" d="M 1128 227 L 338 227"/>
 
   <rect x="190" y="764" width="1100" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="789" text-anchor="middle">The example keeps one process-local order for focused lifecycle learning.</text>

@@ -2,10 +2,10 @@
   <title id="title">Compensation Workflow Scenario</title>
   <desc id="desc">Request-scoped fulfillment workflow showing forward steps, original failure preservation, and reverse compensation cleanup.</desc>
   <defs>
-    <marker id="scenario-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="scenario-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="scenario-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="scenario-request" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="scenario-failure" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <marker id="scenario-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -50,11 +50,11 @@
   <path class="request" d="M 322 261 L 408 261"/><text class="label" x="365" y="241" text-anchor="middle">POST</text>
   <path class="success" d="M 644 261 L 728 261"/><text class="label" x="686" y="241" text-anchor="middle">success</text>
   <path class="success" d="M 964 261 L 1048 261"/><text class="label" x="1006" y="241" text-anchor="middle">success</text>
-  <path class="success" d="M 1284 261 L 1368 261 L 1368 790 L 407 790 L 407 754"/><text class="label" x="1390" y="495" text-anchor="middle" transform="rotate(90 1390 495)">all forward steps complete</text>
-  <path class="failure" d="M 1166 312 L 1166 360 L 303 360 L 303 478"/><text class="label" x="734" y="350" text-anchor="middle">later forward step fails</text>
+  <path class="success" d="M 1284 261 H 1356 Q 1368 261 1368 273 V 778 Q 1368 790 1356 790 H 419 Q 407 790 407 778 V 754"/><text class="label" x="1390" y="495" text-anchor="middle" transform="rotate(90 1390 495)">all forward steps complete</text>
+  <path class="failure" d="M 1166 312 V 348 Q 1166 360 1154 360 H 315 Q 303 360 303 372 V 478"/><text class="label" x="734" y="350" text-anchor="middle">later forward step fails</text>
   <path class="comp" d="M 422 525 L 562 525"/><text class="label" x="492" y="504" text-anchor="middle">reverse stack top</text>
   <path class="comp" d="M 808 525 L 946 525"/><text class="label" x="877" y="504" text-anchor="middle">continue cleanup</text>
-  <path class="comp" d="M 1192 525 C 1274 566 1274 674 998 729"/><text class="label" x="1278" y="626" text-anchor="middle">report cleanup outcome</text>
+  <path class="comp" d="M 1192 525 H 1262 Q 1274 525 1274 537 V 717 Q 1274 729 1262 729 H 998"/><text class="label" x="1278" y="626" text-anchor="middle">report cleanup outcome</text>
   <path class="request" d="M 760 654 L 760 704"/><text class="label" x="832" y="684" text-anchor="middle">forward + compensation children</text>
 
   <rect x="214" y="810" width="1092" height="42" rx="12" fill="#ffffff" stroke="#d8e2e8"/>

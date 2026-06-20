@@ -2,9 +2,9 @@
   <title id="title">Order Lifecycle Scenario</title>
   <desc id="desc">Scenario flow for the order lifecycle state API showing the happy path, cancellation path, payment guard, final states, and invalid command handling.</desc>
   <defs>
-    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
-    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
-    <marker id="scenario-cancel" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#47616f"/></marker>
+    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#4f8b63"/></marker>
+    <marker id="scenario-cancel" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -35,11 +35,11 @@
   <path class="success" d="M 1190 236 L 1250 236"/><text class="label" x="1220" y="216" text-anchor="middle">ship</text>
 
   <g transform="translate(82 404)"><rect width="324" height="104" rx="12" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/><text class="card-title" x="162" y="41" text-anchor="middle">Guard Rejection</text><text class="detail" x="162" y="70" text-anchor="middle">pay fails when total_cents &lt;= 0</text><text class="detail" x="162" y="92" text-anchor="middle">state remains submitted</text></g>
-  <path class="cancel" d="M 485 294 L 485 456 L 406 456"/><text class="label" x="446" y="438" text-anchor="middle">guard error</text>
+  <path class="cancel" d="M 485 294 V 444 Q 485 456 473 456 H 406"/><text class="label" x="446" y="438" text-anchor="middle">guard error</text>
 
   <g transform="translate(532 606)"><rect width="416" height="104" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="208" y="41" text-anchor="middle">Cancelled</text><text class="detail" x="208" y="70" text-anchor="middle">final state from draft, submitted, or paid</text><text class="detail" x="208" y="92" text-anchor="middle">later commands return 409 Conflict</text></g>
-  <path class="cancel" d="M 185 294 L 185 370 L 48 370 L 48 658 L 532 658"/><text class="label" x="254" y="639" text-anchor="middle">cancel</text>
-  <path class="cancel" d="M 540 294 L 540 590 L 600 590 L 600 606"/><text class="label" x="572" y="573" text-anchor="middle">cancel</text>
+  <path class="cancel" d="M 185 294 V 358 Q 185 370 173 370 H 60 Q 48 370 48 382 V 646 Q 48 658 60 658 H 532"/><text class="label" x="254" y="639" text-anchor="middle">cancel</text>
+  <path class="cancel" d="M 540 294 V 578 Q 540 590 552 590 H 592 Q 600 590 600 598 V 606"/><text class="label" x="572" y="573" text-anchor="middle">cancel</text>
   <path class="cancel" d="M 795 294 L 795 606"/><text class="label" x="836" y="453" text-anchor="middle">cancel</text>
 
   <rect x="288" y="752" width="904" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="777" text-anchor="middle">The README scenario is intentionally in-memory: it teaches lifecycle safety, not persistence.</text>

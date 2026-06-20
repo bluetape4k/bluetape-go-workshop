@@ -1,113 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="780" viewBox="0 0 1420 780" role="img" aria-labelledby="title desc">
-  <title id="title">Payment Authorization Guard Sequence</title>
-  <desc id="desc">Sequence diagram for successful authorization and rejection paths through Authorizer, circuit breaker, bulkhead, payment gateway, and event sink.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1579" height="830" viewBox="-60 0 1579 830" role="img" aria-labelledby="title desc">
+  <title id="title">Payment Authorization Sequence</title>
+  <desc id="desc">Best-practices sequence diagram with participant cards, lifelines, activations, numbered labels, and branch frame.</desc>
   <defs>
-    <marker id="seq-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
-    </marker>
-    <marker id="seq-return" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
-    </marker>
-    <marker id="seq-reject" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
-    </marker>
-    <marker id="seq-event" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/>
-    </marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#203040" flood-opacity="0.10"/></filter>
+    <marker id="arrow-call" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#3F7D9C" stroke="#3F7D9C" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-return" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#6E8F4F" stroke="#6E8F4F" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-async" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#755BC6" stroke="#755BC6" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-fail" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#B86868" stroke="#B86868" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
     <style>
-      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
-      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
-      .actor { font-family: 'Architects Daughter', cursive; font-size: 19px; fill: #243845; }
-      .label { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
-      .small { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #536d7d; }
-      .lifeline { stroke: #a9bac5; stroke-width: 2; stroke-dasharray: 7 7; }
-      .main { fill: none; stroke: #47616f; stroke-width: 2.7; marker-end: url(#seq-main); }
-      .return { fill: none; stroke: #4f8b63; stroke-width: 2.7; stroke-dasharray: 8 6; marker-end: url(#seq-return); }
-      .reject { fill: none; stroke: #b95f7a; stroke-width: 2.7; marker-end: url(#seq-reject); }
-      .event { fill: none; stroke: #a78335; stroke-width: 2.7; marker-end: url(#seq-event); }
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .canvas{fill:#fbfcf8}.title{font-family:'Architects Daughter';font-size:40px;fill:#263238}.subtitle,.detail,.footer{font-family:'Comic Mono';fill:#36464f}.subtitle{font-size:16px}.footer{font-size:14px;fill:#60727d}.cardTitle{font-family:'Architects Daughter';font-size:21px;fill:#1f3138}.role{font-family:'Comic Mono';font-size:12px;fill:#546a73}.card{fill:#ffffff;stroke-width:2;filter:url(#shadow)}.lifeline{stroke:#9aaab1;stroke-width:2;stroke-dasharray:7 8;stroke-linecap:round}.activation{fill:#e6f2ec;stroke:#5b7e67;stroke-width:1.5}.call,.return,.async,.fail{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.call{stroke:#3F7D9C;marker-end:url(#arrow-call)}.return{stroke:#6E8F4F;stroke-width:2.6;stroke-dasharray:8 6;marker-end:url(#arrow-return)}.async{stroke:#755BC6;marker-end:url(#arrow-async)}.fail{stroke:#B86868;marker-end:url(#arrow-fail)}.alt{fill:#eef7f0;fill-opacity:.14;stroke:#78909c;stroke-width:2.4;stroke-dasharray:12 7}.divider{stroke:#78909c;stroke-width:2;stroke-dasharray:10 8}rect.label{fill:#ffffff;stroke:#d7e0e4;stroke-width:1.3}.callLabel{stroke:#9cc2d1}.returnLabel{stroke:#b6c9a4}.asyncLabel{stroke:#b8a9d5}.failLabel{stroke:#d9abab}.badgeText,.msg{font-family:'Comic Mono';font-size:12px;font-weight:700}.msg{font-size:13px}.callText{fill:#2f6f8e}.returnText{fill:#55783F}.asyncText{fill:#674b91}.failText{fill:#9d4f4f}
     </style>
   </defs>
-
-  <rect x="0" y="0" width="1420" height="780" fill="#fbfaf6"/>
-  <text class="title" x="710" y="58" text-anchor="middle">Payment Authorization Sequence</text>
-  <text class="subtitle" x="710" y="90" text-anchor="middle">The normal path reaches the gateway; rejection paths return before the gateway or second gateway call runs.</text>
-
-  <g transform="translate(54 136)">
-    <rect width="170" height="58" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Order Workflow</text>
-  </g>
-  <g transform="translate(282 136)">
-    <rect width="170" height="58" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Authorizer</text>
-  </g>
-  <g transform="translate(510 136)">
-    <rect width="170" height="58" rx="8" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Circuit Breaker</text>
-  </g>
-  <g transform="translate(738 136)">
-    <rect width="170" height="58" rx="8" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Bulkhead</text>
-  </g>
-  <g transform="translate(966 136)">
-    <rect width="170" height="58" rx="8" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">Gateway</text>
-  </g>
-  <g transform="translate(1194 136)">
-    <rect width="170" height="58" rx="8" fill="#efe7d2" stroke="#a78335" stroke-width="2"/>
-    <text class="actor" x="85" y="36" text-anchor="middle">OnEvent</text>
-  </g>
-
-  <path class="lifeline" d="M 139 194 L 139 690"/>
-  <path class="lifeline" d="M 367 194 L 367 690"/>
-  <path class="lifeline" d="M 595 194 L 595 690"/>
-  <path class="lifeline" d="M 823 194 L 823 690"/>
-  <path class="lifeline" d="M 1051 194 L 1051 690"/>
-  <path class="lifeline" d="M 1279 194 L 1279 690"/>
-
-  <path class="main" d="M 139 230 L 367 230"/>
-  <rect x="188" y="196" width="132" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="254" y="213" text-anchor="middle">Authorize</text>
-
-  <path class="main" d="M 367 268 L 470 268 L 470 304 L 367 304"/>
-  <rect x="390" y="232" width="86" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="433" y="249" text-anchor="middle">validate</text>
-
-  <path class="main" d="M 367 336 L 595 336"/>
-  <rect x="438" y="309" width="86" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="481" y="326" text-anchor="middle">beforeCall</text>
-
-  <path class="main" d="M 595 376 L 823 376"/>
-  <rect x="650" y="342" width="118" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="709" y="359" text-anchor="middle">closed path</text>
-
-  <path class="main" d="M 823 416 L 1051 416"/>
-  <rect x="875" y="382" width="124" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="937" y="399" text-anchor="middle">gateway call</text>
-
-  <path class="return" d="M 1051 456 L 823 456"/>
-  <rect x="886" y="422" width="102" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="937" y="439" text-anchor="middle">auth/error</text>
-
-  <path class="event" d="M 595 500 L 1279 500"/>
-  <rect x="826" y="466" width="190" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="921" y="483" text-anchor="middle">transition or rejection event</text>
-
-  <path class="event" d="M 823 540 L 1279 540"/>
-  <rect x="950" y="506" width="102" height="23" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="1001" y="523" text-anchor="middle">bulkhead event</text>
-
-  <rect x="74" y="572" width="1280" height="108" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
-  <text class="small" x="96" y="602">Rejection alternatives</text>
-  <path class="reject" d="M 595 624 L 367 624"/>
-  <rect x="425" y="590" width="130" height="23" rx="7" fill="#fff7f3"/>
-  <text class="label" x="490" y="607" text-anchor="middle">ErrCircuitOpen</text>
-  <path class="reject" d="M 823 654 L 367 654"/>
-  <rect x="528" y="628" width="174" height="23" rx="7" fill="#fff7f3"/>
-  <text class="label" x="615" y="645" text-anchor="middle">ErrBulkheadRejected</text>
-  <path class="reject" d="M 367 680 L 139 680"/>
-  <rect x="202" y="646" width="102" height="23" rx="7" fill="#fff7f3"/>
-  <text class="label" x="253" y="663" text-anchor="middle">return error</text>
-
-  <rect x="238" y="722" width="944" height="36" rx="11" fill="#edf1e9" stroke="#5d8a62"/>
-  <text class="subtitle" x="710" y="745" text-anchor="middle">Tests prove the open-circuit and overflow paths by counting gateway calls.</text>
+  <rect class="canvas" x="-60" y="0" width="1579" height="830"/>
+  <text class="title" x="730" y="64" text-anchor="middle">Payment Authorization Sequence</text>
+  <text class="subtitle" x="730" y="98" text-anchor="middle">The normal path reaches the gateway; rejection paths return before the gateway or second gateway call runs.</text>
+  <g id="participant-1"><rect class="card" x="-5" y="160" width="190" height="78" rx="10" fill="#E8F3FF" stroke="#5B8DEF"/><text class="cardTitle" x="90" y="203" text-anchor="middle">Order Workflow</text><line class="lifeline" x1="90" y1="238" x2="90" y2="718"/></g>
+  <g id="participant-2"><rect class="card" x="250.8" y="160" width="190" height="78" rx="10" fill="#FFF3D9" stroke="#D6A441"/><text class="cardTitle" x="345.8" y="203" text-anchor="middle">Authorizer</text><line class="lifeline" x1="345.8" y1="238" x2="345.8" y2="718"/></g>
+  <g id="participant-3"><rect class="card" x="506.6" y="160" width="190" height="78" rx="10" fill="#EAF7EF" stroke="#58A978"/><text class="cardTitle" x="601.6" y="203" text-anchor="middle">Circuit Breaker</text><line class="lifeline" x1="601.6" y1="238" x2="601.6" y2="718"/></g>
+  <g id="participant-4"><rect class="card" x="762.4" y="160" width="190" height="78" rx="10" fill="#F1ECFF" stroke="#8A72D6"/><text class="cardTitle" x="857.4" y="203" text-anchor="middle">Bulkhead</text><line class="lifeline" x1="857.4" y1="238" x2="857.4" y2="718"/></g>
+  <g id="participant-5"><rect class="card" x="1018.2" y="160" width="190" height="78" rx="10" fill="#FDECEF" stroke="#DC6B82"/><text class="cardTitle" x="1113.2" y="203" text-anchor="middle">Gateway</text><line class="lifeline" x1="1113.2" y1="238" x2="1113.2" y2="718"/></g>
+  <g id="participant-6"><rect class="card" x="1274" y="160" width="190" height="78" rx="10" fill="#E9F7F6" stroke="#45A7A1"/><text class="cardTitle" x="1369" y="203" text-anchor="middle">OnEvent</text><line class="lifeline" x1="1369" y1="238" x2="1369" y2="718"/></g>
+  <rect class="activation" x="338.8" y="268" width="14" height="440" rx="6"/>
+  <rect class="activation" x="594.6" y="318" width="14" height="344" rx="6"/>
+  <rect class="activation" x="850.4" y="358" width="14" height="334" rx="6"/>
+  <rect class="activation" x="1106.2" y="398" width="14" height="96" rx="6"/>
+  <rect class="activation" x="1362" y="482" width="14" height="96" rx="6"/>
+  <rect class="alt" x="64" y="412" width="1331" height="326" rx="16"/>
+  <rect class="label failLabel" x="88" y="398" width="230" height="28" rx="8"/>
+  <text class="msg failText" x="203" y="417" text-anchor="middle">alt failure / branch path</text>
+  <g id="message-1"><rect class="label callLabel" x="142.9" y="254" width="150" height="28" rx="8"/><circle cx="160.9" cy="268" r="12" fill="#3F7D9C"/><text class="badgeText" x="160.9" y="272" text-anchor="middle" fill="#fff">1</text><text class="msg callText" x="225.9" y="272" text-anchor="middle">Authorize</text><path class="call" d="M 90 230 H 345.8"/></g>
+  <g id="message-2"><rect class="label callLabel" x="249.9" y="254" width="150" height="28" rx="8"/><circle cx="267.9" cy="268" r="12" fill="#3F7D9C"/><text class="badgeText" x="267.9" y="272" text-anchor="middle" fill="#fff">2</text><text class="msg callText" x="332.9" y="272" text-anchor="middle">validate</text><path class="call" d="M 345.8 268 H 458 Q 470 268 470 280 V 292 Q 470 304 458 304 H 345.8"/></g>
+  <g id="message-3"><rect class="label callLabel" x="398.7" y="300" width="150" height="28" rx="8"/><circle cx="416.7" cy="314" r="12" fill="#3F7D9C"/><text class="badgeText" x="416.7" y="318" text-anchor="middle" fill="#fff">3</text><text class="msg callText" x="481.7" y="318" text-anchor="middle">beforeCall</text><path class="call" d="M 345.8 336 H 601.6"/></g>
+  <g id="message-4"><rect class="label callLabel" x="654.5" y="340" width="150" height="28" rx="8"/><circle cx="672.5" cy="354" r="12" fill="#3F7D9C"/><text class="badgeText" x="672.5" y="358" text-anchor="middle" fill="#fff">4</text><text class="msg callText" x="737.5" y="358" text-anchor="middle">closed path</text><path class="call" d="M 601.6 376 H 857.4"/></g>
+  <g id="message-5"><rect class="label callLabel" x="910.3" y="380" width="150" height="28" rx="8"/><circle cx="928.3" cy="394" r="12" fill="#3F7D9C"/><text class="badgeText" x="928.3" y="398" text-anchor="middle" fill="#fff">5</text><text class="msg callText" x="993.3" y="398" text-anchor="middle">gateway call</text><path class="call" d="M 857.4 416 H 1113.2"/></g>
+  <g id="message-6"><rect class="label failLabel" x="910.3" y="420" width="150" height="28" rx="8"/><circle cx="928.3" cy="434" r="12" fill="#B86868"/><text class="badgeText" x="928.3" y="438" text-anchor="middle" fill="#fff">6</text><text class="msg failText" x="993.3" y="438" text-anchor="middle">auth/error</text><path class="fail" d="M 1113.2 456 H 857.4"/></g>
+  <g id="message-7"><rect class="label asyncLabel" x="825.3" y="464" width="320" height="28" rx="8"/><circle cx="843.3" cy="478" r="12" fill="#755BC6"/><text class="badgeText" x="843.3" y="482" text-anchor="middle" fill="#fff">7</text><text class="msg asyncText" x="993.3" y="482" text-anchor="middle">transition or rejection event</text><path class="async" d="M 601.6 500 H 1369"/></g>
+  <g id="message-8"><rect class="label asyncLabel" x="1033.2" y="504" width="160" height="28" rx="8"/><circle cx="1051.2" cy="518" r="12" fill="#755BC6"/><text class="badgeText" x="1051.2" y="522" text-anchor="middle" fill="#fff">8</text><text class="msg asyncText" x="1121.2" y="522" text-anchor="middle">bulkhead event</text><path class="async" d="M 857.4 540 H 1369"/></g>
+  <g id="message-9"><rect class="label failLabel" x="393.7" y="588" width="160" height="28" rx="8"/><circle cx="411.7" cy="602" r="12" fill="#B86868"/><text class="badgeText" x="411.7" y="606" text-anchor="middle" fill="#fff">9</text><text class="msg failText" x="481.7" y="606" text-anchor="middle">ErrCircuitOpen</text><path class="fail" d="M 601.6 624 H 345.8"/></g>
+  <g id="message-10"><rect class="label failLabel" x="493" y="618" width="217.1" height="28" rx="8"/><circle cx="511" cy="632" r="12" fill="#B86868"/><text class="badgeText" x="511" y="636" text-anchor="middle" fill="#fff">10</text><text class="msg failText" x="609.6" y="636" text-anchor="middle">ErrBulkheadRejected</text><path class="fail" d="M 857.4 654 H 345.8"/></g>
+  <g id="message-11"><rect class="label failLabel" x="142.9" y="644" width="150" height="28" rx="8"/><circle cx="160.9" cy="658" r="12" fill="#B86868"/><text class="badgeText" x="160.9" y="662" text-anchor="middle" fill="#fff">11</text><text class="msg failText" x="225.9" y="662" text-anchor="middle">return error</text><path class="fail" d="M 345.8 680 H 90"/></g>
+  <g><rect x="204.3" y="760" width="1050.5" height="42" rx="12" fill="#ffffff" stroke="#D6E3EF" stroke-width="1.6"/><text class="footer" x="730" y="787" text-anchor="middle">Tests prove the open-circuit and overflow paths by counting gateway calls.</text></g>
 </svg>

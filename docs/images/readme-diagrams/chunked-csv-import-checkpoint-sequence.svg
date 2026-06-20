@@ -1,56 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1554" height="952" viewBox="-60 0 1554 952" role="img" aria-labelledby="title desc">
   <title id="title">Chunked CSV Import Checkpoint Sequence</title>
-  <desc id="desc">Sequence diagram showing first run checkpoint save, simulated crash, restart, duplicate skip, and final checkpoint.</desc>
+  <desc id="desc">Best-practices sequence diagram with participant cards, lifelines, activations, numbered labels, and branch frame.</desc>
   <defs>
-    <marker id="seq-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="seq-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="seq-red" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="seq-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#203040" flood-opacity="0.10"/></filter>
+    <marker id="arrow-call" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#3F7D9C" stroke="#3F7D9C" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-return" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#6E8F4F" stroke="#6E8F4F" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-async" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#755BC6" stroke="#755BC6" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-fail" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#B86868" stroke="#B86868" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
-      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
-      .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
-      .subtitle { font-size: 15px; }
-      .card-title { font-family: 'Architects Daughter'; font-size: 22px; fill: #24313f; }
-      .detail { font-size: 13px; }
-      .label { font-size: 12px; }
-      .footer { font-size: 13px; }
-      .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
-      .lifeline { stroke: #cbd8e2; stroke-width: 2; stroke-dasharray: 7 8; }
-      .blue { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#seq-blue); }
-      .green { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#seq-green); }
-      .red { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#seq-red); }
-      .purple { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#seq-purple); }
+      .canvas{fill:#fbfcf8}.title{font-family:'Architects Daughter';font-size:40px;fill:#263238}.subtitle,.detail,.footer{font-family:'Comic Mono';fill:#36464f}.subtitle{font-size:16px}.footer{font-size:14px;fill:#60727d}.cardTitle{font-family:'Architects Daughter';font-size:21px;fill:#1f3138}.role{font-family:'Comic Mono';font-size:12px;fill:#546a73}.card{fill:#ffffff;stroke-width:2;filter:url(#shadow)}.lifeline{stroke:#9aaab1;stroke-width:2;stroke-dasharray:7 8;stroke-linecap:round}.activation{fill:#e6f2ec;stroke:#5b7e67;stroke-width:1.5}.call,.return,.async,.fail{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.call{stroke:#3F7D9C;marker-end:url(#arrow-call)}.return{stroke:#6E8F4F;stroke-width:2.6;stroke-dasharray:8 6;marker-end:url(#arrow-return)}.async{stroke:#755BC6;marker-end:url(#arrow-async)}.fail{stroke:#B86868;marker-end:url(#arrow-fail)}.alt{fill:#eef7f0;fill-opacity:.14;stroke:#78909c;stroke-width:2.4;stroke-dasharray:12 7}.divider{stroke:#78909c;stroke-width:2;stroke-dasharray:10 8}rect.label{fill:#ffffff;stroke:#d7e0e4;stroke-width:1.3}.callLabel{stroke:#9cc2d1}.returnLabel{stroke:#b6c9a4}.asyncLabel{stroke:#b8a9d5}.failLabel{stroke:#d9abab}.badgeText,.msg{font-family:'Comic Mono';font-size:12px;font-weight:700}.msg{font-size:13px}.callText{fill:#2f6f8e}.returnText{fill:#55783F}.asyncText{fill:#674b91}.failText{fill:#9d4f4f}
     </style>
   </defs>
-  <rect width="1500" height="900" fill="#fbfaf6"/>
-  <rect class="frame" x="44" y="34" width="1412" height="832"/>
-  <text class="title" x="750" y="82" text-anchor="middle">Chunked CSV Import Checkpoint Sequence</text>
-  <text class="subtitle" x="750" y="116" text-anchor="middle">Checkpoint save happens only after a chunk commit; restart reads from the previous safe cursor.</text>
-
-  <g transform="translate(124 162)"><rect width="172" height="58" rx="10" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="86" y="36" text-anchor="middle">Job</text></g>
-  <g transform="translate(362 162)"><rect width="188" height="58" rx="10" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="94" y="36" text-anchor="middle">Reader</text></g>
-  <g transform="translate(616 162)"><rect width="204" height="58" rx="10" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="102" y="36" text-anchor="middle">Writer</text></g>
-  <g transform="translate(892 162)"><rect width="204" height="58" rx="10" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="102" y="36" text-anchor="middle">Checkpoint</text></g>
-  <g transform="translate(1162 162)"><rect width="184" height="58" rx="10" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="92" y="36" text-anchor="middle">Sink</text></g>
-  <line class="lifeline" x1="210" y1="236" x2="210" y2="778"/>
-  <line class="lifeline" x1="456" y1="236" x2="456" y2="778"/>
-  <line class="lifeline" x1="718" y1="236" x2="718" y2="778"/>
-  <line class="lifeline" x1="994" y1="236" x2="994" y2="778"/>
-  <line class="lifeline" x1="1254" y1="236" x2="1254" y2="778"/>
-
-  <path class="blue" d="M 210 276 L 456 276"/><text class="label" x="333" y="256" text-anchor="middle">open and read rows 0..1</text>
-  <path class="green" d="M 456 326 L 718 326"/><text class="label" x="587" y="306" text-anchor="middle">process chunk 1</text>
-  <path class="green" d="M 718 376 L 1254 376"/><text class="label" x="986" y="356" text-anchor="middle">commit cust-1001, cust-1002</text>
-  <path class="blue" d="M 718 426 L 994 426"/><text class="label" x="856" y="406" text-anchor="middle">save next_row=2</text>
-  <path class="blue" d="M 210 486 L 456 486"/><text class="label" x="333" y="466" text-anchor="middle">read rows 2..3</text>
-  <path class="red" d="M 718 536 L 1254 536"/><text class="label" x="986" y="516" text-anchor="middle">commit cust-1003 then crash</text>
-  <path class="red" d="M 718 586 L 210 586"/><text class="label" x="464" y="566" text-anchor="middle">failed report, checkpoint remains 2</text>
-  <path class="purple" d="M 210 646 L 994 646"/><text class="label" x="602" y="626" text-anchor="middle">restart loads next_row=2</text>
-  <path class="purple" d="M 456 696 L 718 696"/><text class="label" x="587" y="676" text-anchor="middle">replay rows 2..4</text>
-  <path class="purple" d="M 718 746 L 1254 746"/><text class="label" x="986" y="726" text-anchor="middle">skip duplicate cust-1003; commit remaining</text>
-  <path class="green" d="M 718 802 L 994 802"/><text class="label" x="856" y="782" text-anchor="middle">save next_row=5</text>
-
-  <g transform="translate(134 834)"><rect width="1232" height="24" rx="12" fill="#ffffff" stroke="#d8e2e8"/><text class="footer" x="616" y="18" text-anchor="middle">No duplicate customer is committed even though the failed chunk is intentionally replayed.</text></g>
+  <rect class="canvas" x="-60" y="0" width="1554" height="952"/>
+  <text class="title" x="717" y="64" text-anchor="middle">Chunked CSV Import Checkpoint Sequence</text>
+  <text class="subtitle" x="717" y="98" text-anchor="middle">Checkpoint save happens only after a chunk commit; restart reads from the previous safe cursor.</text>
+  <g id="participant-1"><rect class="card" x="-5" y="160" width="190" height="78" rx="10" fill="#E8F3FF" stroke="#5B8DEF"/><text class="cardTitle" x="90" y="203" text-anchor="middle">Job</text><line class="lifeline" x1="90" y1="238" x2="90" y2="840"/></g>
+  <g id="participant-2"><rect class="card" x="308.5" y="160" width="190" height="78" rx="10" fill="#FFF3D9" stroke="#D6A441"/><text class="cardTitle" x="403.5" y="203" text-anchor="middle">Reader</text><line class="lifeline" x1="403.5" y1="238" x2="403.5" y2="840"/></g>
+  <g id="participant-3"><rect class="card" x="615" y="160" width="204" height="78" rx="10" fill="#EAF7EF" stroke="#58A978"/><text class="cardTitle" x="717" y="203" text-anchor="middle">Writer</text><line class="lifeline" x1="717" y1="238" x2="717" y2="840"/></g>
+  <g id="participant-4"><rect class="card" x="928.5" y="160" width="204" height="78" rx="10" fill="#F1ECFF" stroke="#8A72D6"/><text class="cardTitle" x="1030.5" y="203" text-anchor="middle">Checkpoint</text><line class="lifeline" x1="1030.5" y1="238" x2="1030.5" y2="840"/></g>
+  <g id="participant-5"><rect class="card" x="1249" y="160" width="190" height="78" rx="10" fill="#FDECEF" stroke="#DC6B82"/><text class="cardTitle" x="1344" y="203" text-anchor="middle">Sink</text><line class="lifeline" x1="1344" y1="238" x2="1344" y2="840"/></g>
+  <rect class="activation" x="396.5" y="268" width="14" height="466" rx="6"/>
+  <rect class="activation" x="710" y="308" width="14" height="522" rx="6"/>
+  <rect class="activation" x="1023.5" y="408" width="14" height="422" rx="6"/>
+  <rect class="activation" x="1337" y="358" width="14" height="426" rx="6"/>
+  <rect class="alt" x="64" y="262" width="1306" height="386" rx="16"/>
+  <rect class="label failLabel" x="88" y="248" width="230" height="28" rx="8"/>
+  <text class="msg failText" x="203" y="267" text-anchor="middle">alt failure / branch path</text>
+  <g id="message-1"><rect class="label failLabel" x="115.3" y="254" width="262.9" height="28" rx="8"/><circle cx="133.3" cy="268" r="12" fill="#B86868"/><text class="badgeText" x="133.3" y="272" text-anchor="middle" fill="#fff">1</text><text class="msg failText" x="254.8" y="272" text-anchor="middle">open and read rows 0..1</text><path class="fail" d="M 90 276 H 403.5"/></g>
+  <g id="message-2"><rect class="label returnLabel" x="474.5" y="290" width="171.4" height="28" rx="8"/><circle cx="492.5" cy="304" r="12" fill="#6E8F4F"/><text class="badgeText" x="492.5" y="308" text-anchor="middle" fill="#fff">2</text><text class="msg returnText" x="568.2" y="308" text-anchor="middle">process chunk 1</text><path class="return" d="M 403.5 326 H 717"/></g>
+  <g id="message-3"><rect class="label returnLabel" x="876.2" y="340" width="308.6" height="28" rx="8"/><circle cx="894.2" cy="354" r="12" fill="#6E8F4F"/><text class="badgeText" x="894.2" y="358" text-anchor="middle" fill="#fff">3</text><text class="msg returnText" x="1038.5" y="358" text-anchor="middle">commit cust-1001, cust-1002</text><path class="return" d="M 717 376 H 1344"/></g>
+  <g id="message-4"><rect class="label callLabel" x="788" y="390" width="171.4" height="28" rx="8"/><circle cx="806" cy="404" r="12" fill="#3F7D9C"/><text class="badgeText" x="806" y="408" text-anchor="middle" fill="#fff">4</text><text class="msg callText" x="881.8" y="408" text-anchor="middle">save next_row=2</text><path class="call" d="M 717 426 H 1030.5"/></g>
+  <g id="message-5"><rect class="label callLabel" x="166.8" y="450" width="160" height="28" rx="8"/><circle cx="184.8" cy="464" r="12" fill="#3F7D9C"/><text class="badgeText" x="184.8" y="468" text-anchor="middle" fill="#fff">5</text><text class="msg callText" x="254.8" y="468" text-anchor="middle">read rows 2..3</text><path class="call" d="M 90 486 H 403.5"/></g>
+  <g id="message-6"><rect class="label failLabel" x="876.2" y="500" width="308.6" height="28" rx="8"/><circle cx="894.2" cy="514" r="12" fill="#B86868"/><text class="badgeText" x="894.2" y="518" text-anchor="middle" fill="#fff">6</text><text class="msg failText" x="1038.5" y="518" text-anchor="middle">commit cust-1003 then crash</text><path class="fail" d="M 717 536 H 1344"/></g>
+  <g id="message-7"><rect class="label failLabel" x="243.5" y="550" width="320" height="28" rx="8"/><circle cx="261.5" cy="564" r="12" fill="#B86868"/><text class="badgeText" x="261.5" y="568" text-anchor="middle" fill="#fff">7</text><text class="msg failText" x="411.5" y="568" text-anchor="middle">failed report, checkpoint remains 2</text><path class="fail" d="M 717 586 H 90"/></g>
+  <g id="message-8"><rect class="label asyncLabel" x="423.1" y="610" width="274.3" height="28" rx="8"/><circle cx="441.1" cy="624" r="12" fill="#755BC6"/><text class="badgeText" x="441.1" y="628" text-anchor="middle" fill="#fff">8</text><text class="msg asyncText" x="568.2" y="628" text-anchor="middle">restart loads next_row=2</text><path class="async" d="M 90 646 H 1030.5"/></g>
+  <g id="message-9"><rect class="label asyncLabel" x="468.8" y="660" width="182.9" height="28" rx="8"/><circle cx="486.8" cy="674" r="12" fill="#755BC6"/><text class="badgeText" x="486.8" y="678" text-anchor="middle" fill="#fff">9</text><text class="msg asyncText" x="568.2" y="678" text-anchor="middle">replay rows 2..4</text><path class="async" d="M 403.5 696 H 717"/></g>
+  <g id="message-10"><rect class="label asyncLabel" x="870.5" y="710" width="320" height="28" rx="8"/><circle cx="888.5" cy="724" r="12" fill="#755BC6"/><text class="badgeText" x="888.5" y="728" text-anchor="middle" fill="#fff">10</text><text class="msg asyncText" x="1038.5" y="728" text-anchor="middle">skip duplicate cust-1003; commit remaining</text><path class="async" d="M 717 746 H 1344"/></g>
+  <g id="message-11"><rect class="label returnLabel" x="788" y="766" width="171.4" height="28" rx="8"/><circle cx="806" cy="780" r="12" fill="#6E8F4F"/><text class="badgeText" x="806" y="784" text-anchor="middle" fill="#fff">11</text><text class="msg returnText" x="881.8" y="784" text-anchor="middle">save next_row=5</text><path class="return" d="M 717 802 H 1030.5"/></g>
+  <g><rect x="200.8" y="882" width="1032.5" height="42" rx="12" fill="#ffffff" stroke="#D6E3EF" stroke-width="1.6"/><text class="footer" x="717" y="909" text-anchor="middle">No duplicate customer is committed even though the failed chunk is intentionally replayed.</text></g>
 </svg>
