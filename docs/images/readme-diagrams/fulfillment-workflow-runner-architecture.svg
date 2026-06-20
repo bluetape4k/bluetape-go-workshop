@@ -2,9 +2,9 @@
   <title id="title">Fulfillment Workflow Runner Architecture</title>
   <desc id="desc">Architecture diagram for the Gin fulfillment workflow runner showing request binding, workflow composition, report projection, and HTTP response mapping.</desc>
   <defs>
-    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
-    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/></marker>
-    <marker id="arch-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#47616f"/></marker>
+    <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#4f8b63"/></marker>
+    <marker id="arch-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -40,15 +40,15 @@
   <g transform="translate(616 622)"><rect width="246" height="82" rx="12" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="123" y="34" text-anchor="middle">Parallel</text><text class="detail" x="123" y="60" text-anchor="middle">risk checks</text></g>
   <g transform="translate(1010 622)"><rect width="246" height="82" rx="12" fill="#f5d3df" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="123" y="34" text-anchor="middle">Conditional</text><text class="detail" x="123" y="60" text-anchor="middle">shipment branch</text></g>
 
-  <path class="main" d="M 338 227 L 371 227 L 371 394"/><text class="label" x="420" y="309" text-anchor="middle">POST /run</text>
-  <path class="main" d="M 492 439 L 612 439"/><text class="label" x="552" y="420" text-anchor="middle">bind</text>
-  <path class="main" d="M 750 494 L 750 548 L 343 548 L 343 622"/><text class="label" x="525" y="530" text-anchor="middle">build per request</text>
-  <path class="main" d="M 466 663 L 616 663"/><text class="label" x="541" y="644" text-anchor="middle">after validate</text>
-  <path class="main" d="M 862 663 L 1010 663"/><text class="label" x="936" y="644" text-anchor="middle">all ok</text>
-  <path class="success" d="M 1133 622 L 1133 548 L 994 548 L 994 484"/><text class="label" x="1074" y="532" text-anchor="middle">report tree</text>
-  <path class="success" d="M 1226 439 L 1300 439 L 1300 270"/><text class="label" x="1336" y="355" text-anchor="middle">200/409/408</text>
-  <path class="success" d="M 1110 227 L 338 227"/>
-  <path class="error" d="M 739 622 L 739 548 L 994 548"/><text class="label" x="862" y="530" text-anchor="middle">failed/cancelled</text>
+  <path class="main" d="M 338 227 H 359 Q 371 227 371 239 V 394"/><text class="label" x="420" y="309" text-anchor="middle">POST /run</text>
+  <path class="main" d="M 492 439 H 612"/><text class="label" x="552" y="420" text-anchor="middle">bind</text>
+  <path class="main" d="M 750 494 V 536 Q 750 548 738 548 H 355 Q 343 548 343 560 V 622"/><text class="label" x="525" y="530" text-anchor="middle">build per request</text>
+  <path class="main" d="M 466 663 H 616"/><text class="label" x="541" y="644" text-anchor="middle">after validate</text>
+  <path class="main" d="M 862 663 H 1010"/><text class="label" x="936" y="644" text-anchor="middle">all ok</text>
+  <path class="success" d="M 1133 622 V 560 Q 1133 548 1121 548 H 1006 Q 994 548 994 536 V 484"/><text class="label" x="1074" y="532" text-anchor="middle">report tree</text>
+  <path class="success" d="M 1226 439 H 1288 Q 1300 439 1300 427 V 270"/><text class="label" x="1336" y="355" text-anchor="middle">200/409/408</text>
+  <path class="success" d="M 1110 227 H 338"/>
+  <path class="error" d="M 820 622 V 548 Q 820 536 832 536 H 1168 Q 1180 536 1180 524 V 484"/><text class="label" x="1000" y="518" text-anchor="middle">failed/cancelled</text>
 
   <rect x="238" y="764" width="1004" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="789" text-anchor="middle">No durable engine, retry scheduler, database, queue, or mutable workflow context map is introduced.</text>
 </svg>
