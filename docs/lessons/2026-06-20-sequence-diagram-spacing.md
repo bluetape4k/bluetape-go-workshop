@@ -1,22 +1,23 @@
-# Sequence Diagram Spacing Lessons
+# Sequence Diagram Spacing
 
 ## Context
 
-Visual review found sequence diagrams where message labels overlapped nearby
-message lines, adjacent labels, or the `alt failure / branch path` label.
+Several README sequence diagrams had call labels close enough to the next call
+line or branch-region label that the rendered PNG looked cramped.
 
 ## Decision
 
-- Treat every message label rectangle as reserved space, not decoration.
-- Keep standalone `alt` labels out of busy first-message corridors.
-- For self-calls, route the loop outside the label rectangle; do not let the
-  horizontal loop segment pass through its own label.
-- Before accepting rendered PNGs, run a coordinate sweep for label-vs-line and
-  label-vs-label overlaps across all sequence SVGs.
+Fix sequence spacing by increasing vertical row gaps and the SVG canvas height
+together. Do not use lateral label movement as the primary fix for call-to-call
+or alt-label collisions, because it hides the symptom while preserving cramped
+message lanes.
 
-## Verification
+## Future Guidance
 
-- Re-render touched sequence SVGs with CairoSVG.
-- Visually inspect a contact sheet and high-risk individual PNGs.
-- Parse all sequence SVGs as XML.
-- Run a sequence label spacing sweep across all README sequence SVGs.
+- When call labels overlap the next call line, move the later message rows down.
+- Increase `height`, `viewBox`, canvas height, lifeline length, activation
+  height, alt frame height, and footer position by the same effective delta.
+- Keep participant positions and label `x` coordinates stable unless the source
+  or target participant order is wrong.
+- Re-render PNGs with CairoSVG and run an id-aware sweep for label-label and
+  label-line overlaps before committing sequence diagram changes.
