@@ -12,14 +12,14 @@
       .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
       .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
       .subtitle { font-size: 15px; }
-      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
-      .band-label { font-size: 22px; }
+      .layer-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .layer-label { font-size: 22px; }
       .card-title { font-size: 23px; }
       .detail { font-size: 13px; }
       .label { font-size: 12px; }
       .footer { font-size: 13px; }
       .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
-      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .layer { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .blue { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#arch-blue); }
       .green { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#arch-green); }
       .purple { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#arch-purple); }
@@ -31,29 +31,31 @@
   <text class="title" x="750" y="82" text-anchor="middle">Chunked CSV Import Checkpoint Architecture</text>
   <text class="subtitle" x="750" y="116" text-anchor="middle">The workshop keeps the batch interfaces visible: reader, processor, writer, checkpoint store, and report projection.</text>
 
-  <rect class="band" x="82" y="158" width="1336" height="136"/><text class="band-label" x="112" y="194">Runnable demo</text>
-  <g transform="translate(178 214)"><rect width="218" height="58" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="109" y="35" text-anchor="middle">go run</text></g>
-  <g transform="translate(628 202)"><rect width="244" height="82" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="122" y="33" text-anchor="middle">batch.Job</text><text class="detail" x="122" y="59" text-anchor="middle">customer-csv-import</text></g>
-  <g transform="translate(1104 202)"><rect width="236" height="82" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="118" y="33" text-anchor="middle">Stable JSON</text><text class="detail" x="118" y="59" text-anchor="middle">no timestamps</text></g>
+  <rect class="layer" x="82" y="158" width="300" height="590"/><text class="layer-label" x="232" y="194" text-anchor="middle">Runnable demo</text>
+  <rect class="layer" x="432" y="158" width="520" height="590"/><text class="layer-label" x="692" y="194" text-anchor="middle">batch.Step components</text>
+  <rect class="layer" x="1002" y="158" width="416" height="590"/><text class="layer-label" x="1210" y="194" text-anchor="middle">Checkpoint contract</text>
 
-  <rect class="band" x="82" y="342" width="1336" height="210"/><text class="band-label" x="112" y="378">batch.Step components</text>
-  <g transform="translate(150 432)"><rect width="228" height="74" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="114" y="31" text-anchor="middle">CSVReader</text><text class="detail" x="114" y="54" text-anchor="middle">CheckpointReader</text></g>
-  <g transform="translate(482 420)"><rect width="236" height="98" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="118" y="34" text-anchor="middle">Processor</text><text class="detail" x="118" y="59" text-anchor="middle">validate rows</text><text class="detail" x="118" y="78" text-anchor="middle">normalize email/tier</text></g>
-  <g transform="translate(822 420)"><rect width="250" height="98" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="125" y="34" text-anchor="middle">CustomerWriter</text><text class="detail" x="125" y="59" text-anchor="middle">chunk writes</text><text class="detail" x="125" y="78" text-anchor="middle">idempotent by ID</text></g>
-  <g transform="translate(1182 420)"><rect width="182" height="98" rx="12" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="91" y="34" text-anchor="middle">Sink</text><text class="detail" x="91" y="59" text-anchor="middle">unique commits</text><text class="detail" x="91" y="78" text-anchor="middle">duplicate skips</text></g>
+  <g transform="translate(130 220)"><rect width="218" height="58" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="109" y="35" text-anchor="middle">go run</text></g>
+  <g transform="translate(120 360)"><rect width="244" height="82" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="122" y="33" text-anchor="middle">batch.Job</text><text class="detail" x="122" y="59" text-anchor="middle">customer-csv-import</text></g>
+  <g transform="translate(124 560)"><rect width="236" height="82" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="118" y="33" text-anchor="middle">Stable JSON</text><text class="detail" x="118" y="59" text-anchor="middle">no timestamps</text></g>
 
-  <rect class="band" x="82" y="600" width="1336" height="118"/><text class="band-label" x="112" y="636">Checkpoint contract</text>
-  <g transform="translate(348 652)"><rect width="320" height="44" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="160" y="29" text-anchor="middle">MemoryCheckpointStore</text></g>
-  <g transform="translate(830 652)"><rect width="300" height="44" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="150" y="29" text-anchor="middle">Checkpoint{NextRow}</text></g>
+  <g transform="translate(500 220)"><rect width="228" height="74" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="114" y="31" text-anchor="middle">CSVReader</text><text class="detail" x="114" y="54" text-anchor="middle">CheckpointReader</text></g>
+  <g transform="translate(496 360)"><rect width="236" height="98" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="118" y="34" text-anchor="middle">Processor</text><text class="detail" x="118" y="59" text-anchor="middle">validate rows</text><text class="detail" x="118" y="78" text-anchor="middle">normalize email/tier</text></g>
+  <g transform="translate(490 505)"><rect width="260" height="98" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="130" y="34" text-anchor="middle">CustomerWriter</text><text class="detail" x="130" y="59" text-anchor="middle">chunk writes</text><text class="detail" x="130" y="78" text-anchor="middle">idempotent by ID</text></g>
+  <g transform="translate(770 610)"><rect width="168" height="98" rx="12" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="84" y="34" text-anchor="middle">Sink</text><text class="detail" x="84" y="59" text-anchor="middle">unique commits</text><text class="detail" x="84" y="78" text-anchor="middle">duplicate skips</text></g>
 
-  <rect class="band" x="82" y="762" width="1336" height="36"/><text class="footer" x="750" y="786" text-anchor="middle">Production replacement points: durable checkpoint store, transactional sink, database upsert, retry/dead-letter policy, and audit records.</text>
+  <g transform="translate(1040 510)"><rect width="320" height="54" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="160" y="34" text-anchor="middle">MemoryCheckpointStore</text></g>
+  <g transform="translate(1050 620)"><rect width="300" height="54" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="150" y="34" text-anchor="middle">Checkpoint{NextRow}</text></g>
 
-  <path class="blue" d="M 396 243 L 628 243"/><text class="label" x="512" y="223" text-anchor="middle">run first + restart</text>
-  <path class="blue" d="M 872 243 L 1104 243"/><text class="label" x="988" y="223" text-anchor="middle">project report</text>
-  <path class="blue" d="M 750 284 V 310 Q 750 322 738 322 H 276 Q 264 322 264 334 V 432"/><text class="label" x="500" y="312" text-anchor="middle">read + restore</text>
-  <path class="green" d="M 378 469 L 482 469"/><text class="label" x="430" y="449" text-anchor="middle">rows</text>
-  <path class="purple" d="M 718 469 L 822 469"/><text class="label" x="770" y="449" text-anchor="middle">customers</text>
-  <path class="amber" d="M 1072 469 L 1182 469"/><text class="label" x="1127" y="449" text-anchor="middle">upsert</text>
-  <path class="blue" d="M 947 518 V 578 Q 947 590 935 590 H 520 Q 508 590 508 602 V 652"/><text class="label" x="728" y="580" text-anchor="middle">save after committed chunk</text>
-  <path class="purple" d="M 830 674 L 668 674"/><text class="label" x="749" y="654" text-anchor="middle">restore on restart</text>
+  <rect x="130" y="772" width="1240" height="36" rx="12" fill="#ffffff" stroke="#d8e2e8" stroke-width="2"/><text class="footer" x="750" y="796" text-anchor="middle">Production replacement points: durable checkpoint store, transactional sink, database upsert, retry/dead-letter policy, and audit records.</text>
+
+  <path class="blue" d="M 239 278 V 360"/><text class="label" x="258" y="324" text-anchor="start">run first + restart</text>
+  <path class="blue" d="M 364 401 H 500"/><text class="label" x="432" y="381" text-anchor="middle">read + restore</text>
+  <path class="blue" d="M 242 442 V 560"/><text class="label" x="260" y="506" text-anchor="start">project report</text>
+  <path class="green" d="M 614 294 V 360"/><text class="label" x="632" y="330" text-anchor="start">rows</text>
+  <path class="purple" d="M 614 458 V 505"/><text class="label" x="632" y="488" text-anchor="start">customers</text>
+  <path class="amber" d="M 620 603 V 647 Q 620 659 632 659 H 770"/><text class="label" x="700" y="639" text-anchor="middle">upsert</text>
+  <path class="blue" d="M 750 554 H 1040"/><text class="label" x="892" y="534" text-anchor="middle">save after committed chunk</text>
+  <path class="blue" d="M 1200 564 V 620"/><text class="label" x="1218" y="596" text-anchor="start">persist cursor</text>
+  <path class="purple" d="M 1050 647 H 982 Q 970 647 970 635 V 238 Q 970 226 958 226 H 728"/><text class="label" x="835" y="206" text-anchor="middle">restore on restart</text>
 </svg>

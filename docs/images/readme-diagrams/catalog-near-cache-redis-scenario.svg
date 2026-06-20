@@ -62,51 +62,51 @@
     <text class="card-text" x="130" y="108" text-anchor="middle">source of Product v2</text>
   </g>
 
-  <g transform="translate(310 500)">
-    <rect width="220" height="130" rx="12" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
-    <text class="card-title" x="110" y="48" text-anchor="middle">Peer A</text>
-    <text class="card-text" x="110" y="80" text-anchor="middle">writes Product v2</text>
-    <text class="card-text" x="110" y="104" text-anchor="middle">origin id = peer-a</text>
+  <g transform="translate(1040 500)">
+    <rect width="260" height="130" rx="12" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
+    <text class="card-title" x="130" y="48" text-anchor="middle">Peer A</text>
+    <text class="card-text" x="130" y="80" text-anchor="middle">writes Product v2</text>
+    <text class="card-text" x="130" y="104" text-anchor="middle">origin id = peer-a</text>
   </g>
 
-  <g transform="translate(670 500)">
+  <g transform="translate(310 500)">
     <rect width="260" height="130" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/>
     <text class="card-title" x="130" y="48" text-anchor="middle">Peer B Invalidation</text>
     <text class="card-text" x="130" y="80" text-anchor="middle">origin-filtered event</text>
     <text class="card-text" x="130" y="104" text-anchor="middle">deletes stale local SKU</text>
   </g>
 
-  <path class="neutral" d="M 240 295 L 310 295"/>
+  <path class="neutral" d="M 240 295 H 310"/>
   <text class="label" x="275" y="275" text-anchor="middle">GetProduct</text>
 
-  <path class="neutral" d="M 530 260 L 620 260"/>
+  <path class="neutral" d="M 530 260 H 620"/>
   <text class="label" x="575" y="240" text-anchor="middle">cold miss</text>
 
-  <path class="load" d="M 840 260 L 1040 260"/>
+  <path class="load" d="M 840 260 H 1040"/>
   <text class="label" x="940" y="240" text-anchor="middle">single owner loads</text>
 
   <path class="load" d="M 1170 210 V 172 Q 1170 160 1158 160 H 432 Q 420 160 420 172 V 210"/>
   <text class="label" x="795" y="143" text-anchor="middle">Product v1 returns to local memory</text>
 
-  <path class="write" d="M 420 500 V 482 Q 420 470 432 470 H 1018 Q 1030 470 1030 458 V 335 Q 1030 330 1035 330 H 1040"/>
-  <rect x="604" y="446" width="188" height="22" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="698" y="462" text-anchor="middle">PutProduct updates store</text>
+  <path class="write" d="M 1170 500 V 360"/>
+  <rect x="1044" y="421" width="188" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="1138" y="437" text-anchor="middle">PutProduct updates store</text>
 
-  <path class="write" d="M 530 525 H 573 Q 585 525 585 513 V 327 Q 585 315 597 315 H 620"/>
-  <rect x="471" y="432" width="92" height="22" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="517" y="448" text-anchor="middle">publish Set</text>
+  <path class="write" d="M 1040 565 H 742 Q 730 565 730 553 V 360"/>
+  <rect x="850" y="536" width="92" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="896" y="552" text-anchor="middle">publish Set</text>
 
-  <path class="invalidate" d="M 730 360 L 730 500"/>
-  <rect x="735" y="425" width="104" height="22" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="787" y="441" text-anchor="middle">event fan-out</text>
+  <path class="invalidate" d="M 700 360 V 458 Q 700 470 688 470 H 452 Q 440 470 440 482 V 500"/>
+  <rect x="520" y="442" width="104" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="572" y="458" text-anchor="middle">event fan-out</text>
 
-  <path class="invalidate" d="M 670 565 H 587 Q 575 565 575 553 V 347 Q 575 335 563 335 H 530"/>
-  <rect x="557" y="581" width="128" height="22" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="621" y="597" text-anchor="middle">evict stale SKU</text>
+  <path class="invalidate" d="M 420 500 V 360"/>
+  <rect x="432" y="421" width="128" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="496" y="437" text-anchor="middle">evict stale SKU</text>
 
-  <path class="load" d="M 530 300 H 573 Q 585 300 585 312 V 393 Q 585 405 597 405 H 1158 Q 1170 405 1170 393 V 360"/>
-  <rect x="743" y="421" width="270" height="22" rx="7" fill="#fbfaf6"/>
-  <text class="label" x="878" y="437" text-anchor="middle">next Peer B read reloads Product v2</text>
+  <path class="load" d="M 530 330 H 584 Q 596 330 596 342 V 406 Q 596 418 608 418 H 1158 Q 1170 418 1170 406 V 360"/>
+  <rect x="720" y="389" width="270" height="22" rx="7" fill="#fbfaf6"/>
+  <text class="label" x="855" y="405" text-anchor="middle">next Peer B read reloads Product v2</text>
 
   <rect x="185" y="682" width="1070" height="42" rx="12" fill="#edf1e9" stroke="#5d8a62"/>
   <text class="subtitle" x="720" y="709" text-anchor="middle">Tests prove peer A writes invalidate peer B and cold bursts share one backing loader.</text>
