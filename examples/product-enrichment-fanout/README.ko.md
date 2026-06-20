@@ -18,6 +18,9 @@ review-summary lookup을 fan-out합니다. required provider failure는 남은 �
 호출해야 하는 상황을 보여줍니다. price와 inventory는 required입니다.
 recommendations와 review summary는 optional이므로 실패해도 전체 product view를
 실패시키지 않고 result metadata로 남깁니다.
+Diagram에서는 **Product Fan-Out** lane이 이 예제에 해당합니다. request-scoped
+`concurrency.Group`이 provider call 수를 제한하고, required failure에서는
+취소하며, optional provider failure는 product metadata로 반환합니다.
 
 ## What It Demonstrates
 

@@ -13,6 +13,9 @@ HTTP service가 outbound call과 inbound handler pressure에 서로 다른 polic
 적용해야 하는 상황을 보여줍니다. catalog request는 retry, timeout, circuit
 breaker를 통과합니다. order creation은 reject-mode bulkhead로 보호되어 handler가
 typed rejection을 빠르게 반환할 수 있습니다.
+Diagram에서는 **HTTP Resilience Boundary** lane이 이 예제에 해당합니다.
+`RoundTripper` policy는 outbound catalog call을 보호하고, handler bulkhead는
+inbound order pressure를 제한하며, `/events`가 policy outcome을 노출합니다.
 
 ## Run
 
