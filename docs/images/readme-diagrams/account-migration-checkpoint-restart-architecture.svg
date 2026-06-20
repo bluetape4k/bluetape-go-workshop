@@ -2,10 +2,10 @@
   <title id="title">Account Migration Checkpoint Restart Architecture</title>
   <desc id="desc">Architecture for the local batch account migration using batch.Job, batch.Step, a checkpoint reader, account processor, target writer, checkpoint store, and target store.</desc>
   <defs>
-    <marker id="arch-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="arch-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="arch-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
-    <marker id="arch-amber" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#c07a42"/></marker>
+    <marker id="arch-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="arch-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="arch-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
+    <marker id="arch-amber" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#c07a42"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -50,10 +50,10 @@
 
   <path class="blue" d="M 396 243 L 628 243"/><text class="label" x="512" y="223" text-anchor="middle">run twice</text>
   <path class="blue" d="M 872 243 L 1104 243"/><text class="label" x="988" y="223" text-anchor="middle">print result</text>
-  <path class="blue" d="M 750 284 L 750 322 L 265 322 L 265 420"/><text class="label" x="502" y="312" text-anchor="middle">read + restore</text>
+  <path class="blue" d="M 750 284 V 310 Q 750 322 738 322 H 277 Q 265 322 265 334 V 420"/><text class="label" x="502" y="312" text-anchor="middle">read + restore</text>
   <path class="green" d="M 380 469 L 486 469"/><text class="label" x="433" y="449" text-anchor="middle">rows</text>
   <path class="purple" d="M 722 469 L 828 469"/><text class="label" x="775" y="449" text-anchor="middle">targets</text>
   <path class="amber" d="M 1078 469 L 1188 469"/><text class="label" x="1133" y="449" text-anchor="middle">put</text>
-  <path class="blue" d="M 953 518 L 953 590 L 508 590 L 508 652"/><text class="label" x="731" y="580" text-anchor="middle">save after committed chunk</text>
+  <path class="blue" d="M 953 518 V 578 Q 953 590 941 590 H 520 Q 508 590 508 602 V 652"/><text class="label" x="731" y="580" text-anchor="middle">save after committed chunk</text>
   <path class="purple" d="M 820 674 L 678 674"/><text class="label" x="749" y="654" text-anchor="middle">same key on restart</text>
 </svg>

@@ -2,10 +2,10 @@
   <title id="title">Account Migration Checkpoint Restart Scenario</title>
   <desc id="desc">Scenario showing an account migration, checkpoint after the first chunk, a deterministic processor crash, restart from the saved cursor, and completed migration.</desc>
   <defs>
-    <marker id="sc-read" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="sc-ok" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="sc-fail" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="sc-restart" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="sc-read" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="sc-ok" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="sc-fail" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <marker id="sc-restart" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -47,7 +47,7 @@
   <path class="read" d="M 340 287 L 430 287"/><text class="label" x="385" y="267" text-anchor="middle">read</text>
   <path class="ok" d="M 648 287 L 752 287"/><text class="label" x="700" y="267" text-anchor="middle">save after write</text>
   <path class="fail" d="M 970 287 L 1082 287"/><text class="label" x="1026" y="267" text-anchor="middle">next account</text>
-  <path class="restart" d="M 1203 334 L 1203 404 L 321 404 L 321 512"/><text class="label" x="760" y="394" text-anchor="middle">restart keeps checkpoint at 2</text>
+  <path class="restart" d="M 1203 334 V 392 Q 1203 404 1191 404 H 333 Q 321 404 321 416 V 512"/><text class="label" x="760" y="394" text-anchor="middle">restart keeps checkpoint at 2</text>
   <path class="restart" d="M 440 556 L 584 556"/><text class="label" x="512" y="536" text-anchor="middle">restore</text>
   <path class="ok" d="M 866 556 L 1010 556"/><text class="label" x="938" y="536" text-anchor="middle">write remaining</text>
 </svg>

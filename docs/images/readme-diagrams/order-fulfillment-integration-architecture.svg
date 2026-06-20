@@ -2,9 +2,9 @@
   <title id="title">Order Fulfillment Integration Architecture</title>
   <desc id="desc">Layered architecture for the order fulfillment integration example.</desc>
   <defs>
-    <marker id="arch-http" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="arch-state" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="arch-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="arch-http" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="arch-state" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="arch-comp" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -48,12 +48,12 @@
 
   <path class="http" d="M 370 241 L 640 241"/><text class="label" x="505" y="222" text-anchor="middle">request</text>
   <path class="http" d="M 900 241 L 1130 241"/><text class="label" x="1015" y="222" text-anchor="middle">status + JSON</text>
-  <path class="http" d="M 770 276 L 770 324 L 287 324 L 287 414"/><text class="label" x="526" y="312" text-anchor="middle">bind + validate</text>
+  <path class="http" d="M 770 276 V 312 Q 770 324 758 324 H 299 Q 287 324 287 336 V 414"/><text class="label" x="526" y="312" text-anchor="middle">bind + validate</text>
   <path class="state" d="M 287 490 L 287 632"/><text class="label" x="352" y="566" text-anchor="middle">lifecycle transitions</text>
   <path class="comp" d="M 412 452 L 520 452"/><text class="label" x="466" y="432" text-anchor="middle">register</text>
   <path class="comp" d="M 774 452 L 886 452"/><text class="label" x="830" y="432" text-anchor="middle">cleanup changes flags</text>
-  <path class="state" d="M 412 490 L 636 632"/><text class="label" x="552" y="535" text-anchor="middle">forward runner</text>
-  <path class="comp" d="M 647 500 L 716 632"/><text class="label" x="766" y="552" text-anchor="middle">reverse runner</text>
+  <path class="state" d="M 412 490 H 624 Q 636 490 636 502 V 632"/><text class="label" x="552" y="535" text-anchor="middle">forward runner</text>
+  <path class="comp" d="M 647 500 H 704 Q 716 500 716 512 V 632"/><text class="label" x="766" y="552" text-anchor="middle">reverse runner</text>
   <path class="state" d="M 866 661 L 1012 661"/><text class="label" x="939" y="642" text-anchor="middle">report tree</text>
-  <path class="http" d="M 1140 632 L 1240 276"/><text class="label" x="1300" y="454" text-anchor="middle">project response</text>
+  <path class="http" d="M 1140 632 H 1228 Q 1240 632 1240 620 V 276"/><text class="label" x="1300" y="454" text-anchor="middle">project response</text>
 </svg>

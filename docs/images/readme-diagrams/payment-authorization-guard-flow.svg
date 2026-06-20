@@ -3,19 +3,19 @@
   <desc id="desc">An order workflow calls a circuit breaker, then a bulkhead, then a payment gateway. Open circuits and bulkhead overflow reject before the gateway is called and emit synchronous events.</desc>
   <defs>
     <marker id="arrow-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+      <polygon points="1,1 7,4 1,7" fill="#47616f"/>
     </marker>
     <marker id="arrow-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+      <polygon points="1,1 7,4 1,7" fill="#4f8b63"/>
     </marker>
     <marker id="arrow-reject" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/>
+      <polygon points="1,1 7,4 1,7" fill="#b95f7a"/>
     </marker>
     <marker id="arrow-overflow" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/>
+      <polygon points="1,1 7,4 1,7" fill="#8a6bb0"/>
     </marker>
     <marker id="arrow-event" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/>
+      <polygon points="1,1 7,4 1,7" fill="#a78335"/>
     </marker>
     <style>
       .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
@@ -91,16 +91,16 @@
   <text class="label" x="692" y="268" text-anchor="middle">closed / half-open</text>
   <path class="route-success" d="M 978 291 L 1116 291"/>
   <text class="label" x="1047" y="268" text-anchor="middle">permit acquired</text>
-  <path class="route-success" d="M 1231 216 L 1231 156 L 165 156 L 165 216"/>
+  <path class="route-success" d="M 1231 216 V 168 Q 1231 156 1219 156 H 177 Q 165 156 165 168 V 216"/>
   <text class="label" x="710" y="139" text-anchor="middle">approved or failed result returns to workflow</text>
 
   <path class="route-reject" d="M 516 386 L 516 462"/>
   <text class="label" x="570" y="444" text-anchor="middle">open</text>
   <path class="route-overflow" d="M 863 366 L 863 462"/>
   <text class="label" x="926" y="421" text-anchor="middle">overflow</text>
-  <path class="route-event" d="M 636 360 L 664 360 L 664 406 L 1231 406 L 1231 472"/>
+  <path class="route-event" d="M 636 360 H 652 Q 664 360 664 372 V 394 Q 664 406 676 406 H 1219 Q 1231 406 1231 418 V 472"/>
   <text class="label" x="850" y="390" text-anchor="middle">circuit rejection event</text>
-  <path class="route-event" d="M 863 578 L 863 606 L 1231 606 L 1231 572"/>
+  <path class="route-event" d="M 863 578 V 594 Q 863 606 875 606 H 1219 Q 1231 606 1231 594 V 572"/>
   <text class="label" x="1048" y="628" text-anchor="middle">bulkhead event</text>
 
   <rect x="188" y="632" width="1044" height="42" rx="12" fill="#edf1e9" stroke="#5d8a62"/>

@@ -2,8 +2,8 @@
   <title id="title">Operations Report Policy Scenario</title>
   <desc id="desc">Scenario flow for an operations checklist that chooses a failure policy, records retry evidence, marks skipped work, and returns a stable summary.</desc>
   <defs>
-    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/></marker>
-    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#47616f"/></marker>
+    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -30,13 +30,13 @@
   <g transform="translate(536 548)"><rect width="308" height="98" rx="12" fill="#edf1e9" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="154" y="39" text-anchor="middle">Stable Summary</text><text class="detail" x="154" y="66" text-anchor="middle">root + descendants counted</text></g>
 
   <path class="main" d="M 282 230 L 364 230"/><text class="label" x="323" y="211" text-anchor="middle">POST</text>
-  <path class="main" d="M 584 230 L 628 230 L 628 172 L 676 172"/>
+  <path class="main" d="M 584 230 H 616 Q 628 230 628 218 V 184 Q 628 172 640 172 H 676"/>
   <path class="main" d="M 796 218 L 796 280"/>
   <path class="main" d="M 916 172 L 998 172"/>
   <path class="main" d="M 916 326 L 998 326"/>
-  <path class="main" d="M 1123 372 L 1123 597 L 844 597"/>
+  <path class="main" d="M 1123 372 V 585 Q 1123 597 1111 597 H 844"/>
   <path class="main" d="M 796 372 L 796 548"/>
-  <path class="error" d="M 676 326 L 626 326 L 626 548"/><text class="label" x="560" y="433" text-anchor="middle">stop on failure</text>
+  <path class="error" d="M 676 326 H 638 Q 626 326 626 338 V 548"/><text class="label" x="560" y="433" text-anchor="middle">stop on failure</text>
 
   <rect x="254" y="704" width="872" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
   <text class="subtitle" x="690" y="729" text-anchor="middle">Skipped work is represented as aborted with a caller-defined reason.</text>

@@ -2,11 +2,11 @@
   <title id="title">Payment Authorization State Scenario</title>
   <desc id="desc">Payment authorization states showing requested, authorized, captured, failed, cancelled, and idempotent replay behavior.</desc>
   <defs>
-    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="scenario-cancel" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/></marker>
-    <marker id="scenario-replay" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="scenario-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="scenario-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="scenario-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <marker id="scenario-cancel" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#a78335"/></marker>
+    <marker id="scenario-replay" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -34,13 +34,13 @@
   <g transform="translate(956 528)"><rect width="220" height="92" rx="12" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">cancelled</text><text class="detail" x="110" y="63" text-anchor="middle">final stop</text></g>
   <g transform="translate(140 554)"><rect width="220" height="92" rx="12" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="110" y="38" text-anchor="middle">idempotency</text><text class="detail" x="110" y="63" text-anchor="middle">same key replays</text></g>
 
-  <path class="main" d="M 316 364 L 520 368"/><text class="label" x="418" y="342" text-anchor="middle">authorize</text>
-  <path class="success" d="M 740 362 L 982 348"/><text class="label" x="858" y="334" text-anchor="middle">capture</text>
-  <path class="error" d="M 316 344 C 520 258 720 188 968 174"/><text class="label" x="640" y="202" text-anchor="middle">fail from requested</text>
-  <path class="error" d="M 740 340 C 816 274 880 210 968 190"/><text class="label" x="852" y="266" text-anchor="middle">fail from authorized</text>
-  <path class="cancel" d="M 316 390 C 510 488 708 568 956 574"/><text class="label" x="604" y="545" text-anchor="middle">cancel from requested</text>
-  <path class="cancel" d="M 740 398 C 820 466 876 536 956 574"/><text class="label" x="840" y="506" text-anchor="middle">cancel from authorized</text>
-  <path class="replay" d="M 360 594 C 430 530 472 438 520 390"/><text class="label" x="432" y="514" text-anchor="middle">successful retry returns original response</text>
+  <path class="main" d="M 316 364 H 520"/><text class="label" x="418" y="388" text-anchor="middle">authorize</text>
+  <path class="success" d="M 740 362 H 982"/><text class="label" x="858" y="334" text-anchor="middle">capture</text>
+  <path class="error" d="M 316 344 H 384 Q 396 344 396 332 V 186 Q 396 174 408 174 H 968"/><text class="label" x="640" y="202" text-anchor="middle">fail from requested</text>
+  <path class="error" d="M 740 340 H 850 Q 862 340 862 328 V 202 Q 862 190 874 190 H 968"/><text class="label" x="852" y="266" text-anchor="middle">fail from authorized</text>
+  <path class="cancel" d="M 316 390 H 400 Q 412 390 412 402 V 562 Q 412 574 424 574 H 956"/><text class="label" x="604" y="545" text-anchor="middle">cancel from requested</text>
+  <path class="cancel" d="M 740 398 H 840 Q 852 398 852 410 V 562 Q 852 574 864 574 H 956"/><text class="label" x="840" y="506" text-anchor="middle">cancel from authorized</text>
+  <path class="replay" d="M 360 594 H 432 Q 444 594 444 582 V 402 Q 444 390 456 390 H 520"/><text class="label" x="432" y="514" text-anchor="middle">successful retry returns original response</text>
 
   <rect x="276" y="686" width="828" height="38" rx="11" fill="#ffffff" stroke="#d8e2e8"/>
   <text class="subtitle" x="690" y="711" text-anchor="middle">Production APIs need durable payment state and durable idempotency storage.</text>

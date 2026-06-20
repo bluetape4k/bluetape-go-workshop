@@ -1,72 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="660" viewBox="0 0 1380 660" role="img" aria-labelledby="title desc">
-  <title id="title">Catalog Refresh Policy Sequence</title>
-  <desc id="desc">Retry wraps timeout. Attempt one fails, retry schedules attempt two, and attempt two gets a fresh timeout context before returning the product.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="-60 0 1500 760" role="img" aria-labelledby="title desc">
+  <title id="title">Retry Is Outer, Timeout Is Per Attempt</title>
+  <desc id="desc">Best-practices sequence diagram with participant cards, lifelines, activations, numbered labels, and branch frame.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
-    </marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#203040" flood-opacity="0.10"/></filter>
+    <marker id="arrow-call" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#3F7D9C" stroke="#3F7D9C" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-return" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#6E8F4F" stroke="#6E8F4F" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-async" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#755BC6" stroke="#755BC6" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-fail" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#B86868" stroke="#B86868" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
     <style>
-      .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
-      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
-      .actor { font-family: 'Architects Daughter', cursive; font-size: 22px; fill: #243845; }
-      .detail { font-family: 'Comic Mono', monospace; font-size: 14px; fill: #344b59; }
-      .msg { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
-      .lifeline { stroke: #9aaeb8; stroke-width: 2; stroke-dasharray: 7 7; }
-      .call { stroke: #47616f; stroke-width: 3; marker-end: url(#arrow); }
-      .return { stroke: #8b789b; stroke-width: 3; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .canvas{fill:#fbfcf8}.title{font-family:'Architects Daughter';font-size:40px;fill:#263238}.subtitle,.detail,.footer{font-family:'Comic Mono';fill:#36464f}.subtitle{font-size:16px}.footer{font-size:14px;fill:#60727d}.cardTitle{font-family:'Architects Daughter';font-size:21px;fill:#1f3138}.role{font-family:'Comic Mono';font-size:12px;fill:#546a73}.card{fill:#ffffff;stroke-width:2;filter:url(#shadow)}.lifeline{stroke:#9aaab1;stroke-width:2;stroke-dasharray:7 8;stroke-linecap:round}.activation{fill:#e6f2ec;stroke:#5b7e67;stroke-width:1.5}.call,.return,.async,.fail{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.call{stroke:#3F7D9C;marker-end:url(#arrow-call)}.return{stroke:#6E8F4F;stroke-width:2.6;stroke-dasharray:8 6;marker-end:url(#arrow-return)}.async{stroke:#755BC6;marker-end:url(#arrow-async)}.fail{stroke:#B86868;marker-end:url(#arrow-fail)}.alt{fill:#eef7f0;fill-opacity:.14;stroke:#78909c;stroke-width:2.4;stroke-dasharray:12 7}.label{fill:#ffffff;stroke:#d7e0e4;stroke-width:1.3}.callLabel{stroke:#9cc2d1}.returnLabel{stroke:#b6c9a4}.asyncLabel{stroke:#b8a9d5}.failLabel{stroke:#d9abab}.badgeText,.msg{font-family:'Comic Mono';font-size:12px;font-weight:700}.msg{font-size:13px}.callText{fill:#2f6f8e}.returnText{fill:#55783F}.asyncText{fill:#674b91}.failText{fill:#9d4f4f}
     </style>
   </defs>
-  <rect x="0" y="0" width="1380" height="660" fill="#fbfaf6"/>
-  <text class="title" x="690" y="58" text-anchor="middle">Retry Is Outer, Timeout Is Per Attempt</text>
-  <text class="subtitle" x="690" y="88" text-anchor="middle">The second provider call receives a new deadline context instead of reusing the failed attempt.</text>
-
-  <g transform="translate(80 134)">
-    <rect width="176" height="76" rx="10" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/>
-    <text class="actor" x="88" y="36" text-anchor="middle">Caller</text>
-    <text class="detail" x="88" y="58" text-anchor="middle">Refresh SKU</text>
-  </g>
-  <g transform="translate(330 134)">
-    <rect width="190" height="76" rx="10" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/>
-    <text class="actor" x="95" y="36" text-anchor="middle">Retry</text>
-    <text class="detail" x="95" y="58" text-anchor="middle">outer policy</text>
-  </g>
-  <g transform="translate(600 134)">
-    <rect width="200" height="76" rx="10" fill="#f9dacd" stroke="#ba705c" stroke-width="2"/>
-    <text class="actor" x="100" y="36" text-anchor="middle">Timeout</text>
-    <text class="detail" x="100" y="58" text-anchor="middle">per attempt</text>
-  </g>
-  <g transform="translate(880 134)">
-    <rect width="200" height="76" rx="10" fill="#f4c7c0" stroke="#ba705c" stroke-width="2"/>
-    <text class="actor" x="100" y="36" text-anchor="middle">Source</text>
-    <text class="detail" x="100" y="58" text-anchor="middle">catalog provider</text>
-  </g>
-  <g transform="translate(1158 134)">
-    <rect width="190" height="76" rx="10" fill="#d8ead4" stroke="#5d8a62" stroke-width="2"/>
-    <text class="actor" x="95" y="36" text-anchor="middle">Product</text>
-    <text class="detail" x="95" y="58" text-anchor="middle">read model</text>
-  </g>
-
-  <line class="lifeline" x1="168" y1="210" x2="168" y2="574"/>
-  <line class="lifeline" x1="425" y1="210" x2="425" y2="574"/>
-  <line class="lifeline" x1="700" y1="210" x2="700" y2="574"/>
-  <line class="lifeline" x1="980" y1="210" x2="980" y2="574"/>
-  <line class="lifeline" x1="1253" y1="210" x2="1253" y2="574"/>
-
-  <line class="call" x1="168" y1="260" x2="415" y2="260"/>
-  <text class="msg" x="292" y="242" text-anchor="middle">Refresh(ctx, sku)</text>
-  <line class="call" x1="425" y1="318" x2="690" y2="318"/>
-  <text class="msg" x="557" y="300" text-anchor="middle">attempt 1</text>
-  <line class="call" x1="700" y1="374" x2="970" y2="374"/>
-  <text class="msg" x="835" y="356" text-anchor="middle">source(deadline ctx)</text>
-  <line class="return" x1="980" y1="424" x2="435" y2="424"/>
-  <text class="msg" x="708" y="404" text-anchor="middle">transient error -> retry event</text>
-  <line class="call" x1="425" y1="486" x2="690" y2="486"/>
-  <text class="msg" x="557" y="468" text-anchor="middle">attempt 2</text>
-  <line class="call" x1="700" y1="534" x2="970" y2="534"/>
-  <text class="msg" x="835" y="516" text-anchor="middle">fresh timeout context</text>
-  <line class="call" x1="980" y1="574" x2="1243" y2="574"/>
-  <text class="msg" x="1112" y="554" text-anchor="middle">product success</text>
-
-  <rect x="216" y="614" width="948" height="32" rx="11" fill="#efe7d2" stroke="#b99b5d"/>
-  <text class="subtitle" x="690" y="635" text-anchor="middle">Sequence tests assert retry events and timeout errors instead of relying on log output.</text>
+  <rect class="canvas" x="-60" y="0" width="1500" height="760"/>
+  <text class="title" x="690" y="64" text-anchor="middle">Retry Is Outer, Timeout Is Per Attempt</text>
+  <text class="subtitle" x="690" y="98" text-anchor="middle">The second provider call receives a new deadline context instead of reusing the failed attempt.</text>
+  <g id="participant-1"><rect class="card" x="0" y="150" width="190" height="78" rx="10" fill="#E8F3FF" stroke="#5B8DEF"/><text class="cardTitle" x="95" y="188" text-anchor="middle">Caller</text><text class="role" x="95" y="210" text-anchor="middle">Refresh SKU</text><line class="lifeline" x1="95" y1="228" x2="95" y2="652"/></g>
+  <g id="participant-2"><rect class="card" x="297.5" y="150" width="190" height="78" rx="10" fill="#FFF3D9" stroke="#D6A441"/><text class="cardTitle" x="392.5" y="188" text-anchor="middle">Retry</text><text class="role" x="392.5" y="210" text-anchor="middle">outer policy</text><line class="lifeline" x1="392.5" y1="228" x2="392.5" y2="652"/></g>
+  <g id="participant-3"><rect class="card" x="590" y="150" width="200" height="78" rx="10" fill="#EAF7EF" stroke="#58A978"/><text class="cardTitle" x="690" y="188" text-anchor="middle">Timeout</text><text class="role" x="690" y="210" text-anchor="middle">per attempt</text><line class="lifeline" x1="690" y1="228" x2="690" y2="652"/></g>
+  <g id="participant-4"><rect class="card" x="887.5" y="150" width="200" height="78" rx="10" fill="#F1ECFF" stroke="#8A72D6"/><text class="cardTitle" x="987.5" y="188" text-anchor="middle">Source</text><text class="role" x="987.5" y="210" text-anchor="middle">catalog provider</text><line class="lifeline" x1="987.5" y1="228" x2="987.5" y2="652"/></g>
+  <g id="participant-5"><rect class="card" x="1190" y="150" width="190" height="78" rx="10" fill="#FDECEF" stroke="#DC6B82"/><text class="cardTitle" x="1285" y="188" text-anchor="middle">Product</text><text class="role" x="1285" y="210" text-anchor="middle">read model</text><line class="lifeline" x1="1285" y1="228" x2="1285" y2="652"/></g>
+  <rect class="activation" x="385.5" y="253" width="14" height="273" rx="6"/>
+  <rect class="activation" x="683" y="298" width="14" height="276" rx="6"/>
+  <rect class="activation" x="980.5" y="354" width="14" height="260" rx="6"/>
+  <rect class="activation" x="1278" y="554" width="14" height="60" rx="6"/>
+  <rect class="alt" x="64" y="379" width="1252" height="107" rx="16"/><rect class="label failLabel" x="88" y="365" width="230" height="28" rx="8"/><text class="msg failText" x="203" y="384" text-anchor="middle">alt failure / retry path</text>
+  <g id="message-1"><rect class="label callLabel" x="138.2" y="242" width="211" height="28" rx="8"/><circle cx="156.2" cy="256" r="12" fill="#3F7D9C"/><text class="badgeText" x="156.2" y="260" text-anchor="middle" fill="#fff">1</text><text class="msg callText" x="251.8" y="260" text-anchor="middle">Refresh(ctx, sku)</text><path class="call" d="M 95 260 H 392.5"/></g>
+  <g id="message-2"><rect class="label callLabel" x="466.2" y="280" width="150" height="28" rx="8"/><circle cx="484.2" cy="294" r="12" fill="#3F7D9C"/><text class="badgeText" x="484.2" y="298" text-anchor="middle" fill="#fff">2</text><text class="msg callText" x="549.2" y="298" text-anchor="middle">attempt 1</text><path class="call" d="M 392.5 318 H 690"/></g>
+  <g id="message-3"><rect class="label callLabel" x="719.8" y="336" width="238" height="28" rx="8"/><circle cx="737.8" cy="350" r="12" fill="#3F7D9C"/><text class="badgeText" x="737.8" y="354" text-anchor="middle" fill="#fff">3</text><text class="msg callText" x="846.8" y="354" text-anchor="middle">source(deadline ctx)</text><path class="call" d="M 690 374 H 987.5"/></g>
+  <g id="message-4"><rect class="label failLabel" x="526" y="386" width="328" height="28" rx="8"/><circle cx="544" cy="400" r="12" fill="#B86868"/><text class="badgeText" x="544" y="404" text-anchor="middle" fill="#fff">4</text><text class="msg failText" x="698" y="404" text-anchor="middle">transient error -&gt; retry event</text><path class="fail" d="M 987.5 424 H 392.5"/></g>
+  <g id="message-5"><rect class="label callLabel" x="466.2" y="448" width="150" height="28" rx="8"/><circle cx="484.2" cy="462" r="12" fill="#3F7D9C"/><text class="badgeText" x="484.2" y="466" text-anchor="middle" fill="#fff">5</text><text class="msg callText" x="549.2" y="466" text-anchor="middle">attempt 2</text><path class="call" d="M 392.5 486 H 690"/></g>
+  <g id="message-6"><rect class="label callLabel" x="715.2" y="496" width="247" height="28" rx="8"/><circle cx="733.2" cy="510" r="12" fill="#3F7D9C"/><text class="badgeText" x="733.2" y="514" text-anchor="middle" fill="#fff">6</text><text class="msg callText" x="846.8" y="514" text-anchor="middle">fresh timeout context</text><path class="call" d="M 690 534 H 987.5"/></g>
+  <g id="message-7"><rect class="label returnLabel" x="1039.8" y="536" width="193" height="28" rx="8"/><circle cx="1057.8" cy="550" r="12" fill="#6E8F4F"/><text class="badgeText" x="1057.8" y="554" text-anchor="middle" fill="#fff">7</text><text class="msg returnText" x="1144.2" y="554" text-anchor="middle">product success</text><path class="return" d="M 987.5 574 H 1285"/></g>
+  <g><rect x="165.6" y="690" width="1048.8" height="42" rx="12" fill="#ffffff" stroke="#D6E3EF" stroke-width="1.6"/><text class="footer" x="690" y="717" text-anchor="middle">Sequence tests assert retry events and timeout errors instead of relying on log output.</text></g>
 </svg>

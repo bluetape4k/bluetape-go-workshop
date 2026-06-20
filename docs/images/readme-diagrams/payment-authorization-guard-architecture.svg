@@ -3,13 +3,13 @@
   <desc id="desc">Layered architecture for the payment authorization guard example: caller workflow, validation, authorizer boundary, resilience policies, gateway function, and event sink.</desc>
   <defs>
     <marker id="arch-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#47616f"/>
+      <polygon points="1,1 7,4 1,7" fill="#47616f"/>
     </marker>
     <marker id="arch-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#4f8b63"/>
+      <polygon points="1,1 7,4 1,7" fill="#4f8b63"/>
     </marker>
     <marker id="arch-event" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M 1 1 L 7 4 L 1 7 Z" fill="#a78335"/>
+      <polygon points="1,1 7,4 1,7" fill="#a78335"/>
     </marker>
     <style>
       .title { font-family: 'Architects Daughter', cursive; font-size: 36px; fill: #243845; }
@@ -77,24 +77,24 @@
     <text class="card-text" x="122" y="55" text-anchor="middle">bounded in-flight calls</text>
   </g>
 
-  <path class="route-main" d="M 312 236 L 340 236 L 340 438"/>
+  <path class="route-main" d="M 312 236 H 328 Q 340 236 340 248 V 438"/>
   <text class="label" x="292" y="318" text-anchor="middle">request</text>
   <path class="route-main" d="M 576 438 L 636 438"/>
   <text class="label" x="606" y="420" text-anchor="middle">validated</text>
   <path class="route-main" d="M 880 438 L 1092 438"/>
   <text class="label" x="986" y="420" text-anchor="middle">gateway dependency</text>
-  <path class="route-success" d="M 1092 438 L 1060 438 L 1060 126 L 34 126 L 34 236 L 92 236"/>
+  <path class="route-success" d="M 1092 438 H 1072 Q 1060 438 1060 426 V 138 Q 1060 126 1048 126 H 46 Q 34 126 34 138 V 224 Q 34 236 46 236 H 92"/>
   <text class="label" x="740" y="120" text-anchor="middle">Authorization or wrapped gateway error</text>
 
   <path class="route-main" d="M 758 506 L 758 614"/>
   <text class="label" x="810" y="560" text-anchor="middle">outer policy</text>
   <path class="route-main" d="M 880 650 L 954 650"/>
   <text class="label" x="917" y="632" text-anchor="middle">inner policy</text>
-  <path class="route-main" d="M 1198 650 L 1246 650 L 1246 490"/>
+  <path class="route-main" d="M 1198 650 H 1234 Q 1246 650 1246 638 V 490"/>
   <text class="label" x="1272" y="579" text-anchor="middle">permit path</text>
-  <path class="route-event" d="M 758 614 L 758 532 L 1410 532 L 1410 236 L 1402 236"/>
+  <path class="route-event" d="M 758 614 V 544 Q 758 532 770 532 H 1398 Q 1410 532 1410 520 V 240 Q 1410 236 1406 236 H 1402"/>
   <text class="label" x="1080" y="514" text-anchor="middle">transition / rejection events</text>
-  <path class="route-event" d="M 1198 650 L 1362 650 L 1362 282"/>
+  <path class="route-event" d="M 1198 650 H 1350 Q 1362 650 1362 638 V 282"/>
 
   <rect x="248" y="714" width="984" height="36" rx="11" fill="#edf1e9" stroke="#5d8a62"/>
   <text class="subtitle" x="740" y="737" text-anchor="middle">No reusable payment abstraction is exported; the package remains a scenario-focused workshop example.</text>

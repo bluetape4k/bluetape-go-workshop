@@ -1,55 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="900" viewBox="0 0 1480 900" role="img" aria-labelledby="title desc">
-  <title id="title">Fulfillment Workflow Runner Sequence</title>
-  <desc id="desc">Sequence diagram showing the Gin handler running a sequential workflow, parallel risk checks, conditional shipment, and response mapping.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1583" height="948" viewBox="-60 0 1583 948" role="img" aria-labelledby="title desc">
+  <title id="title">Fulfillment Workflow Sequence</title>
+  <desc id="desc">Best-practices sequence diagram with participant cards, lifelines, activations, numbered labels, and branch frame.</desc>
   <defs>
-    <marker id="seq-main" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#47616f"/></marker>
-    <marker id="seq-success" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#4f8b63"/></marker>
-    <marker id="seq-error" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#203040" flood-opacity="0.10"/></filter>
+    <marker id="arrow-call" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#3F7D9C" stroke="#3F7D9C" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-return" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#6E8F4F" stroke="#6E8F4F" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-async" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#755BC6" stroke="#755BC6" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="arrow-fail" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#B86868" stroke="#B86868" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
-      .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #243845; }
-      .subtitle, .label, .small { font-family: 'Comic Mono'; fill: #536d7d; }
-      .subtitle { font-size: 15px; }
-      .actor { font-family: 'Architects Daughter'; font-size: 20px; fill: #243845; }
-      .label { font-size: 13px; }
-      .small { font-size: 12px; }
-      .lifeline { stroke: #a9bac5; stroke-width: 2; stroke-dasharray: 7 7; }
-      .main { fill: none; stroke: #47616f; stroke-width: 2.8; marker-end: url(#seq-main); }
-      .success { fill: none; stroke: #4f8b63; stroke-width: 2.8; marker-end: url(#seq-success); }
-      .error { fill: none; stroke: #b95f7a; stroke-width: 2.8; marker-end: url(#seq-error); }
+      .canvas{fill:#fbfcf8}.title{font-family:'Architects Daughter';font-size:40px;fill:#263238}.subtitle,.detail,.footer{font-family:'Comic Mono';fill:#36464f}.subtitle{font-size:16px}.footer{font-size:14px;fill:#60727d}.cardTitle{font-family:'Architects Daughter';font-size:21px;fill:#1f3138}.role{font-family:'Comic Mono';font-size:12px;fill:#546a73}.card{fill:#ffffff;stroke-width:2;filter:url(#shadow)}.lifeline{stroke:#9aaab1;stroke-width:2;stroke-dasharray:7 8;stroke-linecap:round}.activation{fill:#e6f2ec;stroke:#5b7e67;stroke-width:1.5}.call,.return,.async,.fail{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.call{stroke:#3F7D9C;marker-end:url(#arrow-call)}.return{stroke:#6E8F4F;stroke-width:2.6;stroke-dasharray:8 6;marker-end:url(#arrow-return)}.async{stroke:#755BC6;marker-end:url(#arrow-async)}.fail{stroke:#B86868;marker-end:url(#arrow-fail)}.alt{fill:#eef7f0;fill-opacity:.14;stroke:#78909c;stroke-width:2.4;stroke-dasharray:12 7}.divider{stroke:#78909c;stroke-width:2;stroke-dasharray:10 8}rect.label{fill:#ffffff;stroke:#d7e0e4;stroke-width:1.3}.callLabel{stroke:#9cc2d1}.returnLabel{stroke:#b6c9a4}.asyncLabel{stroke:#b8a9d5}.failLabel{stroke:#d9abab}.badgeText,.msg{font-family:'Comic Mono';font-size:12px;font-weight:700}.msg{font-size:13px}.callText{fill:#2f6f8e}.returnText{fill:#55783F}.asyncText{fill:#674b91}.failText{fill:#9d4f4f}
     </style>
   </defs>
-  <rect width="1480" height="900" fill="#fbfaf6"/>
-  <text class="title" x="740" y="58" text-anchor="middle">Fulfillment Workflow Sequence</text>
-  <text class="subtitle" x="740" y="92" text-anchor="middle">A request-scoped runner preserves branch reports while HTTP status mapping stays outside workflow execution.</text>
-
-  <g transform="translate(98 142)"><rect width="170" height="60" rx="8" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="actor" x="85" y="38" text-anchor="middle">Client</text></g>
-  <g transform="translate(355 142)"><rect width="190" height="60" rx="8" fill="#f7e5aa" stroke="#b99b5d" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Gin Handler</text></g>
-  <g transform="translate(640 142)"><rect width="190" height="60" rx="8" fill="#eadcf5" stroke="#8a6bb0" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Sequential</text></g>
-  <g transform="translate(900 142)"><rect width="190" height="60" rx="8" fill="#dbe8d4" stroke="#5d8a62" stroke-width="2"/><text class="actor" x="95" y="38" text-anchor="middle">Parallel</text></g>
-  <g transform="translate(1178 142)"><rect width="210" height="60" rx="8" fill="#efe7d2" stroke="#a78335" stroke-width="2"/><text class="actor" x="105" y="38" text-anchor="middle">Conditional</text></g>
-  <path class="lifeline" d="M 183 202 L 183 726"/>
-  <path class="lifeline" d="M 450 202 L 450 726"/>
-  <path class="lifeline" d="M 735 202 L 735 726"/>
-  <path class="lifeline" d="M 995 202 L 995 726"/>
-  <path class="lifeline" d="M 1283 202 L 1283 726"/>
-
-  <path class="main" d="M 183 250 L 450 250"/><rect x="242" y="220" width="150" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="317" y="237" text-anchor="middle">POST run</text>
-  <path class="main" d="M 450 304 L 735 304"/><rect x="510" y="274" width="166" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="593" y="291" text-anchor="middle">Run(ctx)</text>
-  <path class="success" d="M 735 358 L 450 358"/><rect x="504" y="328" width="178" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="593" y="345" text-anchor="middle">validate-order ok</text>
-  <path class="main" d="M 735 412 L 995 412"/><rect x="782" y="382" width="166" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="865" y="399" text-anchor="middle">risk-checks</text>
-  <path class="success" d="M 995 466 L 735 466"/><rect x="772" y="436" width="184" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="864" y="453" text-anchor="middle">branch reports</text>
-  <path class="main" d="M 735 520 L 1283 520"/><rect x="908" y="490" width="202" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="1009" y="507" text-anchor="middle">shipment-decision</text>
-  <path class="success" d="M 1283 574 L 735 574"/><rect x="900" y="544" width="218" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="1009" y="561" text-anchor="middle">create or skip report</text>
-  <path class="success" d="M 735 628 L 450 628"/><rect x="496" y="598" width="194" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="593" y="615" text-anchor="middle">workreport tree</text>
-  <path class="success" d="M 450 682 L 183 682"/><rect x="231" y="652" width="172" height="23" rx="7" fill="#fbfaf6"/><text class="label" x="317" y="669" text-anchor="middle">200 JSON</text>
-
-  <rect x="120" y="738" width="1240" height="84" rx="14" fill="#fff7f3" stroke="#d8b2a8" stroke-width="2"/>
-  <text class="small" x="144" y="768">Failure path</text>
-  <text class="label" x="688" y="766" text-anchor="middle">risk check failure cancels siblings</text>
-  <text class="label" x="1044" y="766" text-anchor="middle">caller cancellation returns cancelled report</text>
-  <path class="error" d="M 995 798 L 183 798"/><rect x="504" y="784" width="178" height="23" rx="7" fill="#fff7f3"/><text class="label" x="593" y="801" text-anchor="middle">409 / 408 JSON</text>
-
-  <rect x="258" y="842" width="964" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="867" text-anchor="middle">Tests assert completed, failed, skipped, and cancelled report trees.</text>
+  <rect class="canvas" x="-60" y="0" width="1583" height="948"/>
+  <text class="title" x="732" y="64" text-anchor="middle">Fulfillment Workflow Sequence</text>
+  <text class="subtitle" x="732" y="98" text-anchor="middle">A request-scoped runner preserves branch reports while HTTP status mapping stays outside workflow execution.</text>
+  <g id="participant-1"><rect class="card" x="-5" y="160" width="190" height="78" rx="10" fill="#E8F3FF" stroke="#5B8DEF"/><text class="cardTitle" x="90" y="203" text-anchor="middle">Client</text><line class="lifeline" x1="90" y1="238" x2="90" y2="836"/></g>
+  <g id="participant-2"><rect class="card" x="315.8" y="160" width="190" height="78" rx="10" fill="#FFF3D9" stroke="#D6A441"/><text class="cardTitle" x="410.8" y="203" text-anchor="middle">Gin Handler</text><line class="lifeline" x1="410.8" y1="238" x2="410.8" y2="836"/></g>
+  <g id="participant-3"><rect class="card" x="636.5" y="160" width="190" height="78" rx="10" fill="#EAF7EF" stroke="#58A978"/><text class="cardTitle" x="731.5" y="203" text-anchor="middle">Sequential</text><line class="lifeline" x1="731.5" y1="238" x2="731.5" y2="836"/></g>
+  <g id="participant-4"><rect class="card" x="957.2" y="160" width="190" height="78" rx="10" fill="#F1ECFF" stroke="#8A72D6"/><text class="cardTitle" x="1052.2" y="203" text-anchor="middle">Parallel</text><line class="lifeline" x1="1052.2" y1="238" x2="1052.2" y2="836"/></g>
+  <g id="participant-5"><rect class="card" x="1268" y="160" width="210" height="78" rx="10" fill="#FDECEF" stroke="#DC6B82"/><text class="cardTitle" x="1373" y="203" text-anchor="middle">Conditional</text><line class="lifeline" x1="1373" y1="238" x2="1373" y2="836"/></g>
+  <rect class="activation" x="403.8" y="268" width="14" height="452" rx="6"/>
+  <rect class="activation" x="724.5" y="286" width="14" height="380" rx="6"/>
+  <rect class="activation" x="1045.2" y="394" width="14" height="432" rx="6"/>
+  <rect class="activation" x="1366" y="502" width="14" height="110" rx="6"/>
+  <rect class="alt" x="64" y="530" width="1335" height="326" rx="16"/>
+  <rect class="label failLabel" x="88" y="516" width="230" height="28" rx="8"/>
+  <text class="msg failText" x="203" y="535" text-anchor="middle">alt failure / branch path</text>
+  <g id="message-1"><rect class="label callLabel" x="175.4" y="254" width="150" height="28" rx="8"/><circle cx="193.4" cy="268" r="12" fill="#3F7D9C"/><text class="badgeText" x="193.4" y="272" text-anchor="middle" fill="#fff">1</text><text class="msg callText" x="258.4" y="272" text-anchor="middle">POST run</text><path class="call" d="M 90 250 H 410.8"/></g>
+  <g id="message-2"><rect class="label callLabel" x="496.1" y="268" width="150" height="28" rx="8"/><circle cx="514.1" cy="282" r="12" fill="#3F7D9C"/><text class="badgeText" x="514.1" y="286" text-anchor="middle" fill="#fff">2</text><text class="msg callText" x="579.1" y="286" text-anchor="middle">Run(ctx)</text><path class="call" d="M 410.8 304 H 731.5"/></g>
+  <g id="message-3"><rect class="label returnLabel" x="474" y="322" width="194.3" height="28" rx="8"/><circle cx="492" cy="336" r="12" fill="#6E8F4F"/><text class="badgeText" x="492" y="340" text-anchor="middle" fill="#fff">3</text><text class="msg returnText" x="579.1" y="340" text-anchor="middle">validate-order ok</text><path class="return" d="M 731.5 358 H 410.8"/></g>
+  <g id="message-4"><rect class="label callLabel" x="816.9" y="376" width="150" height="28" rx="8"/><circle cx="834.9" cy="390" r="12" fill="#3F7D9C"/><text class="badgeText" x="834.9" y="394" text-anchor="middle" fill="#fff">4</text><text class="msg callText" x="899.9" y="394" text-anchor="middle">risk-checks</text><path class="call" d="M 731.5 412 H 1052.2"/></g>
+  <g id="message-5"><rect class="label returnLabel" x="811.9" y="430" width="160" height="28" rx="8"/><circle cx="829.9" cy="444" r="12" fill="#6E8F4F"/><text class="badgeText" x="829.9" y="448" text-anchor="middle" fill="#fff">5</text><text class="msg returnText" x="899.9" y="448" text-anchor="middle">branch reports</text><path class="return" d="M 1052.2 466 H 731.5"/></g>
+  <g id="message-6"><rect class="label callLabel" x="955.1" y="484" width="194.3" height="28" rx="8"/><circle cx="973.1" cy="498" r="12" fill="#3F7D9C"/><text class="badgeText" x="973.1" y="502" text-anchor="middle" fill="#fff">6</text><text class="msg callText" x="1060.2" y="502" text-anchor="middle">shipment-decision</text><path class="call" d="M 731.5 520 H 1373"/></g>
+  <g id="message-7"><rect class="label failLabel" x="932.2" y="538" width="240" height="28" rx="8"/><circle cx="950.2" cy="552" r="12" fill="#B86868"/><text class="badgeText" x="950.2" y="556" text-anchor="middle" fill="#fff">7</text><text class="msg failText" x="1060.2" y="556" text-anchor="middle">create or skip report</text><path class="fail" d="M 1373 574 H 731.5"/></g>
+  <g id="message-8"><rect class="label returnLabel" x="485.4" y="592" width="171.4" height="28" rx="8"/><circle cx="503.4" cy="606" r="12" fill="#6E8F4F"/><text class="badgeText" x="503.4" y="610" text-anchor="middle" fill="#fff">8</text><text class="msg returnText" x="579.1" y="610" text-anchor="middle">workreport tree</text><path class="return" d="M 731.5 628 H 410.8"/></g>
+  <g id="message-9"><rect class="label returnLabel" x="175.4" y="646" width="150" height="28" rx="8"/><circle cx="193.4" cy="660" r="12" fill="#6E8F4F"/><text class="badgeText" x="193.4" y="664" text-anchor="middle" fill="#fff">9</text><text class="msg returnText" x="258.4" y="664" text-anchor="middle">200 JSON</text><path class="return" d="M 410.8 682 H 90"/></g>
+  <g id="message-10"><rect class="label failLabel" x="491.1" y="762" width="160" height="28" rx="8"/><circle cx="509.1" cy="776" r="12" fill="#B86868"/><text class="badgeText" x="509.1" y="780" text-anchor="middle" fill="#fff">10</text><text class="msg failText" x="579.1" y="780" text-anchor="middle">409 / 408 JSON</text><path class="fail" d="M 1052.2 798 H 90"/></g>
+  <g><rect x="204.8" y="878" width="1053.4" height="42" rx="12" fill="#ffffff" stroke="#D6E3EF" stroke-width="1.6"/><text class="footer" x="732" y="905" text-anchor="middle">Tests assert completed, failed, skipped, and cancelled report trees.</text></g>
 </svg>

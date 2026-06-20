@@ -2,10 +2,10 @@
   <title id="title">Retry Dead-Letter Batch Worker Architecture</title>
   <desc id="desc">Architecture showing the CLI runner, batch job, ticket reader, processor classification, retry and skip policies, writer, processed sink, and dead-letter store.</desc>
   <defs>
-    <marker id="ar-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#48758d"/></marker>
-    <marker id="ar-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="ar-red" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="ar-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="ar-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#48758d"/></marker>
+    <marker id="ar-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="ar-red" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <marker id="ar-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -51,11 +51,11 @@
 
   <path class="blue" d="M 398 239 L 638 239"/><text class="label" x="518" y="219" text-anchor="middle">run</text>
   <path class="blue" d="M 884 239 L 1112 239"/><text class="label" x="998" y="219" text-anchor="middle">project report</text>
-  <path class="blue" d="M 761 280 L 761 322 L 257 322 L 257 430"/><text class="label" x="502" y="312" text-anchor="middle">read tickets</text>
+  <path class="blue" d="M 761 280 V 310 Q 761 322 749 322 H 269 Q 257 322 257 334 V 430"/><text class="label" x="502" y="312" text-anchor="middle">read tickets</text>
   <path class="green" d="M 370 470 L 480 470"/><text class="label" x="425" y="450" text-anchor="middle">tickets</text>
   <path class="purple" d="M 734 470 L 854 470"/><text class="label" x="794" y="450" text-anchor="middle">processed</text>
   <path class="purple" d="M 1100 470 L 1194 470"/><text class="label" x="1147" y="450" text-anchor="middle">write</text>
-  <path class="blue" d="M 575 522 L 575 642 L 449 642 L 449 666"/><text class="label" x="514" y="632" text-anchor="middle">transient</text>
-  <path class="red" d="M 638 522 L 638 642 L 771 642 L 771 666"/><text class="label" x="708" y="632" text-anchor="middle">permanent</text>
-  <path class="red" d="M 680 522 L 680 586 L 1111 586 L 1111 666"/><text class="label" x="908" y="576" text-anchor="middle">record reason + attempts</text>
+  <path class="blue" d="M 575 522 V 630 Q 575 642 563 642 H 461 Q 449 642 449 654 V 666"/><text class="label" x="514" y="632" text-anchor="middle">transient</text>
+  <path class="red" d="M 638 522 V 630 Q 638 642 650 642 H 759 Q 771 642 771 654 V 666"/><text class="label" x="708" y="632" text-anchor="middle">permanent</text>
+  <path class="red" d="M 680 522 V 574 Q 680 586 692 586 H 1099 Q 1111 586 1111 598 V 666"/><text class="label" x="908" y="576" text-anchor="middle">record reason + attempts</text>
 </svg>

@@ -2,10 +2,10 @@
   <title id="title">Chunked CSV Import Checkpoint Scenario</title>
   <desc id="desc">Scenario showing a chunked customer CSV import, a partial writer crash, checkpoint restore, duplicate skip, and completed restart.</desc>
   <defs>
-    <marker id="sc-read" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#3f6f8f"/></marker>
-    <marker id="sc-ok" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#5d8a62"/></marker>
-    <marker id="sc-fail" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#b95f7a"/></marker>
-    <marker id="sc-restart" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 1 1 L 7 4 L 1 7 Z" fill="#8a6bb0"/></marker>
+    <marker id="sc-read" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
+    <marker id="sc-ok" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
+    <marker id="sc-fail" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#b95f7a"/></marker>
+    <marker id="sc-restart" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
@@ -47,7 +47,7 @@
   <path class="read" d="M 336 289 L 430 289"/><text class="label" x="383" y="269" text-anchor="middle">read rows</text>
   <path class="ok" d="M 636 289 L 738 289"/><text class="label" x="687" y="269" text-anchor="middle">write ok</text>
   <path class="fail" d="M 966 289 L 1076 289"/><text class="label" x="1021" y="269" text-anchor="middle">writer error</text>
-  <path class="restart" d="M 1199 342 L 1199 404 L 321 404 L 321 512"/><text class="label" x="760" y="394" text-anchor="middle">process restarts with saved checkpoint</text>
+  <path class="restart" d="M 1199 342 V 392 Q 1199 404 1187 404 H 333 Q 321 404 321 416 V 512"/><text class="label" x="760" y="394" text-anchor="middle">process restarts with saved checkpoint</text>
   <path class="restart" d="M 440 555 L 584 555"/><text class="label" x="512" y="535" text-anchor="middle">replay</text>
   <path class="ok" d="M 864 555 L 1008 555"/><text class="label" x="936" y="535" text-anchor="middle">idempotent write</text>
 </svg>
