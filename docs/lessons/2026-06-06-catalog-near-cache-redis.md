@@ -18,13 +18,17 @@ Issue: `#15 [v0.3.0] Add Redis near-cache and stampede coordination catalog exam
 
 - The README diagrams share English labels across `README.md` and
   `README.ko.md`.
-- Each node-and-connector diagram keeps Graphviz evidence beside the final
-  SVG/PNG pair.
+- Each node-and-connector diagram keeps the final editable SVG and rendered PNG
+  pair as the README asset source.
 - `Architects Daughter` and `Comic Mono` are explicitly loaded in the final SVG
   assets with `@font-face` to avoid renderer font fallback.
 - Visual inspection caught route/card overlap in early scenario and architecture
-  renders; final SVGs were patched directly after Graphviz established the
+  renders; final SVGs were patched directly after layout review established the
   structure.
+- Later visual review caught avoidable connector crossings in the split
+  cold-miss and invalidation scenarios. Separate request and response corridors
+  first, then reserve enough final straight segment before each card for the
+  rendered arrowhead.
 
 ## Verification Notes
 
@@ -46,3 +50,6 @@ sibling worktree. Cleaning the lint cache and rerunning the same command passed.
 - If an example imports a bluetape-go test helper, run `go mod tidy` before
   committing and verify that no extra indirect requirements enter `go.mod`
   unless the issue explicitly permits them.
+- For README SVG routes, run a simple H/V segment crossing sweep before
+  accepting the PNG. If a line can avoid crossing by changing its port or
+  corridor, fix the route instead of treating the crossing as acceptable.

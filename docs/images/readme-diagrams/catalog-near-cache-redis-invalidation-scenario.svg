@@ -23,10 +23,10 @@
       .card-text { font-family: 'Comic Mono'; font-size: 15px; fill: #344b59; }
       .label { font-family: 'Comic Mono'; font-size: 13px; fill: #35505f; }
       .small { font-family: 'Comic Mono'; font-size: 12px; fill: #536d7d; }
-      .neutral { fill: none; stroke: #47616f; stroke-width: 3; marker-end: url(#scenario-neutral); }
-      .load { fill: none; stroke: #4f8b63; stroke-width: 3; marker-end: url(#scenario-load); }
-      .invalidate { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#scenario-invalidate); }
-      .write { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-write); }
+      .neutral { fill: none; stroke: #47616f; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-neutral); }
+      .load { fill: none; stroke: #4f8b63; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-load); }
+      .invalidate { fill: none; stroke: #8a6bb0; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-invalidate); }
+      .write { fill: none; stroke: #b95f7a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#scenario-write); }
     </style>
   </defs>
 
@@ -64,7 +64,7 @@
   </g>
 
   <path class="write" d="M 314 380 H 430"/><rect x="328" y="350" width="88" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="372" y="366" text-anchor="middle">write v2</text>
-  <path class="write" d="M 199 445 V 500 Q 199 512 211 512 H 774 Q 786 512 786 500 V 392 Q 786 380 790 380"/><rect x="514" y="484" width="118" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="573" y="500" text-anchor="middle">publish Set</text>
+  <path class="write" d="M 199 315 V 260 Q 199 248 211 248 H 903 Q 915 248 915 260 V 315"/><rect x="514" y="220" width="118" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="573" y="236" text-anchor="middle">publish Set</text>
   <path class="invalidate" d="M 1040 380 H 1120"/><rect x="1048" y="350" width="78" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="1087" y="366" text-anchor="middle">fan-out</text>
   <path class="load" d="M 1250 445 V 540 Q 1250 552 1238 552 H 572 Q 560 552 560 540 V 445"/><rect x="760" y="524" width="208" height="22" rx="7" fill="#fbfaf6"/><text class="label" x="864" y="540" text-anchor="middle">next read reloads Product v2</text>
 
