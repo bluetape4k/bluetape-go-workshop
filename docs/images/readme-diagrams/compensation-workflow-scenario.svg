@@ -12,14 +12,14 @@
       .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
       .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
       .subtitle { font-size: 15px; }
-      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
-      .band-label { font-size: 22px; }
+      .layer-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .layer-label { font-size: 22px; }
       .card-title { font-size: 23px; }
       .detail { font-size: 13px; }
       .label { font-size: 12px; }
       .footer { font-size: 13px; }
       .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
-      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .layer { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .request { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#scenario-request); }
       .success { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#scenario-success); }
       .failure { fill: none; stroke: #b95f7a; stroke-width: 3; marker-end: url(#scenario-failure); }
@@ -31,31 +31,40 @@
   <text class="title" x="760" y="72" text-anchor="middle">Compensation Workflow Scenario</text>
   <text class="subtitle" x="760" y="105" text-anchor="middle">Forward work records reversible side effects; a later failure triggers reverse cleanup without hiding the original error.</text>
 
-  <rect class="band" x="82" y="142" width="1356" height="190"/><text class="band-label" x="112" y="178">Forward path</text>
-  <g transform="translate(112 220)"><rect width="210" height="82" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="105" y="33" text-anchor="middle">Request</text><text class="detail" x="105" y="58" text-anchor="middle">order + scenario flags</text></g>
-  <g transform="translate(408 210)"><rect width="236" height="102" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="118" y="36" text-anchor="middle">reserve-inventory</text><text class="detail" x="118" y="62" text-anchor="middle">sets inventory_reserved</text><text class="detail" x="118" y="82" text-anchor="middle">push release-inventory</text></g>
-  <g transform="translate(728 210)"><rect width="236" height="102" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="118" y="36" text-anchor="middle">authorize-payment</text><text class="detail" x="118" y="62" text-anchor="middle">sets payment_authorized</text><text class="detail" x="118" y="82" text-anchor="middle">push void-payment</text></g>
-  <g transform="translate(1048 210)"><rect width="236" height="102" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="118" y="36" text-anchor="middle">create-shipment</text><text class="detail" x="118" y="62" text-anchor="middle">last forward side effect</text><text class="detail" x="118" y="82" text-anchor="middle">may fail</text></g>
+  <rect class="layer" x="84" y="146" width="260" height="632"/>
+  <text class="layer-label" x="214" y="184" text-anchor="middle">Input</text>
+  <rect class="layer" x="402" y="146" width="324" height="632"/>
+  <text class="layer-label" x="564" y="184" text-anchor="middle">Forward workflow</text>
+  <rect class="layer" x="784" y="146" width="324" height="632"/>
+  <text class="layer-label" x="946" y="184" text-anchor="middle">Compensation stack</text>
+  <rect class="layer" x="1166" y="146" width="270" height="632"/>
+  <text class="layer-label" x="1301" y="184" text-anchor="middle">Response</text>
 
-  <rect class="band" x="82" y="376" width="1356" height="238"/><text class="band-label" x="112" y="412">Failure + compensation path</text>
-  <g transform="translate(184 478)"><rect width="238" height="94" rx="12" fill="#ffe4e6" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="119" y="35" text-anchor="middle">Original error</text><text class="detail" x="119" y="61" text-anchor="middle">shipment provider</text><text class="detail" x="119" y="80" text-anchor="middle">stays caller-visible</text></g>
-  <g transform="translate(562 466)"><rect width="246" height="118" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="123" y="36" text-anchor="middle">void-payment</text><text class="detail" x="123" y="62" text-anchor="middle">reverse step 1</text><text class="detail" x="123" y="82" text-anchor="middle">may fail independently</text><text class="detail" x="123" y="102" text-anchor="middle">ContinueOnFailure</text></g>
-  <g transform="translate(946 466)"><rect width="246" height="118" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="123" y="36" text-anchor="middle">release-inventory</text><text class="detail" x="123" y="62" text-anchor="middle">reverse step 2</text><text class="detail" x="123" y="82" text-anchor="middle">runs even if void fails</text><text class="detail" x="123" y="102" text-anchor="middle">clears reservation</text></g>
+  <g transform="translate(114 396)"><rect width="200" height="92" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="100" y="36" text-anchor="middle">Request</text><text class="detail" x="100" y="62" text-anchor="middle">order + scenario flags</text></g>
 
-  <rect class="band" x="82" y="654" width="1356" height="114"/><text class="band-label" x="112" y="690">Response contract</text>
-  <g transform="translate(272 704)"><rect width="270" height="50" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="135" y="33" text-anchor="middle">200 completed</text></g>
-  <g transform="translate(622 704)"><rect width="296" height="50" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="148" y="33" text-anchor="middle">stable JSON report</text></g>
-  <g transform="translate(998 704)"><rect width="270" height="50" rx="12" fill="#fee2e2" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="135" y="33" text-anchor="middle">409 compensated</text></g>
+  <g transform="translate(450 214)"><rect width="228" height="100" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="114" y="34" text-anchor="middle">reserve-inventory</text><text class="detail" x="114" y="60" text-anchor="middle">sets inventory_reserved</text><text class="detail" x="114" y="80" text-anchor="middle">push release-inventory</text></g>
+  <g transform="translate(450 386)"><rect width="228" height="100" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="114" y="34" text-anchor="middle">authorize-payment</text><text class="detail" x="114" y="60" text-anchor="middle">sets payment_authorized</text><text class="detail" x="114" y="80" text-anchor="middle">push void-payment</text></g>
+  <g transform="translate(450 558)"><rect width="228" height="100" rx="12" fill="#fee2e2" stroke="#bf6672" stroke-width="2"/><text class="card-title" x="114" y="34" text-anchor="middle">create-shipment</text><text class="detail" x="114" y="60" text-anchor="middle">last forward side effect</text><text class="detail" x="114" y="80" text-anchor="middle">may fail</text></g>
 
-  <path class="request" d="M 322 261 L 408 261"/><text class="label" x="365" y="241" text-anchor="middle">POST</text>
-  <path class="success" d="M 644 261 L 728 261"/><text class="label" x="686" y="241" text-anchor="middle">success</text>
-  <path class="success" d="M 964 261 L 1048 261"/><text class="label" x="1006" y="241" text-anchor="middle">success</text>
-  <path class="success" d="M 1284 261 H 1356 Q 1368 261 1368 273 V 778 Q 1368 790 1356 790 H 419 Q 407 790 407 778 V 754"/><text class="label" x="1390" y="495" text-anchor="middle" transform="rotate(90 1390 495)">all forward steps complete</text>
-  <path class="failure" d="M 1166 312 V 348 Q 1166 360 1154 360 H 315 Q 303 360 303 372 V 478"/><text class="label" x="734" y="350" text-anchor="middle">later forward step fails</text>
-  <path class="comp" d="M 422 525 L 562 525"/><text class="label" x="492" y="504" text-anchor="middle">reverse stack top</text>
-  <path class="comp" d="M 808 525 L 946 525"/><text class="label" x="877" y="504" text-anchor="middle">continue cleanup</text>
-  <path class="comp" d="M 1192 525 H 1262 Q 1274 525 1274 537 V 717 Q 1274 729 1262 729 H 998"/><text class="label" x="1278" y="626" text-anchor="middle">report cleanup outcome</text>
-  <path class="request" d="M 760 654 L 760 704"/><text class="label" x="832" y="684" text-anchor="middle">forward + compensation children</text>
+  <g transform="translate(832 214)"><rect width="228" height="92" rx="12" fill="#ffe4e6" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="114" y="34" text-anchor="middle">Original error</text><text class="detail" x="114" y="60" text-anchor="middle">shipment provider</text><text class="detail" x="114" y="78" text-anchor="middle">stays caller-visible</text></g>
+  <g transform="translate(832 386)"><rect width="228" height="108" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="114" y="34" text-anchor="middle">void-payment</text><text class="detail" x="114" y="60" text-anchor="middle">reverse step 1</text><text class="detail" x="114" y="80" text-anchor="middle">may fail independently</text><text class="detail" x="114" y="98" text-anchor="middle">ContinueOnFailure</text></g>
+  <g transform="translate(832 568)"><rect width="228" height="108" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="114" y="34" text-anchor="middle">release-inventory</text><text class="detail" x="114" y="60" text-anchor="middle">reverse step 2</text><text class="detail" x="114" y="80" text-anchor="middle">runs even if void fails</text><text class="detail" x="114" y="98" text-anchor="middle">clears reservation</text></g>
+
+  <g transform="translate(1204 244)"><rect width="194" height="58" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="97" y="38" text-anchor="middle">200 completed</text></g>
+  <g transform="translate(1204 420)"><rect width="194" height="58" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="97" y="38" text-anchor="middle">JSON report</text></g>
+  <g transform="translate(1204 608)"><rect width="194" height="58" rx="12" fill="#fee2e2" stroke="#b95f7a" stroke-width="2"/><text class="card-title" x="97" y="38" text-anchor="middle">409 compensated</text></g>
+
+  <path class="request" d="M 314 442 H 374 Q 386 442 386 430 V 264 Q 386 252 398 252 H 450"/><text class="label" x="372" y="423" text-anchor="middle">POST</text>
+  <path class="success" d="M 564 314 V 386"/><text class="label" x="616" y="356" text-anchor="middle">success</text>
+  <path class="success" d="M 564 486 V 558"/><text class="label" x="616" y="528" text-anchor="middle">success</text>
+  <path class="success" d="M 678 608 H 744 Q 756 608 756 596 V 204 Q 756 192 768 192 H 1188 Q 1200 192 1200 204 V 273 Q 1200 285 1204 285"/><text class="label" x="982" y="212" text-anchor="middle">all forward steps complete</text>
+
+  <path class="failure" d="M 678 608 H 744 Q 756 608 756 596 V 260 Q 756 248 768 248 H 832"/><text class="label" x="758" y="430" text-anchor="middle" transform="rotate(-90 758 430)">later step fails</text>
+  <path class="comp" d="M 946 306 V 386"/><text class="label" x="1000" y="350" text-anchor="middle">reverse stack top</text>
+  <path class="comp" d="M 946 494 V 568"/><text class="label" x="1002" y="536" text-anchor="middle">continue cleanup</text>
+  <path class="comp" d="M 1060 622 H 1204"/><text class="label" x="1132" y="602" text-anchor="middle">cleanup outcome</text>
+  <path class="request" d="M 946 676 V 704 Q 946 716 958 716 H 1289 Q 1301 716 1301 704 V 666"/><text class="label" x="1132" y="737" text-anchor="middle">report preserves original error</text>
+  <path class="request" d="M 1301 420 V 302"/><text class="label" x="1358" y="364" text-anchor="middle">stable report</text>
 
   <rect x="214" y="810" width="1092" height="42" rx="12" fill="#ffffff" stroke="#d8e2e8"/>
   <text class="footer" x="760" y="836" text-anchor="middle">Teaching boundary: request-scoped flags stand in for durable inventory, payment, and shipment commands.</text>
