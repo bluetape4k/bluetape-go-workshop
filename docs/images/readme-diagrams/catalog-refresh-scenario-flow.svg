@@ -58,7 +58,7 @@
   <text class="label" x="326" y="246" text-anchor="middle">Refresh(sku)</text>
   <path class="route" d="M 620 265 L 730 265"/>
   <text class="label" x="675" y="246" text-anchor="middle">attempt</text>
-  <path class="route" d="M 960 265 H 1039 Q 1048 265 1048 256 V 247"/>
+  <path class="route" d="M 960 265 H 1048"/>
   <text class="label" x="1008" y="226" text-anchor="middle">success</text>
   <path class="route-soft" d="M 620 314 H 672 Q 684 314 684 326 V 439 Q 684 451 696 451 H 1058"/>
   <text class="label" x="820" y="432" text-anchor="middle">OnEvent(event)</text>
