@@ -12,14 +12,14 @@
       .title { font-family: 'Architects Daughter'; font-size: 38px; fill: #24313f; }
       .subtitle, .detail, .label, .footer { font-family: 'Comic Mono'; fill: #536d7d; }
       .subtitle { font-size: 15px; }
-      .band-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
-      .band-label { font-size: 22px; }
+      .layer-label, .card-title { font-family: 'Architects Daughter'; fill: #24313f; }
+      .layer-label { font-size: 22px; }
       .card-title { font-size: 23px; }
       .detail { font-size: 13px; }
       .label { font-size: 12px; }
       .footer { font-size: 13px; }
       .frame { fill: #fffefa; stroke: #d8e2e8; stroke-width: 2; rx: 20; }
-      .band { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
+      .layer { fill: #ffffff; stroke: #d8e2e8; stroke-width: 2; rx: 16; }
       .blue { fill: none; stroke: #3f6f8f; stroke-width: 3; marker-end: url(#arch-blue); }
       .green { fill: none; stroke: #5d8a62; stroke-width: 3; marker-end: url(#arch-green); }
       .purple { fill: none; stroke: #8a6bb0; stroke-width: 3; marker-end: url(#arch-purple); }
@@ -31,29 +31,34 @@
   <text class="title" x="750" y="82" text-anchor="middle">Account Migration Checkpoint Restart Architecture</text>
   <text class="subtitle" x="750" y="116" text-anchor="middle">The replaceable checkpoint store and target store keep the restart contract visible and testable.</text>
 
-  <rect class="band" x="82" y="158" width="1336" height="136"/><text class="band-label" x="112" y="194">Runnable demo</text>
-  <g transform="translate(178 214)"><rect width="218" height="58" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="109" y="35" text-anchor="middle">go run</text></g>
-  <g transform="translate(628 202)"><rect width="244" height="82" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="122" y="33" text-anchor="middle">batch.Job</text><text class="detail" x="122" y="59" text-anchor="middle">account-migration</text></g>
-  <g transform="translate(1104 202)"><rect width="236" height="82" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="118" y="33" text-anchor="middle">Stable JSON</text><text class="detail" x="118" y="59" text-anchor="middle">restart evidence</text></g>
+  <rect class="layer" x="84" y="158" width="300" height="590"/>
+  <text class="layer-label" x="234" y="196" text-anchor="middle">Runnable demo</text>
+  <rect class="layer" x="436" y="158" width="430" height="590"/>
+  <text class="layer-label" x="651" y="196" text-anchor="middle">batch.Step components</text>
+  <rect class="layer" x="918" y="158" width="498" height="590"/>
+  <text class="layer-label" x="1167" y="196" text-anchor="middle">Stores and evidence</text>
 
-  <rect class="band" x="82" y="342" width="1336" height="210"/><text class="band-label" x="112" y="378">batch.Step components</text>
-  <g transform="translate(150 420)"><rect width="230" height="98" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="115" y="34" text-anchor="middle">Reader</text><text class="detail" x="115" y="59" text-anchor="middle">CheckpointReader</text><text class="detail" x="115" y="78" text-anchor="middle">cursor = next_index</text></g>
-  <g transform="translate(486 420)"><rect width="236" height="98" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="118" y="34" text-anchor="middle">Processor</text><text class="detail" x="118" y="59" text-anchor="middle">normalize fields</text><text class="detail" x="118" y="78" text-anchor="middle">crash hook</text></g>
-  <g transform="translate(828 420)"><rect width="250" height="98" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="125" y="34" text-anchor="middle">Writer</text><text class="detail" x="125" y="59" text-anchor="middle">chunk commits</text><text class="detail" x="125" y="78" text-anchor="middle">unique target IDs</text></g>
-  <g transform="translate(1188 420)"><rect width="182" height="98" rx="12" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="91" y="34" text-anchor="middle">Target</text><text class="detail" x="91" y="59" text-anchor="middle">snapshot</text><text class="detail" x="91" y="78" text-anchor="middle">write log</text></g>
+  <g transform="translate(126 246)"><rect width="216" height="64" rx="12" fill="#d7ecf2" stroke="#48758d" stroke-width="2"/><text class="card-title" x="108" y="40" text-anchor="middle">go run</text></g>
+  <g transform="translate(118 394)"><rect width="232" height="86" rx="12" fill="#fef3c7" stroke="#b99b5d" stroke-width="2"/><text class="card-title" x="116" y="35" text-anchor="middle">batch.Job</text><text class="detail" x="116" y="61" text-anchor="middle">account-migration</text></g>
+  <g transform="translate(118 590)"><rect width="232" height="86" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="116" y="35" text-anchor="middle">Stable JSON</text><text class="detail" x="116" y="61" text-anchor="middle">restart evidence</text></g>
 
-  <rect class="band" x="82" y="600" width="1336" height="118"/><text class="band-label" x="112" y="636">Checkpoint contract</text>
-  <g transform="translate(338 652)"><rect width="340" height="44" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="170" y="29" text-anchor="middle">CheckpointStore</text></g>
-  <g transform="translate(820 652)"><rect width="320" height="44" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="160" y="29" text-anchor="middle">account-migration-v1</text></g>
+  <g transform="translate(504 220)"><rect width="294" height="92" rx="12" fill="#dbeafe" stroke="#4f7e9d" stroke-width="2"/><text class="card-title" x="147" y="33" text-anchor="middle">Reader</text><text class="detail" x="147" y="58" text-anchor="middle">CheckpointReader</text><text class="detail" x="147" y="76" text-anchor="middle">cursor = next_index</text></g>
+  <g transform="translate(504 384)"><rect width="294" height="92" rx="12" fill="#dcfce7" stroke="#5d8a62" stroke-width="2"/><text class="card-title" x="147" y="33" text-anchor="middle">Processor</text><text class="detail" x="147" y="58" text-anchor="middle">normalize fields</text><text class="detail" x="147" y="76" text-anchor="middle">crash hook</text></g>
+  <g transform="translate(504 548)"><rect width="294" height="92" rx="12" fill="#f3e8ff" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="147" y="33" text-anchor="middle">Writer</text><text class="detail" x="147" y="58" text-anchor="middle">chunk commits</text><text class="detail" x="147" y="76" text-anchor="middle">unique target IDs</text></g>
 
-  <rect class="band" x="82" y="762" width="1336" height="36"/><text class="footer" x="750" y="786" text-anchor="middle">Production replacements: durable checkpoint persistence, transactional target writes, audit events, and retry/dead-letter policy.</text>
+  <g transform="translate(988 228)"><rect width="350" height="62" rx="12" fill="#e0f2fe" stroke="#48758d" stroke-width="2"/><text class="card-title" x="175" y="39" text-anchor="middle">CheckpointStore</text></g>
+  <g transform="translate(1004 342)"><rect width="318" height="62" rx="12" fill="#ede9fe" stroke="#8a6bb0" stroke-width="2"/><text class="card-title" x="159" y="39" text-anchor="middle">account-migration-v1</text></g>
+  <g transform="translate(1016 510)"><rect width="294" height="92" rx="12" fill="#fff7ed" stroke="#c07a42" stroke-width="2"/><text class="card-title" x="147" y="33" text-anchor="middle">Target</text><text class="detail" x="147" y="58" text-anchor="middle">snapshot</text><text class="detail" x="147" y="76" text-anchor="middle">write log</text></g>
 
-  <path class="blue" d="M 396 243 L 628 243"/><text class="label" x="512" y="223" text-anchor="middle">run twice</text>
-  <path class="blue" d="M 872 243 L 1104 243"/><text class="label" x="988" y="223" text-anchor="middle">print result</text>
-  <path class="blue" d="M 750 284 V 310 Q 750 322 738 322 H 277 Q 265 322 265 334 V 420"/><text class="label" x="502" y="312" text-anchor="middle">read + restore</text>
-  <path class="green" d="M 380 469 L 486 469"/><text class="label" x="433" y="449" text-anchor="middle">rows</text>
-  <path class="purple" d="M 722 469 L 828 469"/><text class="label" x="775" y="449" text-anchor="middle">targets</text>
-  <path class="amber" d="M 1078 469 L 1188 469"/><text class="label" x="1133" y="449" text-anchor="middle">put</text>
-  <path class="blue" d="M 953 518 V 578 Q 953 590 941 590 H 520 Q 508 590 508 602 V 652"/><text class="label" x="731" y="580" text-anchor="middle">save after committed chunk</text>
-  <path class="purple" d="M 820 674 L 678 674"/><text class="label" x="749" y="654" text-anchor="middle">same key on restart</text>
+  <path class="blue" d="M 234 310 V 394"/><text class="label" x="286" y="356" text-anchor="middle">run twice</text>
+  <path class="blue" d="M 350 437 H 418 Q 430 437 430 425 V 278 Q 430 266 442 266 H 504"/><text class="label" x="431" y="250" text-anchor="middle">read + restore</text>
+  <path class="green" d="M 651 312 V 384"/><text class="label" x="704" y="354" text-anchor="middle">rows</text>
+  <path class="purple" d="M 651 476 V 548"/><text class="label" x="704" y="518" text-anchor="middle">targets</text>
+  <path class="amber" d="M 798 594 H 1016"/><text class="label" x="907" y="574" text-anchor="middle">put</text>
+  <path class="blue" d="M 798 594 H 886 Q 898 594 898 582 V 271 Q 898 259 910 259 H 988"/><text class="label" x="914" y="414" text-anchor="middle" transform="rotate(-90 914 414)">save after committed chunk</text>
+  <path class="purple" d="M 1004 373 H 942 Q 930 373 930 361 V 290 Q 930 278 942 278 H 988"/><text class="label" x="936" y="334" text-anchor="middle" transform="rotate(-90 936 334)">same key</text>
+  <path class="blue" d="M 234 480 V 590"/><text class="label" x="286" y="540" text-anchor="middle">print result</text>
+
+  <rect x="214" y="778" width="1072" height="36" rx="12" fill="#ffffff" stroke="#d8e2e8"/>
+  <text class="footer" x="750" y="802" text-anchor="middle">Production replacements: durable checkpoint persistence, transactional target writes, audit events, and retry/dead-letter policy.</text>
 </svg>
