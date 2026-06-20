@@ -17,6 +17,9 @@ Use this example when one request must call several downstream providers with a
 bounded concurrency budget. Price and inventory are required. Recommendations
 and review summaries are optional, so their failures are captured in the result
 without failing the whole product view.
+In the diagram this example owns the **Product Fan-Out** lane: a request-scoped
+`concurrency.Group` keeps provider calls bounded, cancels on required failure,
+and returns optional provider failures as product metadata.
 
 ## What It Demonstrates
 

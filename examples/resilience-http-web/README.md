@@ -13,6 +13,9 @@ Use this example when an HTTP service needs separate policies for outbound calls
 and inbound handler pressure. Catalog requests go through retry, timeout, and a
 circuit breaker. Order creation is protected by a reject-mode bulkhead so the
 handler can return a typed rejection quickly.
+In the diagram this example owns the **HTTP Resilience Boundary** lane:
+`RoundTripper` policies protect outbound catalog calls, while the handler
+bulkhead protects inbound order pressure and `/events` exposes policy outcomes.
 
 ## Run
 
