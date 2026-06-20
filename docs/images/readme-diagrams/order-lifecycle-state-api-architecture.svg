@@ -41,11 +41,11 @@
 
   <path class="main" d="M 338 227 H 363 Q 375 227 375 239 V 394"/><text class="label" x="422" y="309" text-anchor="middle">GET / POST</text>
   <path class="main" d="M 496 439 L 620 439"/><text class="label" x="558" y="420" text-anchor="middle">route</text>
-  <path class="main" d="M 749 494 V 610 Q 749 622 737 622 H 696"/><text class="label" x="690" y="558" text-anchor="middle">State / Transition</text>
+  <path class="main" d="M 749 494 V 560 Q 749 572 737 572 H 570 Q 558 572 558 584 V 622"/><text class="label" x="690" y="558" text-anchor="middle">State / Transition</text>
   <path class="main" d="M 696 663 L 784 663"/><text class="label" x="740" y="644" text-anchor="middle">pay guard</text>
   <path class="error" d="M 878 439 L 974 439"/><text class="label" x="926" y="420" text-anchor="middle">sentinel error</text>
-  <path class="success" d="M 878 410 H 1116 Q 1128 410 1128 398 V 226"/><text class="label" x="1015" y="305" text-anchor="middle">snapshot</text>
-  <path class="error" d="M 1100 394 H 1148 Q 1160 394 1160 382 V 270"/><text class="label" x="1150" y="347" text-anchor="middle">problem JSON</text>
+  <path class="success" d="M 878 410 H 930 Q 942 410 942 398 V 342 Q 942 330 954 330 H 1188 Q 1200 330 1200 318 V 270"/><text class="label" x="1030" y="309" text-anchor="middle">snapshot</text>
+  <path class="error" d="M 1100 394 V 360 Q 1100 348 1112 348 H 1280 Q 1292 348 1292 336 V 270"/><text class="label" x="1205" y="371" text-anchor="middle">problem JSON</text>
   <path class="success" d="M 1128 227 L 338 227"/>
 
   <rect x="190" y="764" width="1100" height="38" rx="11" fill="#edf1e9" stroke="#5d8a62"/><text class="subtitle" x="740" y="789" text-anchor="middle">The example keeps one process-local order for focused lifecycle learning.</text>

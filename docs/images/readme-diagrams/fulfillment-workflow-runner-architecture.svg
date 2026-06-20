@@ -45,7 +45,7 @@
   <path class="main" d="M 750 494 V 536 Q 750 548 738 548 H 355 Q 343 548 343 560 V 622"/><text class="label" x="525" y="530" text-anchor="middle">build per request</text>
   <path class="main" d="M 466 663 H 616"/><text class="label" x="541" y="644" text-anchor="middle">after validate</text>
   <path class="main" d="M 862 663 H 1010"/><text class="label" x="936" y="644" text-anchor="middle">all ok</text>
-  <path class="success" d="M 1133 622 V 560 Q 1133 548 1121 548 H 1006 Q 994 548 994 536 V 484"/><text class="label" x="1074" y="532" text-anchor="middle">report tree</text>
+  <path class="success" d="M 1133 622 V 560 Q 1133 548 1121 548 H 1062 Q 1050 548 1050 536 V 484"/><text class="label" x="1090" y="532" text-anchor="middle">report tree</text>
   <path class="success" d="M 1226 439 H 1288 Q 1300 439 1300 427 V 270"/><text class="label" x="1336" y="355" text-anchor="middle">200/409/408</text>
   <path class="success" d="M 1110 227 H 338"/>
   <path class="error" d="M 820 622 V 548 Q 820 536 832 536 H 1168 Q 1180 536 1180 524 V 484"/><text class="label" x="1000" y="518" text-anchor="middle">failed/cancelled</text>

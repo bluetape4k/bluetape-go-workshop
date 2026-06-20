@@ -52,8 +52,8 @@
   <path class="state" d="M 287 490 L 287 632"/><text class="label" x="352" y="566" text-anchor="middle">lifecycle transitions</text>
   <path class="comp" d="M 412 452 L 520 452"/><text class="label" x="466" y="432" text-anchor="middle">register</text>
   <path class="comp" d="M 774 452 L 886 452"/><text class="label" x="830" y="432" text-anchor="middle">cleanup changes flags</text>
-  <path class="state" d="M 412 490 H 624 Q 636 490 636 502 V 632"/><text class="label" x="552" y="535" text-anchor="middle">forward runner</text>
-  <path class="comp" d="M 647 500 H 704 Q 716 500 716 512 V 632"/><text class="label" x="766" y="552" text-anchor="middle">reverse runner</text>
+  <path class="state" d="M 392 490 V 540 Q 392 552 404 552 H 624 Q 636 552 636 564 V 632"/><text class="label" x="552" y="535" text-anchor="middle">forward runner</text>
+  <path class="comp" d="M 647 500 V 548 Q 647 560 659 560 H 704 Q 716 560 716 572 V 632"/><text class="label" x="766" y="552" text-anchor="middle">reverse runner</text>
   <path class="state" d="M 866 661 L 1012 661"/><text class="label" x="939" y="642" text-anchor="middle">report tree</text>
-  <path class="http" d="M 1140 632 H 1228 Q 1240 632 1240 620 V 276"/><text class="label" x="1300" y="454" text-anchor="middle">project response</text>
+  <path class="http" d="M 1140 632 V 606 Q 1140 594 1152 594 H 1228 Q 1240 594 1240 582 V 276"/><text class="label" x="1300" y="454" text-anchor="middle">project response</text>
 </svg>

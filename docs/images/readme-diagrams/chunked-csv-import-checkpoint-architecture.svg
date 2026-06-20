@@ -50,7 +50,7 @@
   <rect x="130" y="772" width="1240" height="36" rx="12" fill="#ffffff" stroke="#d8e2e8" stroke-width="2"/><text class="footer" x="750" y="796" text-anchor="middle">Production replacement points: durable checkpoint store, transactional sink, database upsert, retry/dead-letter policy, and audit records.</text>
 
   <path class="blue" d="M 239 278 V 360"/><text class="label" x="258" y="324" text-anchor="start">run first + restart</text>
-  <path class="blue" d="M 364 401 H 500"/><text class="label" x="432" y="381" text-anchor="middle">read + restore</text>
+  <path class="blue" d="M 364 401 H 496"/><text class="label" x="432" y="381" text-anchor="middle">read + restore</text>
   <path class="blue" d="M 242 442 V 560"/><text class="label" x="260" y="506" text-anchor="start">project report</text>
   <path class="green" d="M 614 294 V 360"/><text class="label" x="632" y="330" text-anchor="start">rows</text>
   <path class="purple" d="M 614 458 V 505"/><text class="label" x="632" y="488" text-anchor="start">customers</text>

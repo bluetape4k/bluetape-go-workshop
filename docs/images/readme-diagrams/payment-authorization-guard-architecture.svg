@@ -77,8 +77,8 @@
     <text class="card-text" x="122" y="55" text-anchor="middle">bounded in-flight calls</text>
   </g>
 
-  <path class="route-main" d="M 312 236 H 328 Q 340 236 340 248 V 438"/>
-  <text class="label" x="292" y="318" text-anchor="middle">request</text>
+  <path class="route-main" d="M 312 236 H 458 Q 470 236 470 248 V 386"/>
+  <text class="label" x="390" y="218" text-anchor="middle">request</text>
   <path class="route-main" d="M 576 438 L 636 438"/>
   <text class="label" x="606" y="420" text-anchor="middle">validated</text>
   <path class="route-main" d="M 880 438 L 1092 438"/>
