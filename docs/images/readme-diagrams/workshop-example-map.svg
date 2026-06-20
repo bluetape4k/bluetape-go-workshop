@@ -35,11 +35,11 @@
 <text x="80" y="646" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">Integration and Batch</text>
 <rect x="664" y="612" width="558" height="230" rx="22" fill="#fff1f2" stroke="#e6a6ae" stroke-width="2.2"/>
 <text x="686" y="646" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">HTTP Resilience and Operations</text>
-<path d="M 520,266 H 222 Q 210,266 210,278 V 316" fill="none" stroke="#059669" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGreen)"/>
+<path d="M 520,266 V 286 Q 520,298 508,298 H 222 Q 210,298 210,310 V 316" fill="none" stroke="#059669" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGreen)"/>
 <path d="M 592,266 V 316" fill="none" stroke="#ea580c" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowOrange)"/>
-<path d="M 760,266 H 1026 Q 1038,266 1038,278 V 316" fill="none" stroke="#7c3aed" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowPurple)"/>
-<path d="M 544,266 H 450 Q 438,266 438,278 V 570 Q 438,582 426,582 H 350 Q 338,582 338,594 V 612" fill="none" stroke="#2563eb" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)"/>
-<path d="M 736,266 H 826 Q 838,266 838,278 V 570 Q 838,582 850,582 H 928 Q 940,582 940,594 V 612" fill="none" stroke="#e11d48" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowRose)"/>
+<path d="M 760,266 V 286 Q 760,298 772,298 H 1026 Q 1038,298 1038,310 V 316" fill="none" stroke="#7c3aed" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowPurple)"/>
+<path d="M 544,266 V 286 Q 544,298 532,298 H 450 Q 438,298 438,310 V 570 Q 438,582 426,582 H 350 Q 338,582 338,594 V 612" fill="none" stroke="#2563eb" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)"/>
+<path d="M 736,266 V 286 Q 736,298 748,298 H 826 Q 838,298 838,310 V 570 Q 838,582 850,582 H 928 Q 940,582 940,594 V 612" fill="none" stroke="#e11d48" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowRose)"/>
 <rect x="84" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#74b79b" stroke-width="2.2"/>
 <path d="M 100,374 H 218 Q 234,374 234,390 V 416 H 84 V 390 Q 84,374 100,374 Z" fill="#bbf7d0" opacity="0.22"/>
 <text x="102" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Feed Cleanup</text>
