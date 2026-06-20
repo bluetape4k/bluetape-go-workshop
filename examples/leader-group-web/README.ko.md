@@ -16,6 +16,9 @@ Redis `LeaderGroupElector`를 HTTP service로 노출하는 예제입니다.
 정확히 하나의 leader가 아니라 작고 제한된 수의 active worker에 job을 분산해야
 하는 상황을 보여줍니다. 각 HTTP instance는 group slot을 얻기 위해 campaign하고,
 현재 membership을 보고하며, slot을 내려놓아야 할 때 resign합니다.
+Topology diagram에서는 **Bounded Group Web** lane이 이 예제에 해당합니다.
+`LeaderGroupElector`가 contender를 Redis-backed slot에 매핑하고, contention
+상황에서도 active owner set이 `MAX_LEADERS` 안에 머물도록 합니다.
 
 ## Run
 

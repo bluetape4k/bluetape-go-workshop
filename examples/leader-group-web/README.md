@@ -16,6 +16,9 @@ Use this example when a job should be distributed across a small, bounded number
 of active workers rather than exactly one leader. Each HTTP instance campaigns
 for a group slot, reports current membership, and resigns when the slot should
 be released.
+In the topology diagram this example owns the **Bounded Group Web** lane:
+`LeaderGroupElector` maps contenders onto Redis-backed slots and keeps the
+active owner set within `MAX_LEADERS` even under contention.
 
 ## Run
 

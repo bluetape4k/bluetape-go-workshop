@@ -11,6 +11,9 @@ Minimal chi-based HTTP service that uses `bluetape-go` Redis leader election.
 Use this example when one HTTP instance should expose and control Redis-backed
 leadership. The service keeps the API small so the leader lifecycle is visible:
 health check, current leadership state, campaign, and resign.
+In the topology diagram this example owns the **Single Leader Web** lane: chi
+handlers call a `leader.Elector`, Redis stores the lease token, and at most one
+local member reports itself as leader for the election group.
 
 ## Run
 
