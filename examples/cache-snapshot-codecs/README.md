@@ -18,6 +18,8 @@ measurement.
 Use this example when a cache needs a portable snapshot format and a compact
 payload. The versioned serializer keeps the payload shape explicit, while the
 compressor remains a replaceable decision that can be measured independently.
+In the shared flow, this example owns the right column: product records become a
+versioned envelope and compressed cache bytes.
 
 ## What It Demonstrates
 

@@ -16,7 +16,9 @@ envelope에 넣은 뒤 `gzip` 또는 `zstd`로 압축합니다. 테스트에는 
 
 cache가 portable snapshot 형식과 작은 payload를 동시에 필요로 할 때 사용할 수
 있는 흐름입니다. versioned serializer는 payload shape을 명시적으로 보존하고,
-compressor는 별도로 측정하고 교체할 수 있는 선택지로 둡니다.
+compressor는 별도로 측정하고 교체할 수 있는 선택지로 둡니다. Shared flow에서는
+오른쪽 column을 담당하며, product record가 versioned envelope와 compressed cache
+bytes로 바뀌는 흐름을 보여줍니다.
 
 ## What It Demonstrates
 

@@ -17,7 +17,8 @@ encoding이지 encryption이 아니므로, 별도 보안 설계 없이 secret을
 값이 URL, callback, support boundary를 지나야 하지만 사람이 다루기 어려운
 형태가 되면 안 되는 상황을 보여줍니다. 각 codec은 좁은 책임을 가집니다:
 Base62는 compact token, Base64URL은 callback state, Hex는 diagnostic reference를
-담당합니다.
+담당합니다. Shared flow에서는 가운데 column을 담당하며, boundary value가
+portable non-secret string으로 바뀌는 흐름을 보여줍니다.
 
 ## What It Demonstrates
 

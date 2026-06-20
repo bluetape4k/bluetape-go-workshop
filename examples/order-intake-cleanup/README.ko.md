@@ -15,7 +15,9 @@ channel별로 그룹화합니다. helper 호출보다 명확한 곳에서는 의
 
 partner feed가 domain pipeline에 들어가기 전에 결정적인 cleanup이 필요한 상황을
 보여줍니다. validation, default, filtering, deduplication, grouping 단계를
-하나의 helper에 숨기지 않고 명시적으로 드러냅니다.
+하나의 helper에 숨기지 않고 명시적으로 드러냅니다. Shared flow에서는 왼쪽
+column을 담당하며, raw partner row가 channel별 accepted order로 바뀌는 흐름을
+보여줍니다.
 
 ## What It Demonstrates
 
