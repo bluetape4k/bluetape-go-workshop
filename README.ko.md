@@ -47,6 +47,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
 | [`examples/token-refresh-claims`](examples/token-refresh-claims/README.ko.md) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Access-token claim과 refresh-token exchange claim을 분리하는 Gin token boundary 예제입니다. | `jwt` |
 | [`examples/money-rule-pricing`](examples/money-rule-pricing/README.ko.md) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Decimal-backed money value, rounded total, accepted discount, rejected rule decision을 보여주는 Gin cart pricing API입니다. | `money` |
+| [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission/README.ko.md) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Bloom filter로 definitely-new와 probably-seen event path를 보여주는 Gin webhook admission API입니다. | `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience/README.ko.md) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job에서 retry, attempt별 timeout, event visibility, diagram 기반 outcome을 보여주는 예제입니다. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard/README.ko.md) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Circuit breaker, bulkhead overflow rejection, synchronous event로 payment authorization gateway를 보호하는 예제입니다. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web/README.ko.md) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Redis 기반 leader election을 수행하고 leader 상태를 노출하는 최소 chi 기반 HTTP service입니다. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -366,6 +367,30 @@ curl -s -X POST http://127.0.0.1:8098/quotes \
 
 이 예제는 money value를 explicit currency가 있는 string으로 유지하는 이유와 cart
 total에 `float64`를 쓰지 않는 이유를 보여줍니다.
+
+## Probabilistic Dedupe Admission 예제 실행
+
+Local webhook admission API를 실행합니다:
+
+```bash
+go run ./examples/probabilistic-dedupe-admission
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8099/healthz
+curl -s -X POST http://127.0.0.1:8099/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+curl -s -X POST http://127.0.0.1:8099/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+```
+
+이 예제는 Bloom filter가 event가 definitely new임은 증명할 수 있지만 hit는
+`probably_seen`일 뿐이며 production에서는 durable store와 함께 써야 한다는 점을
+보여줍니다.
 
 ## 개발
 
