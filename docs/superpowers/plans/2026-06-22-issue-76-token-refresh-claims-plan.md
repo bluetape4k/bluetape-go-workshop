@@ -42,7 +42,7 @@ dependencies.
 
 ## Implementation Tasks
 
-- [ ] **A. Service TDD red tests [complexity: medium]**
+- [x] **A. Service TDD red tests [complexity: medium]**
   - Add tests for session issue, valid access-token profile, expired access
     token, malformed/wrong-key token, wrong audience, wrong token-use, missing
     scope, valid refresh exchange, access-as-refresh rejection, and
@@ -51,7 +51,7 @@ dependencies.
   - Run `go test -count=1 ./examples/token-refresh-claims/internal/tokenrefresh`
     and keep the expected compile/fail output as TDD evidence.
 
-- [ ] **B. Service implementation [complexity: medium]**
+- [x] **B. Service implementation [complexity: medium]**
   - Implement sentinel errors, DTOs, `Service`, `IssueSession`,
     `ValidateAccess`, `RefreshAccess`, claim parsing helpers,
     bearer-token extraction, stable error mapping, and `NewRouter`.
@@ -61,14 +61,14 @@ dependencies.
     entropy-backed generator for `session_id` and `jti`.
   - Run focused package tests.
 
-- [ ] **C. Main entrypoint TDD/implementation [complexity: small]**
+- [x] **C. Main entrypoint TDD/implementation [complexity: small]**
   - Add tests for default loopback address, valid loopback override,
     non-loopback rejection, and server timeouts.
   - Implement `main.go` with default `127.0.0.1:8097`, bounded HTTP server
     timeouts, signal handling, and graceful shutdown.
   - Run `go test -count=1 ./examples/token-refresh-claims/...`.
 
-- [ ] **D. Documentation [complexity: medium]**
+- [x] **D. Documentation [complexity: medium]**
   - Add English/Korean example READMEs with scenario, endpoint table, run
     command, curl flow, valid profile, refresh, invalid token-use, and
     production hardening boundaries.
@@ -76,14 +76,14 @@ dependencies.
   - Link #44 as the base ID/JWT boundary example.
   - Add `docs/lessons/2026-06-22-token-refresh-claims.md`.
 
-- [ ] **E. Focused verification [complexity: medium]**
+- [x] **E. Focused verification [complexity: medium]**
   - Run:
     - `go test -count=1 ./examples/token-refresh-claims/...`
     - `go test -race -count=1 ./examples/token-refresh-claims/...`
     - live smoke with `go run ./examples/token-refresh-claims` for `/healthz`,
       `/sessions`, `/profile`, and `/tokens/refresh`.
 
-- [ ] **F. Full repository verification [complexity: high]**
+- [x] **F. Full repository verification [complexity: high]**
   - Run:
     - `go test -p 1 ./...`
     - `make fmt-check`
@@ -94,7 +94,7 @@ dependencies.
     - `git diff --check`
   - Fix failures in scope.
 
-- [ ] **G. Step 6-R code review and fixes [complexity: medium]**
+- [x] **G. Step 6-R code review and fixes [complexity: medium]**
   - Run six-lane review plus security/trust-boundary review.
   - Save `docs/review/2026-06-22-issue-76-token-refresh-claims-code-review.md`.
   - Fix all P0/P1 findings and rerun affected tests.

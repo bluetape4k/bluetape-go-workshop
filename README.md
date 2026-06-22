@@ -45,6 +45,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
+| [`examples/token-refresh-claims`](examples/token-refresh-claims) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Gin token boundary that separates access-token claims from refresh-token exchange claims. | `jwt` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -314,6 +315,37 @@ curl -X POST http://127.0.0.1:8096/orders \
 The example demonstrates that UUID v7 values are internal identifiers, not
 bearer secrets, and that signed JWT claims are verified but not encrypted.
 
+## Run the Token Refresh Claims Example
+
+This example builds on the base [ID and JWT Boundary](examples/id-jwt-boundary)
+example from #44 and focuses on access-token versus refresh-token claim
+contracts.
+
+```bash
+go run ./examples/token-refresh-claims
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8097/healthz
+SESSION=$(
+  curl -s -X POST http://127.0.0.1:8097/sessions \
+    -H 'Content-Type: application/json' \
+    -d '{"subject":"customer-1001","role":"customer","scopes":["profile:read"],"ttl_seconds":300}'
+)
+ACCESS_TOKEN=$(printf '%s' "${SESSION}" | jq -r '.access_token')
+REFRESH_TOKEN=$(printf '%s' "${SESSION}" | jq -r '.refresh_token')
+curl http://127.0.0.1:8097/profile \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
+curl -X POST http://127.0.0.1:8097/tokens/refresh \
+  -H 'Content-Type: application/json' \
+  -d "{\"refresh_token\":\"${REFRESH_TOKEN}\"}"
+```
+
+The example demonstrates that signed refresh tokens still need operation-specific
+claim checks; signature validity alone is not permission to call every endpoint.
+
 ## Development
 
 Common commands:
@@ -346,4 +378,4 @@ Nightly workflows run these tests against real containers.
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
 | `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, fulfillment workflow runner, compensation workflow, operations report policy APIs, and an order fulfillment integration example. |
 | `0.5.0` | Batch processing examples for chunked CSV checkpoint/restart, batch operations APIs, scheduled execution, retry/dead-letter behavior, and milestone integration. |
-| `0.6.0` | ID and JWT examples for generated identifiers, signed request claims, and HTTP trust-boundary handling. |
+| `0.6.0` | ID and JWT examples for generated identifiers, signed request claims, token refresh boundaries, and HTTP trust-boundary handling. |
