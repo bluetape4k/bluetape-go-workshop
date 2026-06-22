@@ -45,6 +45,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
+| [`examples/token-refresh-claims`](examples/token-refresh-claims/README.ko.md) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Access-token claim과 refresh-token exchange claim을 분리하는 Gin token boundary 예제입니다. | `jwt` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience/README.ko.md) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job에서 retry, attempt별 timeout, event visibility, diagram 기반 outcome을 보여주는 예제입니다. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard/README.ko.md) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Circuit breaker, bulkhead overflow rejection, synchronous event로 payment authorization gateway를 보호하는 예제입니다. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web/README.ko.md) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Redis 기반 leader election을 수행하고 leader 상태를 노출하는 최소 chi 기반 HTTP service입니다. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -314,6 +315,37 @@ curl -X POST http://127.0.0.1:8096/orders \
 이 예제는 UUID v7 값이 내부 identifier이지 bearer secret이 아니며, signed JWT
 claim은 검증되지만 암호화된 값은 아니라는 boundary를 보여줍니다.
 
+## Token Refresh Claims 예제 실행
+
+이 예제는 #44의 기본 [ID and JWT Boundary](examples/id-jwt-boundary/README.ko.md)
+예제를 기반으로 하며, access-token claim과 refresh-token claim contract의 차이에
+초점을 둡니다.
+
+```bash
+go run ./examples/token-refresh-claims
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8097/healthz
+SESSION=$(
+  curl -s -X POST http://127.0.0.1:8097/sessions \
+    -H 'Content-Type: application/json' \
+    -d '{"subject":"customer-1001","role":"customer","scopes":["profile:read"],"ttl_seconds":300}'
+)
+ACCESS_TOKEN=$(printf '%s' "${SESSION}" | jq -r '.access_token')
+REFRESH_TOKEN=$(printf '%s' "${SESSION}" | jq -r '.refresh_token')
+curl http://127.0.0.1:8097/profile \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
+curl -X POST http://127.0.0.1:8097/tokens/refresh \
+  -H 'Content-Type: application/json' \
+  -d "{\"refresh_token\":\"${REFRESH_TOKEN}\"}"
+```
+
+이 예제는 signed refresh token에도 operation-specific claim check가 필요하다는
+점을 보여줍니다. Signature가 유효하다고 모든 endpoint 호출 권한이 생기지는 않습니다.
+
 ## 개발
 
 자주 쓰는 명령:
@@ -346,4 +378,4 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.3.0` | Near-cache, Redis invalidation, stampede coordination 예제. |
 | `0.4.0` | Gin order lifecycle과 payment authorization state API, fulfillment workflow runner, compensation workflow, operations report policy API, order fulfillment integration을 포함한 state/workflow 예제. |
 | `0.5.0` | Chunked CSV checkpoint/restart, batch operations API, scheduled execution, retry/dead-letter behavior, milestone integration을 포함한 batch processing 예제. |
-| `0.6.0` | Generated identifier, signed request claim, HTTP trust-boundary handling을 다루는 ID/JWT 예제. |
+| `0.6.0` | Generated identifier, signed request claim, token refresh boundary, HTTP trust-boundary handling을 다루는 ID/JWT 예제. |
