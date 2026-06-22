@@ -62,6 +62,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint/README.ko.md) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | CSV row를 chunk 단위로 import하고 checkpoint 저장, partial writer crash 이후 restart, boundary duplicate skip을 보여주는 local batch job입니다. | `batch` |
 | [`examples/account-migration-checkpoint-restart`](examples/account-migration-checkpoint-restart/README.ko.md) | [English](examples/account-migration-checkpoint-restart/README.md) \| [한국어](examples/account-migration-checkpoint-restart/README.ko.md) | Account migration batch job이 지정 account에서 실패한 뒤 저장된 checkpoint부터 재시작하고 완료된 chunk를 다시 처리하지 않음을 증명합니다. | `batch` |
 | [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker/README.ko.md) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Transient ticket failure는 retry하고 permanent ticket failure는 dead letter로 기록하는 local batch worker입니다. | `batch` |
+| [`examples/customer-migration-batch-integration`](examples/customer-migration-batch-integration/README.ko.md) | [English](examples/customer-migration-batch-integration/README.md) \| [한국어](examples/customer-migration-batch-integration/README.ko.md) | Checkpoint restart, retry/dead-letter handling, leader-guarded scheduling, status/report 조회, active-run cancellation을 합친 milestone Gin API입니다. | `batch`, `leader` |
 
 ## Leader 예제 실행
 
@@ -258,6 +259,32 @@ go run ./examples/retry-dead-letter-batch-worker
 실행은 `ticket-1002`를 한 번 retry하고, `ticket-1003`을 dead-letter list에
 기록한 뒤 permanent item으로 skip합니다. 최종 report는 `read=4`, `write=3`,
 `retry=1`, `skip=1`로 완료됩니다.
+
+## Customer Migration Batch Integration 예제 실행
+
+Local operations API를 실행합니다:
+
+```bash
+go run ./examples/customer-migration-batch-integration
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8095/healthz
+curl -X POST http://127.0.0.1:8095/batch/start \
+  -H 'Content-Type: application/json' \
+  -d '{"run_id":"manual-001","crash_after_new_writes":3}'
+curl http://127.0.0.1:8095/batch/status
+curl -X POST http://127.0.0.1:8095/batch/schedule/tick \
+  -H 'Content-Type: application/json' \
+  -d '{"run_id":"scheduled-001"}'
+curl http://127.0.0.1:8095/batch/report
+```
+
+`LEADER_MODE=missing`을 설정하면 `not_leader`를 재현할 수 있습니다. `HTTP_ADDR`는
+`127.0.0.1:8096` 같은 다른 loopback bind로 바꿀 수 있습니다. 이 workshop API는
+인증이 없으므로 non-loopback bind는 거부합니다.
 
 ## 개발
 
