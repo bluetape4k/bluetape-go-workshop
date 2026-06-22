@@ -49,6 +49,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/money-rule-pricing`](examples/money-rule-pricing/README.ko.md) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Decimal-backed money value, rounded total, accepted discount, rejected rule decision을 보여주는 Gin cart pricing API입니다. | `money` |
 | [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules/README.ko.md) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Money total을 currency별로 group하고 discount와 tax-like rule decision을 노출하는 Gin invoice API입니다. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission/README.ko.md) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Bloom filter로 definitely-new와 probably-seen event path를 보여주는 Gin webhook admission API입니다. | `probabilistic` |
+| [`examples/checkout-guard-integration`](examples/checkout-guard-integration/README.ko.md) | [English](examples/checkout-guard-integration/README.md) \| [한국어](examples/checkout-guard-integration/README.ko.md) | JWT claim, ID, money/rule, probabilistic repeated-submission admission을 조합하는 Gin checkout guard API입니다. | `id`, `jwt`, `money`, `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience/README.ko.md) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job에서 retry, attempt별 timeout, event visibility, diagram 기반 outcome을 보여주는 예제입니다. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard/README.ko.md) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Circuit breaker, bulkhead overflow rejection, synchronous event로 payment authorization gateway를 보호하는 예제입니다. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web/README.ko.md) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Redis 기반 leader election을 수행하고 leader 상태를 노출하는 최소 chi 기반 HTTP service입니다. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -417,6 +418,36 @@ curl -s -X POST http://127.0.0.1:8099/events/admit \
 이 예제는 Bloom filter가 event가 definitely new임은 증명할 수 있지만 hit는
 `probably_seen`일 뿐이며 production에서는 durable store와 함께 써야 한다는 점을
 보여줍니다.
+
+## Checkout Guard Integration 예제 실행
+
+이 예제는 ID/JWT, token claim, money/rule, probabilistic admission lesson을 하나의
+protected checkout boundary로 조합합니다.
+
+Local checkout guard API를 실행합니다:
+
+```bash
+go run ./examples/checkout-guard-integration
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8101/healthz
+TOKEN=$(
+  curl -s -X POST http://127.0.0.1:8101/tokens \
+    -H 'Content-Type: application/json' \
+    -d '{"subject":"customer-1001","role":"customer","scopes":["checkout:submit"],"ttl_seconds":300}' \
+  | jq -r '.token'
+)
+curl -s -X POST http://127.0.0.1:8101/checkout/guard \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -d '{"checkout_id":"chk-1001","idempotency_key":"idem-1001","customer_tier":"vip","region":"EU","currency":"USD","items":[{"line_id":"svc-1","sku":"support-plan","unit_price":"19.995","currency":"USD","quantity":2,"category":"service"}]}' | jq
+```
+
+Response는 검증된 subject/session claim, 생성된 request/order ID, rounded checkout
+total, rule decision, Bloom admission decision을 포함합니다.
 
 ## 개발
 
