@@ -46,6 +46,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
 | [`examples/token-refresh-claims`](examples/token-refresh-claims) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Gin token boundary that separates access-token claims from refresh-token exchange claims. | `jwt` |
+| [`examples/money-rule-pricing`](examples/money-rule-pricing) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Gin cart pricing API with decimal-backed money values, rounded totals, accepted discounts, and rejected rule decisions. | `money` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -345,6 +346,26 @@ curl -X POST http://127.0.0.1:8097/tokens/refresh \
 
 The example demonstrates that signed refresh tokens still need operation-specific
 claim checks; signature validity alone is not permission to call every endpoint.
+
+## Run the Money Rule Pricing Example
+
+Run the local cart pricing API:
+
+```bash
+go run ./examples/money-rule-pricing
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8098/healthz
+curl -s -X POST http://127.0.0.1:8098/quotes \
+  -H 'Content-Type: application/json' \
+  -d '{"cart_id":"cart-1001","currency":"USD","customer_tier":"vip","coupon_code":"SAVE10","items":[{"sku":"book-1","unit_price":"19.995","currency":"USD","quantity":2},{"sku":"pen-1","unit_price":"2.50","currency":"USD","quantity":1}]}' | jq
+```
+
+The example demonstrates why money values stay as strings plus explicit
+currency, and why `float64` is not used for cart totals.
 
 ## Development
 
