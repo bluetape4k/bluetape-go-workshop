@@ -47,6 +47,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
 | [`examples/token-refresh-claims`](examples/token-refresh-claims) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Gin token boundary that separates access-token claims from refresh-token exchange claims. | `jwt` |
 | [`examples/money-rule-pricing`](examples/money-rule-pricing) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Gin cart pricing API with decimal-backed money values, rounded totals, accepted discounts, and rejected rule decisions. | `money` |
+| [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Gin invoice API that groups money totals by currency and exposes discount and tax-like rule decisions. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Gin webhook admission API that uses a Bloom filter for definitely-new and probably-seen event paths. | `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
@@ -367,6 +368,32 @@ curl -s -X POST http://127.0.0.1:8098/quotes \
 
 The example demonstrates why money values stay as strings plus explicit
 currency, and why `float64` is not used for cart totals.
+
+## Run the Multi-Currency Invoice Rule Example
+
+This example builds on #45's base
+[`money-rule-pricing`](examples/money-rule-pricing/README.md) lesson by keeping
+money values explicit while grouping invoice totals by currency. It does not
+perform exchange-rate conversion.
+
+Run the local invoice evaluation API:
+
+```bash
+go run ./examples/multi-currency-invoice-rules
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8100/healthz
+curl -s -X POST http://127.0.0.1:8100/invoices/evaluate \
+  -H 'Content-Type: application/json' \
+  -d '{"invoice_id":"inv-1001","customer_tier":"vip","region":"EU","lines":[{"line_id":"svc-usd","amount":"19.995","currency":"USD","quantity":2,"category":"service"},{"line_id":"goods-eur","amount":"10.00","currency":"EUR","quantity":1,"category":"goods"},{"line_id":"goods-jpy","amount":"100.60","currency":"JPY","quantity":1,"category":"tax_exempt"}]}' | jq
+```
+
+The response keeps `USD`, `EUR`, and `JPY` totals separate, makes the VIP
+service discount and regional VAT decisions visible, and sets
+`conversion_applied` to `false`.
 
 ## Run the Probabilistic Dedupe Admission Example
 
