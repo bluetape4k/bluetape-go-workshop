@@ -49,6 +49,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/money-rule-pricing`](examples/money-rule-pricing) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Gin cart pricing API with decimal-backed money values, rounded totals, accepted discounts, and rejected rule decisions. | `money` |
 | [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Gin invoice API that groups money totals by currency and exposes discount and tax-like rule decisions. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Gin webhook admission API that uses a Bloom filter for definitely-new and probably-seen event paths. | `probabilistic` |
+| [`examples/checkout-guard-integration`](examples/checkout-guard-integration) | [English](examples/checkout-guard-integration/README.md) \| [한국어](examples/checkout-guard-integration/README.ko.md) | Gin checkout guard API that composes JWT claims, IDs, money/rules, and probabilistic repeated-submission admission. | `id`, `jwt`, `money`, `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -418,6 +419,36 @@ curl -s -X POST http://127.0.0.1:8099/events/admit \
 The example demonstrates that a Bloom filter can prove an event is definitely
 new, but a hit is only `probably_seen` and still needs durable-store pairing in
 production.
+
+## Run the Checkout Guard Integration Example
+
+This example composes the ID/JWT, token-claim, money/rule, and probabilistic
+admission lessons into one protected checkout boundary.
+
+Run the local checkout guard API:
+
+```bash
+go run ./examples/checkout-guard-integration
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8101/healthz
+TOKEN=$(
+  curl -s -X POST http://127.0.0.1:8101/tokens \
+    -H 'Content-Type: application/json' \
+    -d '{"subject":"customer-1001","role":"customer","scopes":["checkout:submit"],"ttl_seconds":300}' \
+  | jq -r '.token'
+)
+curl -s -X POST http://127.0.0.1:8101/checkout/guard \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -d '{"checkout_id":"chk-1001","idempotency_key":"idem-1001","customer_tier":"vip","region":"EU","currency":"USD","items":[{"line_id":"svc-1","sku":"support-plan","unit_price":"19.995","currency":"USD","quantity":2,"category":"service"}]}' | jq
+```
+
+The response includes verified subject/session claims, generated request/order
+IDs, rounded checkout totals, rule decisions, and a Bloom admission decision.
 
 ## Development
 
