@@ -47,6 +47,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
 | [`examples/token-refresh-claims`](examples/token-refresh-claims) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Gin token boundary that separates access-token claims from refresh-token exchange claims. | `jwt` |
 | [`examples/money-rule-pricing`](examples/money-rule-pricing) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Gin cart pricing API with decimal-backed money values, rounded totals, accepted discounts, and rejected rule decisions. | `money` |
+| [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Gin webhook admission API that uses a Bloom filter for definitely-new and probably-seen event paths. | `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -366,6 +367,30 @@ curl -s -X POST http://127.0.0.1:8098/quotes \
 
 The example demonstrates why money values stay as strings plus explicit
 currency, and why `float64` is not used for cart totals.
+
+## Run the Probabilistic Dedupe Admission Example
+
+Run the local webhook admission API:
+
+```bash
+go run ./examples/probabilistic-dedupe-admission
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8099/healthz
+curl -s -X POST http://127.0.0.1:8099/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+curl -s -X POST http://127.0.0.1:8099/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+```
+
+The example demonstrates that a Bloom filter can prove an event is definitely
+new, but a hit is only `probably_seen` and still needs durable-store pairing in
+production.
 
 ## Development
 
