@@ -62,6 +62,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/chunked-csv-import-checkpoint`](examples/chunked-csv-import-checkpoint) | [English](examples/chunked-csv-import-checkpoint/README.md) \| [한국어](examples/chunked-csv-import-checkpoint/README.ko.md) | Local batch job that imports CSV rows in chunks, persists checkpoints, restarts after a partial writer crash, and skips duplicate boundary rows. | `batch` |
 | [`examples/account-migration-checkpoint-restart`](examples/account-migration-checkpoint-restart) | [English](examples/account-migration-checkpoint-restart/README.md) \| [한국어](examples/account-migration-checkpoint-restart/README.ko.md) | Local account migration batch job that fails at a known account, restarts from a saved checkpoint, and proves the completed chunk is not reprocessed. | `batch` |
 | [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Local batch worker that retries transient ticket failures and records permanent ticket failures as dead letters. | `batch` |
+| [`examples/customer-migration-batch-integration`](examples/customer-migration-batch-integration) | [English](examples/customer-migration-batch-integration/README.md) \| [한국어](examples/customer-migration-batch-integration/README.ko.md) | Milestone Gin API that combines checkpoint restart, retry/dead-letter handling, leader-guarded scheduling, status/report inspection, and active-run cancellation. | `batch`, `leader` |
 
 ## Run the Leader Example
 
@@ -258,6 +259,32 @@ go run ./examples/retry-dead-letter-batch-worker
 The run retries `ticket-1002` once, records `ticket-1003` in the dead-letter
 list, skips that permanent item, and completes with `read=4`, `write=3`,
 `retry=1`, and `skip=1`.
+
+## Run the Customer Migration Batch Integration Example
+
+Run the local operations API:
+
+```bash
+go run ./examples/customer-migration-batch-integration
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8095/healthz
+curl -X POST http://127.0.0.1:8095/batch/start \
+  -H 'Content-Type: application/json' \
+  -d '{"run_id":"manual-001","crash_after_new_writes":3}'
+curl http://127.0.0.1:8095/batch/status
+curl -X POST http://127.0.0.1:8095/batch/schedule/tick \
+  -H 'Content-Type: application/json' \
+  -d '{"run_id":"scheduled-001"}'
+curl http://127.0.0.1:8095/batch/report
+```
+
+Set `LEADER_MODE=missing` to reproduce `not_leader`. `HTTP_ADDR` may point to
+another loopback bind such as `127.0.0.1:8096`; non-loopback binds are rejected
+because the workshop API is unauthenticated.
 
 ## Development
 
