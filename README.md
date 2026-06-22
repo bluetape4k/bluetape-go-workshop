@@ -44,6 +44,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
+| [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
 | [`examples/leader-redis-web`](examples/leader-redis-web) | [English](examples/leader-redis-web/README.md) \| [한국어](examples/leader-redis-web/README.ko.md) | Minimal chi-based HTTP service that campaigns for Redis-backed leadership and exposes leader state. | `leader`, `leader/redis`, `testcontainers/redis` |
@@ -286,6 +287,33 @@ Set `LEADER_MODE=missing` to reproduce `not_leader`. `HTTP_ADDR` may point to
 another loopback bind such as `127.0.0.1:8096`; non-loopback binds are rejected
 because the workshop API is unauthenticated.
 
+## Run the ID and JWT Boundary Example
+
+Run the local order intake API:
+
+```bash
+go run ./examples/id-jwt-boundary
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8096/healthz
+TOKEN=$(
+  curl -s -X POST http://127.0.0.1:8096/tokens \
+    -H 'Content-Type: application/json' \
+    -d '{"subject":"customer-1001","role":"customer","scopes":["orders:create"],"ttl_seconds":900}' \
+  | jq -r '.token'
+)
+curl -X POST http://127.0.0.1:8096/orders \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -d '{"sku":"sku-blue-tape","quantity":2}'
+```
+
+The example demonstrates that UUID v7 values are internal identifiers, not
+bearer secrets, and that signed JWT claims are verified but not encrypted.
+
 ## Development
 
 Common commands:
@@ -318,3 +346,4 @@ Nightly workflows run these tests against real containers.
 | `0.3.0` | Near-cache, Redis invalidation, and stampede coordination examples. |
 | `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, fulfillment workflow runner, compensation workflow, operations report policy APIs, and an order fulfillment integration example. |
 | `0.5.0` | Batch processing examples for chunked CSV checkpoint/restart, batch operations APIs, scheduled execution, retry/dead-letter behavior, and milestone integration. |
+| `0.6.0` | ID and JWT examples for generated identifiers, signed request claims, and HTTP trust-boundary handling. |
