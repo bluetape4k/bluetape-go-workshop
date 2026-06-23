@@ -482,3 +482,10 @@ Nightly workflow 모두 실제 container를 사용해 테스트합니다.
 | `0.4.0` | Gin order lifecycle과 payment authorization state API, fulfillment workflow runner, compensation workflow, operations report policy API, order fulfillment integration을 포함한 state/workflow 예제. |
 | `0.5.0` | Chunked CSV checkpoint/restart, batch operations API, scheduled execution, retry/dead-letter behavior, milestone integration을 포함한 batch processing 예제. |
 | `0.6.0` | Generated identifier, signed request claim, token refresh boundary, HTTP trust-boundary handling을 다루는 ID/JWT 예제. |
+
+## Roadmap Planning
+
+- [Workshop roadmap matrix](docs/superpowers/plans/2026-06-23-issue-49-workshop-roadmap-matrix-plan.md)
+- [Example selection scorecard](docs/superpowers/plans/2026-06-23-issue-79-example-selection-scorecard.md)
+- [Integration example template and acceptance rubric](docs/superpowers/plans/2026-06-23-issue-80-integration-example-template-rubric.md)
+- [Cross-milestone integration blueprint](docs/superpowers/plans/2026-06-23-issue-81-cross-milestone-integration-blueprint.md)
