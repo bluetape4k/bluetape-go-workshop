@@ -483,3 +483,10 @@ Nightly workflows run these tests against real containers.
 | `0.4.0` | State and workflow examples, including Gin order lifecycle and payment authorization state APIs, fulfillment workflow runner, compensation workflow, operations report policy APIs, and an order fulfillment integration example. |
 | `0.5.0` | Batch processing examples for chunked CSV checkpoint/restart, batch operations APIs, scheduled execution, retry/dead-letter behavior, and milestone integration. |
 | `0.6.0` | ID and JWT examples for generated identifiers, signed request claims, token refresh boundaries, and HTTP trust-boundary handling. |
+
+## Roadmap Planning
+
+- [Workshop roadmap matrix](docs/superpowers/plans/2026-06-23-issue-49-workshop-roadmap-matrix-plan.md)
+- [Example selection scorecard](docs/superpowers/plans/2026-06-23-issue-79-example-selection-scorecard.md)
+- [Integration example template and acceptance rubric](docs/superpowers/plans/2026-06-23-issue-80-integration-example-template-rubric.md)
+- [Cross-milestone integration blueprint](docs/superpowers/plans/2026-06-23-issue-81-cross-milestone-integration-blueprint.md)
