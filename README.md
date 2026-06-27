@@ -43,6 +43,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 |---|---|---|---|
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Gin upload API that bounds compressed requests and decompressed payloads for untrusted input. | `compression` |
+| [`examples/measured-shipping-quote`](examples/measured-shipping-quote) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Gin shipping quote API that parses caller-facing units, derives area/volume, and selects billable weight. | `measure` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -497,6 +498,27 @@ printf '%s' '{"document_id":"doc-1001","tenant":"checkout","body":"invoice uploa
 
 The example demonstrates the difference between compressed request-size limits
 and decompressed payload-size limits for untrusted upload bytes.
+
+## Run the Measured Shipping Quote Example
+
+Run the local measured quote API:
+
+```bash
+go run ./examples/measured-shipping-quote
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8104/healthz
+curl -s -X POST http://127.0.0.1:8104/quotes \
+  -H 'Content-Type: application/json' \
+  -d '{"quote_id":"ship-1001","destination_zone":"kr-seoul","width":"40 cm","height":"30 cm","length":"20 cm","weight":"3.2 kg"}' | jq
+```
+
+The example demonstrates how `measure` keeps caller-facing units typed while the
+application derives area, volume, dimensional weight, billable weight, and a
+stable HTTP error policy.
 
 ## Run the Checkout Guard Integration Example
 

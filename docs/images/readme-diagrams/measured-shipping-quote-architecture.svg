@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
+  <title id="title">Measured shipping quote architecture</title>
+  <desc id="desc">Client measurements pass through Gin, measure parsing, derived area and volume, and a stable JSON quote response.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="1"/>
+    </marker>
+    <style>
+      .canvas { fill: #f8fafc; }
+      .title { font: 30px 'Architects Daughter', 'Comic Mono', cursive; fill: #0f172a; }
+      .subtitle { font: 17px 'Comic Mono', ui-monospace, monospace; fill: #475569; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 8; }
+      .card-blue { fill: #eff6ff; stroke: #93c5fd; }
+      .card-green { fill: #ecfdf5; stroke: #86efac; }
+      .card-amber { fill: #fffbeb; stroke: #fcd34d; }
+      .card-rose { fill: #fff1f2; stroke: #fda4af; }
+      .label { font: 23px 'Architects Daughter', 'Comic Mono', cursive; fill: #111827; }
+      .body { font: 15px 'Comic Mono', ui-monospace, monospace; fill: #334155; }
+      .pill { fill: #e2e8f0; stroke: #94a3b8; stroke-width: 1; rx: 13; }
+      .pillText { font: 14px 'Comic Mono', ui-monospace, monospace; fill: #334155; }
+      .flow { fill: none; stroke: #1d4ed8; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-blue); }
+      .note { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1.5; rx: 8; }
+    </style>
+  </defs>
+  <rect class="canvas" width="1200" height="640"/>
+  <text class="title" x="60" y="62">Measured Shipping Quote</text>
+  <text class="subtitle" x="60" y="94">Typed measurements cross the HTTP boundary, derived values stay in bluetape-go/measure.</text>
+
+  <rect class="card card-blue" x="60" y="165" width="190" height="210"/>
+  <text class="label" x="88" y="208">Client JSON</text>
+  <text class="body" x="88" y="246">width: "12 in"</text>
+  <text class="body" x="88" y="272">height: "10 in"</text>
+  <text class="body" x="88" y="298">length: "18 in"</text>
+  <text class="body" x="88" y="324">weight: "20 lb"</text>
+
+  <rect class="card" x="310" y="155" width="205" height="230"/>
+  <text class="label" x="342" y="198">Gin Router</text>
+  <text class="body" x="342" y="238">POST /quotes</text>
+  <text class="body" x="342" y="264">MaxBytesReader</text>
+  <text class="body" x="342" y="290">stable errors</text>
+  <text class="body" x="342" y="316">loopback service</text>
+
+  <rect class="card card-green" x="575" y="125" width="250" height="280"/>
+  <text class="label" x="612" y="168">Quote Service</text>
+  <text class="body" x="612" y="210">ParseLength</text>
+  <text class="body" x="612" y="236">Parse mass registry</text>
+  <text class="body" x="612" y="262">Compare dimensions</text>
+  <text class="body" x="612" y="288">Preserve errors.Is</text>
+  <rect class="pill" x="612" y="322" width="162" height="32"/>
+  <text class="pillText" x="632" y="344">kg, cm, in, lb</text>
+
+  <rect class="card card-amber" x="885" y="135" width="255" height="260"/>
+  <text class="label" x="918" y="178">Derived Quote</text>
+  <text class="body" x="918" y="218">AreaFromLength</text>
+  <text class="body" x="918" y="244">VolumeFromAreaLength</text>
+  <text class="body" x="918" y="270">volume cm3 / divisor</text>
+  <text class="body" x="918" y="296">billable weight</text>
+  <text class="body" x="918" y="322">handling class</text>
+
+  <path class="flow" d="M250 270 H310"/>
+  <path class="flow" d="M515 270 H575"/>
+  <path class="flow" d="M825 270 H885"/>
+
+  <rect class="note" x="180" y="475" width="840" height="92"/>
+  <text class="label" x="215" y="515">Boundary contract</text>
+  <text class="body" x="215" y="548">Public JSON stays stable while `measure` keeps unit parsing, formatting, conversion, and sentinel errors typed.</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
+  <title id="title">Measured shipping quote policy map</title>
+  <desc id="desc">Policy map showing valid measurement quote outcomes and public error mapping.</desc>
+  <defs>
+    <marker id="arrow-slate" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#334155" stroke="#334155"/>
+    </marker>
+    <style>
+      .canvas { fill: #f8fafc; }
+      .title { font: 30px 'Architects Daughter', 'Comic Mono', cursive; fill: #0f172a; }
+      .subtitle { font: 17px 'Comic Mono', ui-monospace, monospace; fill: #475569; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 8; }
+      .ok { fill: #ecfdf5; stroke: #86efac; }
+      .warn { fill: #fffbeb; stroke: #fcd34d; }
+      .bad { fill: #fff1f2; stroke: #fda4af; }
+      .head { font: 22px 'Architects Daughter', 'Comic Mono', cursive; fill: #111827; }
+      .body { font: 15px 'Comic Mono', ui-monospace, monospace; fill: #334155; }
+      .flow { stroke: #334155; stroke-width: 3.5; fill: none; marker-end: url(#arrow-slate); stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <rect class="canvas" width="1200" height="640"/>
+  <text class="title" x="60" y="58">Policy Outcomes</text>
+  <text class="subtitle" x="60" y="90">The same typed parse result feeds quote decisions and public HTTP error mapping.</text>
+
+  <rect class="card" x="80" y="170" width="235" height="135"/>
+  <text class="head" x="112" y="212">Parse Inputs</text>
+  <text class="body" x="112" y="246">length fields -> Length</text>
+  <text class="body" x="112" y="272">weight field -> Mass</text>
+
+  <rect class="card ok" x="415" y="120" width="310" height="135"/>
+  <text class="head" x="448" y="162">Valid Measurements</text>
+  <text class="body" x="448" y="196">derive area, volume, kg</text>
+  <text class="body" x="448" y="222">return billable JSON</text>
+
+  <rect class="card warn" x="825" y="120" width="300" height="135"/>
+  <text class="head" x="858" y="162">Parcel Policy</text>
+  <text class="body" x="858" y="196">standard / oversize</text>
+  <text class="body" x="858" y="222">freight_required when too long</text>
+
+  <rect class="card bad" x="415" y="355" width="310" height="145"/>
+  <text class="head" x="448" y="397">Measurement Errors</text>
+  <text class="body" x="448" y="431">invalid_measure</text>
+  <text class="body" x="448" y="457">incompatible_unit</text>
+  <text class="body" x="448" y="483">invalid_dimensional_divisor</text>
+
+  <rect class="card" x="825" y="355" width="300" height="145"/>
+  <text class="head" x="858" y="397">HTTP Boundary</text>
+  <text class="body" x="858" y="431">400 with stable error_code</text>
+  <text class="body" x="858" y="457">raw input not echoed</text>
+  <text class="body" x="858" y="483">errors.Is still works in code</text>
+
+  <path class="flow" d="M315 235 H415"/>
+  <path class="flow" d="M725 188 H825"/>
+  <path class="flow" d="M315 252 C360 252 360 428 415 428"/>
+  <path class="flow" d="M725 428 H825"/>
+</svg>
