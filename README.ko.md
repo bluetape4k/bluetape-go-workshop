@@ -44,6 +44,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs/README.ko.md) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | 안전한 serialization과 compression 선택 기준을 보여주는 versioned product cache snapshot 예제입니다. | `serialization`, `compression` |
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload/README.ko.md) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Untrusted input에 대해 compressed request와 decompressed payload를 모두 제한하는 Gin upload API입니다. | `compression` |
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote/README.ko.md) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Caller-facing unit을 parse하고 area/volume을 derive한 뒤 billable weight를 고르는 Gin shipping quote API입니다. | `measure` |
+| [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision/README.ko.md) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | direct `database/sql`, `sqlkit`, generated query boundary, migration tooling 선택 기준을 비교하는 local SQL access strategy 예제입니다. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -74,6 +75,24 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/account-migration-checkpoint-restart`](examples/account-migration-checkpoint-restart/README.ko.md) | [English](examples/account-migration-checkpoint-restart/README.md) \| [한국어](examples/account-migration-checkpoint-restart/README.ko.md) | Account migration batch job이 지정 account에서 실패한 뒤 저장된 checkpoint부터 재시작하고 완료된 chunk를 다시 처리하지 않음을 증명합니다. | `batch` |
 | [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker/README.ko.md) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Transient ticket failure는 retry하고 permanent ticket failure는 dead letter로 기록하는 local batch worker입니다. | `batch` |
 | [`examples/customer-migration-batch-integration`](examples/customer-migration-batch-integration/README.ko.md) | [English](examples/customer-migration-batch-integration/README.md) \| [한국어](examples/customer-migration-batch-integration/README.ko.md) | Checkpoint restart, retry/dead-letter handling, leader-guarded scheduling, status/report 조회, active-run cancellation을 합친 milestone Gin API입니다. | `batch`, `leader` |
+
+## SQL Access Strategy Decision 예제 실행
+
+Local SQL strategy report를 출력합니다.
+
+```bash
+go run ./examples/sql-access-strategy-decision
+```
+
+이 예제는 같은 order-hold repository flow를 direct `database/sql`과 `sqlkit`으로
+비교하고, generated query code나 schema migration을 언제 runtime dependency 밖의
+boundary로 옮겨야 하는지 설명합니다.
+
+PostgreSQL Testcontainers contract test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/sql-access-strategy-decision/...
+```
 
 ## Leader 예제 실행
 

@@ -44,6 +44,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Gin upload API that bounds compressed requests and decompressed payloads for untrusted input. | `compression` |
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Gin shipping quote API that parses caller-facing units, derives area/volume, and selects billable weight. | `measure` |
+| [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | Local SQL access strategy example that compares direct `database/sql`, `sqlkit`, generated query boundaries, and migration tooling choices. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -74,6 +75,24 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/account-migration-checkpoint-restart`](examples/account-migration-checkpoint-restart) | [English](examples/account-migration-checkpoint-restart/README.md) \| [한국어](examples/account-migration-checkpoint-restart/README.ko.md) | Local account migration batch job that fails at a known account, restarts from a saved checkpoint, and proves the completed chunk is not reprocessed. | `batch` |
 | [`examples/retry-dead-letter-batch-worker`](examples/retry-dead-letter-batch-worker) | [English](examples/retry-dead-letter-batch-worker/README.md) \| [한국어](examples/retry-dead-letter-batch-worker/README.ko.md) | Local batch worker that retries transient ticket failures and records permanent ticket failures as dead letters. | `batch` |
 | [`examples/customer-migration-batch-integration`](examples/customer-migration-batch-integration) | [English](examples/customer-migration-batch-integration/README.md) \| [한국어](examples/customer-migration-batch-integration/README.ko.md) | Milestone Gin API that combines checkpoint restart, retry/dead-letter handling, leader-guarded scheduling, status/report inspection, and active-run cancellation. | `batch`, `leader` |
+
+## Run the SQL Access Strategy Decision Example
+
+Print the local SQL strategy report:
+
+```bash
+go run ./examples/sql-access-strategy-decision
+```
+
+The example compares direct `database/sql` and `sqlkit` against the same
+order-hold repository flow, then documents when to move generated query code or
+schema migrations outside the runtime dependency boundary.
+
+Run the PostgreSQL Testcontainers contract tests:
+
+```bash
+go test -count=1 ./examples/sql-access-strategy-decision/...
+```
 
 ## Run the Leader Example
 

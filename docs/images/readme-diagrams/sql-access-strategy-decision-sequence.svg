@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">SQL access strategy decision sequence</title>
+  <desc id="desc">A sequence diagram showing direct database/sql and sqlkit paths through create, find-one, confirm, rollback, and cancellation tests.</desc>
+  <defs>
+    <marker id="seq-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="seq-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="seq-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <symbol id="postgresql-icon" viewBox="0 0 24 24">
+      <path fill="#4169e1" d="M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698z"/>
+    </symbol>
+  </defs>
+  <style>
+    text { font-family: "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #132033; letter-spacing: 0; }
+    .canvas { fill: #f8fafc; }
+    .title { font-size: 30px; font-weight: 700; }
+    .subtitle { font-size: 15px; fill: #475569; }
+    .participant { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+    .participant-blue { fill: #dbeafe; stroke: #93c5fd; stroke-width: 2; rx: 10; }
+    .participant-green { fill: #dcfce7; stroke: #86efac; stroke-width: 2; rx: 10; }
+    .participant-orange { fill: #ffedd5; stroke: #fdba74; stroke-width: 2; rx: 10; }
+    .head { font-size: 16px; font-weight: 700; }
+    .sub { font-size: 12px; fill: #64748b; }
+    .label { font-size: 12px; fill: #334155; }
+    .lifeline { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 8 8; }
+    .msg-blue { fill: none; stroke: #2563eb; stroke-width: 3.2; marker-end: url(#seq-blue); stroke-linecap: round; stroke-linejoin: round; }
+    .msg-green { fill: none; stroke: #059669; stroke-width: 3.2; marker-end: url(#seq-green); stroke-linecap: round; stroke-linejoin: round; }
+    .msg-red { fill: none; stroke: #dc2626; stroke-width: 3.2; marker-end: url(#seq-red); stroke-linecap: round; stroke-linejoin: round; }
+    .return { stroke-dasharray: 7 5; }
+    .frame { fill: #ffffff; fill-opacity: .62; stroke: #cbd5e1; stroke-width: 2; rx: 14; }
+    .frame-title { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: 1.5; rx: 9; }
+    .note { fill: #fff7ed; stroke: #fed7aa; stroke-width: 1.5; rx: 10; }
+  </style>
+  <rect class="canvas" width="1200" height="760"/>
+  <text class="title" x="60" y="58">SQL access strategy sequence</text>
+  <text class="subtitle" x="60" y="86">The tests run both repository shapes against PostgreSQL, then prove cardinality, rollback, and cancellation behavior.</text>
+
+  <rect class="participant-blue" x="70" y="124" width="170" height="66"/>
+  <text class="head" x="102" y="153">Workshop test</text>
+  <text class="sub" x="102" y="174">repository contract</text>
+  <rect class="participant-orange" x="330" y="124" width="170" height="66"/>
+  <text class="head" x="360" y="153">Direct repo</text>
+  <text class="sub" x="360" y="174">database/sql</text>
+  <rect class="participant-green" x="590" y="124" width="170" height="66"/>
+  <text class="head" x="632" y="153">sqlkit repo</text>
+  <text class="sub" x="632" y="174">helpers and tx</text>
+  <rect class="participant" x="850" y="124" width="200" height="66"/>
+  <use href="#postgresql-icon" data-bluetape4k-icon="postgresql" x="870" y="139" width="32" height="32"/>
+  <text class="head" x="910" y="153">PostgreSQL</text>
+  <text class="sub" x="910" y="174">Testcontainers</text>
+
+  <line class="lifeline" x1="155" y1="190" x2="155" y2="690"/>
+  <line class="lifeline" x1="415" y1="190" x2="415" y2="690"/>
+  <line class="lifeline" x1="675" y1="190" x2="675" y2="690"/>
+  <line class="lifeline" x1="950" y1="190" x2="950" y2="690"/>
+
+  <rect class="frame" x="48" y="222" width="1104" height="150"/>
+  <rect class="frame-title" x="70" y="210" width="142" height="28"/>
+  <text class="label" x="90" y="229">normal flow</text>
+  <path class="msg-blue" d="M 155 266 H 415"/>
+  <text class="label" x="218" y="254">create/find/confirm</text>
+  <path class="msg-blue" d="M 415 306 H 950"/>
+  <text class="label" x="556" y="294">raw SQL, manual scan, BeginTx</text>
+  <path class="msg-green return" d="M 950 342 H 155"/>
+  <text class="label" x="512" y="330">confirmed hold + audit row</text>
+
+  <rect class="frame" x="48" y="402" width="1104" height="176"/>
+  <rect class="frame-title" x="70" y="390" width="166" height="28"/>
+  <text class="label" x="90" y="409">sqlkit helpers</text>
+  <path class="msg-green" d="M 155 448 H 675"/>
+  <text class="label" x="304" y="436">QueryOne exact row</text>
+  <path class="msg-green" d="M 675 488 H 950"/>
+  <text class="label" x="730" y="476">quoted SQL + args</text>
+  <path class="msg-red" d="M 155 528 H 675"/>
+  <text class="label" x="264" y="516">reject audit inside WithTx</text>
+  <path class="msg-red return" d="M 675 558 H 950"/>
+  <text class="label" x="716" y="548">rollback preserves original error</text>
+
+  <rect class="note" x="104" y="630" width="990" height="54"/>
+  <text class="label" x="128" y="653">Coverage focus: no rows, too many rows, rollback, context cancellation, and visible SQL/args snapshots.</text>
+  <text class="sub" x="128" y="672">The example teaches the SQL access decision before later SQL service examples add HTTP and larger integration flows.</text>
+</svg>

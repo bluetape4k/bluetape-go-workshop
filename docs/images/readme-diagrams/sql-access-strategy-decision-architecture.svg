@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">SQL access strategy decision architecture</title>
+  <desc id="desc">A workshop example comparing direct database/sql, sqlkit, generated SQL tools, and migration tooling boundaries.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#475569" stroke="#475569" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <symbol id="postgresql-icon" viewBox="0 0 24 24">
+      <path fill="#4169e1" d="M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698z"/>
+    </symbol>
+  </defs>
+  <style>
+    text { font-family: "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #132033; letter-spacing: 0; }
+    .canvas { fill: #f8fafc; }
+    .title { font-size: 30px; font-weight: 700; }
+    .subtitle { font-size: 15px; fill: #475569; }
+    .lane-title { font-size: 17px; font-weight: 700; fill: #334155; }
+    .card-title { font-size: 17px; font-weight: 700; }
+    .card-sub { font-size: 13px; fill: #475569; }
+    .small { font-size: 12px; fill: #64748b; }
+    .label { font-size: 12px; fill: #334155; }
+    .lane { fill: #eef6ff; stroke: #bfd7ff; stroke-width: 2; rx: 18; }
+    .lane2 { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 2; rx: 18; }
+    .lane3 { fill: #fff7ed; stroke: #fed7aa; stroke-width: 2; rx: 18; }
+    .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+    .card-blue { fill: #dbeafe; stroke: #93c5fd; stroke-width: 2; rx: 10; }
+    .card-green { fill: #dcfce7; stroke: #86efac; stroke-width: 2; rx: 10; }
+    .card-orange { fill: #ffedd5; stroke: #fdba74; stroke-width: 2; rx: 10; }
+    .card-purple { fill: #f3e8ff; stroke: #d8b4fe; stroke-width: 2; rx: 10; }
+    .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 3.4; marker-end: url(#arrow-blue); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-green { fill: none; stroke: #059669; stroke-width: 3.4; marker-end: url(#arrow-green); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-slate { fill: none; stroke: #475569; stroke-width: 2.4; marker-end: url(#arrow-slate); stroke-linecap: round; stroke-linejoin: round; }
+    .dash { stroke-dasharray: 7 5; }
+  </style>
+  <rect class="canvas" width="1200" height="720"/>
+  <text class="title" x="60" y="58">SQL access strategy decision</text>
+  <text class="subtitle" x="60" y="86">Same order-hold flow, four boundaries: direct SQL, sqlkit runtime helper, generated query layer, migration tooling.</text>
+
+  <rect class="lane" x="40" y="118" width="1120" height="178"/>
+  <text class="lane-title" x="64" y="150">Application flow used by the example</text>
+  <rect class="card-blue" x="80" y="176" width="220" height="82"/>
+  <text class="card-title" x="104" y="206">Order hold service</text>
+  <text class="card-sub" x="104" y="230">create, find-one, confirm</text>
+  <rect class="card" x="388" y="176" width="220" height="82"/>
+  <text class="card-title" x="412" y="206">Repository strategy</text>
+  <text class="card-sub" x="412" y="230">chosen per module boundary</text>
+  <rect class="card" x="696" y="176" width="220" height="82"/>
+  <text class="card-title" x="720" y="206">Inspectable SQL</text>
+  <text class="card-sub" x="720" y="230">statement text and args</text>
+  <rect class="card-green" x="1000" y="176" width="122" height="82"/>
+  <use href="#postgresql-icon" data-bluetape4k-icon="postgresql" x="1018" y="190" width="34" height="34"/>
+  <text class="card-title" x="1060" y="207">Postgres</text>
+  <text class="card-sub" x="1060" y="231">testcontainer</text>
+
+  <path class="arrow-blue" d="M 300 217 H 388"/>
+  <text class="label" x="322" y="204">repository call</text>
+  <path class="arrow-blue" d="M 608 217 H 696"/>
+  <text class="label" x="622" y="204">build/run</text>
+  <path class="arrow-green" d="M 916 217 H 1000"/>
+  <text class="label" x="928" y="204">SQL + args</text>
+
+  <rect class="lane2" x="40" y="326" width="545" height="258"/>
+  <text class="lane-title" x="64" y="358">Runtime repository choices</text>
+  <rect class="card-orange" x="80" y="388" width="215" height="128"/>
+  <text class="card-title" x="104" y="419">direct database/sql</text>
+  <text class="card-sub" x="104" y="445">raw query strings</text>
+  <text class="card-sub" x="104" y="467">manual scan and cardinality</text>
+  <text class="card-sub" x="104" y="489">explicit BeginTx/Commit</text>
+  <rect class="card-green" x="330" y="388" width="215" height="128"/>
+  <text class="card-title" x="354" y="419">sqlkit</text>
+  <text class="card-sub" x="354" y="445">small builders</text>
+  <text class="card-sub" x="354" y="467">QueryOne/Optional helpers</text>
+  <text class="card-sub" x="354" y="489">WithTx rollback contract</text>
+
+  <rect class="lane3" x="615" y="326" width="545" height="258"/>
+  <text class="lane-title" x="640" y="358">Boundary choices kept outside runtime deps</text>
+  <rect class="card-purple" x="655" y="388" width="215" height="128"/>
+  <text class="card-title" x="679" y="419">sqlc or Jet</text>
+  <text class="card-sub" x="679" y="445">generated typed methods</text>
+  <text class="card-sub" x="679" y="467">schema or handwritten SQL</text>
+  <text class="card-sub" x="679" y="489">review generated package</text>
+  <rect class="card-purple" x="905" y="388" width="215" height="128"/>
+  <text class="card-title" x="929" y="419">Atlas</text>
+  <text class="card-sub" x="929" y="445">schema diff and lint</text>
+  <text class="card-sub" x="929" y="467">migration plan/apply</text>
+  <text class="card-sub" x="929" y="489">CI/CD tooling boundary</text>
+
+  <path class="arrow-slate" d="M 498 258 V 320 Q 498 338 480 338 H 188 V 388"/>
+  <path class="arrow-slate" d="M 498 258 V 338 H 438 V 388"/>
+  <path class="arrow-slate dash" d="M 806 258 V 320 Q 806 338 788 338 H 764 V 388"/>
+  <path class="arrow-slate dash" d="M 806 258 V 338 H 1012 V 388"/>
+
+  <rect class="card" x="86" y="624" width="1028" height="52"/>
+  <text class="small" x="110" y="647">Reader contract: use direct database/sql for tiny raw paths, sqlkit for visible SQL plus row/tx helpers, and move generation or migrations to explicit tool boundaries.</text>
+  <text class="small" x="110" y="666">The workshop code intentionally avoids sqlc, Jet, Atlas, GORM, and ORM runtime dependencies.</text>
+</svg>
