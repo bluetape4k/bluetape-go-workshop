@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 52px; fill: #0f172a; }
+      .subtitle { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 24px; fill: #475569; }
+      .label { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 32px; fill: #0f172a; }
+      .small { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 21px; fill: #334155; }
+      .head { fill: #e0f2fe; stroke: #0284c7; stroke-width: 4; rx: 18; }
+      .ok { fill: #ecfdf5; stroke: #059669; stroke-width: 4; rx: 18; }
+      .warn { fill: #fff7ed; stroke: #f97316; stroke-width: 4; rx: 18; }
+      .bad { fill: #fef2f2; stroke: #dc2626; stroke-width: 4; rx: 18; }
+      .note { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; rx: 18; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="920"/>
+  <text class="title" x="70" y="95">Safe upload decision policy</text>
+  <text class="subtitle" x="74" y="138">Each failure maps to a stable public error without leaking decoder internals.</text>
+
+  <rect class="head" x="95" y="205" width="360" height="92"/>
+  <text class="label" x="140" y="262">Boundary check</text>
+  <rect class="head" x="510" y="205" width="340" height="92"/>
+  <text class="label" x="555" y="262">HTTP status</text>
+  <rect class="head" x="905" y="205" width="420" height="92"/>
+  <text class="label" x="950" y="262">Public error code</text>
+
+  <rect class="ok" x="95" y="345" width="360" height="92"/>
+  <text class="small" x="135" y="382">valid compressed JSON</text>
+  <text class="small" x="135" y="412">within both limits</text>
+  <rect class="ok" x="510" y="345" width="340" height="92"/>
+  <text class="small" x="555" y="397">202 accepted</text>
+  <rect class="note" x="905" y="345" width="420" height="92"/>
+  <text class="small" x="950" y="397">sha256 + scan still needed</text>
+
+  <rect class="warn" x="95" y="480" width="360" height="92"/>
+  <text class="small" x="135" y="518">compressed body</text>
+  <text class="small" x="135" y="548">exceeds MaxBytesReader</text>
+  <rect class="warn" x="510" y="480" width="340" height="92"/>
+  <text class="small" x="555" y="532">413 payload too large</text>
+  <rect class="warn" x="905" y="480" width="420" height="92"/>
+  <text class="small" x="950" y="532">compressed_request_too_large</text>
+
+  <rect class="warn" x="95" y="615" width="360" height="92"/>
+  <text class="small" x="135" y="653">expanded payload</text>
+  <text class="small" x="135" y="683">exceeds DecompressLimit</text>
+  <rect class="warn" x="510" y="615" width="340" height="92"/>
+  <text class="small" x="555" y="667">413 payload too large</text>
+  <rect class="warn" x="905" y="615" width="420" height="92"/>
+  <text class="small" x="950" y="667">decompressed_payload_too_large</text>
+
+  <rect class="bad" x="95" y="750" width="360" height="92"/>
+  <text class="small" x="135" y="788">bad gzip or zstd</text>
+  <text class="small" x="135" y="818">or unsupported algorithm</text>
+  <rect class="bad" x="510" y="750" width="340" height="92"/>
+  <text class="small" x="555" y="802">400 bad request</text>
+  <rect class="bad" x="905" y="750" width="420" height="92"/>
+  <text class="small" x="950" y="788">malformed_compressed_payload</text>
+  <text class="small" x="950" y="818">unsupported_compression</text>
+</svg>

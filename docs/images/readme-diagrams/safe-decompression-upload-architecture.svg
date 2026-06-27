@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="safe-blue" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#2563eb" stroke="#2563eb"/>
+    </marker>
+    <marker id="safe-green" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#059669" stroke="#059669"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 52px; fill: #0f172a; }
+      .subtitle { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 24px; fill: #475569; }
+      .label { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 32px; fill: #0f172a; }
+      .small { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 22px; fill: #334155; }
+      .lane { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 3; rx: 28; }
+      .lane2 { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 3; rx: 28; }
+      .card { fill: #ffffff; stroke: #334155; stroke-width: 4; rx: 24; }
+      .guard { fill: #fff7ed; stroke: #f97316; stroke-width: 4; rx: 24; }
+      .limit { fill: #fef2f2; stroke: #dc2626; stroke-width: 4; rx: 24; }
+      .store { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 4; rx: 24; }
+      .line-blue { fill: none; stroke: #2563eb; stroke-width: 7; stroke-linecap: round; marker-end: url(#safe-blue); }
+      .line-green { fill: none; stroke: #059669; stroke-width: 7; stroke-linecap: round; marker-end: url(#safe-green); }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <text class="title" x="70" y="95">Safe decompression upload boundary</text>
+  <text class="subtitle" x="74" y="138">Bound the compressed request and the expanded payload before trusting JSON.</text>
+
+  <rect class="lane" x="70" y="180" width="1460" height="300"/>
+  <text class="subtitle" x="105" y="225">Untrusted HTTP boundary</text>
+
+  <rect class="card" x="120" y="270" width="310" height="145"/>
+  <text class="label" x="160" y="330">Client upload</text>
+  <text class="small" x="160" y="368">gzip or zstd bytes</text>
+
+  <rect class="limit" x="525" y="250" width="370" height="185"/>
+  <text class="label" x="565" y="310">MaxBytesReader</text>
+  <text class="small" x="565" y="350">compressed body limit</text>
+  <text class="small" x="565" y="382">reject transport bloat</text>
+
+  <rect class="guard" x="1010" y="250" width="390" height="185"/>
+  <text class="label" x="1050" y="310">DecompressLimit</text>
+  <text class="small" x="1050" y="350">expanded payload limit</text>
+  <text class="small" x="1050" y="382">typed size error</text>
+
+  <path class="line-blue" d="M 430 342 H 505"/>
+  <path class="line-blue" d="M 895 342 H 990"/>
+
+  <rect class="lane2" x="70" y="535" width="1460" height="255"/>
+  <text class="subtitle" x="105" y="580">Trusted-after-validation path</text>
+
+  <rect class="card" x="155" y="625" width="350" height="115"/>
+  <text class="label" x="195" y="675">Strict JSON decode</text>
+  <text class="small" x="195" y="712">document_id + tenant</text>
+
+  <rect class="store" x="625" y="605" width="390" height="155"/>
+  <text class="label" x="665" y="655">Ingestion response</text>
+  <text class="small" x="665" y="695">sizes + SHA-256</text>
+  <text class="small" x="665" y="725">scan still required</text>
+
+  <rect class="card" x="1135" y="625" width="310" height="115"/>
+  <text class="label" x="1175" y="675">Downstream scan</text>
+  <text class="small" x="1175" y="712">authz, malware, schema</text>
+
+  <path class="line-green" d="M 1205 435 C 1205 510 540 535 435 610"/>
+  <path class="line-blue" d="M 505 682 H 605"/>
+  <path class="line-blue" d="M 1015 682 H 1115"/>
+</svg>

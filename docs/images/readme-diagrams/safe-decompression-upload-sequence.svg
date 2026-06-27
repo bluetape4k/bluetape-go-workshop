@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <marker id="seq-blue" markerWidth="16" markerHeight="16" refX="15" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 16 8 L 0 16 Z" fill="#2563eb" stroke="#2563eb"/>
+    </marker>
+    <marker id="seq-green" markerWidth="16" markerHeight="16" refX="15" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 16 8 L 0 16 Z" fill="#059669" stroke="#059669"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 52px; fill: #0f172a; }
+      .subtitle { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 24px; fill: #475569; }
+      .label { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 32px; fill: #0f172a; }
+      .small { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 21px; fill: #334155; }
+      .head { fill: #ffffff; stroke: #334155; stroke-width: 4; rx: 22; }
+      .life { stroke: #94a3b8; stroke-width: 3; stroke-dasharray: 9 11; }
+      .msg-blue { stroke: #2563eb; stroke-width: 6; marker-end: url(#seq-blue); stroke-linecap: round; }
+      .msg-green { stroke: #059669; stroke-width: 6; marker-end: url(#seq-green); stroke-linecap: round; }
+      .return { stroke: #64748b; stroke-width: 5; stroke-dasharray: 10 9; marker-end: url(#seq-blue); stroke-linecap: round; }
+      .ok { fill: #ecfdf5; stroke: #059669; stroke-width: 3; rx: 18; }
+      .warn { fill: #fff7ed; stroke: #f97316; stroke-width: 3; rx: 18; }
+      .bad { fill: #fef2f2; stroke: #ef4444; stroke-width: 3; rx: 18; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="980"/>
+  <text class="title" x="70" y="95">Bounded upload sequence</text>
+  <text class="subtitle" x="74" y="138">The service rejects compressed bloat before expansion, then rejects decompression bloat.</text>
+
+  <rect class="head" x="85" y="185" width="220" height="92"/>
+  <text class="label" x="135" y="240">Client</text>
+  <rect class="head" x="415" y="185" width="280" height="92"/>
+  <text class="label" x="455" y="240">HTTP boundary</text>
+  <rect class="head" x="815" y="185" width="300" height="92"/>
+  <text class="label" x="855" y="240">DecompressLimit</text>
+  <rect class="head" x="1230" y="185" width="250" height="92"/>
+  <text class="label" x="1270" y="240">JSON guard</text>
+
+  <line class="life" x1="195" y1="277" x2="195" y2="900"/>
+  <line class="life" x1="555" y1="277" x2="555" y2="900"/>
+  <line class="life" x1="965" y1="277" x2="965" y2="900"/>
+  <line class="life" x1="1355" y1="277" x2="1355" y2="900"/>
+
+  <text class="small" x="235" y="340">POST compressed bytes</text>
+  <line class="msg-blue" x1="205" y1="355" x2="535" y2="355"/>
+  <text class="small" x="610" y="415">ReadAll bounded by MaxBytesReader</text>
+  <line class="msg-green" x1="565" y1="430" x2="945" y2="430"/>
+  <text class="small" x="1040" y="500">expand with maxBytes+1</text>
+  <line class="msg-green" x1="975" y1="515" x2="1335" y2="515"/>
+  <text class="small" x="1030" y="575">strict JSON decode</text>
+  <line class="return" x1="1335" y1="590" x2="585" y2="590"/>
+
+  <rect class="ok" x="365" y="640" width="520" height="84"/>
+  <text class="small" x="400" y="674">202 accepted</text>
+  <text class="small" x="400" y="704">sizes, algorithm, payload hash</text>
+
+  <rect class="warn" x="95" y="790" width="590" height="74"/>
+  <text class="small" x="130" y="835">413 compressed_request_too_large</text>
+
+  <rect class="bad" x="800" y="790" width="610" height="74"/>
+  <text class="small" x="835" y="835">413 decompressed_payload_too_large</text>
+</svg>
