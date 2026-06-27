@@ -43,6 +43,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 |---|---|---|---|
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs/README.ko.md) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | 안전한 serialization과 compression 선택 기준을 보여주는 versioned product cache snapshot 예제입니다. | `serialization`, `compression` |
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload/README.ko.md) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Untrusted input에 대해 compressed request와 decompressed payload를 모두 제한하는 Gin upload API입니다. | `compression` |
+| [`examples/measured-shipping-quote`](examples/measured-shipping-quote/README.ko.md) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Caller-facing unit을 parse하고 area/volume을 derive한 뒤 billable weight를 고르는 Gin shipping quote API입니다. | `measure` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -496,6 +497,27 @@ printf '%s' '{"document_id":"doc-1001","tenant":"checkout","body":"invoice uploa
 
 이 예제는 untrusted upload byte를 다룰 때 compressed request-size limit과
 decompressed payload-size limit을 별도로 둬야 하는 이유를 보여줍니다.
+
+## Measured Shipping Quote 예제 실행
+
+Local measured quote API를 실행합니다:
+
+```bash
+go run ./examples/measured-shipping-quote
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8104/healthz
+curl -s -X POST http://127.0.0.1:8104/quotes \
+  -H 'Content-Type: application/json' \
+  -d '{"quote_id":"ship-1001","destination_zone":"kr-seoul","width":"40 cm","height":"30 cm","length":"20 cm","weight":"3.2 kg"}' | jq
+```
+
+이 예제는 `measure`가 caller-facing unit을 typed value로 유지하고, application이 area,
+volume, dimensional weight, billable weight, stable HTTP error policy를 만드는 흐름을
+보여줍니다.
 
 ## Checkout Guard Integration 예제 실행
 
