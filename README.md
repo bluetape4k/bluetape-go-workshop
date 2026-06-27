@@ -51,6 +51,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/exchange-rate-pricing`](examples/exchange-rate-pricing) | [English](examples/exchange-rate-pricing/README.md) \| [한국어](examples/exchange-rate-pricing/README.ko.md) | Gin display-pricing API that converts base totals through provider-backed exchange rates, locale currency defaults, and explicit stale quote policy. | `money` |
 | [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Gin invoice API that groups money totals by currency and exposes discount and tax-like rule decisions. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Gin webhook admission API that uses a Bloom filter for definitely-new and probably-seen event paths. | `probabilistic` |
+| [`examples/shared-redis-bloom-admission`](examples/shared-redis-bloom-admission) | [English](examples/shared-redis-bloom-admission/README.md) \| [한국어](examples/shared-redis-bloom-admission/README.ko.md) | Gin webhook admission API that shares Redis-backed Bloom state across API instances. | `probabilistic`, `probabilistic/redis`, `testcontainers/redis` |
 | [`examples/checkout-guard-integration`](examples/checkout-guard-integration) | [English](examples/checkout-guard-integration/README.md) \| [한국어](examples/checkout-guard-integration/README.ko.md) | Gin checkout guard API that composes JWT claims, IDs, money/rules, and probabilistic repeated-submission admission. | `id`, `jwt`, `money`, `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job with retry, per-attempt timeout, event visibility, and diagrammed policy outcomes. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Payment authorization gateway protected by circuit breaker, bulkhead overflow rejection, and synchronous events. | `resilience` |
@@ -446,6 +447,32 @@ curl -s -X POST http://127.0.0.1:8099/events/admit \
 The example demonstrates that a Bloom filter can prove an event is definitely
 new, but a hit is only `probably_seen` and still needs durable-store pairing in
 production.
+
+## Run the Shared Redis Bloom Admission Example
+
+Start Redis locally, then run the webhook admission API:
+
+```bash
+export REDIS_ADDR=127.0.0.1:6379
+go run ./examples/shared-redis-bloom-admission
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8102/healthz
+curl -s -X POST http://127.0.0.1:8102/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+curl -s -X POST http://127.0.0.1:8102/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+curl -s http://127.0.0.1:8102/filters/current | jq
+```
+
+The example demonstrates how multiple API instances share a Redis Bloom
+namespace while preserving the reader rule: `probably_seen` is not authorization
+and not exact dedupe.
 
 ## Run the Checkout Guard Integration Example
 

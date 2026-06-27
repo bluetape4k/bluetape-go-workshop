@@ -51,6 +51,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/exchange-rate-pricing`](examples/exchange-rate-pricing/README.ko.md) | [English](examples/exchange-rate-pricing/README.md) \| [한국어](examples/exchange-rate-pricing/README.ko.md) | Provider-backed exchange rate, locale currency default, explicit stale quote policy로 base total을 display total로 변환하는 Gin API입니다. | `money` |
 | [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules/README.ko.md) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Money total을 currency별로 group하고 discount와 tax-like rule decision을 노출하는 Gin invoice API입니다. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission/README.ko.md) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Bloom filter로 definitely-new와 probably-seen event path를 보여주는 Gin webhook admission API입니다. | `probabilistic` |
+| [`examples/shared-redis-bloom-admission`](examples/shared-redis-bloom-admission/README.ko.md) | [English](examples/shared-redis-bloom-admission/README.md) \| [한국어](examples/shared-redis-bloom-admission/README.ko.md) | Redis-backed Bloom state를 여러 API instance가 공유하는 Gin webhook admission API입니다. | `probabilistic`, `probabilistic/redis`, `testcontainers/redis` |
 | [`examples/checkout-guard-integration`](examples/checkout-guard-integration/README.ko.md) | [English](examples/checkout-guard-integration/README.md) \| [한국어](examples/checkout-guard-integration/README.ko.md) | JWT claim, ID, money/rule, probabilistic repeated-submission admission을 조합하는 Gin checkout guard API입니다. | `id`, `jwt`, `money`, `probabilistic` |
 | [`examples/catalog-refresh-resilience`](examples/catalog-refresh-resilience/README.ko.md) | [English](examples/catalog-refresh-resilience/README.md) \| [한국어](examples/catalog-refresh-resilience/README.ko.md) | SKU refresh job에서 retry, attempt별 timeout, event visibility, diagram 기반 outcome을 보여주는 예제입니다. | `resilience` |
 | [`examples/payment-authorization-guard`](examples/payment-authorization-guard/README.ko.md) | [English](examples/payment-authorization-guard/README.md) \| [한국어](examples/payment-authorization-guard/README.ko.md) | Circuit breaker, bulkhead overflow rejection, synchronous event로 payment authorization gateway를 보호하는 예제입니다. | `resilience` |
@@ -444,6 +445,32 @@ curl -s -X POST http://127.0.0.1:8099/events/admit \
 
 이 예제는 Bloom filter가 event가 definitely new임은 증명할 수 있지만 hit는
 `probably_seen`일 뿐이며 production에서는 durable store와 함께 써야 한다는 점을
+보여줍니다.
+
+## Shared Redis Bloom Admission 예제 실행
+
+Redis를 먼저 실행한 뒤 webhook admission API를 실행합니다:
+
+```bash
+export REDIS_ADDR=127.0.0.1:6379
+go run ./examples/shared-redis-bloom-admission
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8102/healthz
+curl -s -X POST http://127.0.0.1:8102/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+curl -s -X POST http://127.0.0.1:8102/events/admit \
+  -H 'Content-Type: application/json' \
+  -d '{"event_id":"evt-1001","source":"checkout"}' | jq
+curl -s http://127.0.0.1:8102/filters/current | jq
+```
+
+이 예제는 여러 API instance가 Redis Bloom namespace를 공유하는 방법과
+`probably_seen`을 authorization이나 exact dedupe로 읽으면 안 된다는 boundary를 함께
 보여줍니다.
 
 ## Checkout Guard Integration 예제 실행

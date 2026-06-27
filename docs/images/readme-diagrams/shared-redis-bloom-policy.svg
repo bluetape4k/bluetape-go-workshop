@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 52px; fill: #0f172a; }
+      .subtitle { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 24px; fill: #475569; }
+      .label { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 34px; fill: #0f172a; }
+      .small { font-family: "Comic Mono", "SFMono-Regular", monospace; font-size: 22px; fill: #334155; }
+      .head { fill: #e0f2fe; stroke: #0284c7; stroke-width: 4; rx: 18; }
+      .cell { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; rx: 16; }
+      .ok { fill: #ecfdf5; stroke: #059669; stroke-width: 4; rx: 18; }
+      .warn { fill: #fff7ed; stroke: #f97316; stroke-width: 4; rx: 18; }
+      .bad { fill: #fef2f2; stroke: #dc2626; stroke-width: 4; rx: 18; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <text class="title" x="70" y="95">Admission decision policy</text>
+  <text class="subtitle" x="74" y="138">The API treats Redis Bloom as a prefilter, not a source of exact truth.</text>
+
+  <rect class="head" x="95" y="190" width="340" height="90"/>
+  <text class="label" x="145" y="247">Redis Bloom result</text>
+  <rect class="head" x="485" y="190" width="320" height="90"/>
+  <text class="label" x="545" y="247">HTTP decision</text>
+  <rect class="head" x="855" y="190" width="320" height="90"/>
+  <text class="label" x="915" y="247">Public reason</text>
+  <rect class="head" x="1225" y="190" width="280" height="90"/>
+  <text class="label" x="1270" y="247">Reader lesson</text>
+
+  <rect class="ok" x="95" y="315" width="340" height="110"/>
+  <text class="label" x="135" y="365">Put changed bits</text>
+  <text class="small" x="135" y="400">first insert path</text>
+  <rect class="ok" x="485" y="315" width="320" height="110"/>
+  <text class="label" x="525" y="365">200 admit</text>
+  <text class="small" x="525" y="400">accepted is true</text>
+  <rect class="ok" x="855" y="315" width="320" height="110"/>
+  <text class="small" x="895" y="365">definitely_new</text>
+  <text class="small" x="895" y="400">no false negative</text>
+  <rect class="cell" x="1225" y="315" width="280" height="110"/>
+  <text class="small" x="1265" y="365">safe to enqueue</text>
+  <text class="small" x="1265" y="400">next workflow step</text>
+
+  <rect class="warn" x="95" y="460" width="340" height="120"/>
+  <text class="label" x="135" y="512">No bit changed</text>
+  <text class="small" x="135" y="548">all offsets already set</text>
+  <rect class="warn" x="485" y="460" width="320" height="120"/>
+  <text class="label" x="525" y="512">200 probably seen</text>
+  <text class="small" x="525" y="548">accepted is false</text>
+  <rect class="warn" x="855" y="460" width="320" height="120"/>
+  <text class="small" x="895" y="512">might_be_duplicate</text>
+  <text class="small" x="895" y="548">or false positive</text>
+  <rect class="cell" x="1225" y="460" width="280" height="120"/>
+  <text class="small" x="1265" y="512">not authorization</text>
+  <text class="small" x="1265" y="548">not exact dedupe</text>
+
+  <rect class="bad" x="95" y="615" width="340" height="110"/>
+  <text class="label" x="135" y="665">Config mismatch</text>
+  <text class="small" x="135" y="700">fingerprint differs</text>
+  <rect class="bad" x="485" y="615" width="320" height="110"/>
+  <text class="label" x="525" y="665">409 conflict</text>
+  <text class="small" x="525" y="700">stop mixed readers</text>
+  <rect class="bad" x="855" y="615" width="320" height="110"/>
+  <text class="small" x="895" y="665">filter_config</text>
+  <text class="small" x="895" y="700">mismatch</text>
+  <rect class="cell" x="1225" y="615" width="280" height="110"/>
+  <text class="small" x="1265" y="665">use a new namespace</text>
+  <text class="small" x="1265" y="700">or rebuild safely</text>
+
+  <rect class="bad" x="95" y="760" width="340" height="80"/>
+  <text class="label" x="135" y="812">Redis unavailable</text>
+  <rect class="bad" x="485" y="760" width="320" height="80"/>
+  <text class="label" x="525" y="812">503 unavailable</text>
+  <rect class="bad" x="855" y="760" width="320" height="80"/>
+  <text class="small" x="895" y="812">filter_unavailable</text>
+  <rect class="cell" x="1225" y="760" width="280" height="80"/>
+  <text class="small" x="1265" y="812">retry upstream later</text>
+</svg>
