@@ -45,6 +45,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload/README.ko.md) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Untrusted input에 대해 compressed request와 decompressed payload를 모두 제한하는 Gin upload API입니다. | `compression` |
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote/README.ko.md) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Caller-facing unit을 parse하고 area/volume을 derive한 뒤 billable weight를 고르는 Gin shipping quote API입니다. | `measure` |
 | [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision/README.ko.md) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | direct `database/sql`, `sqlkit`, generated query boundary, migration tooling 선택 기준을 비교하는 local SQL access strategy 예제입니다. | `sqlkit`, `testcontainers/postgres` |
+| [`examples/sql-order-repository`](examples/sql-order-repository/README.ko.md) | [English](examples/sql-order-repository/README.md) \| [한국어](examples/sql-order-repository/README.ko.md) | visible `sqlkit` statement로 insert, find-by-ID, filtered list, not-found behavior를 보여주는 PostgreSQL-backed order repository 예제입니다. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/s3-floci-storage`](examples/s3-floci-storage/README.ko.md) | [English](examples/s3-floci-storage/README.md) \| [한국어](examples/s3-floci-storage/README.ko.md) | AWS SDK v2와 opt-in Floci smoke coverage로 tenant receipt object upload, download, list, delete, presign을 보여주는 local S3 storage 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/sqs-floci-worker`](examples/sqs-floci-worker/README.ko.md) | [English](examples/sqs-floci-worker/README.md) \| [한국어](examples/sqs-floci-worker/README.ko.md) | Fulfillment task enqueue, handler success delete acknowledgement, handler failure retry visibility를 Floci smoke coverage로 보여주는 local SQS worker 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer/README.ko.md) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | DynamoDB document-index materializer가 batch write를 chunking하고, `UnprocessedItems`만 retry하며, retry exhaustion과 AWS service error를 분리하는 local 예제입니다. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
@@ -96,6 +97,24 @@ PostgreSQL Testcontainers contract test를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/sql-access-strategy-decision/...
+```
+
+## SQL Order Repository 예제 실행
+
+Local repository preview를 출력합니다.
+
+```bash
+go run ./examples/sql-order-repository
+```
+
+이 예제는 order persist, primary key read, customer/status list를 보여주고,
+`sqlkit`이 ORM이나 migration owner가 되지 않으면서 direct `database/sql`을 어떻게
+보완하는지 문서화합니다.
+
+PostgreSQL Testcontainers contract test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/sql-order-repository/...
 ```
 
 ## S3 Floci Storage 예제 실행
