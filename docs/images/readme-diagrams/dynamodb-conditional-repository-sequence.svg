@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 840" role="img" aria-labelledby="title desc">
+  <title id="title">DynamoDB conditional repository sequence</title>
+  <desc id="desc">Create, duplicate conflict, optimistic update, stale update conflict, and tenant query paths between caller, repository, and DynamoDB.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <symbol id="dynamodb-icon" viewBox="0 0 24 24">
+      <path fill="#4053d6" d="M16.606 20.705v-2.371c-1.263 1.082-3.884 1.795-7.066 1.795-3.184 0-5.805-.714-7.068-1.797v2.369c0 1.168 2.903 2.47 7.068 2.47 4.16 0 7.06-1.3 7.066-2.466zm.001-6.765l.817-.005v.005c0 .517-.258.998-.75 1.441.601.54.75 1.071.75 1.449a1661.7 1661.7 0 0 0 0 3.87c0 1.881-3.389 3.3-7.884 3.3-4.471 0-7.846-1.404-7.88-3.27a583.119 583.119 0 0 1-.003-3.909c.001-.375.15-.9.745-1.437-.592-.538-.743-1.062-.746-1.435v-3.892c.002-.377.153-.903.747-1.438-.593-.54-.744-1.062-.747-1.435 0-1.357-.002-2.735.002-3.897C1.674 1.412 5.056 0 9.54 0c2.159 0 4.233.356 5.689.974l-.315.766c-1.36-.58-3.319-.91-5.374-.91-4.165 0-7.067 1.3-7.067 2.47 0 1.168 2.902 2.47 7.067 2.47.115 0 .222 0 .334-.005l.033.828c-.122.006-.245.006-.367.006-3.184 0-5.805-.714-7.068-1.798v2.38c.005.45.45.843.821 1.093 1.116.736 3.114 1.239 5.34 1.342l-.037.829c-2.254-.105-4.23-.59-5.5-1.332-.318.245-.623.573-.623.952 0 1.168 2.902 2.47 7.067 2.47.411 0 .812-.014 1.203-.042l.06.826c-.41.03-.833.045-1.263.045-3.184 0-5.805-.713-7.068-1.797v2.368c.005.462.449.855.821 1.104 1.275.842 3.67 1.366 6.247 1.366h.182v.83H9.54c-2.62 0-4.99-.507-6.444-1.359-.317.245-.623.574-.623.954 0 1.168 2.902 2.47 7.067 2.47 4.159 0 7.058-1.298 7.066-2.465v-.007c0-.377-.303-.705-.62-.948a5.732 5.732 0 0 1-.662.336l-.316-.764c.3-.128.56-.266.776-.412.376-.254.823-.651.823-1.1zm4.377-6.915h-2.717a.406.406 0 0 1-.332-.173.42.42 0 0 1-.055-.375l1.204-3.597h-5.403l-2.583 4.974h2.623c.128 0 .248.06.325.164a.418.418 0 0 1 .069.36l-2.249 8.365zm1.249-.128l-10.89 11.608a.408.408 0 0 1-.498.075.418.418 0 0 1-.192-.471l2.534-9.426h-2.766a.407.407 0 0 1-.349-.2.418.418 0 0 1-.012-.407l3.014-5.804a.408.408 0 0 1 .36-.222h6.22c.132 0 .256.065.332.174a.422.422 0 0 1 .055.374l-1.204 3.598h3.1c.164 0 .31.099.375.251a.422.422 0 0 1-.08.45zM3.085 20.723a8.107 8.107 0 0 0 1.72.72l.233-.794a7.32 7.32 0 0 1-1.546-.645zm1.72-5.984l.233-.795a7.262 7.262 0 0 1-1.546-.646l-.407.72a8.051 8.051 0 0 0 1.72.72zm-1.72-7.427l.407-.719c.418.244.939.462 1.546.646l-.232.794a8.046 8.046 0 0 1-1.72-.72Z"/>
+    </symbol>
+  </defs>
+  <style>
+    text { font-family: "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #132033; letter-spacing: 0; }
+    .canvas { fill: #f8fafc; }
+    .title { font-size: 30px; font-weight: 700; }
+    .subtitle { font-size: 15px; fill: #475569; }
+    .actor { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+    .repo { fill: #dcfce7; stroke: #86efac; stroke-width: 2; rx: 10; }
+    .db { fill: #f3e8ff; stroke: #d8b4fe; stroke-width: 2; rx: 10; }
+    .note { fill: #fff7ed; stroke: #fed7aa; stroke-width: 2; rx: 10; }
+    .conflict { fill: #fee2e2; stroke: #fca5a5; stroke-width: 2; rx: 10; }
+    .actor-title { font-size: 17px; font-weight: 700; }
+    .actor-sub { font-size: 13px; fill: #475569; }
+    .small { font-size: 12px; fill: #64748b; }
+    .label { font-size: 13px; fill: #334155; }
+    .divider { stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 10; }
+    .lifeline { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 8 10; }
+    .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 3.2; marker-end: url(#arrow-blue); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-green { fill: none; stroke: #059669; stroke-width: 3.2; marker-end: url(#arrow-green); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-red { fill: none; stroke: #dc2626; stroke-width: 3.2; marker-end: url(#arrow-red); stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <rect class="canvas" width="1200" height="840"/>
+  <text class="title" x="60" y="58">DynamoDB conditional write sequence</text>
+  <text class="subtitle" x="60" y="86">The same repository turns DynamoDB conditional failures into business conflicts while preserving typed AWS errors.</text>
+
+  <rect class="actor" x="88" y="122" width="214" height="72"/>
+  <text class="actor-title" x="112" y="152">Caller</text>
+  <text class="actor-sub" x="112" y="174">catalog worker or API</text>
+  <rect class="repo" x="484" y="122" width="232" height="72"/>
+  <text class="actor-title" x="508" y="152">Repository</text>
+  <text class="actor-sub" x="508" y="174">keys, guards, translation</text>
+  <rect class="db" x="900" y="122" width="214" height="72"/>
+  <use href="#dynamodb-icon" data-bluetape4k-icon="amazon-dynamodb" x="924" y="142" width="32" height="32"/>
+  <text class="actor-title" x="972" y="152">DynamoDB</text>
+  <text class="actor-sub" x="972" y="174">table enforces conditions</text>
+
+  <line class="lifeline" x1="195" y1="194" x2="195" y2="806"/>
+  <line class="lifeline" x1="600" y1="194" x2="600" y2="806"/>
+  <line class="lifeline" x1="1007" y1="194" x2="1007" y2="806"/>
+
+  <text class="label" x="88" y="232">1. Create new item</text>
+  <path class="arrow-blue" d="M 210 250 H 585"/>
+  <text class="label" x="278" y="238">CreateIfAbsent(item)</text>
+  <path class="arrow-green" d="M 615 286 H 992"/>
+  <text class="label" x="662" y="274">PutItem with attribute_not_exists(pk/sk)</text>
+  <path class="arrow-green" d="M 992 322 H 615"/>
+  <text class="label" x="715" y="310">created</text>
+  <path class="arrow-green" d="M 585 358 H 210"/>
+  <text class="label" x="300" y="346">nil</text>
+
+  <line class="divider" x1="86" y1="392" x2="1114" y2="392"/>
+  <text class="label" x="88" y="418">2. Duplicate create or stale update</text>
+  <path class="arrow-blue" d="M 210 448 H 585"/>
+  <text class="label" x="265" y="436">CreateIfAbsent or UpdateName</text>
+  <path class="arrow-green" d="M 615 484 H 992"/>
+  <text class="label" x="656" y="472">conditioned PutItem / UpdateItem</text>
+  <path class="arrow-red" d="M 992 520 H 615"/>
+  <text class="label" x="650" y="508">ConditionalCheckFailedException</text>
+  <rect class="conflict" x="450" y="542" width="300" height="62"/>
+  <text class="actor-title" x="476" y="570">ErrConditionalConflict</text>
+  <text class="actor-sub" x="476" y="590">errors.As still finds AWS typed error</text>
+  <path class="arrow-red" d="M 585 628 H 210"/>
+  <text class="label" x="250" y="616">business conflict: reload or stop duplicate</text>
+
+  <line class="divider" x1="86" y1="662" x2="1114" y2="662"/>
+  <text class="label" x="88" y="700">3. Tenant query</text>
+  <path class="arrow-blue" d="M 210 718 H 585"/>
+  <text class="label" x="290" y="706">QueryTenant(tenantID)</text>
+  <path class="arrow-blue" d="M 615 718 H 992"/>
+  <text class="label" x="656" y="706">pk equality + begins_with(sk, ITEM#)</text>
+  <path class="arrow-green" d="M 992 756 H 615"/>
+  <text class="label" x="742" y="744">matching tenant items</text>
+  <path class="arrow-green" d="M 585 792 H 210"/>
+  <text class="label" x="332" y="780">[]CatalogItem</text>
+  <rect class="note" x="770" y="610" width="318" height="42"/>
+  <text class="small" x="792" y="636">ctx.Err is checked before any DynamoDB call</text>
+
+  <rect class="actor" x="146" y="36" width="908" height="0" opacity="0"/>
+</svg>
