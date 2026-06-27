@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">S3 Floci storage architecture</title>
+  <desc id="desc">Receipt commands call a small storage boundary that maps safe keys and metadata to caller-owned AWS SDK S3 clients, with Floci providing the local endpoint for smoke tests.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <symbol id="s3-icon" viewBox="0 0 80 80">
+      <rect x="0" y="0" width="80" height="80" fill="#7AA116"/>
+      <g transform="translate(12 12)" fill="#FFFFFF">
+        <path d="M53.682 39.59c-.23-.237-.669-.602-1.474-1.108l-.117.87c.788.183 1.288.235 1.591.238ZM51.905 25.597c-.137-1.19-5.672-3.883-14.336-3.883-8.663 0-14.198 2.693-14.334 3.883l.019.153c.472 1.356 6.193 3.284 14.315 3.284 8.124 0 13.844-1.928 14.316-3.284l.02-.153Zm-.377 2.955c-3.066 1.634-8.639 2.482-13.959 2.482s-10.893-.848-13.957-2.482l1.459 10.836c1.003.344 1.945.922 2.769 1.735.512.505.951 1.093 1.315 1.756.774-.416 1.685-.524 2.558-.266 1.362.403 2.303 1.559 2.604 3.154.6.182 1.207.458 1.74.795 1.668 1.055 2.513 2.428 2.513 4.082 0 1.348-.367 2.465-1.051 3.356h.05c2.556 0 5.109-.265 7.187-.746.805-.185 1.516-.399 2.114-.635 1.174-.465 1.527-.879 1.558-.987 0-.044.001-.071.007-.115l1.441-10.701c-4.103-1.27-9.578-3.801-11.891-4.904-.153.053-.314.088-.485.088-.827 0-1.5-.673-1.5-1.5s.673-1.5 1.5-1.5c.71 0 1.304.497 1.458 1.161 1.864.886 7.195 3.36 11.19 4.64l1.38-10.249ZM36.57 50.644c0-.648-.18-1.505-1.582-2.392-.534-.337-1.191-.596-1.756-.692-.513-.086-.868-.55-.83-1.058-.095-1.032-.561-1.766-1.256-1.971-.567-.166-1.181.053-1.562.56-.219.294-.58.448-.948.389-.364-.055-.668-.305-.793-.651-.33-.918-.804-1.686-1.408-2.283-.546-.539-1.796-1.536-3.566-1.536-.624 0-1.31.123-2.053.433-1.607.669-2.914 2.678-2.914 4.476 0 .206.011.41.036.609.061.501-.26.969-.749 1.092-1.128.283-2.473 1.055-2.473 3.122 0 1.694.947 2.612 1.742 3.084.191.114.426.173.681.174l15.909.016c.059 0 .167-.001.314-.002.666-.016 3.208-.281 3.208-3.37ZM15.902 45.937v-.018c0-2.619 1.781-5.337 4.144-6.322.98-.409 1.98-.59 2.957-.571l-1.721-12.787.033-.004c-.002-.009-.008-.017-.01-.025-.011-.04-.019-.082-.023-.124l-.041-.315a1 1 0 0 1-.009-.129c0-1.685 1.919-3.103 4.768-4.132V3.565C26 2.702 25.298 2 24.435 2H3.566C2.703 2 2 2.702 2 3.565v44.87C2 49.298 2.703 50 3.566 50h9.199c.231-1.895 1.354-3.351 3.137-4.063ZM17.137 56c-.613-.001-1.201-.158-1.7-.454-.849-.504-2.161-1.593-2.578-3.546H7v4H5v-4H3.566C1.6 52 0 50.401 0 48.435V3.565C0 1.599 1.6 0 3.566 0h20.869C26.401 0 28 1.599 28 3.565V20.89c2.845-.751 6.252-1.176 9.569-1.176 7.89 0 16.339 2.382 16.339 5.928 0 .043-.003.086-.009.129l-.041.315c-.005.042-.013.084-.024.124-.002.008-.007.016-.009.025l.033.004-1.36 10.088c2.183 1.256 3.221 2.238 3.406 3.226.091.492-.034.973-.356 1.354-.382.455-.97.682-1.837.682-.519 0-1.15-.089-1.887-.251l-1.4 10.391c-.042 1.102-.99 2.027-2.819 2.75-.692.273-1.498.516-2.399.724C42.985 55.716 40.273 56 37.569 56c-.893 0-3.317-.004-4.218 0H17.137ZM7 21h15v-2H7v2Zm0 7h11v-2H7v2Zm0-14h15v-2H7v2Z"/>
+      </g>
+    </symbol>
+  </defs>
+  <style>
+    text { font-family: "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #132033; letter-spacing: 0; }
+    .canvas { fill: #f8fafc; }
+    .title { font-size: 30px; font-weight: 700; }
+    .subtitle { font-size: 15px; fill: #475569; }
+    .lane { fill: #eef6ff; stroke: #bfd7ff; stroke-width: 2; rx: 18; }
+    .lane2 { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 2; rx: 18; }
+    .lane3 { fill: #fff7ed; stroke: #fed7aa; stroke-width: 2; rx: 18; }
+    .lane-title { font-size: 17px; font-weight: 700; fill: #334155; }
+    .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+    .blue { fill: #dbeafe; stroke: #93c5fd; stroke-width: 2; rx: 10; }
+    .green { fill: #dcfce7; stroke: #86efac; stroke-width: 2; rx: 10; }
+    .amber { fill: #fef3c7; stroke: #fcd34d; stroke-width: 2; rx: 10; }
+    .red { fill: #fee2e2; stroke: #fca5a5; stroke-width: 2; rx: 10; }
+    .purple { fill: #f3e8ff; stroke: #d8b4fe; stroke-width: 2; rx: 10; }
+    .card-title { font-size: 17px; font-weight: 700; }
+    .card-sub { font-size: 13px; fill: #475569; }
+    .label { font-size: 12px; fill: #334155; }
+    .small { font-size: 12px; fill: #64748b; }
+    .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 3.4; marker-end: url(#arrow-blue); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-green { fill: none; stroke: #059669; stroke-width: 3.4; marker-end: url(#arrow-green); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-red { fill: none; stroke: #dc2626; stroke-width: 3.4; marker-end: url(#arrow-red); stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <rect class="canvas" width="1200" height="760"/>
+  <text class="title" x="60" y="58">S3 Floci receipt storage</text>
+  <text class="subtitle" x="60" y="86">ReceiptStore owns safe keys and metadata; callers still own AWS SDK clients and production configuration.</text>
+
+  <rect class="lane" x="48" y="120" width="1104" height="170"/>
+  <text class="lane-title" x="74" y="152">Application decision boundary</text>
+  <rect class="blue" x="88" y="182" width="220" height="78"/>
+  <text class="card-title" x="112" y="211">Checkout service</text>
+  <text class="card-sub" x="112" y="235">receipt upload / lookup</text>
+  <rect class="card" x="388" y="182" width="250" height="78"/>
+  <text class="card-title" x="412" y="211">ReceiptStore API</text>
+  <text class="card-sub" x="412" y="235">Upload Download List Delete</text>
+  <rect class="amber" x="718" y="182" width="252" height="78"/>
+  <text class="card-title" x="742" y="211">Presign request</text>
+  <text class="card-sub" x="742" y="235">GET URL with bounded TTL</text>
+  <path class="arrow-blue" d="M 308 221 H 388"/>
+  <text class="label" x="324" y="207">storage intent</text>
+  <path class="arrow-blue" d="M 638 221 H 718"/>
+  <text class="label" x="654" y="207">download link</text>
+
+  <rect class="lane2" x="48" y="326" width="540" height="282"/>
+  <text class="lane-title" x="74" y="358">Storage boundary</text>
+  <rect class="green" x="88" y="392" width="208" height="92"/>
+  <text class="card-title" x="112" y="422">Key builder</text>
+  <text class="card-sub" x="112" y="446">tenants/{id}/receipts</text>
+  <text class="card-sub" x="112" y="468">safe file names only</text>
+  <rect class="green" x="334" y="392" width="208" height="92"/>
+  <text class="card-title" x="358" y="422">Object mapper</text>
+  <text class="card-sub" x="358" y="446">body, content type, size</text>
+  <text class="card-sub" x="358" y="468">tenant metadata</text>
+  <rect class="card" x="88" y="514" width="208" height="62"/>
+  <text class="card-title" x="112" y="542">Body owner</text>
+  <text class="card-sub" x="112" y="562">read and close GetObject</text>
+  <rect class="red" x="334" y="514" width="208" height="62"/>
+  <text class="card-title" x="358" y="542">Error mapper</text>
+  <text class="card-sub" x="358" y="562">NoSuchKey -> not found</text>
+  <path class="arrow-green" d="M 514 260 V 318 Q 514 326 498 326 H 192 V 392"/>
+  <text class="label" x="248" y="314">validate and build object key</text>
+  <path class="arrow-green" d="M 296 438 H 334"/>
+  <path class="arrow-green" d="M 438 484 V 514"/>
+
+  <rect class="lane3" x="632" y="326" width="520" height="282"/>
+  <text class="lane-title" x="658" y="358">AWS SDK and local emulator boundary</text>
+  <rect class="purple" x="672" y="392" width="230" height="106"/>
+  <use href="#s3-icon" data-bluetape4k-icon="amazon-s3-official-storage" x="696" y="418" width="40" height="40"/>
+  <text class="card-title" x="752" y="422">S3 bucket</text>
+  <text class="card-sub" x="752" y="446">tenant-receipts</text>
+  <text class="card-sub" x="752" y="468">caller-owned client</text>
+  <rect class="amber" x="940" y="392" width="170" height="106"/>
+  <text class="card-title" x="964" y="422">Floci config</text>
+  <text class="card-sub" x="964" y="446">endpoint override</text>
+  <text class="card-sub" x="964" y="468">UsePathStyle true</text>
+  <rect class="card" x="672" y="528" width="230" height="48"/>
+  <text class="card-title" x="696" y="558">real AWS config unchanged</text>
+  <rect class="red" x="940" y="528" width="170" height="48"/>
+  <text class="card-title" x="964" y="558">cloud creds absent</text>
+  <path class="arrow-green" d="M 542 438 H 672"/>
+  <text class="label" x="570" y="424">Put/Get/List/Delete</text>
+  <path class="arrow-blue" d="M 970 221 V 342 Q 970 358 986 358 H 1025 V 392"/>
+  <text class="label" x="988" y="346">local smoke</text>
+  <path class="arrow-red" d="M 940 552 H 902"/>
+  <text class="label" x="788" y="516">normal AWS path keeps IAM outside example</text>
+
+  <rect class="card" x="146" y="654" width="908" height="58"/>
+  <text class="small" x="170" y="678">Reader contract: deterministic tests prove request shape; Floci smoke proves the AWS SDK client path locally.</text>
+  <text class="small" x="170" y="700">Bucket policy, IAM, KMS, lifecycle, replication, and alarms stay in infrastructure code.</text>
+</svg>

@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 840" role="img" aria-labelledby="title desc">
+  <title id="title">S3 Floci storage operation sequence</title>
+  <desc id="desc">Upload, download, list, delete, missing-object, and presign paths between caller, ReceiptStore, AWS SDK S3 client, and Floci.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #132033; letter-spacing: 0; }
+    .canvas { fill: #f8fafc; }
+    .title { font-size: 30px; font-weight: 700; }
+    .subtitle { font-size: 15px; fill: #475569; }
+    .actor { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+    .repo { fill: #dcfce7; stroke: #86efac; stroke-width: 2; rx: 10; }
+    .sdk { fill: #dbeafe; stroke: #93c5fd; stroke-width: 2; rx: 10; }
+    .floci { fill: #f3e8ff; stroke: #d8b4fe; stroke-width: 2; rx: 10; }
+    .note { fill: #fff7ed; stroke: #fed7aa; stroke-width: 2; rx: 10; }
+    .conflict { fill: #fee2e2; stroke: #fca5a5; stroke-width: 2; rx: 10; }
+    .actor-title { font-size: 17px; font-weight: 700; }
+    .actor-sub { font-size: 13px; fill: #475569; }
+    .small { font-size: 12px; fill: #64748b; }
+    .label { font-size: 13px; fill: #334155; }
+    .divider { stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 10; }
+    .lifeline { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 8 10; }
+    .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 3.2; marker-end: url(#arrow-blue); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-green { fill: none; stroke: #059669; stroke-width: 3.2; marker-end: url(#arrow-green); stroke-linecap: round; stroke-linejoin: round; }
+    .arrow-red { fill: none; stroke: #dc2626; stroke-width: 3.2; marker-end: url(#arrow-red); stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <rect class="canvas" width="1200" height="840"/>
+  <text class="title" x="60" y="58">S3 Floci storage sequence</text>
+  <text class="subtitle" x="60" y="86">The store maps safe receipt keys to S3 requests; Floci only supplies the local endpoint and test credentials.</text>
+
+  <rect class="actor" x="72" y="122" width="188" height="72"/>
+  <text class="actor-title" x="96" y="152">Caller</text>
+  <text class="actor-sub" x="96" y="174">checkout or support tool</text>
+  <rect class="repo" x="348" y="122" width="210" height="72"/>
+  <text class="actor-title" x="372" y="152">ReceiptStore</text>
+  <text class="actor-sub" x="372" y="174">key and metadata boundary</text>
+  <rect class="sdk" x="652" y="122" width="210" height="72"/>
+  <text class="actor-title" x="676" y="152">AWS SDK S3</text>
+  <text class="actor-sub" x="676" y="174">caller-owned client</text>
+  <rect class="floci" x="954" y="122" width="174" height="72"/>
+  <text class="actor-title" x="978" y="152">Floci S3</text>
+  <text class="actor-sub" x="978" y="174">local endpoint</text>
+
+  <line class="lifeline" x1="166" y1="194" x2="166" y2="806"/>
+  <line class="lifeline" x1="453" y1="194" x2="453" y2="806"/>
+  <line class="lifeline" x1="757" y1="194" x2="757" y2="806"/>
+  <line class="lifeline" x1="1041" y1="194" x2="1041" y2="806"/>
+
+  <text class="label" x="72" y="232">1. Upload receipt</text>
+  <path class="arrow-blue" d="M 182 250 H 438"/>
+  <text class="label" x="250" y="238">Upload(document)</text>
+  <path class="arrow-green" d="M 468 286 H 742"/>
+  <text class="label" x="520" y="274">PutObject key + metadata</text>
+  <path class="arrow-green" d="M 772 286 H 1026"/>
+  <text class="label" x="842" y="274">path-style local S3</text>
+  <path class="arrow-green" d="M 742 322 H 468"/>
+  <text class="label" x="574" y="310">StoredObject</text>
+  <path class="arrow-green" d="M 438 358 H 182"/>
+  <text class="label" x="270" y="346">key and content type</text>
+
+  <line class="divider" x1="72" y1="392" x2="1128" y2="392"/>
+  <text class="label" x="72" y="430">2. Download, list, delete</text>
+  <path class="arrow-blue" d="M 182 448 H 438"/>
+  <text class="label" x="238" y="436">Download / List / Delete</text>
+  <path class="arrow-green" d="M 468 484 H 742"/>
+  <text class="label" x="526" y="472">GetObject or tenant prefix List</text>
+  <path class="arrow-green" d="M 742 520 H 468"/>
+  <text class="label" x="540" y="508">body / objects / delete ack</text>
+  <rect class="note" x="308" y="542" width="290" height="58"/>
+  <text class="actor-title" x="334" y="570">body is always closed</text>
+  <text class="actor-sub" x="334" y="590">download owns io.ReadAll + Close</text>
+  <path class="arrow-green" d="M 438 628 H 182"/>
+  <text class="label" x="260" y="616">DownloadedObject or list</text>
+
+  <line class="divider" x1="72" y1="662" x2="1128" y2="662"/>
+  <text class="label" x="72" y="700">3. Missing object and presign</text>
+  <path class="arrow-blue" d="M 182 718 H 438"/>
+  <text class="label" x="252" y="706">download missing receipt</text>
+  <path class="arrow-red" d="M 742 718 H 468"/>
+  <text class="label" x="552" y="706">NoSuchKey</text>
+  <rect class="conflict" x="320" y="742" width="266" height="52"/>
+  <text class="actor-title" x="346" y="772">ErrObjectNotFound</text>
+  <path class="arrow-blue" d="M 598 790 H 742"/>
+  <text class="label" x="606" y="778">PresignGetObject</text>
+  <path class="arrow-green" d="M 438 814 H 182"/>
+  <text class="label" x="256" y="802">GET URL with TTL</text>
+</svg>
