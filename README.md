@@ -45,6 +45,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Gin upload API that bounds compressed requests and decompressed payloads for untrusted input. | `compression` |
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Gin shipping quote API that parses caller-facing units, derives area/volume, and selects billable weight. | `measure` |
 | [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | Local SQL access strategy example that compares direct `database/sql`, `sqlkit`, generated query boundaries, and migration tooling choices. | `sqlkit`, `testcontainers/postgres` |
+| [`examples/sql-order-repository`](examples/sql-order-repository) | [English](examples/sql-order-repository/README.md) \| [한국어](examples/sql-order-repository/README.ko.md) | PostgreSQL-backed order repository example that uses visible `sqlkit` statements for insert, find-by-ID, filtered list, and not-found behavior. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/s3-floci-storage`](examples/s3-floci-storage) | [English](examples/s3-floci-storage/README.md) \| [한국어](examples/s3-floci-storage/README.ko.md) | Local S3 receipt storage example that uploads, downloads, lists, deletes, and presigns tenant receipt objects through AWS SDK v2 with opt-in Floci smoke coverage. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/sqs-floci-worker`](examples/sqs-floci-worker) | [English](examples/sqs-floci-worker/README.md) \| [한국어](examples/sqs-floci-worker/README.ko.md) | Local SQS worker example that enqueues fulfillment tasks, acknowledges handler success with delete, and makes handler failures visible for retry through Floci smoke coverage. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | Local DynamoDB document-index materializer that chunks batch writes, retries only `UnprocessedItems`, and keeps retry exhaustion distinct from AWS service errors. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
@@ -96,6 +97,24 @@ Run the PostgreSQL Testcontainers contract tests:
 
 ```bash
 go test -count=1 ./examples/sql-access-strategy-decision/...
+```
+
+## Run the SQL Order Repository Example
+
+Print the local repository preview:
+
+```bash
+go run ./examples/sql-order-repository
+```
+
+The example persists an order, reads it by primary key, lists customer orders by
+status, and documents how `sqlkit` complements direct `database/sql` without
+becoming an ORM or migration owner.
+
+Run the PostgreSQL Testcontainers contract tests:
+
+```bash
+go test -count=1 ./examples/sql-order-repository/...
 ```
 
 ## Run the S3 Floci Storage Example

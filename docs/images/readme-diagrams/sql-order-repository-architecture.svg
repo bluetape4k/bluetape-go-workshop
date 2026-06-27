@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="760" viewBox="0 0 1320 760" role="img" aria-labelledby="title desc">
+  <title id="title">SQL order repository architecture</title>
+  <desc id="desc">A workshop application owns order use cases, a small repository owns visible sqlkit statements, and database/sql owns sessions against PostgreSQL.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #334155; stroke-width: 3; rx: 8; }
+      .soft { fill: #eef2ff; stroke: #3730a3; stroke-width: 2.5; rx: 8; }
+      .repo { fill: #ecfdf5; stroke: #047857; stroke-width: 2.5; rx: 8; }
+      .db { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.5; rx: 8; }
+      .test { fill: #fefce8; stroke: #a16207; stroke-width: 2.5; rx: 8; }
+      .title { font: 700 30px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .label { font: 700 22px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .text { font: 18px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #1e293b; }
+      .small { font: 16px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #334155; }
+      .arrow { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke: #64748b; stroke-width: 2.5; fill: none; stroke-dasharray: 9 7; marker-end: url(#arrowGrey); }
+    </style>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#334155"/>
+    </marker>
+    <marker id="arrowGrey" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1320" height="760"/>
+  <text x="60" y="68" class="title">SQL order repository: visible SQL, small helper boundary</text>
+  <text x="60" y="104" class="text">The example keeps database/sql ownership explicit while sqlkit removes repeated statement and row-cardinality boilerplate.</text>
+
+  <rect x="60" y="150" width="260" height="400" class="soft"/>
+  <text x="88" y="195" class="label">Workshop app</text>
+  <text x="88" y="238" class="text">main.go preview</text>
+  <text x="88" y="272" class="text">order use case</text>
+  <text x="88" y="306" class="text">context deadlines</text>
+  <text x="88" y="340" class="text">service transactions</text>
+  <text x="88" y="398" class="small">Owns when work starts</text>
+  <text x="88" y="426" class="small">and which *sql.DB/*sql.Tx</text>
+  <text x="88" y="454" class="small">is passed to the repo.</text>
+
+  <rect x="410" y="140" width="330" height="430" class="repo"/>
+  <text x="440" y="185" class="label">OrderRepository</text>
+  <text x="440" y="228" class="text">Create(order)</text>
+  <text x="440" y="262" class="text">FindByID(id)</text>
+  <text x="440" y="296" class="text">List(filter)</text>
+  <line x1="440" y1="324" x2="710" y2="324" stroke="#047857" stroke-width="2"/>
+  <text x="440" y="364" class="text">validates domain input</text>
+  <text x="440" y="398" class="text">builds sqlkit.Statement</text>
+  <text x="440" y="432" class="text">uses QueryOne / QueryAll</text>
+  <text x="440" y="466" class="text">returns ErrNoRows</text>
+  <text x="440" y="524" class="small">Does not own pooling,</text>
+  <text x="440" y="550" class="small">migrations, or ORM state.</text>
+
+  <rect x="830" y="155" width="210" height="165" class="panel"/>
+  <text x="858" y="200" class="label">sqlkit</text>
+  <text x="858" y="240" class="text">InsertInto</text>
+  <text x="858" y="274" class="text">SelectFrom</text>
+  <text x="858" y="308" class="text">row cardinality</text>
+
+  <rect x="830" y="390" width="210" height="160" class="panel"/>
+  <text x="858" y="435" class="label">database/sql</text>
+  <text x="858" y="475" class="text">*sql.DB</text>
+  <text x="858" y="509" class="text">*sql.Tx</text>
+  <text x="858" y="543" class="text">driver calls</text>
+
+  <rect x="1110" y="250" width="160" height="205" class="db"/>
+  <text x="1140" y="294" class="label">Postgres</text>
+  <text x="1140" y="336" class="text">orders table</text>
+  <text x="1140" y="370" class="text">constraints</text>
+  <text x="1140" y="404" class="text">real rows</text>
+
+  <rect x="250" y="610" width="820" height="85" class="test"/>
+  <text x="278" y="646" class="label">Testcontainers contract tests</text>
+  <text x="278" y="678" class="text">assert insert, find, filter, not-found, validation, and context cancellation against PostgreSQL.</text>
+
+  <path d="M320 300 C355 300, 372 300, 408 300" class="arrow"/>
+  <text x="330" y="284" class="small">call repo</text>
+  <path d="M740 255 C775 230, 795 225, 828 225" class="arrow"/>
+  <text x="758" y="210" class="small">build SQL</text>
+  <path d="M740 448 C775 468, 795 472, 828 472" class="arrow"/>
+  <text x="748" y="560" class="small">execute/query</text>
+  <path d="M1040 475 C1080 455, 1085 390, 1108 360" class="arrow"/>
+  <text x="1048" y="430" class="small">pgx driver</text>
+  <path d="M660 610 C660 585, 660 583, 660 572" class="dashed"/>
+  <text x="690" y="596" class="small">tests prove behavior</text>
+</svg>
