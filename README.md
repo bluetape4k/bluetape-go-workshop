@@ -45,6 +45,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Gin upload API that bounds compressed requests and decompressed payloads for untrusted input. | `compression` |
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Gin shipping quote API that parses caller-facing units, derives area/volume, and selects billable weight. | `measure` |
 | [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | Local SQL access strategy example that compares direct `database/sql`, `sqlkit`, generated query boundaries, and migration tooling choices. | `sqlkit`, `testcontainers/postgres` |
+| [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | Local DynamoDB document-index materializer that chunks batch writes, retries only `UnprocessedItems`, and keeps retry exhaustion distinct from AWS service errors. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -92,6 +93,30 @@ Run the PostgreSQL Testcontainers contract tests:
 
 ```bash
 go test -count=1 ./examples/sql-access-strategy-decision/...
+```
+
+## Run the DynamoDB Batch Write Materializer Example
+
+Print the local batch-write preview:
+
+```bash
+go run ./examples/dynamodb-batchwrite-materializer
+```
+
+The example maps 30 document events to DynamoDB `WriteRequest` values, shows
+the `25 + 5` chunk boundary, and documents how `batchwrite.WriteAll` separates
+`UnprocessedItems` retry exhaustion from typed AWS SDK service errors.
+
+Run the deterministic retry and error-policy tests:
+
+```bash
+go test -count=1 ./examples/dynamodb-batchwrite-materializer/...
+```
+
+Run the optional Floci DynamoDB smoke test serially when Docker is available:
+
+```bash
+BLUETAPE_DYNAMODB_BATCHWRITE_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/dynamodb-batchwrite-materializer/...
 ```
 
 ## Run the Leader Example
