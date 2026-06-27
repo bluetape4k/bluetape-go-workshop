@@ -46,6 +46,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Gin shipping quote API that parses caller-facing units, derives area/volume, and selects billable weight. | `measure` |
 | [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | Local SQL access strategy example that compares direct `database/sql`, `sqlkit`, generated query boundaries, and migration tooling choices. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | Local DynamoDB document-index materializer that chunks batch writes, retries only `UnprocessedItems`, and keeps retry exhaustion distinct from AWS service errors. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
+| [`examples/dynamodb-conditional-repository`](examples/dynamodb-conditional-repository) | [English](examples/dynamodb-conditional-repository/README.md) \| [한국어](examples/dynamodb-conditional-repository/README.ko.md) | Local DynamoDB catalog repository that demonstrates create-if-absent writes, optimistic version updates, tenant queries, and typed conditional conflict handling. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -117,6 +118,30 @@ Run the optional Floci DynamoDB smoke test serially when Docker is available:
 
 ```bash
 BLUETAPE_DYNAMODB_BATCHWRITE_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/dynamodb-batchwrite-materializer/...
+```
+
+## Run the DynamoDB Conditional Repository Example
+
+Print the local repository preview:
+
+```bash
+go run ./examples/dynamodb-conditional-repository
+```
+
+The example models create-if-absent writes, optimistic version updates, and
+tenant partition queries while preserving typed DynamoDB conditional conflict
+errors behind an application-level `ErrConditionalConflict`.
+
+Run the deterministic repository tests:
+
+```bash
+go test -count=1 ./examples/dynamodb-conditional-repository/...
+```
+
+Run the optional Floci DynamoDB smoke test serially when Docker is available:
+
+```bash
+BLUETAPE_DYNAMODB_CONDITIONAL_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/dynamodb-conditional-repository/...
 ```
 
 ## Run the Leader Example
