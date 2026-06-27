@@ -45,6 +45,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/safe-decompression-upload`](examples/safe-decompression-upload/README.ko.md) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Untrusted input에 대해 compressed request와 decompressed payload를 모두 제한하는 Gin upload API입니다. | `compression` |
 | [`examples/measured-shipping-quote`](examples/measured-shipping-quote/README.ko.md) | [English](examples/measured-shipping-quote/README.md) \| [한국어](examples/measured-shipping-quote/README.ko.md) | Caller-facing unit을 parse하고 area/volume을 derive한 뒤 billable weight를 고르는 Gin shipping quote API입니다. | `measure` |
 | [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision/README.ko.md) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | direct `database/sql`, `sqlkit`, generated query boundary, migration tooling 선택 기준을 비교하는 local SQL access strategy 예제입니다. | `sqlkit`, `testcontainers/postgres` |
+| [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer/README.ko.md) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | DynamoDB document-index materializer가 batch write를 chunking하고, `UnprocessedItems`만 retry하며, retry exhaustion과 AWS service error를 분리하는 local 예제입니다. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -92,6 +93,30 @@ PostgreSQL Testcontainers contract test를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/sql-access-strategy-decision/...
+```
+
+## DynamoDB Batch Write Materializer 예제 실행
+
+Local batch-write preview를 출력합니다.
+
+```bash
+go run ./examples/dynamodb-batchwrite-materializer
+```
+
+이 예제는 30개 document event를 DynamoDB `WriteRequest`로 변환하고, `25 + 5`
+chunk boundary를 보여주며, `batchwrite.WriteAll`이 `UnprocessedItems` retry
+exhaustion과 AWS SDK typed service error를 어떻게 분리하는지 설명합니다.
+
+Deterministic retry와 error-policy test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/dynamodb-batchwrite-materializer/...
+```
+
+Docker가 있을 때 opt-in Floci DynamoDB smoke test를 serial로 실행합니다.
+
+```bash
+BLUETAPE_DYNAMODB_BATCHWRITE_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/dynamodb-batchwrite-materializer/...
 ```
 
 ## Leader 예제 실행
