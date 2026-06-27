@@ -48,6 +48,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/token-refresh-claims`](examples/token-refresh-claims/README.ko.md) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Access-token claim과 refresh-token exchange claim을 분리하는 Gin token boundary 예제입니다. | `jwt` |
 | [`examples/distributed-jwt-key-rotation`](examples/distributed-jwt-key-rotation/README.ko.md) | [English](examples/distributed-jwt-key-rotation/README.md) \| [한국어](examples/distributed-jwt-key-rotation/README.ko.md) | Redis-backed distributed JWT key rotation, retained `kid` 검증, cached reader revalidation 예제입니다. | `jwt`, `jwt/redis`, `cache`, `testcontainers/redis` |
 | [`examples/money-rule-pricing`](examples/money-rule-pricing/README.ko.md) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Decimal-backed money value, rounded total, accepted discount, rejected rule decision을 보여주는 Gin cart pricing API입니다. | `money` |
+| [`examples/exchange-rate-pricing`](examples/exchange-rate-pricing/README.ko.md) | [English](examples/exchange-rate-pricing/README.md) \| [한국어](examples/exchange-rate-pricing/README.ko.md) | Provider-backed exchange rate, locale currency default, explicit stale quote policy로 base total을 display total로 변환하는 Gin API입니다. | `money` |
 | [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules/README.ko.md) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Money total을 currency별로 group하고 discount와 tax-like rule decision을 노출하는 Gin invoice API입니다. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission/README.ko.md) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Bloom filter로 definitely-new와 probably-seen event path를 보여주는 Gin webhook admission API입니다. | `probabilistic` |
 | [`examples/checkout-guard-integration`](examples/checkout-guard-integration/README.ko.md) | [English](examples/checkout-guard-integration/README.md) \| [한국어](examples/checkout-guard-integration/README.ko.md) | JWT claim, ID, money/rule, probabilistic repeated-submission admission을 조합하는 Gin checkout guard API입니다. | `id`, `jwt`, `money`, `probabilistic` |
@@ -370,6 +371,31 @@ curl -s -X POST http://127.0.0.1:8098/quotes \
 
 이 예제는 money value를 explicit currency가 있는 string으로 유지하는 이유와 cart
 total에 `float64`를 쓰지 않는 이유를 보여줍니다.
+
+## Exchange-Rate Pricing 예제 실행
+
+이 예제는 `money-rule-pricing` lesson을 이어받아 base cart subtotal은 `USD`로
+유지하고, buyer locale에서 display currency를 고른 뒤 provider-backed
+exchange-rate quote로 final display total을 변환합니다.
+
+Local display-pricing API를 실행합니다:
+
+```bash
+go run ./examples/exchange-rate-pricing
+```
+
+주요 endpoint:
+
+```bash
+curl http://127.0.0.1:8101/healthz
+curl -s -X POST http://127.0.0.1:8101/quotes \
+  -H 'Content-Type: application/json' \
+  -d '{"quote_id":"quote-1001","base_currency":"USD","locale":"ko-KR","items":[{"sku":"pro-plan","unit_price":"19.995","currency":"USD","quantity":2},{"sku":"support","unit_price":"5.00","currency":"USD","quantity":1}]}' | jq
+```
+
+Response는 `subtotal`과 `display_total`을 분리해 유지하고, rate source와 freshness
+metadata를 노출하며, caller가 `allow_stale_quote`를 명시하지 않으면 stale quote를
+reject합니다.
 
 ## Multi-Currency Invoice Rule 예제 실행
 
