@@ -42,6 +42,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | Example | README | Purpose | bluetape-go packages |
 |---|---|---|---|
 | [`examples/cache-snapshot-codecs`](examples/cache-snapshot-codecs) | [English](examples/cache-snapshot-codecs/README.md) \| [한국어](examples/cache-snapshot-codecs/README.ko.md) | Versioned product cache snapshots with safe serialization and compression tradeoff notes. | `serialization`, `compression` |
+| [`examples/safe-decompression-upload`](examples/safe-decompression-upload) | [English](examples/safe-decompression-upload/README.md) \| [한국어](examples/safe-decompression-upload/README.ko.md) | Gin upload API that bounds compressed requests and decompressed payloads for untrusted input. | `compression` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -473,6 +474,29 @@ curl -s http://127.0.0.1:8102/filters/current | jq
 The example demonstrates how multiple API instances share a Redis Bloom
 namespace while preserving the reader rule: `probably_seen` is not authorization
 and not exact dedupe.
+
+## Run the Safe Decompression Upload Example
+
+Run the local upload guard API:
+
+```bash
+go run ./examples/safe-decompression-upload
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8103/healthz
+curl http://127.0.0.1:8103/uploads/limits
+printf '%s' '{"document_id":"doc-1001","tenant":"checkout","body":"invoice upload"}' \
+  | gzip -c \
+  | curl -s -X POST http://127.0.0.1:8103/uploads/compressed \
+      -H 'X-Compression-Algorithm: gzip' \
+      --data-binary @- | jq
+```
+
+The example demonstrates the difference between compressed request-size limits
+and decompressed payload-size limits for untrusted upload bytes.
 
 ## Run the Checkout Guard Integration Example
 
