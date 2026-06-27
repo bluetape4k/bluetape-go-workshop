@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="800" viewBox="0 0 1320 800" role="img" aria-labelledby="title desc">
+  <title id="title">SQL transaction boundary sequence</title>
+  <desc id="desc">Commit path and rollback path for SQL order placement using sqlkit.WithTx and PostgreSQL row locks.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .lane { fill: #ffffff; stroke: #334155; stroke-width: 2.5; rx: 8; }
+      .title { font: 700 30px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .head { font: 700 22px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .text { font: 18px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #1e293b; }
+      .small { font: 15px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #334155; }
+      .line { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 9 8; }
+      .arrow { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .return { stroke: #047857; stroke-width: 3; fill: none; stroke-dasharray: 8 7; marker-end: url(#arrowGreen); }
+      .err { stroke: #b91c1c; stroke-width: 3; fill: none; marker-end: url(#arrowRed); }
+      .note { fill: #fefce8; stroke: #a16207; stroke-width: 2; rx: 8; }
+    </style>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#334155"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#047857"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#b91c1c"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1320" height="800"/>
+  <text x="60" y="65" class="title">Commit only after every SQL write and business check succeeds</text>
+  <text x="60" y="102" class="text">The rollback path is intentionally visible so readers know where transaction ownership belongs.</text>
+
+  <rect x="70" y="145" width="180" height="58" class="lane"/>
+  <rect x="350" y="145" width="210" height="58" class="lane"/>
+  <rect x="660" y="145" width="220" height="58" class="lane"/>
+  <rect x="1000" y="145" width="220" height="58" class="lane"/>
+  <text x="112" y="181" class="head">Use case</text>
+  <text x="385" y="181" class="head">Service</text>
+  <text x="690" y="181" class="head">Repositories</text>
+  <text x="1045" y="181" class="head">PostgreSQL</text>
+
+  <line x1="160" y1="204" x2="160" y2="720" class="line"/>
+  <line x1="455" y1="204" x2="455" y2="720" class="line"/>
+  <line x1="770" y1="204" x2="770" y2="720" class="line"/>
+  <line x1="1110" y1="204" x2="1110" y2="720" class="line"/>
+
+  <path d="M160 250 L447 250" class="arrow"/>
+  <text x="205" y="235" class="small">PlaceOrder(request)</text>
+  <path d="M455 292 L762 292" class="arrow"/>
+  <text x="510" y="277" class="small">WithTx begins</text>
+  <path d="M770 334 L1102 334" class="arrow"/>
+  <text x="828" y="319" class="small">lock products for update</text>
+  <path d="M770 390 L1102 390" class="arrow"/>
+  <text x="828" y="375" class="small">debit stock, insert order and lines</text>
+  <path d="M1110 448 L463 448" class="return"/>
+  <text x="660" y="432" class="small">all SQL writes succeeded</text>
+  <path d="M455 506 L1110 506" class="return"/>
+  <text x="720" y="490" class="small">commit</text>
+  <path d="M455 560 L168 560" class="return"/>
+  <text x="238" y="545" class="small">PlacedOrder</text>
+
+  <rect x="235" y="620" width="780" height="92" class="note"/>
+  <text x="265" y="654" class="head">Rollback branch</text>
+  <text x="265" y="682" class="small">ErrInsufficientStock, ErrPaymentRejected, or context cancellation returns from the tx function.</text>
+  <text x="265" y="705" class="small">sqlkit.WithTx rolls back; tests assert stock and order rows remain unchanged.</text>
+  <path d="M1110 620 C1030 600, 820 598, 610 620" class="err"/>
+  <text x="880" y="592" class="small">rollback</text>
+</svg>
