@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080" viewBox="0 0 1800 1080" role="img" aria-labelledby="title desc">
+  <title id="title">SQS Floci worker architecture</title>
+  <desc id="desc">Application boundary owns task payloads, acknowledgement and retry decisions; SQS client and Floci endpoint remain outside the worker boundary.</desc>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&amp;family=Comic+Mono:wght@400;700&amp;display=swap');
+      .title{font-family:'Architects Daughter','Comic Mono',sans-serif;font-size:48px;fill:#172033}
+      .subtitle,.label,.small,.footer{font-family:'Comic Mono','Architects Daughter',monospace;fill:#4b5568}
+      .subtitle{font-size:21px}.label{font-size:24px}.small{font-size:18px}.footer{font-size:18px}
+      .layer{fill:#eef6ff;stroke:#b8d5ff;stroke-width:3}.worker{fill:#ecfdf5;stroke:#86efac;stroke-width:3}
+      .aws{fill:#fff7ed;stroke:#fed7aa;stroke-width:3}.card{fill:#fff;stroke:#cbd5e1;stroke-width:3}
+      .blue{fill:#dbeafe;stroke:#93c5fd}.green{fill:#dcfce7;stroke:#22c55e}.yellow{fill:#fef3c7;stroke:#f59e0b}
+      .red{fill:#fee2e2;stroke:#f87171}.purple{fill:#f3e8ff;stroke:#c084fc}
+      .arrow{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:5}
+    </style>
+    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#2563eb" stroke="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#059669" stroke="#059669"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 14 7 L 0 14 Z" fill="#dc2626" stroke="#dc2626"/>
+    </marker>
+  </defs>
+
+  <rect width="1800" height="1080" fill="#f8fafc"/>
+  <text x="90" y="86" class="title">SQS Floci fulfillment worker</text>
+  <text x="90" y="128" class="subtitle">TaskQueue owns payload, idempotency metadata, ack, and retry visibility; callers still own AWS SDK clients and infrastructure.</text>
+
+  <rect x="70" y="180" width="1660" height="300" rx="26" class="layer"/>
+  <text x="110" y="230" class="label">Application decision boundary</text>
+  <rect x="130" y="290" width="330" height="110" rx="16" class="blue"/>
+  <text x="170" y="342" class="label">Checkout flow</text>
+  <text x="170" y="378" class="small">creates fulfillment task</text>
+  <rect x="580" y="290" width="370" height="110" rx="16" class="card"/>
+  <text x="620" y="342" class="label">TaskQueue API</text>
+  <text x="620" y="378" class="small">Enqueue / PollOnce</text>
+  <rect x="1090" y="290" width="420" height="110" rx="16" class="yellow"/>
+  <text x="1130" y="342" class="label">Handler boundary</text>
+  <text x="1130" y="378" class="small">idempotent side effect</text>
+
+  <rect x="70" y="540" width="820" height="360" rx="26" class="worker"/>
+  <text x="110" y="590" class="label">Worker contract</text>
+  <rect x="130" y="650" width="310" height="110" rx="16" class="green"/>
+  <text x="170" y="696" class="label">Payload mapper</text>
+  <text x="170" y="732" class="small">JSON + attributes</text>
+  <rect x="520" y="650" width="310" height="110" rx="16" class="green"/>
+  <text x="560" y="696" class="label">Ack mapper</text>
+  <text x="560" y="732" class="small">success -> DeleteMessage</text>
+  <rect x="325" y="805" width="310" height="80" rx="16" class="red"/>
+  <text x="365" y="853" class="label">failure -> visibility retry</text>
+
+  <rect x="970" y="540" width="760" height="360" rx="26" class="aws"/>
+  <text x="1010" y="590" class="label">AWS SDK and local emulator boundary</text>
+  <rect x="1030" y="650" width="330" height="130" rx="16" class="purple"/>
+  <image x="1070" y="680" width="54" height="54" data-bluetape4k-icon="amazon-sqs-official" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8dGl0bGU+SWNvbi1BcmNoaXRlY3R1cmUvMTYvQXJjaF9BbWF6b24tU2ltcGxlLVF1ZXVlLVNlcnZpY2VfMTY8L3RpdGxlPgogICAgPGcgaWQ9Ikljb24tQXJjaGl0ZWN0dXJlLzE2L0FyY2hfQW1hem9uLVNpbXBsZS1RdWV1ZS1TZXJ2aWNlXzE2IiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iSWNvbi1BcmNoaXRlY3R1cmUtQkcvMTYvQXBwbGljYXRpb24tSW50ZWdyYXRpb24iIGZpbGw9IiNFNzE1N0IiPgogICAgICAgICAgICA8cmVjdCBpZD0iUmVjdGFuZ2xlIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiPjwvcmVjdD4KICAgICAgICA8L2c+CiAgICAgICAgPHBhdGggZD0iTTguMDA1MzgzOTIsMTIuOTg1MDQzMiBMOS4wMDcwNDI5MSwxMi45ODUwNDMyIEw5LjAwNzA0MjkxLDExLjk5NDI3NDUgTDguMDA1MzgzOTIsMTEuOTk0Mjc0NSBMOC4wMDUzODM5MiwxMi45ODUwNDMyIFogTTE1LjAxNjk5NjksMTIuOTg2MDM0IEwxNi4wMTg2NTU5LDEyLjk4NjAzNCBMMTYuMDE4NjU1OSwxMS45OTUyNjUzIEwxNS4wMTY5OTY5LDExLjk5NTI2NTMgTDE1LjAxNjk5NjksMTIuOTg2MDM0IFogTTEyLjc5MDMwODksMTEuMjIzNDU2NSBDMTIuMjgyNDY3OCwxMS4zNTIyNTY0IDExLjc0MTU3MiwxMS4zNTIyNTY0IDExLjIzMzczMDksMTEuMjIzNDU2NSBDMTEuNDM1MDY0MywxMi4wMDUxNzMgMTEuNDM1MDY0MywxMi44NzgwNDAyIDExLjIzMzczMDksMTMuNjU5NzU2NyBDMTEuNDg4MTUyMywxMy41OTUzNTY3IDExLjc0ODU4MzYsMTMuNTYyNjYxNCAxMi4wMTIwMTk5LDEzLjU2MjY2MTQgQzEyLjI3NTQ1NjIsMTMuNTYyNjYxNCAxMi41MzU4ODc2LDEzLjU5NTM1NjcgMTIuNzkwMzA4OSwxMy42NTk3NTY3IEMxMi41ODg5NzU1LDEyLjg3ODA0MDIgMTIuNTg4OTc1NSwxMi4wMDUxNzMgMTIuNzkwMzA4OSwxMS4yMjM0NTY1IEwxMi43OTAzMDg5LDExLjIyMzQ1NjUgWiBNMTQuMzY5OTI1MiwxMC4zMTQ5MjE2IEMxMy40MDUzMjc2LDExLjI2OTAzMTggMTMuNDA1MzI3NiwxMy42MTQxODEzIDE0LjM2OTkyNTIsMTQuNTY4MjkxNiBDMTQuNDY3MDg2MSwxNC42NjUzODY5IDE0LjUxNjE2NzQsMTQuNzkyMjA1MyAxNC41MTYxNjc0LDE0LjkxOTAyMzcgQzE0LjUxNjE2NzQsMTUuMDQ1ODQyMSAxNC40NjcwODYxLDE1LjE3MjY2MDUgMTQuMzY5OTI1MiwxNS4yNjg3NjUxIEMxNC4yNzE3NjI2LDE1LjM2NTg2MDQgMTQuMTQzNTUwMywxNS40MTQ0MDgxIDE0LjAxNTMzNzksMTUuNDE0NDA4MSBDMTMuODg3MTI1NiwxNS40MTQ0MDgxIDEzLjc1ODkxMzIsMTUuMzY1ODYwNCAxMy42NjE3NTIzLDE1LjI2ODc2NTEgQzEyLjcyODIwNjEsMTQuMzQ2MzU5NCAxMS4yOTU4MzM3LDE0LjM0NjM1OTQgMTAuMzYzMjg5MiwxNS4yNjg3NjUxIEMxMC4xNjY5NjQsMTUuNDYyOTU1NyA5Ljg1MDQzOTc5LDE1LjQ2Mjk1NTcgOS42NTUxMTYyOSwxNS4yNjg3NjUxIEM5LjU1Njk1MzcsMTUuMTcyNjYwNSA5LjUwNzg3MjQxLDE1LjA0NTg0MjEgOS41MDc4NzI0MSwxNC45MTkwMjM3IEM5LjUwNzg3MjQxLDE0Ljc5MjIwNTMgOS41NTY5NTM3LDE0LjY2NTM4NjkgOS42NTUxMTYyOSwxNC41NjgyOTE2IEMxMC42MTg3MTIyLDEzLjYxNDE4MTMgMTAuNjE4NzEyMiwxMS4yNjkwMzE4IDkuNjU1MTE2MjksMTAuMzE0OTIxNiBDOS41NTY5NTM3LDEwLjIxODgxNyA5LjUwNzg3MjQxLDEwLjA5MTk5ODYgOS41MDc4NzI0MSw5Ljk2NTE4MDIxIEM5LjUwNzg3MjQxLDkuODM4MzYxODEgOS41NTY5NTM3LDkuNzExNTQzNDIgOS42NTUxMTYyOSw5LjYxNDQ0ODA5IEM5Ljg1MDQzOTc5LDkuNDIxMjQ4MTkgMTAuMTY2OTY0LDkuNDIxMjQ4MTkgMTAuMzYzMjg5Miw5LjYxNDQ0ODA5IEMxMS4yOTU4MzM3LDEwLjUzNzg0NDUgMTIuNzI4MjA2MSwxMC41Mzc4NDQ1IDEzLjY2MTc1MjMsOS42MTQ0NDgwOSBDMTMuODU3MDc1OCw5LjQyMTI0ODE5IDE0LjE3MzYsOS40MjEyNDgxOSAxNC4zNjk5MjUyLDkuNjE0NDQ4MDkgQzE0LjQ2NzA4NjEsOS43MTE1NDM0MiAxNC41MTYxNjc0LDkuODM4MzYxODEgMTQuNTE2MTY3NCw5Ljk2NTE4MDIxIEMxNC41MTYxNjc0LDEwLjA5MTk5ODYgMTQuNDY3MDg2MSwxMC4yMTg4MTcgMTQuMzY5OTI1MiwxMC4zMTQ5MjE2IEwxNC4zNjk5MjUyLDEwLjMxNDkyMTYgWiBNMTguODE2Mjg5NSwxMi4wNzk0ODA2IEMxOC42OTgwOTM3LDExLjk2MzU2MDcgMTguNTQxODM0OSwxMS44OTkxNjA3IDE4LjM3NTU1OTUsMTEuODk5MTYwNyBDMTguMjA4MjgyNSwxMS44OTkxNjA3IDE4LjA1MTAyMiwxMS45NjM1NjA3IDE3LjkzMjgyNjIsMTIuMDc5NDgwNiBDMTcuNjg5NDIzMSwxMi4zMjEyMjgyIDE3LjY4OTQyMzEsMTIuNzEyNTgxOCAxNy45MzI4MjYyLDEyLjk1MzMzODYgQzE4LjE2OTIxNzgsMTMuMTg1MTc4NSAxOC41Nzg4OTYzLDEzLjE4NzE2IDE4LjgxNjI4OTUsMTIuOTUzMzM4NiBDMTkuMDU5NjkyNiwxMi43MTI1ODE4IDE5LjA1OTY5MjYsMTIuMzIxMjI4MiAxOC44MTYyODk1LDEyLjA3OTQ4MDYgTDE4LjgxNjI4OTUsMTIuMDc5NDgwNiBaIE0xOS41MjQ0NjI0LDEzLjY1MzgxMjEgQzE5LjIxNjk1MzEsMTMuOTU2OTg3MyAxOC44MDkyNzc5LDE0LjEyNDQyNzIgMTguMzc1NTU5NSwxNC4xMjQ0MjcyIEMxNy45Mzk4Mzc5LDE0LjEyNDQyNzIgMTcuNTMyMTYyNiwxMy45NTY5ODczIDE3LjIyNDY1MzMsMTMuNjUzODEyMSBDMTYuNTkwNjAzMiwxMy4wMjY2NTU1IDE2LjU5MDYwMzIsMTIuMDA2MTYzNyAxNy4yMjQ2NTMzLDExLjM3OTAwNzEgQzE3LjgzNzY2ODYsMTAuNzcyNjU2NyAxOC45MDk0NDM4LDEwLjc3MTY2NTkgMTkuNTI0NDYyNCwxMS4zNzkwMDcxIEMyMC4xNTg1MTI1LDEyLjAwNjE2MzcgMjAuMTU4NTEyNSwxMy4wMjY2NTU1IDE5LjUyNDQ2MjQsMTMuNjUzODEyMSBMMTkuNTI0NDYyNCwxMy42NTM4MTIxIFogTTYuMDY2MTcyMSwxMi4wODU0MjUyIEM1Ljk0Nzk3NjM0LDExLjk2OTUwNTMgNS43OTE3MTc1MywxMS45MDUxMDUzIDUuNjI1NDQyMTQsMTEuOTA1MTA1MyBDNS40NTgxNjUwOSwxMS45MDUxMDUzIDUuMzAxOTA2MjgsMTEuOTY5NTA1MyA1LjE4MzcxMDUyLDEyLjA4NTQyNTIgQzQuOTM5MzA1NzMsMTIuMzI2MTgyIDQuOTM5MzA1NzMsMTIuNzE4NTI2NCA1LjE4MzcxMDUyLDEyLjk1OTI4MzIgQzUuNDIwMTAyMDQsMTMuMTkxMTIzMSA1LjgyOTc4MDU3LDEzLjE5MzEwNDYgNi4wNjYxNzIxLDEyLjk1OTI4MzIgQzYuMzEwNTc2ODksMTIuNzE4NTI2NCA2LjMxMDU3Njg5LDEyLjMyNjE4MiA2LjA2NjE3MjEsMTIuMDg1NDI1MiBMNi4wNjYxNzIxLDEyLjA4NTQyNTIgWiBNNi43NzUzNDY2NywxMy42NTk3NTY3IEM2LjQ2NzgzNzM2LDEzLjk2MjkzMTkgNi4wNjAxNjIxNCwxNC4xMzAzNzE4IDUuNjI1NDQyMTQsMTQuMTMwMzcxOCBDNS4xODk3MjA0NywxNC4xMzAzNzE4IDQuNzgyMDQ1MjYsMTMuOTYyOTMxOSA0LjQ3NTUzNzYxLDEzLjY1OTc1NjcgQzMuODQxNDg3NDYsMTMuMDMyNjAwMSAzLjg0MTQ4NzQ2LDEyLjAxMjEwODMgNC40NzU1Mzc2MSwxMS4zODQ5NTE4IEM1LjA4OTU1NDU3LDEwLjc3NzYxMDUgNi4xNTkzMjYzOCwxMC43Nzc2MTA1IDYuNzc1MzQ2NjcsMTEuMzg0OTUxOCBDNy40MDgzOTUxNSwxMi4wMTIxMDgzIDcuNDA4Mzk1MTUsMTMuMDMyNjAwMSA2Ljc3NTM0NjY3LDEzLjY1OTc1NjcgTDYuNzc1MzQ2NjcsMTMuNjU5NzU2NyBaIE0xNS44ODQ0MzM2LDE2LjQwODE0OTEgQzEzLjcyNDg1NjgsMTguNTQzMjU1NiAxMC4yMTMwNDAzLDE4LjU0MjI2NDkgOC4wNTU0NjY4NywxNi40MDgxNDkxIEM3LjQ3NjUwNzk3LDE1LjgzNTQ4NDggNy4xMDg4OTkxMSwxNS4zMzcxMjgxIDYuODYxNDg5MzQsMTQuNzkyMjA1MyBMNS45NDc5NzYzNCwxNS4xOTY0MzkgQzYuMjQ2NDcwNzIsMTUuODU2MjkwOSA2LjY3ODE4NTc1LDE2LjQ0Njc4OTEgNy4zNDcyOTM5NiwxNy4xMDg2MjI1IEM4LjYyMTQwNDIsMTguMzY5ODcxMSAxMC4yOTUxNzY0LDE5IDExLjk2OTk1MDIsMTkgQzEzLjY0MzcyMjQsMTkgMTUuMzE4NDk2MywxOC4zNjk4NzExIDE2LjU5MjYwNjUsMTcuMTA4NjIyNSBDMTcuMTA0NDU0MywxNi42MDMzMzA1IDE3LjY3NTM5OTksMTUuOTgyMTE4NSAxOC4wNDAwMDM4LDE1LjIwMTM5MjggTDE3LjEyOTQ5NTcsMTQuNzg2MjYwNyBDMTYuODMzMDA0NywxNS40MjMzMjUgMTYuMzU2MjE1LDE1Ljk0MjQ4NzggMTUuODg0NDMzNiwxNi40MDgxNDkxIEwxNS44ODQ0MzM2LDE2LjQwODE0OTEgWiBNNi44Nzk1MTkyLDEwLjE3MjI1MDkgTDUuOTcwMDEyODMsOS43NTcxMTg3OCBDNi4yNjc1MDU1Niw5LjEyMTA0NTI3IDYuNzA1MjMwNTQsOC41Mjg1NjU1OSA3LjM0OTI5NzI3LDcuODkwNTEwNTUgQzkuODk2NTE2MSw1LjM2OTk5NDk3IDE0LjA0MzM4NDQsNS4zNjk5OTQ5NyAxNi41OTA2MDMyLDcuODg5NTE5NzggQzE3LjA1NjM3NDYsOC4zNTEyMTc5OSAxNy42MzkzNDAyLDguOTc5MzY1MzUgMTguMDEzOTYwNiw5Ljc1MDE4MzQgTDE3LjExMjQ2NzUsMTAuMTc5MTg2MiBDMTYuODY3MDYxMSw5LjY3NTg3NTc1IDE2LjQ5OTQ1MjIsOS4yMDEyOTc1NCAxNS44ODI0MzAzLDguNTg5OTkzMjUgQzEzLjcyMzg1NTEsNi40NTY4NjgyNCAxMC4yMTQwNDIsNi40NTg4NDk3NyA4LjA1NzQ3MDE4LDguNTg5OTkzMjUgQzcuNDkxNTMyODUsOS4xNTA3NjgzNCA3LjEyODkzMjI5LDkuNjM4MjI2NTQgNi44Nzk1MTkyLDEwLjE3MjI1MDkgTDYuODc5NTE5MiwxMC4xNzIyNTA5IFoiIGlkPSJBV1MtU2ltcGxlLVF1ZXVlLVNlcnZpY2VfSWNvbl8xNl9TcXVpZCIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgPC9nPgo8L3N2Zz4="/>
+  <text x="1140" y="694" class="label">SQS queue</text>
+  <text x="1140" y="730" class="small">fulfillment-tasks</text>
+  <rect x="1430" y="650" width="250" height="130" rx="16" class="yellow"/>
+  <text x="1470" y="696" class="label">Floci config</text>
+  <text x="1470" y="732" class="small">endpoint + test creds</text>
+  <rect x="1170" y="820" width="330" height="60" rx="14" class="card"/>
+  <text x="1210" y="858" class="small">real AWS IAM and DLQ stay outside example</text>
+
+  <path class="arrow" stroke="#2563eb" marker-end="url(#arrow-blue)" d="M460 345 H575"/>
+  <text x="486" y="326" class="small">task intent</text>
+  <path class="arrow" stroke="#2563eb" marker-end="url(#arrow-blue)" d="M950 345 H1085"/>
+  <text x="1035" y="292" class="small">call handler</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M765 400 V610 Q765 650 725 650 H445"/>
+  <text x="475" y="620" class="small">serialize task + attributes</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M830 705 H1025"/>
+  <text x="850" y="684" class="small">Send / Receive / Delete</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M440 705 H515"/>
+  <path class="arrow" stroke="#dc2626" marker-end="url(#arrow-red)" d="M675 760 V785 Q675 805 655 805 H640"/>
+  <text x="690" y="800" class="small">handler error</text>
+  <path class="arrow" stroke="#2563eb" marker-end="url(#arrow-blue)" d="M1510 400 V645"/>
+  <text x="1530" y="530" class="small">local smoke</text>
+
+  <rect x="220" y="960" width="1360" height="70" rx="16" class="card"/>
+  <text x="260" y="1005" class="footer">Reader contract: SQS is at-least-once; handler idempotency is mandatory; delete is the only ack.</text>
+</svg>
