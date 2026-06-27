@@ -48,6 +48,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/token-refresh-claims`](examples/token-refresh-claims) | [English](examples/token-refresh-claims/README.md) \| [한국어](examples/token-refresh-claims/README.ko.md) | Gin token boundary that separates access-token claims from refresh-token exchange claims. | `jwt` |
 | [`examples/distributed-jwt-key-rotation`](examples/distributed-jwt-key-rotation) | [English](examples/distributed-jwt-key-rotation/README.md) \| [한국어](examples/distributed-jwt-key-rotation/README.ko.md) | Redis-backed distributed JWT key rotation with retained `kid` verification and cached reader revalidation. | `jwt`, `jwt/redis`, `cache`, `testcontainers/redis` |
 | [`examples/money-rule-pricing`](examples/money-rule-pricing) | [English](examples/money-rule-pricing/README.md) \| [한국어](examples/money-rule-pricing/README.ko.md) | Gin cart pricing API with decimal-backed money values, rounded totals, accepted discounts, and rejected rule decisions. | `money` |
+| [`examples/exchange-rate-pricing`](examples/exchange-rate-pricing) | [English](examples/exchange-rate-pricing/README.md) \| [한국어](examples/exchange-rate-pricing/README.ko.md) | Gin display-pricing API that converts base totals through provider-backed exchange rates, locale currency defaults, and explicit stale quote policy. | `money` |
 | [`examples/multi-currency-invoice-rules`](examples/multi-currency-invoice-rules) | [English](examples/multi-currency-invoice-rules/README.md) \| [한국어](examples/multi-currency-invoice-rules/README.ko.md) | Gin invoice API that groups money totals by currency and exposes discount and tax-like rule decisions. | `money` |
 | [`examples/probabilistic-dedupe-admission`](examples/probabilistic-dedupe-admission) | [English](examples/probabilistic-dedupe-admission/README.md) \| [한국어](examples/probabilistic-dedupe-admission/README.ko.md) | Gin webhook admission API that uses a Bloom filter for definitely-new and probably-seen event paths. | `probabilistic` |
 | [`examples/checkout-guard-integration`](examples/checkout-guard-integration) | [English](examples/checkout-guard-integration/README.md) \| [한국어](examples/checkout-guard-integration/README.ko.md) | Gin checkout guard API that composes JWT claims, IDs, money/rules, and probabilistic repeated-submission admission. | `id`, `jwt`, `money`, `probabilistic` |
@@ -370,6 +371,31 @@ curl -s -X POST http://127.0.0.1:8098/quotes \
 
 The example demonstrates why money values stay as strings plus explicit
 currency, and why `float64` is not used for cart totals.
+
+## Run the Exchange-Rate Pricing Example
+
+This example builds on the `money-rule-pricing` lesson by keeping the base cart
+subtotal in `USD`, selecting a buyer display currency from locale, and converting
+the final display total through a provider-backed exchange-rate quote.
+
+Run the local display-pricing API:
+
+```bash
+go run ./examples/exchange-rate-pricing
+```
+
+Useful endpoints:
+
+```bash
+curl http://127.0.0.1:8101/healthz
+curl -s -X POST http://127.0.0.1:8101/quotes \
+  -H 'Content-Type: application/json' \
+  -d '{"quote_id":"quote-1001","base_currency":"USD","locale":"ko-KR","items":[{"sku":"pro-plan","unit_price":"19.995","currency":"USD","quantity":2},{"sku":"support","unit_price":"5.00","currency":"USD","quantity":1}]}' | jq
+```
+
+The response keeps `subtotal` and `display_total` separate, exposes rate source
+and freshness metadata, and rejects stale quotes unless the caller explicitly
+sets `allow_stale_quote`.
 
 ## Run the Multi-Currency Invoice Rule Example
 
