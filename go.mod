@@ -3,7 +3,7 @@ module github.com/bluetape4k/bluetape-go-workshop
 go 1.26.3
 
 require (
-	github.com/bluetape4k/bluetape-go v0.7.0
+	github.com/bluetape4k/bluetape-go v0.8.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/jackc/pgx/v5 v5.10.0
