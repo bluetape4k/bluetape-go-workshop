@@ -25,3 +25,10 @@ compatibility without requiring real AWS credentials or account state.
 Diagram QA lesson: inspect full-size PNGs after CairoSVG render, not only SVG.
 The first architecture pass had a connector crossing the retry-visible note and
 AWS card labels with tight margins; both were visible only in the rendered PNG.
+
+Follow-up diagram QA lesson: a sequence-named asset must visually match the
+local best-practices sequence family, not merely contain lifelines and arrows.
+Use participant headers, activation bars, pill labels, dashed `alt`/`else`
+regions, and enough row height before accepting the PNG. For architecture
+connectors, keep each operation in its own corridor; do not let a state-write
+line share a tight corridor with an object-store line or hug a layer border.

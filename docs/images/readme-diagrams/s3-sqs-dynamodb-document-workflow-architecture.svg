@@ -61,20 +61,20 @@
   <rect x="120" y="760" width="430" height="76" rx="16" class="red"/>
   <text x="160" y="806" class="label">transient failure -> retry visible</text>
 
-  <rect x="900" y="510" width="830" height="365" rx="26" class="aws"/>
-  <text x="940" y="560" class="label">Caller-owned AWS SDK and Floci resources</text>
-  <rect x="960" y="625" width="220" height="125" rx="16" class="purple"/>
-  <use href="#icon-s3" data-bluetape4k-icon="amazon-s3" x="995" y="660" width="48" height="48"/>
-  <text x="1060" y="670" class="label">S3 bucket</text>
-  <text x="1060" y="704" class="small">documents</text>
-  <rect x="1235" y="625" width="220" height="125" rx="16" class="purple"/>
-  <use href="#icon-sqs" data-bluetape4k-icon="amazon-sqs" x="1268" y="660" width="52" height="52"/>
-  <text x="1335" y="670" class="label">SQS queue</text>
-  <text x="1335" y="704" class="small">events</text>
-  <rect x="1490" y="625" width="205" height="125" rx="16" class="purple"/>
-  <use href="#icon-dynamodb" data-bluetape4k-icon="amazon-dynamodb" x="1520" y="660" width="52" height="52"/>
-  <text x="1582" y="670" class="label">DynamoDB</text>
-  <text x="1582" y="704" class="small">state table</text>
+  <rect x="900" y="510" width="830" height="415" rx="26" class="aws"/>
+  <text x="940" y="548" class="label">Caller-owned AWS SDK and Floci resources</text>
+  <rect x="960" y="675" width="220" height="125" rx="16" class="purple"/>
+  <use href="#icon-s3" data-bluetape4k-icon="amazon-s3" x="995" y="710" width="48" height="48"/>
+  <text x="1060" y="720" class="label">S3 bucket</text>
+  <text x="1060" y="754" class="small">documents</text>
+  <rect x="1235" y="675" width="220" height="125" rx="16" class="purple"/>
+  <use href="#icon-sqs" data-bluetape4k-icon="amazon-sqs" x="1268" y="710" width="52" height="52"/>
+  <text x="1335" y="720" class="label">SQS queue</text>
+  <text x="1335" y="754" class="small">events</text>
+  <rect x="1490" y="675" width="205" height="125" rx="16" class="purple"/>
+  <use href="#icon-dynamodb" data-bluetape4k-icon="amazon-dynamodb" x="1520" y="710" width="52" height="52"/>
+  <text x="1582" y="720" class="label">DynamoDB</text>
+  <text x="1582" y="754" class="small">state table</text>
 
   <path class="arrow" stroke="#2563eb" marker-end="url(#arrow-blue)" d="M470 338 H625"/>
   <text x="504" y="316" class="small">Submit</text>
@@ -82,9 +82,12 @@
   <text x="1086" y="316" class="small">ProcessOnce</text>
   <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M790 385 V585 Q790 620 755 620 H430"/>
   <text x="455" y="600" class="small">marshal event + attributes</text>
-  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M880 385 V688 H960"/>
-  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M1180 688 H1235"/>
-  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M622 712 V835 Q622 860 647 860 H1550 Q1570 860 1570 835 V750"/>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M880 385 V575 Q880 600 905 600 H1070 Q1095 600 1095 635 V675"/>
+  <text x="924" y="578" class="small">PutObject</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M1180 738 H1235"/>
+  <text x="1196" y="718" class="small">SendMessage</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M622 712 V825 Q622 850 647 850 H1570 Q1595 850 1595 825 V800"/>
+  <text x="1398" y="833" class="small">state write</text>
 
   <rect x="210" y="950" width="1380" height="70" rx="16" class="card"/>
   <text x="250" y="995" class="footer">Reader contract: S3 persists bytes, SQS transports an at-least-once event, and DynamoDB decides whether processing is new or duplicate.</text>
