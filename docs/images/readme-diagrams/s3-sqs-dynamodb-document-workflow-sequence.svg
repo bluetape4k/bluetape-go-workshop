@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1460" viewBox="0 0 1800 1460" role="img" aria-labelledby="title desc">
+  <title id="title">S3 SQS DynamoDB document workflow sequence</title>
+  <desc id="desc">Sequence for document submit, successful processing, duplicate acknowledgement, and transient retry visibility.</desc>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&amp;family=Comic+Mono:wght@400;700&amp;display=swap');
+      .title{font-family:'Architects Daughter','Comic Mono',sans-serif;font-size:48px;fill:#172033}
+      .subtitle,.label,.small{font-family:'Comic Mono','Architects Daughter',monospace;fill:#4b5568}
+      .subtitle{font-size:21px}.label{font-size:23px}.small{font-size:18px}.head{font-family:'Architects Daughter','Comic Mono',sans-serif;font-size:27px;fill:#172033}
+      .participant{fill:#fff;stroke:#cbd5e1;stroke-width:3}.workflow{fill:#dcfce7;stroke:#86efac;stroke-width:3}
+      .s3{fill:#ecfccb;stroke:#bef264;stroke-width:3}.sqs{fill:#fce7f3;stroke:#f9a8d4;stroke-width:3}.ddb{fill:#e0e7ff;stroke:#a5b4fc;stroke-width:3}
+      .note{fill:#fff7ed;stroke:#fed7aa;stroke-width:3}.error{fill:#fee2e2;stroke:#f87171;stroke-width:3}
+      .life{stroke:#94a3b8;stroke-width:3;stroke-dasharray:12 14}.sep{stroke:#cbd5e1;stroke-width:3;stroke-dasharray:14 16}
+      .arrow{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:5}
+    </style>
+    <marker id="blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="green" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+    <marker id="red" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+  </defs>
+  <rect width="1800" height="1460" fill="#f8fafc"/>
+  <text x="90" y="86" class="title">Document workflow sequence</text>
+  <text x="90" y="128" class="subtitle">The worker deletes SQS messages only after DynamoDB records a terminal success or duplicate outcome.</text>
+
+  <rect x="90" y="185" width="230" height="105" rx="16" class="participant"/><text x="130" y="231" class="head">Caller</text><text x="130" y="265" class="small">document submitter</text>
+  <rect x="430" y="185" width="280" height="105" rx="16" class="workflow"/><text x="470" y="231" class="head">Workflow</text><text x="470" y="265" class="small">Submit / ProcessOnce</text>
+  <rect x="820" y="185" width="230" height="105" rx="16" class="s3"/><text x="860" y="231" class="head">S3</text><text x="860" y="265" class="small">documents bucket</text>
+  <rect x="1160" y="185" width="230" height="105" rx="16" class="sqs"/><text x="1200" y="231" class="head">SQS</text><text x="1200" y="265" class="small">document events</text>
+  <rect x="1500" y="185" width="230" height="105" rx="16" class="ddb"/><text x="1540" y="231" class="head">DynamoDB</text><text x="1540" y="265" class="small">processing state</text>
+
+  <path class="life" d="M205 290 V1395"/><path class="life" d="M570 290 V1395"/><path class="life" d="M935 290 V1395"/><path class="life" d="M1275 290 V1395"/><path class="life" d="M1615 290 V1395"/>
+  <path class="sep" d="M70 540 H1730"/><path class="sep" d="M70 985 H1730"/><path class="sep" d="M70 1215 H1730"/>
+
+  <text x="90" y="350" class="label">1. Submit stores bytes before publishing the event</text>
+  <path class="arrow" stroke="#2563eb" marker-end="url(#blue)" d="M230 390 H550"/>
+  <text x="315" y="368" class="label">Submit(document)</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 455 H915"/>
+  <text x="665" y="432" class="label">PutObject body + metadata</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 505 H1255"/>
+  <text x="760" y="482" class="label">SendMessage DocumentEvent + attributes</text>
+
+  <text x="90" y="600" class="label">2. Success path reads S3 and records processing once</text>
+  <path class="arrow" stroke="#2563eb" marker-end="url(#blue)" d="M230 645 H550"/>
+  <text x="310" y="622" class="label">ProcessOnce()</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 705 H1255"/>
+  <text x="800" y="682" class="label">ReceiveMessage</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M1255 765 H595"/>
+  <text x="770" y="742" class="label">DocumentEvent</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 825 H915"/>
+  <text x="690" y="802" class="label">GetObject and close body</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 885 H1595"/>
+  <text x="830" y="862" class="label">PutItem attribute_not_exists(pk/sk)</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 945 H1255"/>
+  <text x="820" y="922" class="label">DeleteMessage ack</text>
+
+  <text x="90" y="1045" class="label">3. Duplicate path is terminal, not a retry</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 1090 H1595"/>
+  <text x="815" y="1067" class="label">same conditional PutItem</text>
+  <path class="arrow" stroke="#dc2626" marker-end="url(#red)" d="M1595 1148 H595"/>
+  <text x="775" y="1125" class="label">ConditionalCheckFailed -> duplicate</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#green)" d="M595 1190 H1255"/>
+  <text x="820" y="1168" class="label">DeleteMessage ack</text>
+
+  <text x="90" y="1275" class="label">4. Transient failures keep the SQS message retryable</text>
+  <rect x="430" y="1305" width="360" height="65" rx="14" class="error"/>
+  <text x="470" y="1346" class="label">S3/DynamoDB transient error</text>
+  <path class="arrow" stroke="#dc2626" marker-end="url(#red)" d="M595 1400 H1255"/>
+  <text x="760" y="1377" class="label">ChangeMessageVisibility(0)</text>
+</svg>

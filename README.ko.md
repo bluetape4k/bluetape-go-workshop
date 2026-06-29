@@ -53,6 +53,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/sqs-floci-worker`](examples/sqs-floci-worker/README.ko.md) | [English](examples/sqs-floci-worker/README.md) \| [한국어](examples/sqs-floci-worker/README.ko.md) | Fulfillment task enqueue, handler success delete acknowledgement, handler failure retry visibility를 Floci smoke coverage로 보여주는 local SQS worker 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer/README.ko.md) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | DynamoDB document-index materializer가 batch write를 chunking하고, `UnprocessedItems`만 retry하며, retry exhaustion과 AWS service error를 분리하는 local 예제입니다. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
 | [`examples/dynamodb-conditional-repository`](examples/dynamodb-conditional-repository/README.ko.md) | [English](examples/dynamodb-conditional-repository/README.md) \| [한국어](examples/dynamodb-conditional-repository/README.ko.md) | DynamoDB catalog repository가 create-if-absent write, optimistic version update, tenant query, typed conditional conflict handling을 보여주는 local 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
+| [`examples/s3-sqs-dynamodb-document-workflow`](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | [English](examples/s3-sqs-dynamodb-document-workflow/README.md) \| [한국어](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | S3 object 저장, SQS event 발행, DynamoDB idempotent processing state 기록을 하나로 합친 local document workflow 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -285,6 +286,31 @@ Docker가 있을 때 opt-in Floci DynamoDB smoke test를 serial로 실행합니�
 
 ```bash
 BLUETAPE_DYNAMODB_CONDITIONAL_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/dynamodb-conditional-repository/...
+```
+
+## S3-SQS-DynamoDB Document Workflow 예제 실행
+
+Local document workflow preview를 출력합니다.
+
+```bash
+go run ./examples/s3-sqs-dynamodb-document-workflow
+```
+
+이 예제는 작은 S3, SQS, DynamoDB lesson을 하나의 local document ingestion flow로
+합칩니다. S3에 bytes를 저장하고, SQS `DocumentEvent`를 발행하며, worker가 S3
+object를 읽고 DynamoDB idempotency record를 만든 뒤 SQS message를
+acknowledge합니다.
+
+Deterministic workflow test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/s3-sqs-dynamodb-document-workflow/...
+```
+
+Docker가 있을 때 optional multi-service Floci smoke test를 serial로 실행합니다.
+
+```bash
+BLUETAPE_DOCUMENT_WORKFLOW_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/s3-sqs-dynamodb-document-workflow/...
 ```
 
 ## Leader 예제 실행
