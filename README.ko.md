@@ -47,6 +47,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/sql-access-strategy-decision`](examples/sql-access-strategy-decision/README.ko.md) | [English](examples/sql-access-strategy-decision/README.md) \| [한국어](examples/sql-access-strategy-decision/README.ko.md) | direct `database/sql`, `sqlkit`, generated query boundary, migration tooling 선택 기준을 비교하는 local SQL access strategy 예제입니다. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/sql-order-repository`](examples/sql-order-repository/README.ko.md) | [English](examples/sql-order-repository/README.md) \| [한국어](examples/sql-order-repository/README.ko.md) | visible `sqlkit` statement로 insert, find-by-ID, filtered list, not-found behavior를 보여주는 PostgreSQL-backed order repository 예제입니다. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/sql-transaction-boundary`](examples/sql-transaction-boundary/README.ko.md) | [English](examples/sql-transaction-boundary/README.md) \| [한국어](examples/sql-transaction-boundary/README.ko.md) | Stock debit과 order row를 함께 commit하거나 실패 시 함께 rollback하는 PostgreSQL-backed order placement transaction 예제입니다. | `sqlkit`, `testcontainers/postgres` |
+| [`examples/gin-sql-crud-api`](examples/gin-sql-crud-api/README.ko.md) | [English](examples/gin-sql-crud-api/README.md) \| [한국어](examples/gin-sql-crud-api/README.ko.md) | HTTP parsing, public error, request timeout, sqlkit repository ownership을 분리해서 보여주는 Gin 주문 CRUD API입니다. | `sqlkit`, `gin`, `testcontainers/postgres` |
 | [`examples/s3-floci-storage`](examples/s3-floci-storage/README.ko.md) | [English](examples/s3-floci-storage/README.md) \| [한국어](examples/s3-floci-storage/README.ko.md) | AWS SDK v2와 opt-in Floci smoke coverage로 tenant receipt object upload, download, list, delete, presign을 보여주는 local S3 storage 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/sqs-floci-worker`](examples/sqs-floci-worker/README.ko.md) | [English](examples/sqs-floci-worker/README.md) \| [한국어](examples/sqs-floci-worker/README.ko.md) | Fulfillment task enqueue, handler success delete acknowledgement, handler failure retry visibility를 Floci smoke coverage로 보여주는 local SQS worker 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer/README.ko.md) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | DynamoDB document-index materializer가 batch write를 chunking하고, `UnprocessedItems`만 retry하며, retry exhaustion과 AWS service error를 분리하는 local 예제입니다. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
@@ -134,6 +135,29 @@ PostgreSQL Testcontainers contract test를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/sql-transaction-boundary/...
+```
+
+## Gin SQL CRUD API 예제 실행
+
+Database 없이 API/repository preview를 출력합니다.
+
+```bash
+go run ./examples/gin-sql-crud-api
+```
+
+`DATABASE_URL`을 설정하면 PostgreSQL을 대상으로 HTTP service를 실행합니다. 예제는
+local demo table을 시작 시 생성하지만, production service는 schema 변경을 별도
+migration owner로 옮겨야 합니다.
+
+```bash
+export DATABASE_URL='postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable'
+go run ./examples/gin-sql-crud-api
+```
+
+PostgreSQL-backed handler/repository test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/gin-sql-crud-api/...
 ```
 
 ## S3 Floci Storage 예제 실행
