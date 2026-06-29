@@ -80,8 +80,8 @@
   <text x="504" y="316" class="small">Submit</text>
   <path class="arrow" stroke="#2563eb" marker-end="url(#arrow-blue)" d="M1050 338 H1220"/>
   <text x="1086" y="316" class="small">ProcessOnce</text>
-  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M790 385 V585 Q790 620 755 620 H430"/>
-  <text x="455" y="600" class="small">marshal event + attributes</text>
+  <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M790 385 V560 Q790 585 765 585 H305 Q280 585 280 610 V620"/>
+  <text x="486" y="568" class="small">marshal event + attributes</text>
   <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M880 385 V575 Q880 600 905 600 H1070 Q1095 600 1095 635 V675"/>
   <text x="924" y="578" class="small">PutObject</text>
   <path class="arrow" stroke="#059669" marker-end="url(#arrow-green)" d="M1180 738 H1235"/>
