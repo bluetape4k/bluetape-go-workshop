@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="780" viewBox="0 0 1320 780" role="img" aria-labelledby="title desc">
+  <title id="title">Gin SQL CRUD API architecture</title>
+  <desc id="desc">A Gin HTTP API parses CRUD requests, calls a reusable sqlkit repository, and persists order rows through database/sql into PostgreSQL.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .api { fill: #eef2ff; stroke: #3730a3; stroke-width: 2.8; rx: 8; }
+      .app { fill: #f0fdf4; stroke: #047857; stroke-width: 2.8; rx: 8; }
+      .repo { fill: #ecfeff; stroke: #0e7490; stroke-width: 2.8; rx: 8; }
+      .db { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.8; rx: 8; }
+      .test { fill: #fefce8; stroke: #a16207; stroke-width: 2.5; rx: 8; }
+      .note { fill: #ffffff; stroke: #475569; stroke-width: 2.2; rx: 8; }
+      .title { font: 700 30px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .label { font: 700 22px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .text { font: 18px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #1e293b; }
+      .small { font: 16px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #334155; }
+      .arrowBlue { stroke: #334155; stroke-width: 3.2; fill: none; marker-end: url(#arrowBlue); stroke-linecap: round; stroke-linejoin: round; }
+      .arrowGreen { stroke: #047857; stroke-width: 3.2; fill: none; marker-end: url(#arrowGreen); stroke-linecap: round; stroke-linejoin: round; }
+      .arrowOrange { stroke: #c2410c; stroke-width: 3.2; fill: none; marker-end: url(#arrowOrange); stroke-linecap: round; stroke-linejoin: round; }
+      .dashed { stroke: #64748b; stroke-width: 2.8; fill: none; stroke-dasharray: 9 7; marker-end: url(#arrowGrey); stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrowBlue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#334155" stroke="#334155" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#047857" stroke="#047857" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#c2410c" stroke="#c2410c" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowGrey" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#64748b" stroke="#64748b" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1320" height="780"/>
+  <text x="60" y="66" class="title">Gin SQL CRUD API: keep HTTP public, SQL reusable</text>
+  <text x="60" y="102" class="text">Handlers translate requests and errors; the repository remains a context + database/sql boundary.</text>
+
+  <rect x="60" y="150" width="235" height="360" class="api"/>
+  <text x="90" y="194" class="label">Client</text>
+  <text x="90" y="236" class="text">curl / HTTP caller</text>
+  <text x="90" y="270" class="text">JSON body</text>
+  <text x="90" y="304" class="text">path params</text>
+  <text x="90" y="338" class="text">query filters</text>
+  <line x1="90" y1="366" x2="265" y2="366" stroke="#3730a3" stroke-width="2"/>
+  <text x="90" y="404" class="small">Sees only public</text>
+  <text x="90" y="430" class="small">status and error codes.</text>
+
+  <rect x="375" y="130" width="285" height="420" class="app"/>
+  <text x="405" y="174" class="label">Gin boundary</text>
+  <text x="405" y="216" class="text">POST /orders</text>
+  <text x="405" y="250" class="text">GET /orders/:id</text>
+  <text x="405" y="284" class="text">GET /orders?filter</text>
+  <text x="405" y="318" class="text">PATCH status</text>
+  <text x="405" y="352" class="text">DELETE /orders/:id</text>
+  <line x1="405" y1="380" x2="630" y2="380" stroke="#047857" stroke-width="2"/>
+  <text x="405" y="420" class="small">Owns JSON binding,</text>
+  <text x="405" y="446" class="small">request timeout, and</text>
+  <text x="405" y="472" class="small">HTTP error projection.</text>
+
+  <rect x="740" y="125" width="295" height="430" class="repo"/>
+  <text x="770" y="170" class="label">Order Repository</text>
+  <text x="770" y="212" class="text">Create</text>
+  <text x="770" y="246" class="text">FindByID</text>
+  <text x="770" y="280" class="text">List</text>
+  <text x="770" y="314" class="text">UpdateStatus</text>
+  <text x="770" y="348" class="text">Delete</text>
+  <line x1="770" y1="376" x2="1005" y2="376" stroke="#0e7490" stroke-width="2"/>
+  <text x="770" y="416" class="small">Uses sqlkit.Statement,</text>
+  <text x="770" y="442" class="small">QueryOne, QueryAll,</text>
+  <text x="770" y="468" class="small">and Execer/Queryer.</text>
+  <text x="770" y="520" class="small">No Gin dependency.</text>
+
+  <rect x="1110" y="220" width="160" height="215" class="db"/>
+  <text x="1138" y="265" class="label">Postgres</text>
+  <text x="1138" y="306" class="text">orders table</text>
+  <text x="1138" y="340" class="text">constraints</text>
+  <text x="1138" y="374" class="text">real rows</text>
+  <text x="1138" y="408" class="text">pgx driver</text>
+
+  <rect x="95" y="620" width="510" height="105" class="note"/>
+  <text x="125" y="656" class="label">Local setup</text>
+  <text x="125" y="688" class="text">DATABASE_URL starts the service.</text>
+  <text x="125" y="714" class="text">Unset prints a SQL/API preview.</text>
+
+  <rect x="700" y="620" width="520" height="105" class="test"/>
+  <text x="730" y="656" class="label">Focused tests</text>
+  <text x="730" y="688" class="text">Testcontainers prove HTTP CRUD</text>
+  <text x="730" y="714" class="text">and repository behavior on PostgreSQL.</text>
+
+  <path d="M295 315 H373" class="arrowBlue"/>
+  <text x="312" y="298" class="small">HTTP request</text>
+  <path d="M660 315 H738" class="arrowGreen"/>
+  <text x="676" y="298" class="small">domain call</text>
+  <path d="M1035 315 H1108" class="arrowOrange"/>
+  <text x="1042" y="298" class="small">SQL</text>
+  <path d="M875 620 V557" class="dashed"/>
+  <text x="905" y="592" class="small">same repository contract</text>
+</svg>

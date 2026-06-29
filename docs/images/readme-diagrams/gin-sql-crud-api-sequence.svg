@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="820" viewBox="0 0 1320 820" role="img" aria-labelledby="title desc">
+  <title id="title">Gin SQL CRUD API request sequence</title>
+  <desc id="desc">A CRUD request moves from client to Gin handler, through validation and request timeout, into a sqlkit repository, database/sql, and PostgreSQL before returning a public HTTP response.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .header { fill: #ffffff; stroke: #334155; stroke-width: 2.8; rx: 8; }
+      .client { fill: #eef2ff; stroke: #3730a3; stroke-width: 2.4; rx: 8; }
+      .handler { fill: #f0fdf4; stroke: #047857; stroke-width: 2.4; rx: 8; }
+      .repo { fill: #ecfeff; stroke: #0e7490; stroke-width: 2.4; rx: 8; }
+      .db { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.4; rx: 8; }
+      .result { fill: #fefce8; stroke: #a16207; stroke-width: 2.4; rx: 8; }
+      .lane { stroke: #94a3b8; stroke-width: 2.2; stroke-dasharray: 9 7; }
+      .title { font: 700 30px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .label { font: 700 20px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #0f172a; }
+      .text { font: 17px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #1e293b; }
+      .small { font: 15px "Architects Daughter", "Comic Mono", "Comic Sans MS", sans-serif; fill: #334155; }
+      .msgBlue { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrowBlue); stroke-linecap: round; stroke-linejoin: round; }
+      .msgGreen { stroke: #047857; stroke-width: 3; fill: none; marker-end: url(#arrowGreen); stroke-linecap: round; stroke-linejoin: round; }
+      .msgCyan { stroke: #0e7490; stroke-width: 3; fill: none; marker-end: url(#arrowCyan); stroke-linecap: round; stroke-linejoin: round; }
+      .msgOrange { stroke: #c2410c; stroke-width: 3; fill: none; marker-end: url(#arrowOrange); stroke-linecap: round; stroke-linejoin: round; }
+      .return { stroke: #64748b; stroke-width: 2.5; fill: none; stroke-dasharray: 8 7; marker-end: url(#arrowGrey); stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrowBlue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L14,8 L2,14 Z" fill="#334155" stroke="#334155" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L14,8 L2,14 Z" fill="#047857" stroke="#047857" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowCyan" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L14,8 L2,14 Z" fill="#0e7490" stroke="#0e7490" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L14,8 L2,14 Z" fill="#c2410c" stroke="#c2410c" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowGrey" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L14,8 L2,14 Z" fill="#64748b" stroke="#64748b" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1320" height="820"/>
+  <text x="60" y="66" class="title">CRUD request sequence: public HTTP shape, private SQL mechanics</text>
+  <text x="60" y="102" class="text">The same flow handles create, read, list, status update, and delete with endpoint-specific statements.</text>
+
+  <rect x="60" y="135" width="190" height="70" class="client"/>
+  <text x="94" y="178" class="label">HTTP caller</text>
+  <rect x="325" y="135" width="210" height="70" class="handler"/>
+  <text x="356" y="178" class="label">Gin handler</text>
+  <rect x="610" y="135" width="220" height="70" class="repo"/>
+  <text x="638" y="178" class="label">Repository</text>
+  <rect x="905" y="135" width="180" height="70" class="header"/>
+  <text x="936" y="178" class="label">database/sql</text>
+  <rect x="1160" y="135" width="120" height="70" class="db"/>
+  <text x="1183" y="178" class="label">Postgres</text>
+
+  <line x1="155" y1="205" x2="155" y2="715" class="lane"/>
+  <line x1="430" y1="205" x2="430" y2="715" class="lane"/>
+  <line x1="720" y1="205" x2="720" y2="715" class="lane"/>
+  <line x1="995" y1="205" x2="995" y2="715" class="lane"/>
+  <line x1="1220" y1="205" x2="1220" y2="715" class="lane"/>
+
+  <path d="M155 250 H430" class="msgBlue"/>
+  <rect x="230" y="218" width="145" height="28" class="result"/>
+  <text x="242" y="238" class="small">CRUD request</text>
+
+  <rect x="350" y="285" width="160" height="54" class="handler"/>
+  <text x="372" y="307" class="small">bind JSON, path,</text>
+  <text x="372" y="329" class="small">or query filter</text>
+
+  <path d="M430 370 H720" class="msgGreen"/>
+  <rect x="510" y="338" width="145" height="28" class="result"/>
+  <text x="522" y="358" class="small">validate domain</text>
+
+  <rect x="345" y="405" width="170" height="54" class="handler"/>
+  <text x="364" y="427" class="small">context.WithTimeout</text>
+  <text x="364" y="449" class="small">per request</text>
+
+  <path d="M720 490 H995" class="msgCyan"/>
+  <rect x="780" y="458" width="165" height="28" class="result"/>
+  <text x="792" y="478" class="small">sqlkit.Statement</text>
+
+  <path d="M995 560 H1220" class="msgOrange"/>
+  <rect x="1045" y="528" width="130" height="28" class="result"/>
+  <text x="1057" y="548" class="small">Exec/Query</text>
+
+  <path d="M1220 620 H995" class="return"/>
+  <rect x="1030" y="588" width="160" height="28" class="result"/>
+  <text x="1042" y="608" class="small">row or row count</text>
+
+  <path d="M995 660 H720" class="return"/>
+  <path d="M720 700 H430" class="return"/>
+  <path d="M430 740 H155" class="return"/>
+  <rect x="210" y="708" width="190" height="28" class="result"/>
+  <text x="222" y="728" class="small">201 / 200 / 204 / error</text>
+</svg>
