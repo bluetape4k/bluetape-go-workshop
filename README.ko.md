@@ -48,6 +48,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/sql-order-repository`](examples/sql-order-repository/README.ko.md) | [English](examples/sql-order-repository/README.md) \| [한국어](examples/sql-order-repository/README.ko.md) | visible `sqlkit` statement로 insert, find-by-ID, filtered list, not-found behavior를 보여주는 PostgreSQL-backed order repository 예제입니다. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/sql-transaction-boundary`](examples/sql-transaction-boundary/README.ko.md) | [English](examples/sql-transaction-boundary/README.md) \| [한국어](examples/sql-transaction-boundary/README.ko.md) | Stock debit과 order row를 함께 commit하거나 실패 시 함께 rollback하는 PostgreSQL-backed order placement transaction 예제입니다. | `sqlkit`, `testcontainers/postgres` |
 | [`examples/gin-sql-crud-api`](examples/gin-sql-crud-api/README.ko.md) | [English](examples/gin-sql-crud-api/README.md) \| [한국어](examples/gin-sql-crud-api/README.ko.md) | HTTP parsing, public error, request timeout, sqlkit repository ownership을 분리해서 보여주는 Gin 주문 CRUD API입니다. | `sqlkit`, `gin`, `testcontainers/postgres` |
+| [`examples/gin-sql-order-service`](examples/gin-sql-order-service/README.ko.md) | [English](examples/gin-sql-order-service/README.md) \| [한국어](examples/gin-sql-order-service/README.ko.md) | HTTP parsing, service-owned SQL transaction, multi-table repository, item update, rollback proof를 합친 milestone Gin order service입니다. | `sqlkit`, `gin`, `testcontainers/postgres` |
 | [`examples/s3-floci-storage`](examples/s3-floci-storage/README.ko.md) | [English](examples/s3-floci-storage/README.md) \| [한국어](examples/s3-floci-storage/README.ko.md) | AWS SDK v2와 opt-in Floci smoke coverage로 tenant receipt object upload, download, list, delete, presign을 보여주는 local S3 storage 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/sqs-floci-worker`](examples/sqs-floci-worker/README.ko.md) | [English](examples/sqs-floci-worker/README.md) \| [한국어](examples/sqs-floci-worker/README.ko.md) | Fulfillment task enqueue, handler success delete acknowledgement, handler failure retry visibility를 Floci smoke coverage로 보여주는 local SQS worker 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer/README.ko.md) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | DynamoDB document-index materializer가 batch write를 chunking하고, `UnprocessedItems`만 retry하며, retry exhaustion과 AWS service error를 분리하는 local 예제입니다. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
@@ -158,6 +159,36 @@ PostgreSQL-backed handler/repository test를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/gin-sql-crud-api/...
+```
+
+## Gin SQL Order Service 예제 실행
+
+Database 없이 order service preview를 출력합니다.
+
+```bash
+go run ./examples/gin-sql-order-service
+```
+
+이 예제는 SQL repository, SQL transaction boundary, Gin CRUD lesson을 하나로
+합칩니다. Gin은 HTTP parsing과 public error를 소유하고, service는
+`sqlkit.WithTx`를 소유하며, repository는 order header, item, status-event SQL을
+소유합니다. `reject_after_items` request는 payment, inventory, fulfillment,
+outbox scope를 추가하지 않고 item insert 이후 rollback을 증명하는 deterministic
+failure switch입니다.
+
+`DATABASE_URL`을 설정하면 PostgreSQL을 대상으로 HTTP service를 실행합니다. 예제는
+local demo table을 시작 시 생성하지만, production service는 schema 변경을 별도
+migration owner로 옮겨야 합니다.
+
+```bash
+export DATABASE_URL='postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable'
+go run ./examples/gin-sql-order-service
+```
+
+PostgreSQL-backed handler/service/repository test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/gin-sql-order-service/...
 ```
 
 ## S3 Floci Storage 예제 실행
