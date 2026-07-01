@@ -50,8 +50,8 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.42.1 h1:F/M5Y9I3nwr2IEpshZgh1GeHpOIt
 github.com/aws/aws-sdk-go-v2/service/sts v1.42.1/go.mod h1:mTNxImtovCOEEuD65mKW7DCsL+2gjEH+RPEAexAzAio=
 github.com/aws/smithy-go v1.27.1 h1:4T340VFndXtADGF52gYa1POyL7s9E4Z1OeZ1hCscIw8=
 github.com/aws/smithy-go v1.27.1/go.mod h1:YE2RhdIuDbA5E5bTdciG9KrW3+TiEONeUWCqxX9i1Fc=
-github.com/bluetape4k/bluetape-go v0.9.0 h1:VD5SDVrm2v3XK1Bececyo/zzQJSWT6dzlx/SECcmPZQ=
-github.com/bluetape4k/bluetape-go v0.9.0/go.mod h1:yZQbRsgKxOvCSAkNgRXKV8MBjFvGARY1OXL9fzoDt6Y=
+github.com/bluetape4k/bluetape-go v0.10.0 h1:gL9V9gh39Ylc89Dz7PnLigFp7bVT8MisXh1zm3EITKc=
+github.com/bluetape4k/bluetape-go v0.10.0/go.mod h1:yZQbRsgKxOvCSAkNgRXKV8MBjFvGARY1OXL9fzoDt6Y=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
