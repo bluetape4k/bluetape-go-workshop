@@ -54,6 +54,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer/README.ko.md) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | DynamoDB document-index materializer가 batch write를 chunking하고, `UnprocessedItems`만 retry하며, retry exhaustion과 AWS service error를 분리하는 local 예제입니다. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
 | [`examples/dynamodb-conditional-repository`](examples/dynamodb-conditional-repository/README.ko.md) | [English](examples/dynamodb-conditional-repository/README.md) \| [한국어](examples/dynamodb-conditional-repository/README.ko.md) | DynamoDB catalog repository가 create-if-absent write, optimistic version update, tenant query, typed conditional conflict handling을 보여주는 local 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/s3-sqs-dynamodb-document-workflow`](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | [English](examples/s3-sqs-dynamodb-document-workflow/README.md) \| [한국어](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | S3 object 저장, SQS event 발행, DynamoDB idempotent processing state 기록을 하나로 합친 local document workflow 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
+| [`examples/text-moderation-masking`](examples/text-moderation-masking/README.ko.md) | [English](examples/text-moderation-masking/README.md) \| [한국어](examples/text-moderation-masking/README.ko.md) | Deterministic `textsearch` blockword matching, allowlist subtraction, Unicode-safe masking을 사용하는 local content moderation pass입니다. | `textsearch` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -311,6 +312,24 @@ Docker가 있을 때 optional multi-service Floci smoke test를 serial로 실행
 
 ```bash
 BLUETAPE_DOCUMENT_WORKFLOW_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/s3-sqs-dynamodb-document-workflow/...
+```
+
+## Text Moderation Masking 예제 실행
+
+Local content moderation preview를 출력합니다.
+
+```bash
+go run ./examples/text-moderation-masking
+```
+
+이 예제는 deterministic `textsearch` blockword matching으로 overlapping English
+pattern, Korean blockword, standalone word-boundary match를 mask하고 allowlisted
+phrase는 보존합니다.
+
+Focused test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/text-moderation-masking/...
 ```
 
 ## Leader 예제 실행

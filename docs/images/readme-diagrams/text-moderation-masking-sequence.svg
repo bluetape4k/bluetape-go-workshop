@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1500" viewBox="0 0 1800 1500" role="img" aria-labelledby="title desc">
+  <title id="title">Text moderation masking sequence</title>
+  <desc id="desc">Review request sequence for blockword matching, allowlist subtraction, exact masking, and boundary-safe output.</desc>
+  <defs>
+    <style>
+      text { font-family: "Comic Mono", "Architects Daughter", "Comic Sans MS", monospace; fill: #172033; }
+      .title { font-family: "Architects Daughter", "Comic Mono", cursive; font-size: 42px; font-weight: 700; }
+      .subtitle { font-size: 22px; fill: #46546a; }
+      .head { fill: #f8fafc; stroke-width: 3; }
+      .caller { stroke: #2563eb; }
+      .service { stroke: #16a34a; }
+      .allow { stroke: #d97706; }
+      .dict { stroke: #0f766e; }
+      .out { stroke: #dc2626; }
+      .head-text { font-size: 26px; font-weight: 700; }
+      .small { font-size: 18px; fill: #475569; }
+      .lifeline { stroke: #94a3b8; stroke-width: 3; stroke-dasharray: 11 11; }
+      .activation { fill: #fff7ed; stroke: #b45309; stroke-width: 3; }
+      .msg-blue { stroke: #2563eb; marker-end: url(#arrow-blue); }
+      .msg-green { stroke: #15803d; marker-end: url(#arrow-green); }
+      .msg-amber { stroke: #b45309; marker-end: url(#arrow-amber); }
+      .msg-teal { stroke: #0f766e; marker-end: url(#arrow-teal); }
+      .msg-red { stroke: #dc2626; marker-end: url(#arrow-red); }
+      .return { stroke-dasharray: 10 8; }
+      .message { fill: none; stroke-width: 5; stroke-linecap: round; }
+      .pill { fill: #ffffff; stroke-width: 2; }
+      .pill-text { font-size: 18px; font-weight: 700; }
+      .frame { fill: none; stroke: #94a3b8; stroke-width: 3; stroke-dasharray: 12 10; }
+      .frame-label { fill: #ffffff; stroke: #f59e0b; stroke-width: 2; }
+      .note { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; }
+    </style>
+    <marker id="arrow-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#2563eb"/></marker>
+    <marker id="arrow-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#15803d"/></marker>
+    <marker id="arrow-amber" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#b45309"/></marker>
+    <marker id="arrow-teal" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#0f766e"/></marker>
+    <marker id="arrow-red" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#dc2626"/></marker>
+  </defs>
+
+  <rect width="1800" height="1500" fill="#f8fafc"/>
+  <text class="title" x="70" y="70">Text moderation masking sequence</text>
+  <text class="subtitle" x="70" y="108">Evaluate one comment, subtract allowlisted spans, then mask only accepted blockword matches.</text>
+
+  <g transform="translate(0 0)">
+    <rect class="head caller" x="90" y="155" width="210" height="78" rx="13"/>
+    <text class="head-text" x="135" y="190">Caller</text>
+    <text class="small" x="122" y="216">comment text</text>
+
+    <rect class="head service" x="455" y="155" width="260" height="78" rx="13"/>
+    <text class="head-text" x="500" y="190">Service</text>
+    <text class="small" x="490" y="216">policy owner</text>
+
+    <rect class="head allow" x="850" y="155" width="260" height="78" rx="13"/>
+    <text class="head-text" x="890" y="190">Allowlist</text>
+    <text class="small" x="900" y="216">safe phrases</text>
+
+    <rect class="head dict" x="1240" y="155" width="260" height="78" rx="13"/>
+    <text class="head-text" x="1280" y="190">Dictionary</text>
+    <text class="small" x="1285" y="216">textsearch</text>
+
+    <rect class="head out" x="1570" y="155" width="180" height="78" rx="13"/>
+    <text class="head-text" x="1608" y="190">Result</text>
+    <text class="small" x="1605" y="216">masked JSON</text>
+  </g>
+
+  <line class="lifeline" x1="195" y1="233" x2="195" y2="1400"/>
+  <line class="lifeline" x1="585" y1="233" x2="585" y2="1400"/>
+  <line class="lifeline" x1="980" y1="233" x2="980" y2="1400"/>
+  <line class="lifeline" x1="1370" y1="233" x2="1370" y2="1400"/>
+  <line class="lifeline" x1="1660" y1="233" x2="1660" y2="1400"/>
+
+  <rect class="activation" x="572" y="305" width="26" height="940" rx="8"/>
+  <rect class="activation" x="967" y="520" width="26" height="170" rx="8"/>
+  <rect class="activation" x="1357" y="390" width="26" height="440" rx="8"/>
+
+  <path class="message msg-blue" d="M 195 330 H 572"/>
+  <rect class="pill caller" x="105" y="292" width="310" height="38" rx="19"/>
+  <text class="pill-text" x="125" y="318">1 Evaluate(comment)</text>
+
+  <path class="message msg-green" d="M 598 420 H 1357"/>
+  <rect class="pill service" x="670" y="382" width="470" height="38" rx="19"/>
+  <text class="pill-text" x="692" y="408">2 Detect blockwords with Unicode boundary</text>
+
+  <path class="message msg-teal return" d="M 1357 500 H 598"/>
+  <rect class="pill dict" x="770" y="462" width="375" height="38" rx="19"/>
+  <text class="pill-text" x="792" y="488">3 overlapping matches returned</text>
+
+  <path class="message msg-amber" d="M 598 565 H 967"/>
+  <rect class="pill allow" x="640" y="527" width="320" height="38" rx="19"/>
+  <text class="pill-text" x="662" y="553">4 Match allow phrases</text>
+
+  <path class="message msg-amber return" d="M 967 650 H 598"/>
+  <rect class="pill allow" x="650" y="612" width="365" height="38" rx="19"/>
+  <text class="pill-text" x="672" y="638">5 safe spans returned</text>
+
+  <rect class="frame" x="70" y="725" width="1500" height="395" rx="20"/>
+  <rect class="frame-label" x="95" y="705" width="455" height="38" rx="19"/>
+  <text class="pill-text" x="117" y="731">alt allowed span and boundary handling</text>
+
+  <path class="message msg-green" d="M 598 800 H 1357"/>
+  <rect class="pill service" x="690" y="762" width="430" height="38" rx="19"/>
+  <text class="pill-text" x="712" y="788">6 Select leftmost-longest matches</text>
+
+  <path class="message msg-amber" d="M 598 895 H 967"/>
+  <rect class="pill allow" x="665" y="857" width="360" height="38" rx="19"/>
+  <text class="pill-text" x="687" y="883">7 Drop contained allowlist hits</text>
+
+  <path class="message msg-red" d="M 598 990 H 1370"/>
+  <rect class="pill out" x="690" y="952" width="420" height="38" rx="19"/>
+  <text class="pill-text" x="712" y="978">8 Mask exact original byte spans</text>
+
+  <path class="message msg-blue" d="M 598 1185 H 1660"/>
+  <rect class="pill caller" x="690" y="1147" width="470" height="38" rx="19"/>
+  <text class="pill-text" x="712" y="1173">9 Build decision + findings + allowlist hits</text>
+
+  <path class="message msg-blue return" d="M 572 1275 H 195"/>
+  <rect class="pill caller" x="270" y="1237" width="365" height="38" rx="19"/>
+  <text class="pill-text" x="292" y="1263">10 ReviewResult JSON</text>
+
+  <rect class="note" x="210" y="1370" width="1380" height="62" rx="16"/>
+  <text class="small" x="250" y="1408">Examples: bad wolf -> ********, Korean abuse -> **, badge/badwolf stay visible, allowlisted title remains unmasked.</text>
+</svg>
