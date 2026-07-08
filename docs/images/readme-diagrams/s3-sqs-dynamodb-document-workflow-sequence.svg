@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1880" viewBox="0 0 1800 1880" role="img" aria-labelledby="title desc">
+  <title id="title">S3 SQS DynamoDB document workflow sequence</title>
+  <desc id="desc">Best-practices sequence diagram for Submit and ProcessOnce, including success, duplicate acknowledgement, and transient retry visibility.</desc>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&amp;family=Comic+Mono:wght@400;700&amp;display=swap');
+      .title{font-family:'Architects Daughter','Comic Mono',sans-serif;font-size:46px;fill:#263238}
+      .subtitle,.msg,.note,.footer{font-family:'Comic Mono','Architects Daughter',monospace;fill:#36464f}
+      .subtitle{font-size:19px}.msg{font-size:16px}.note{font-size:14px}.footer{font-size:16px;fill:#60727d}
+      .participant{font-family:'Architects Daughter','Comic Mono',sans-serif;font-size:22px;fill:#1f3138}
+      .role{font-family:'Comic Mono','Architects Daughter',monospace;font-size:14px;fill:#546a73}
+      .frame{fill:#fbfcf8;stroke:#41545d;stroke-width:3}
+      .header{fill:#ffffff;stroke:#546e7a;stroke-width:2.2}
+      .header.workflow{fill:#f0fdf4;stroke:#4ade80}
+      .header.s3{fill:#f7fee7;stroke:#a3e635}
+      .header.sqs{fill:#fdf2f8;stroke:#f9a8d4}
+      .header.ddb{fill:#eef2ff;stroke:#a5b4fc}
+      .lifeline{stroke:#9aaab1;stroke-width:2.2;stroke-dasharray:8 10}
+      .activation{fill:#f3ecdf;stroke:#8f784e;stroke-width:1.5}
+      .call{fill:none;stroke:#3f7d9c;stroke-width:3.4;marker-end:url(#arrowCall);stroke-linecap:round;stroke-linejoin:round}
+      .aws{fill:none;stroke:#6e8f4f;stroke-width:3.4;marker-end:url(#arrowAws);stroke-linecap:round;stroke-linejoin:round}
+      .return{fill:none;stroke:#9b7d54;stroke-width:3;stroke-dasharray:8 6;marker-end:url(#arrowReturn);stroke-linecap:round;stroke-linejoin:round}
+      .retry{fill:none;stroke:#b86868;stroke-width:3.4;marker-end:url(#arrowRetry);stroke-linecap:round;stroke-linejoin:round}
+      .alt{fill:none;stroke:#78909c;stroke-width:3;stroke-dasharray:12 7}
+      .branchDivider{stroke:#78909c;stroke-width:3;stroke-dasharray:12 8}
+      .label{fill:#ffffff;stroke:#d7e0e4;stroke-width:1.5}
+      .label.callLabel{stroke:#9cc2d1}.label.awsLabel{stroke:#b6c9a4}.label.returnLabel{stroke:#c8b38f}.label.retryLabel{stroke:#d9abab}
+      .branchOk{fill:#f8f1e6;stroke:#a2743d;stroke-width:1.8}
+      .branchDup{fill:#fff7e8;stroke:#c8a15a;stroke-width:1.8}
+      .branchRetry{fill:#fff5f5;stroke:#b86868;stroke-width:1.8}
+      .badge{stroke-width:1.8}.callBadge{fill:#eaf4f8;stroke:#3f7d9c}.awsBadge{fill:#eef7f0;stroke:#6e8f4f}.returnBadge{fill:#fff7e8;stroke:#9b7d54}.retryBadge{fill:#fff0f0;stroke:#b86868}
+      .badgeText{font-family:'Comic Mono','Architects Daughter',monospace;font-size:12px;font-weight:700}
+      .callText,.badgeText.callText{fill:#2f6f8e}.awsText,.badgeText.awsText{fill:#55783f}.returnText,.badgeText.returnText{fill:#7f6038}.retryText,.badgeText.retryText{fill:#9d4f4f}
+    </style>
+    <marker id="arrowCall" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3f7d9c" stroke="#3f7d9c" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowAws" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#6e8f4f" stroke="#6e8f4f" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowReturn" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#9b7d54" stroke="#9b7d54" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+    <marker id="arrowRetry" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b86868" stroke="#b86868" stroke-dasharray="none" style="stroke-dasharray:none"/>
+    </marker>
+  </defs>
+
+  <rect x="24" y="24" width="1752" height="1832" rx="20" class="frame"/>
+  <text x="900" y="82" text-anchor="middle" class="title">S3-SQS-DynamoDB Document Workflow</text>
+  <text x="900" y="114" text-anchor="middle" class="subtitle">Submit publishes only after S3 stores bytes; ProcessOnce acks SQS only after DynamoDB records a terminal outcome.</text>
+
+  <g>
+    <rect x="75" y="155" width="170" height="76" rx="10" class="header"/>
+    <text x="160" y="187" text-anchor="middle" class="participant">Caller</text>
+    <text x="160" y="211" text-anchor="middle" class="role">submitter / worker</text>
+    <rect x="345" y="155" width="220" height="76" rx="10" class="header workflow"/>
+    <text x="455" y="187" text-anchor="middle" class="participant">DocumentWorkflow</text>
+    <text x="455" y="211" text-anchor="middle" class="role">Submit + ProcessOnce</text>
+    <rect x="675" y="155" width="170" height="76" rx="10" class="header s3"/>
+    <text x="760" y="187" text-anchor="middle" class="participant">S3</text>
+    <text x="760" y="211" text-anchor="middle" class="role">documents bucket</text>
+    <rect x="1015" y="155" width="170" height="76" rx="10" class="header sqs"/>
+    <text x="1100" y="187" text-anchor="middle" class="participant">SQS</text>
+    <text x="1100" y="211" text-anchor="middle" class="role">document events</text>
+    <rect x="1375" y="155" width="230" height="76" rx="10" class="header ddb"/>
+    <text x="1490" y="187" text-anchor="middle" class="participant">DynamoDB</text>
+    <text x="1490" y="211" text-anchor="middle" class="role">processing state</text>
+  </g>
+
+  <line x1="160" y1="231" x2="160" y2="1788" class="lifeline"/>
+  <line x1="455" y1="231" x2="455" y2="1788" class="lifeline"/>
+  <line x1="760" y1="231" x2="760" y2="1788" class="lifeline"/>
+  <line x1="1100" y1="231" x2="1100" y2="1788" class="lifeline"/>
+  <line x1="1490" y1="231" x2="1490" y2="1788" class="lifeline"/>
+  <rect x="448" y="306" width="14" height="1428" rx="6" class="activation"/>
+  <rect x="753" y="410" width="14" height="130" rx="6" class="activation"/>
+  <rect x="1093" y="500" width="14" height="1245" rx="6" class="activation"/>
+  <rect x="1483" y="1016" width="14" height="650" rx="6" class="activation"/>
+
+  <rect x="86" y="270" width="318" height="34" rx="17" class="label callLabel"/>
+  <circle cx="110" cy="287" r="13" class="callBadge"/><text x="110" y="292" text-anchor="middle" class="badgeText callText">1</text>
+  <text x="134" y="292" class="msg callText">Submit(document)</text>
+  <path d="M 160 330 H455" class="call"/>
+
+  <rect x="486" y="376" width="382" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="510" cy="393" r="13" class="awsBadge"/><text x="510" y="398" text-anchor="middle" class="badgeText awsText">2</text>
+  <text x="534" y="398" class="msg awsText">PutObject body + metadata</text>
+  <path d="M 455 434 H760" class="aws"/>
+
+  <rect x="616" y="466" width="464" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="640" cy="483" r="13" class="awsBadge"/><text x="640" y="488" text-anchor="middle" class="badgeText awsText">3</text>
+  <text x="664" y="488" class="msg awsText">SendMessage DocumentEvent + attributes</text>
+  <path d="M 455 524 H1100" class="aws"/>
+
+  <rect x="150" y="560" width="302" height="34" rx="17" class="label returnLabel"/>
+  <circle cx="174" cy="577" r="13" class="returnBadge"/><text x="174" y="582" text-anchor="middle" class="badgeText returnText">4</text>
+  <text x="198" y="582" class="msg returnText">SubmittedDocument</text>
+  <path d="M 455 618 H160" class="return"/>
+
+  <rect x="70" y="670" width="1660" height="1090" rx="14" class="alt"/>
+  <rect x="96" y="688" width="332" height="30" rx="15" class="branchOk"/>
+  <text x="118" y="708" class="note">alt success: visible message is processed once</text>
+  <line x1="70" y1="1258" x2="1730" y2="1258" class="branchDivider"/>
+  <rect x="96" y="1276" width="308" height="30" rx="15" class="branchDup"/>
+  <text x="118" y="1296" class="note">else duplicate: terminal but already recorded</text>
+  <line x1="70" y1="1528" x2="1730" y2="1528" class="branchDivider"/>
+  <rect x="96" y="1546" width="330" height="30" rx="15" class="branchRetry"/>
+  <text x="118" y="1566" class="note">else transient failure: make retry visible</text>
+
+  <rect x="86" y="738" width="274" height="34" rx="17" class="label callLabel"/>
+  <circle cx="110" cy="755" r="13" class="callBadge"/><text x="110" y="760" text-anchor="middle" class="badgeText callText">5</text>
+  <text x="134" y="760" class="msg callText">ProcessOnce()</text>
+  <path d="M 160 796 H455" class="call"/>
+
+  <rect x="704" y="816" width="260" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="728" cy="833" r="13" class="awsBadge"/><text x="728" y="838" text-anchor="middle" class="badgeText awsText">6</text>
+  <text x="752" y="838" class="msg awsText">ReceiveMessage</text>
+  <path d="M 455 874 H1100" class="aws"/>
+
+  <rect x="646" y="896" width="272" height="34" rx="17" class="label returnLabel"/>
+  <circle cx="670" cy="913" r="13" class="returnBadge"/><text x="670" y="918" text-anchor="middle" class="badgeText returnText">7</text>
+  <text x="694" y="918" class="msg returnText">DocumentEvent</text>
+  <path d="M 1100 954 H455" class="return"/>
+
+  <rect x="510" y="976" width="342" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="534" cy="993" r="13" class="awsBadge"/><text x="534" y="998" text-anchor="middle" class="badgeText awsText">8</text>
+  <text x="558" y="998" class="msg awsText">GetObject and close body</text>
+  <path d="M 455 1034 H760" class="aws"/>
+
+  <rect x="818" y="1056" width="544" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="842" cy="1073" r="13" class="awsBadge"/><text x="842" y="1078" text-anchor="middle" class="badgeText awsText">9</text>
+  <text x="866" y="1078" class="msg awsText">PutItem attribute_not_exists(pk/sk) -> PROCESSED</text>
+  <path d="M 455 1114 H1490" class="aws"/>
+
+  <rect x="710" y="1168" width="306" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="734" cy="1185" r="13" class="awsBadge"/><text x="734" y="1190" text-anchor="middle" class="badgeText awsText">10</text>
+  <text x="764" y="1190" class="msg awsText">DeleteMessage ack</text>
+  <path d="M 455 1226 H1100" class="aws"/>
+
+  <rect x="815" y="1320" width="402" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="839" cy="1337" r="13" class="awsBadge"/><text x="839" y="1342" text-anchor="middle" class="badgeText awsText">11</text>
+  <text x="869" y="1342" class="msg awsText">conditional PutItem sees old key</text>
+  <path d="M 455 1378 H1490" class="aws"/>
+
+  <rect x="684" y="1404" width="494" height="34" rx="17" class="label retryLabel"/>
+  <circle cx="708" cy="1421" r="13" class="retryBadge"/><text x="708" y="1426" text-anchor="middle" class="badgeText retryText">12</text>
+  <text x="738" y="1426" class="msg retryText">ConditionalCheckFailed -> duplicate outcome</text>
+  <path d="M 1490 1462 H455" class="retry"/>
+
+  <rect x="710" y="1476" width="328" height="34" rx="17" class="label awsLabel"/>
+  <circle cx="734" cy="1493" r="13" class="awsBadge"/><text x="734" y="1498" text-anchor="middle" class="badgeText awsText">13</text>
+  <text x="764" y="1498" class="msg awsText">DeleteMessage ack</text>
+  <path d="M 455 1514 H1100" class="aws"/>
+
+  <rect x="706" y="1600" width="460" height="34" rx="17" class="label retryLabel"/>
+  <circle cx="730" cy="1617" r="13" class="retryBadge"/><text x="730" y="1622" text-anchor="middle" class="badgeText retryText">14</text>
+  <text x="760" y="1622" class="msg retryText">S3 or DynamoDB returns transient error</text>
+  <path d="M 1490 1658 H455" class="retry"/>
+
+  <rect x="658" y="1674" width="448" height="34" rx="17" class="label retryLabel"/>
+  <circle cx="682" cy="1691" r="13" class="retryBadge"/><text x="682" y="1696" text-anchor="middle" class="badgeText retryText">15</text>
+  <text x="712" y="1696" class="msg retryText">ChangeMessageVisibility(0)</text>
+  <path d="M 455 1732 H1100" class="retry"/>
+
+  <rect x="98" y="1800" width="1604" height="42" rx="12" fill="#ffffff" stroke="#ccd7da" stroke-width="2"/>
+  <text x="118" y="1827" class="note">Reader contract: S3 stores bytes, SQS carries an at-least-once event, and DynamoDB is the idempotent terminal-state gate.</text>
+</svg>
