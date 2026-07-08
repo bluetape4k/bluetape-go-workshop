@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080" viewBox="0 0 1800 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Gin text search service architecture</title>
+  <desc id="desc">Gin owns HTTP parsing while a reusable service owns textsearch policy, matching, masking, and Unicode caveats.</desc>
+  <defs>
+    <style>
+      text { font-family: "Comic Mono", "Architects Daughter", "Comic Sans MS", monospace; fill: #172033; }
+      .title { font-family: "Architects Daughter", "Comic Mono", cursive; font-size: 46px; font-weight: 700; }
+      .subtitle { font-size: 24px; fill: #46546a; }
+      .lane-title { font-size: 29px; font-weight: 700; }
+      .card-title { font-size: 28px; font-weight: 700; }
+      .card-sub { font-size: 21px; fill: #334155; }
+      .small { font-size: 19px; fill: #475569; }
+      .label { font-size: 20px; fill: #475569; }
+      .label-pill { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; }
+      .canvas { fill: #f8fafc; }
+      .lane-http { fill: #eff6ff; stroke: #93c5fd; stroke-width: 4; }
+      .lane-domain { fill: #ecfdf5; stroke: #86efac; stroke-width: 4; }
+      .lane-helper { fill: #fff7ed; stroke: #fed7aa; stroke-width: 4; }
+      .card-blue { fill: #dbeafe; stroke: #3b82f6; stroke-width: 4; }
+      .card-green { fill: #dcfce7; stroke: #22c55e; stroke-width: 4; }
+      .card-orange { fill: #ffedd5; stroke: #f97316; stroke-width: 4; }
+      .card-red { fill: #fee2e2; stroke: #ef4444; stroke-width: 4; }
+      .note { fill: #ffffff; stroke: #cbd5e1; stroke-width: 4; }
+      .flow { fill: none; stroke: #2563eb; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-blue); }
+      .domain-flow { fill: none; stroke: #059669; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-green); }
+      .helper-flow { fill: none; stroke: #ea580c; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-orange); }
+    </style>
+    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 14 7 L 0 14 z" fill="#2563eb"/></marker>
+    <marker id="arrow-green" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 14 7 L 0 14 z" fill="#059669"/></marker>
+    <marker id="arrow-orange" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 14 7 L 0 14 z" fill="#ea580c"/></marker>
+  </defs>
+
+  <rect class="canvas" width="1800" height="1080"/>
+  <text class="title" x="70" y="80">Gin text search service</text>
+  <text class="subtitle" x="70" y="122">HTTP exposes deterministic exact search and masking without owning product policy.</text>
+
+  <rect class="lane-http" x="70" y="170" width="1660" height="245" rx="26"/>
+  <text class="lane-title" x="110" y="220">HTTP boundary</text>
+  <rect class="card-blue" x="145" y="270" width="330" height="105" rx="18"/>
+  <text class="card-title" x="190" y="318">Client</text>
+  <text class="card-sub" x="190" y="352">curl or UI preview</text>
+  <rect class="card-blue" x="645" y="260" width="505" height="125" rx="18"/>
+  <text class="card-title" x="700" y="310">Gin handler</text>
+  <text class="card-sub" x="700" y="345">JSON bind + public error</text>
+  <rect class="card-blue" x="1330" y="270" width="330" height="105" rx="18"/>
+  <text class="card-title" x="1375" y="318">JSON result</text>
+  <text class="card-sub" x="1375" y="352">matches + masked text</text>
+  <path class="flow" d="M 475 322 H 645"/>
+  <rect class="label-pill" x="485" y="242" width="295" height="42" rx="21"/>
+  <text class="label" x="510" y="270">POST /text/search-mask</text>
+  <path class="flow" d="M 1150 322 H 1330"/>
+  <text class="label" x="1205" y="300">200 or 400</text>
+
+  <rect class="lane-domain" x="70" y="500" width="760" height="390" rx="26"/>
+  <text class="lane-title" x="110" y="550">Reusable domain service</text>
+  <rect class="card-green" x="145" y="615" width="285" height="115" rx="16"/>
+  <text class="card-title" x="190" y="660">Policy</text>
+  <text class="small" x="190" y="693">sale, coupon</text>
+  <text class="small" x="190" y="720">refund window, bad wolf</text>
+  <rect class="card-green" x="500" y="615" width="260" height="115" rx="16"/>
+  <text class="card-title" x="540" y="660">Service</text>
+  <text class="small" x="540" y="693">thin reusable API</text>
+  <rect class="card-red" x="215" y="785" width="425" height="70" rx="16"/>
+  <text class="card-title" x="260" y="831">No provider or model call</text>
+
+  <rect class="lane-helper" x="970" y="500" width="760" height="390" rx="26"/>
+  <text class="lane-title" x="1010" y="550">textsearch mechanics</text>
+  <rect class="card-orange" x="1045" y="615" width="300" height="115" rx="16"/>
+  <text class="card-title" x="1085" y="660">Matcher</text>
+  <text class="small" x="1085" y="693">immutable automaton</text>
+  <rect class="card-orange" x="1410" y="615" width="250" height="115" rx="16"/>
+  <text class="card-title" x="1450" y="660">Boundary</text>
+  <text class="small" x="1450" y="693">Unicode words</text>
+  <rect class="card-orange" x="1195" y="785" width="335" height="70" rx="16"/>
+  <text class="card-title" x="1240" y="831">Original byte spans</text>
+
+  <path class="domain-flow" d="M 900 385 V 455 Q 900 500 855 500 H 630 Q 630 500 630 615"/>
+  <text class="label" x="670" y="480">delegate to service</text>
+  <path class="domain-flow" d="M 430 672 H 500"/>
+  <path class="helper-flow" d="M 760 672 H 1045"/>
+  <rect class="label-pill" x="810" y="606" width="260" height="42" rx="21"/>
+  <text class="label" x="835" y="634">FindAll + overlap</text>
+  <path class="helper-flow" d="M 1345 672 H 1410"/>
+  <path class="helper-flow" d="M 1535 730 V 785 H 1530"/>
+  <path class="domain-flow" d="M 1195 820 H 650"/>
+  <rect class="label-pill" x="770" y="865" width="260" height="42" rx="21"/>
+  <text class="label" x="795" y="893">mask exact spans</text>
+
+  <rect class="note" x="200" y="950" width="1400" height="70" rx="18"/>
+  <text class="small" x="250" y="993">Reader contract: Gin stays thin; tokenizer choice and language detection remain separate v0.8.0 lessons.</text>
+</svg>
