@@ -50,3 +50,32 @@ No blocking findings remain.
 No Testcontainers run is required for this issue. The example has no database,
 queue, model, or external service dependency; HTTP behavior is covered with
 `httptest` and domain behavior is covered with deterministic unit tests.
+
+## Post-Merge Diagram Re-Audit
+
+Scope: `docs/images/readme-diagrams/gin-text-search-service-architecture.*`
+and `docs/images/readme-diagrams/gin-text-search-service-sequence.*`.
+
+Findings fixed:
+
+- SVG marker shapes now use fixed `userSpaceOnUse` filled-triangle paths with
+  `stroke="none"` and `stroke-dasharray="none"` so CairoSVG PNG output keeps
+  arrowhead direction and shape stable.
+- Sequence message labels now sit 10px above their call/return lines instead
+  of touching the line.
+- Sequence participant, header, label, and message classes now match the local
+  sequence-style audit contract.
+
+Validation:
+
+- `xmllint --noout docs/images/readme-diagrams/gin-text-search-service-architecture.svg docs/images/readme-diagrams/gin-text-search-service-sequence.svg`
+- `cairosvg docs/images/readme-diagrams/gin-text-search-service-architecture.svg -o docs/images/readme-diagrams/gin-text-search-service-architecture.png`
+- `cairosvg docs/images/readme-diagrams/gin-text-search-service-sequence.svg -o docs/images/readme-diagrams/gin-text-search-service-sequence.png`
+- `diagram-connector-audit.py`: PASS for both SVGs
+- `diagram-geometry-audit.py --fail-diagonal`: `geometry_failures=0` for both SVGs
+- `diagram-endpoint-audit.py`: PASS for both SVGs
+- `diagram-mixed-corner-audit.py`: PASS for both SVGs
+- `diagram-sequence-style-audit.py`: PASS for the sequence SVG
+- Custom label-gap check: `labels=8 min_gap=10.0px failures=0`
+- Full-size PNG inspection for both regenerated PNG files
+- `git diff --check`
