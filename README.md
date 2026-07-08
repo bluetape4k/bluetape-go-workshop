@@ -53,6 +53,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/sqs-floci-worker`](examples/sqs-floci-worker) | [English](examples/sqs-floci-worker/README.md) \| [한국어](examples/sqs-floci-worker/README.ko.md) | Local SQS worker example that enqueues fulfillment tasks, acknowledges handler success with delete, and makes handler failures visible for retry through Floci smoke coverage. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/dynamodb-batchwrite-materializer`](examples/dynamodb-batchwrite-materializer) | [English](examples/dynamodb-batchwrite-materializer/README.md) \| [한국어](examples/dynamodb-batchwrite-materializer/README.ko.md) | Local DynamoDB document-index materializer that chunks batch writes, retries only `UnprocessedItems`, and keeps retry exhaustion distinct from AWS service errors. | `dynamodb/batchwrite`, `testcontainers/floci`, `AWS SDK v2` |
 | [`examples/dynamodb-conditional-repository`](examples/dynamodb-conditional-repository) | [English](examples/dynamodb-conditional-repository/README.md) \| [한국어](examples/dynamodb-conditional-repository/README.ko.md) | Local DynamoDB catalog repository that demonstrates create-if-absent writes, optimistic version updates, tenant queries, and typed conditional conflict handling. | `AWS SDK v2`, `testcontainers/floci` |
+| [`examples/s3-sqs-dynamodb-document-workflow`](examples/s3-sqs-dynamodb-document-workflow) | [English](examples/s3-sqs-dynamodb-document-workflow/README.md) \| [한국어](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | Local document workflow that stores objects in S3, publishes SQS events, and records DynamoDB idempotent processing state with opt-in multi-service Floci smoke coverage. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -284,6 +285,32 @@ Run the optional Floci DynamoDB smoke test serially when Docker is available:
 
 ```bash
 BLUETAPE_DYNAMODB_CONDITIONAL_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/dynamodb-conditional-repository/...
+```
+
+## Run the S3-SQS-DynamoDB Document Workflow Example
+
+Print the local document workflow preview:
+
+```bash
+go run ./examples/s3-sqs-dynamodb-document-workflow
+```
+
+The example composes the smaller S3, SQS, and DynamoDB lessons into one local
+document ingestion flow: store bytes in S3, publish an SQS `DocumentEvent`, read
+the S3 object in the worker, and create a DynamoDB idempotency record before
+acknowledging the SQS message.
+
+Run the deterministic workflow tests:
+
+```bash
+go test -count=1 ./examples/s3-sqs-dynamodb-document-workflow/...
+```
+
+Run the optional multi-service Floci smoke test serially when Docker is
+available:
+
+```bash
+BLUETAPE_DOCUMENT_WORKFLOW_SMOKE=1 go test -run TestFlociSmoke -count=1 ./examples/s3-sqs-dynamodb-document-workflow/...
 ```
 
 ## Run the Leader Example
