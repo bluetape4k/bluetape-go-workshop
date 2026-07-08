@@ -71,7 +71,7 @@
   <rect class="card-orange" x="1410" y="615" width="250" height="115" rx="16"/>
   <text class="card-title" x="1450" y="660">Boundary</text>
   <text class="small" x="1450" y="693">Unicode words</text>
-  <rect class="card-orange" x="1195" y="785" width="335" height="70" rx="16"/>
+  <rect class="card-orange" x="1195" y="785" width="365" height="70" rx="16"/>
   <text class="card-title" x="1240" y="831">Original byte spans</text>
 
   <path class="domain-flow" d="M 900 385 V 455 Q 900 485 870 485 H 660 Q 630 485 630 515 V 615"/>
@@ -81,7 +81,7 @@
   <rect class="label-pill" x="810" y="606" width="260" height="42" rx="21"/>
   <text class="label" x="835" y="634">FindAll + overlap</text>
   <path class="helper-flow" d="M 1345 672 H 1410"/>
-  <path class="helper-flow" d="M 1535 730 V 755 Q 1535 775 1515 775 H 1372 Q 1362 775 1362 785"/>
+  <path class="helper-flow" d="M 1535 730 V 785"/>
   <path class="domain-flow" d="M 1195 820 H 650"/>
   <rect class="label-pill" x="770" y="865" width="260" height="42" rx="21"/>
   <text class="label" x="795" y="893">mask exact spans</text>
