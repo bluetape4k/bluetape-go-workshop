@@ -55,6 +55,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/dynamodb-conditional-repository`](examples/dynamodb-conditional-repository) | [English](examples/dynamodb-conditional-repository/README.md) \| [한국어](examples/dynamodb-conditional-repository/README.ko.md) | Local DynamoDB catalog repository that demonstrates create-if-absent writes, optimistic version updates, tenant queries, and typed conditional conflict handling. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/s3-sqs-dynamodb-document-workflow`](examples/s3-sqs-dynamodb-document-workflow) | [English](examples/s3-sqs-dynamodb-document-workflow/README.md) \| [한국어](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | Local document workflow that stores objects in S3, publishes SQS events, and records DynamoDB idempotent processing state with opt-in multi-service Floci smoke coverage. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/text-moderation-masking`](examples/text-moderation-masking) | [English](examples/text-moderation-masking/README.md) \| [한국어](examples/text-moderation-masking/README.ko.md) | Local content moderation pass that uses deterministic `textsearch` blockword matching, allowlist subtraction, and Unicode-safe masking. | `textsearch` |
+| [`examples/gin-text-search-service`](examples/gin-text-search-service) | [English](examples/gin-text-search-service/README.md) \| [한국어](examples/gin-text-search-service/README.ko.md) | Gin API that exposes deterministic `textsearch` search/mask behavior with thin handlers, stable HTTP errors, and Unicode caveats. | `gin`, `textsearch` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -330,6 +331,29 @@ Run the focused tests:
 
 ```bash
 go test -count=1 ./examples/text-moderation-masking/...
+```
+
+## Run the Gin Text Search Service Example
+
+Print the no-server preview:
+
+```bash
+go run ./examples/gin-text-search-service
+```
+
+Run the local Gin API and try the search/mask endpoint:
+
+```bash
+SERVE_HTTP=1 go run ./examples/gin-text-search-service
+curl -s -X POST http://127.0.0.1:8098/text/search-mask \
+  -H 'Content-Type: application/json' \
+  -d '{"request_id":"search-1001","text":"sale 쿠폰 refundable refund window bad wolf"}' | jq
+```
+
+Run the focused tests:
+
+```bash
+go test -count=1 ./examples/gin-text-search-service/...
 ```
 
 ## Run the Leader Example
