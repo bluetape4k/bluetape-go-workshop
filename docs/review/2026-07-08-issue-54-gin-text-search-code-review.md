@@ -79,3 +79,32 @@ Validation:
 - Custom label-gap check: `labels=8 min_gap=10.0px failures=0`
 - Full-size PNG inspection for both regenerated PNG files
 - `git diff --check`
+
+### Follow-Up Boundary Arrow Correction
+
+The PR #158 audit still missed the rendered direction/readability problem on
+the `Boundary -> Original byte spans` connector. Root cause: the previous route
+forced a dogleg with a terminal curve because the `Original byte spans` card
+ended 5px left of the `Boundary` centerline. CairoSVG rendered a technically
+valid marker, but the PNG did not read as a clean downward relationship.
+
+Correction:
+
+- Widened `Original byte spans` from 335px to 365px so the `Boundary` centerline
+  lands inside the target card's top edge.
+- Replaced the dogleg route with a single vertical helper connector:
+  `M 1535 730 V 785`.
+- Verified the rendered PNG crop and full-size PNG show a clear downward
+  arrowhead from `Boundary` to `Original byte spans`.
+
+Validation:
+
+- `xmllint --noout docs/images/readme-diagrams/gin-text-search-service-architecture.svg`
+- `cairosvg docs/images/readme-diagrams/gin-text-search-service-architecture.svg -o docs/images/readme-diagrams/gin-text-search-service-architecture.png -s 2`
+- `diagram-connector-audit.py`: PASS
+- `diagram-geometry-audit.py --fail-diagonal`: `geometry_failures=0`
+- `diagram-endpoint-audit.py`: PASS
+- `diagram-mixed-corner-audit.py`: PASS
+- Custom invariant: `path=vertical_down`, `target_inside_top_guard=True`, `card_width=365`
+- Full-size PNG inspection plus focused crop inspection for the boundary arrow
+- `git diff --check`
