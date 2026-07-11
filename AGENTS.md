@@ -8,7 +8,7 @@ Runnable web application examples for `bluetape-go`.
 
 ## Skills
 
-- Use `bluetape4k-workflow` for task classification and issue/PR discipline.
+- Use `bluetape-workflow` for task classification and issue/PR discipline.
 - Use `bluetape-go-patterns` for Go implementation, tests, examples, and review.
 
 ## Commands
