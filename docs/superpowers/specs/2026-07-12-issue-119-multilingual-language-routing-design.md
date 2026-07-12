@@ -181,8 +181,9 @@ For every request, `Route` performs these steps in order:
 2. Collect script hints in fixed order: Latin, Hangul, Kana, Han.
 3. Call `Detect`, `Confidences`, and `DetectMultiple` on the shared detector.
 4. Mark input mixed when detector sections contain at least two distinct
-   detected languages. Script hints remain evidence and do not independently
-   redefine detector sections.
+   non-`Unknown` languages. An `Unknown` section remains evidence but does not
+   create a second language decision. Script hints remain evidence and do not
+   independently redefine detector sections.
 5. Append review reasons in this exact order:
    `text-too-short`, `language-unknown`, `low-confidence`, `mixed-language`,
    `ambiguous-cjk-script`, `unsupported-language`.
@@ -223,7 +224,7 @@ mode. Both the default request decisions and low-confidence policy check must
 compare equal across model-loading modes.
 
 The dedicated low-confidence check uses the same detector subset and lifecycle
-but raises `MinimumConfidence` to `1.0` for the fixed mixed fixture
+but raises `MinimumConfidence` to `1.0` for the fixed multilingual-script fixture
 `support 문의 订单 delivery`. Under pinned v0.18.0 its detected confidence is
 below `1.0`, so the check produces `low-confidence` without changing the
 default `0.70` policy. The exact confidence is test evidence, not a documented
@@ -250,9 +251,11 @@ One `Router` and its detector are safe to reuse concurrently. All request
 results, reason slices, confidence projections, and section projections are
 call-local. Tests will use a worker pool with capacity six, dispatch six requests
 per round, and run three rounds for exactly 18 route calls. A bounded entry gate
-records at least two logically concurrent in-flight calls before releasing the
-round, so the assertion does not depend on scheduler parallelism and remains
-meaningful under `GOMAXPROCS=1`.
+proves all six goroutines are ready before releasing each round. Exact outcomes,
+cross-round determinism, and the race detector prove safe reuse; the test does
+not claim to instrument overlap inside the upstream detector. A focused test
+process exercises a fresh lazy router before any route call. The same gate also
+completes under `GOMAXPROCS=1` without relying on scheduler parallelism.
 
 The same test runs under focused normal and race commands. It does not create
 unbounded goroutines, sleep for correctness, or publish latency claims.
@@ -269,19 +272,21 @@ go run ./examples/multilingual-language-routing --preload
 Default-policy fixtures cover confident English, Korean, Japanese with Kana,
 Chinese/Han-only, mixed English/Japanese, short text, and numeric unknown text.
 A separately labeled low-confidence policy check uses threshold `1.0` and the
-fixed mixed fixture `support 문의 订单 delivery`. Tests lock only that the pinned
-v0.18.0 result is detected below the configured threshold and produces ordered
-`low-confidence` plus `mixed-language` reasons; documentation does not publish
-the numeric confidence as a universal detector guarantee.
+fixed multilingual-script fixture `support 문의 订单 delivery`. Tests lock only
+that the pinned v0.18.0 result is detected below the configured threshold and
+produces `low-confidence`; its `Unknown` section does not independently create
+`mixed-language`. Documentation does not publish the numeric confidence as a
+universal detector guarantee.
 
 Within one mode, repeated output is byte-identical. Lazy and preloaded outputs
 have identical request decisions; only explicit lifecycle/configuration
 metadata differs.
 
-The three detector queries per request are intentional because this lesson
+The three public evidence views per request are intentional because this lesson
 exposes single-language, confidence-list, and mixed-section evidence together.
-The README must state that production callers should request only the evidence
-their policy needs; this example is not a hot-path throughput template.
+Those APIs can repeat detector computation and allocate result projections. The
+README must state that production callers should request only the evidence their
+policy needs; this example is not a hot-path throughput template.
 
 The command accepts only fixed, non-sensitive fixtures. `Decision` retains the
 original request text to prove section spans, so callers embedding the package
@@ -332,8 +337,10 @@ Tests are written before implementation and cover:
 8. distinct-language section mixing and exact UTF-8 byte-span slicing;
 9. deterministic, non-nil caller-owned slices;
 10. lazy/preloaded decision equality and intentional lifecycle metadata
-    difference;
-11. bounded shared-router reuse with exact completion and overlap assertions;
+    difference, scoped to option wiring and behavioral equivalence rather than
+    in-process startup or memory measurement;
+11. bounded shared-router reuse with six-participant release gates, exact
+    completion/results, cross-round determinism, and race proof;
 12. CLI flag parsing, repeated deterministic JSON, and route equality across
     both model-loading modes.
 
@@ -386,7 +393,7 @@ The example README pair will include:
 - representative route and manual-review output;
 - confidence, mixed-section, script-hint, and UTF-8 byte-span semantics;
 - lazy versus preloaded lifecycle tradeoff without benchmark claims;
-- the deliberate cost of collecting all three detector evidence views and the
+- the deliberate cost of collecting all three public evidence views and the
   production guidance to request only what a policy uses;
 - supported and unsupported routes;
 - the heuristic, security, and compliance boundary.
@@ -443,6 +450,7 @@ against this exact artifact.
 | P2 | Operator/Ops | CLI error/help behavior and partial-output boundary were not explicit. | Added injected CLI seams, non-zero error behavior, standard help, stderr, and no partial JSON. |
 | P2 | User/caller | Canonical ID behavior and lazy/preloaded comparison fields were ambiguous. | Specified trimmed IDs, byte-exact text, equal decisions, and the two explicit lifecycle/config fields. |
 | P1 | Evidence integrity | Planning-time v0.18.0 execution disproved the original claim that `문의 注文 support` was below the default `0.70` threshold. | With user approval, preserved default `0.70` and isolated a threshold `1.0` check using stable fixture `support 문의 订单 delivery`; tests assert the relation, not a universal numeric claim. |
+| P1 | Performance/stability | The original `maxActive` gate measured waiting goroutines and could not prove overlap inside the detector. | Removed the internal-overlap claim; require a fresh lazy target, six ready participants, exact outcomes, cross-round determinism, and race proof. |
 
 Integration review found no remaining contradiction, unsupported assumption,
 or open material user decision. Latest convergence: P0=0, P1=0. The listed P2
