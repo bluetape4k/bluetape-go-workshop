@@ -168,48 +168,138 @@ func (s *Service) valid() bool {
 }
 
 func (s *Service) prepareProduct(input ProductInput) (PreparedProduct, error) {
-	for _, text := range []string{input.Title, input.SupportText} {
-		if _, err := textsearch.NewTokenizeRequest(text, textsearch.TokenizeOptions{
-			Normalize: textsearch.NormalizeNFC,
-		}); err != nil {
-			return PreparedProduct{}, err
+	titleTokens, err := s.prepareField(FieldTitle, input.Title)
+	if err != nil {
+		return PreparedProduct{}, err
+	}
+	supportTokens, err := s.prepareField(FieldSupportText, input.SupportText)
+	if err != nil {
+		return PreparedProduct{}, err
+	}
+
+	maskResponse, err := s.dictionary.Process(textsearch.BlockwordRequest{
+		Text:    input.SupportText,
+		Options: textsearch.BlockwordOptions{Mask: s.mask},
+	})
+	if err != nil {
+		return PreparedProduct{}, err
+	}
+	maskMatches := make([]MaskMatch, len(maskResponse.Matches))
+	for i, match := range maskResponse.Matches {
+		maskMatches[i] = MaskMatch{
+			ID:    match.Entry.ID,
+			Text:  match.Text,
+			Start: match.Start,
+			End:   match.End,
 		}
 	}
+	for i := range supportTokens {
+		for _, match := range maskResponse.Matches {
+			if byteSpansOverlap(supportTokens[i].Start, supportTokens[i].End, match.Start, match.End) {
+				supportTokens[i].Indexable = false
+				break
+			}
+		}
+	}
+
+	tokens := make([]PreparedToken, 0, len(titleTokens)+len(supportTokens))
+	tokens = append(tokens, titleTokens...)
+	tokens = append(tokens, supportTokens...)
+	indexTerms := make([]string, 0, len(tokens))
+	seen := make(map[string]struct{}, len(tokens))
+	for _, token := range tokens {
+		if !token.Indexable {
+			continue
+		}
+		term := indexTerm(token)
+		if term == "" {
+			continue
+		}
+		if _, exists := seen[term]; exists {
+			continue
+		}
+		seen[term] = struct{}{}
+		indexTerms = append(indexTerms, term)
+	}
+
 	return PreparedProduct{
 		SKU:               input.SKU,
 		Title:             input.Title,
 		SupportText:       input.SupportText,
-		MaskedSupportText: input.SupportText,
-		MaskMatches:       []MaskMatch{},
-		Tokens:            []PreparedToken{},
-		IndexTerms:        []string{},
-		IndexText:         "",
+		MaskedSupportText: maskResponse.MaskedText,
+		MaskMatches:       maskMatches,
+		Tokens:            tokens,
+		IndexTerms:        indexTerms,
+		IndexText:         strings.Join(indexTerms, " "),
 	}, nil
+}
+
+func (s *Service) prepareField(field Field, input string) ([]PreparedToken, error) {
+	request, err := textsearch.NewTokenizeRequest(input, textsearch.TokenizeOptions{
+		Normalize: textsearch.NormalizeNFC,
+	})
+	if err != nil {
+		return nil, err
+	}
+	response, err := s.tokenizer.Tokenize(request)
+	if err != nil {
+		return nil, err
+	}
+	selected := japanese.Filter(response.Tokens, func(token textsearch.Token) bool {
+		return japanese.IsNoun(token) || japanese.IsVerb(token)
+	})
+	prepared := make([]PreparedToken, len(selected))
+	for i, token := range selected {
+		prepared[i] = PreparedToken{
+			Field:      field,
+			Text:       token.Text,
+			Normalized: token.Normalized,
+			BaseForm:   token.Metadata[japanese.MetadataBaseForm],
+			POS:        string(token.POS),
+			Start:      token.Span.Start,
+			End:        token.Span.End,
+			Indexable:  true,
+			Metadata:   maps.Clone(token.Metadata),
+		}
+	}
+	return prepared, nil
+}
+
+func indexTerm(token PreparedToken) string {
+	term := token.BaseForm
+	if term == "" || term == "*" {
+		term = token.Text
+	}
+	return textsearch.NormalizeText(term, textsearch.NormalizeNFC).Normalized
+}
+
+func byteSpansOverlap(firstStart, firstEnd, secondStart, secondEnd int) bool {
+	return firstStart < secondEnd && secondStart < firstEnd
 }
 
 func DefaultProducts() []ProductInput {
 	return []ProductInput{
 		{
 			SKU:         "JP-100",
-			Title:       "ランニングシューズ",
-			SupportText: "毎日の運動に使えます。",
+			Title:       "軽量ランニングシューズ",
+			SupportText: "毎日のランニングを快適にします。",
 		},
 		{
 			SKU:         "JP-200",
 			Title:       "ガラス保存容器",
-			SupportText: "食品を保存できます。偽物にはご注意ください。",
+			SupportText: "電子レンジで温めて使用できます。偽物に注意してください。",
 		},
 		{
 			SKU:         "JP-300",
 			Title:       "折りたたみ自転車",
-			SupportText: "持ち運びやすい折りたたみ式です。",
+			SupportText: "通勤で便利に走れます。",
 		},
 	}
 }
 
 func DefaultMaskPolicy() MaskPolicy {
 	return MaskPolicy{
-		Entries: []textsearch.BlockwordEntry{{ID: "unsafe", Text: "偽物"}},
+		Entries: []textsearch.BlockwordEntry{{ID: "counterfeit", Text: "偽物", Severity: textsearch.SeverityHigh}},
 		Mask:    "*",
 	}
 }
