@@ -373,11 +373,25 @@ func TestServiceSharedReuseUnderBoundedConcurrency(t *testing.T) {
 		{query: "宇宙船", want: []string{}},
 	}
 	tasks := make([]concurrencytest.Task, 6)
+	var arrivalMu sync.Mutex
+	arrived := 0
+	release := make(chan struct{})
 	for i := range tasks {
 		fixture := fixtures[i%len(fixtures)]
+		arrival := &sync.Once{}
 		tasks[i] = func(ctx context.Context) error {
-			if err := ctx.Err(); err != nil {
-				return err
+			arrival.Do(func() {
+				arrivalMu.Lock()
+				defer arrivalMu.Unlock()
+				arrived++
+				if arrived == len(tasks) {
+					close(release)
+				}
+			})
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-release:
 			}
 			result, err := service.Search(SearchRequest{Query: fixture.query})
 			if err != nil {
