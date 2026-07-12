@@ -379,17 +379,18 @@ go test -race -count=1 ./examples/multilingual-intake-feasibility/...
 
 ## Japanese Search Preparation 예제 실행
 
-Deterministic prepared-catalog와 search preview를 출력합니다.
+일본어 상품 카탈로그를 검색용으로 준비한 결과와 검색 결과를 항상 같은 JSON으로
+출력합니다.
 
 ```bash
 go run ./examples/japanese-search-preparation
 ```
 
-이 예제는 재사용하는 Kagome Search-mode tokenizer와 dictionary 하나로
-NFC-normalized term을 준비하고, masked support token을 제외한 뒤, prepared query
-term이 모두 match하는지 확인합니다.
+이 예제는 Kagome Search mode tokenizer와 dictionary를 한 번 만들고 재사용합니다.
+검색 term은 NFC로 정규화하고, mask된 support token은 index에서 제외하며, 준비한
+query term이 모두 포함된 상품만 반환합니다.
 
-Focused normal test와 race test를 실행합니다.
+이 예제만 대상으로 일반 테스트와 race 테스트를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/japanese-search-preparation/...

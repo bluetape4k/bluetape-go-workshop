@@ -12,7 +12,7 @@ deterministic all-term matching without hiding token or source-span semantics.
 
 ## Package Lesson
 
-The application composes released bluetape-go packages and owns the catalog policy:
+The application combines published bluetape-go packages and owns the catalog policy:
 
 | Component | Owns |
 |---|---|
@@ -27,8 +27,8 @@ The lesson has three stages:
    NFC-normalized index terms from base forms or surface text.
 2. **Search:** prepare the query with the same tokenizer and projection, then require
    every unique query term to match the product's space-delimited index.
-3. **Reuse and preview:** construct one service and reuse its tokenizer, dictionary,
-   and prepared catalog while returning copied products and deterministic JSON.
+3. **Reuse and preview:** construct one service, reuse its tokenizer, dictionary,
+   and prepared catalog, and return copied products in a deterministic JSON preview.
 
 ## Representative Output
 
@@ -89,7 +89,7 @@ and all-term matching explicit application policy.
 
 `NewService` constructs one Search-mode Kagome tokenizer and one blockword
 dictionary, prepares the catalog once, and reuses all three across calls. The IPA
-dictionary adds startup work plus binary and memory footprint, so the tokenizer
+dictionary adds startup work plus binary size and memory footprint, so the tokenizer
 does not belong in the query path; this example intentionally makes no universal
 numeric latency or memory claim. Each `Search` call compiles its matcher locally,
 so mutable query state is not shared.
