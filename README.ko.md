@@ -386,9 +386,9 @@ go test -race -count=1 ./examples/multilingual-intake-feasibility/...
 go run ./examples/japanese-search-preparation
 ```
 
-이 예제는 Kagome Search mode tokenizer와 dictionary를 한 번 만들고 재사용합니다.
-검색 term은 NFC로 정규화하고, mask된 support token은 index에서 제외하며, 준비한
-query term이 모두 포함된 상품만 반환합니다.
+이 예제는 Kagome Search 모드 토크나이저와 사전을 한 번씩 만들고 재사용합니다.
+검색어는 NFC로 정규화하고, 마스킹된 안내 문구 토큰은 색인에서 제외하며, 준비한
+검색어가 모두 포함된 상품만 반환합니다.
 
 이 예제만 대상으로 일반 테스트와 race 테스트를 실행합니다.
 

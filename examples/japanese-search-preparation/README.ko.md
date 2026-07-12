@@ -6,9 +6,9 @@
 준비하는 애플리케이션 형태의 예제입니다.
 
 일본어 상품명과 안내 문구는 공백만으로 검색어를 나누기 어렵습니다. 이 예제는
-title과 support text를 토큰화해 확인 가능한 검색용 index를 만들고, mask된 support
-term을 index에서 제외합니다. 각 token이 원문 어디에서 왔는지도 유지한 채 모든
-검색어가 일치하는 상품만 일정한 순서로 찾습니다.
+상품명과 안내 문구를 토큰화해 확인 가능한 검색어 색인을 만들고, 마스킹된 안내 문구
+검색어를 색인에서 제외합니다. 각 토큰이 원문의 어느 위치에서 왔는지도 보존하면서
+모든 검색어가 일치하는 상품만 일정한 순서로 찾습니다.
 
 ## 패키지 구성과 역할
 
@@ -17,19 +17,19 @@ term을 index에서 제외합니다. 각 token이 원문 어디에서 왔는지�
 
 | 구성 요소 | 담당 역할 |
 |---|---|
-| `textsearch/japanese` | Kagome IPA Search mode tokenization, base form, POS metadata, 원본 UTF-8 byte span. |
-| `textsearch` | NFC 정규화, 컴파일한 blockword dictionary, masking, 항상 같은 결과를 내는 term matching. |
-| `catalogprep.Service` | 명사와 동사 선별, masked token 제외, index 구성, all-term hit 정책, 수명 주기. |
+| `textsearch/japanese` | Kagome IPA Search 모드 토큰화, 기본형, 품사 메타데이터, 원본 UTF-8 바이트 범위. |
+| `textsearch` | NFC 정규화, 컴파일한 금칙어 사전, 마스킹, 항상 같은 결과를 내는 검색어 일치. |
+| `catalogprep.Service` | 명사와 동사 선별, 마스킹된 토큰 제외, 색인 구성, 모든 검색어 일치 정책, 수명 주기. |
 
 처리는 세 단계로 나뉩니다.
 
-1. **준비:** title과 support field를 토큰화하고 명사와 동사만 남깁니다. 설정된
-   support substring을 mask하고 겹치는 token을 제외한 뒤, base form이나 surface
-   text를 NFC로 정규화해 중복 없는 index term을 만듭니다.
-2. **검색:** 같은 tokenizer와 구성 규칙으로 query를 준비합니다. 중복을 제거한
-   query term이 공백으로 구분된 상품 index에 모두 있어야 검색 결과에 포함합니다.
-3. **재사용과 미리보기:** service 하나를 생성한 뒤 tokenizer, dictionary, 준비된
-   catalog를 재사용합니다. 복사한 상품 정보로 실행할 때마다 같은 JSON preview를
+1. **준비:** 상품명과 안내 문구를 토큰화하고 명사와 동사만 남깁니다. 설정된 안내
+   문구 부분 문자열을 마스킹하고 겹치는 토큰을 제외한 뒤, 기본형이나 표면형을 NFC로
+   정규화해 중복 없는 색인 검색어를 만듭니다.
+2. **검색:** 같은 토크나이저와 구성 규칙으로 질의를 준비합니다. 중복을 제거한 질의
+   검색어가 공백으로 구분된 상품 색인에 모두 있어야 검색 결과에 포함합니다.
+3. **재사용과 미리보기:** 서비스 하나를 생성한 뒤 토크나이저, 사전, 준비된
+   카탈로그를 재사용합니다. 복사한 상품 정보로 실행할 때마다 같은 JSON 미리보기를
    반환합니다.
 
 ## 대표 출력
