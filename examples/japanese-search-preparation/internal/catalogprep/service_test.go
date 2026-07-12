@@ -452,7 +452,10 @@ func TestNewPreviewDocumentsScenario(t *testing.T) {
 	if got := productBySKU(t, preview.Products, "JP-200").MaskedSupportText; got != "電子レンジで温めて使用できます。**に注意してください。" {
 		t.Fatalf("JP-200 MaskedSupportText = %q", got)
 	}
-	if preview.LifecycleNotes == nil || len(preview.LifecycleNotes) == 0 || preview.BoundaryNotes == nil || len(preview.BoundaryNotes) == 0 {
+	if preview.LifecycleNotes == nil || preview.BoundaryNotes == nil {
+		t.Fatalf("preview note slices must be non-nil: %+v", preview)
+	}
+	if len(preview.LifecycleNotes) == 0 || len(preview.BoundaryNotes) == 0 {
 		t.Fatalf("preview notes are incomplete: %+v", preview)
 	}
 	wantCommands := []string{

@@ -1,3 +1,4 @@
+// Package catalogprep prepares a Japanese product catalog for deterministic search and masking.
 package catalogprep
 
 import (
@@ -12,29 +13,38 @@ import (
 )
 
 var (
+	// ErrInvalidService reports an uninitialized service receiver.
 	ErrInvalidService = errors.New("catalogprep: invalid service")
+	// ErrInvalidProduct reports missing or invalid product input.
 	ErrInvalidProduct = errors.New("catalogprep: invalid product")
-	ErrInvalidQuery   = errors.New("catalogprep: invalid query")
+	// ErrInvalidQuery reports a query that cannot produce searchable terms.
+	ErrInvalidQuery = errors.New("catalogprep: invalid query")
 )
 
+// ProductInput contains the source fields prepared for catalog search.
 type ProductInput struct {
 	SKU         string `json:"sku"`
 	Title       string `json:"title"`
 	SupportText string `json:"support_text"`
 }
 
+// MaskPolicy configures blockword matching and replacement text.
 type MaskPolicy struct {
 	Entries []textsearch.BlockwordEntry
 	Mask    string
 }
 
+// Field identifies the product field that produced a token.
 type Field string
 
 const (
-	FieldTitle       Field = "title"
+	// FieldTitle identifies text from a product title.
+	FieldTitle Field = "title"
+	// FieldSupportText identifies text from product support content.
 	FieldSupportText Field = "support_text"
 )
 
+// PreparedToken records a normalized token and its original byte span.
 type PreparedToken struct {
 	Field      Field             `json:"field"`
 	Text       string            `json:"text"`
@@ -47,6 +57,7 @@ type PreparedToken struct {
 	Metadata   map[string]string `json:"metadata"`
 }
 
+// MaskMatch records a blockword match in the original support text.
 type MaskMatch struct {
 	ID    string `json:"id"`
 	Text  string `json:"text"`
@@ -54,6 +65,7 @@ type MaskMatch struct {
 	End   int    `json:"end"`
 }
 
+// PreparedProduct contains source text, masked text, tokens, and index terms.
 type PreparedProduct struct {
 	SKU               string          `json:"sku"`
 	Title             string          `json:"title"`
@@ -65,21 +77,25 @@ type PreparedProduct struct {
 	IndexText         string          `json:"index_text"`
 }
 
+// SearchRequest contains a query to prepare and match against the catalog.
 type SearchRequest struct {
 	Query string `json:"query"`
 }
 
+// SearchHit identifies a matching product and the terms matched for it.
 type SearchHit struct {
 	SKU          string   `json:"sku"`
 	MatchedTerms []string `json:"matched_terms"`
 }
 
+// SearchResult contains prepared query terms and matching products.
 type SearchResult struct {
 	Query      string      `json:"query"`
 	QueryTerms []string    `json:"query_terms"`
 	Hits       []SearchHit `json:"hits"`
 }
 
+// Preview contains the deterministic example payload and operating notes.
 type Preview struct {
 	Scenario       string            `json:"scenario"`
 	Tokenizer      string            `json:"tokenizer"`
@@ -90,6 +106,7 @@ type Preview struct {
 	Commands       []string          `json:"commands"`
 }
 
+// Service prepares products and searches a reusable Japanese-tokenized catalog.
 type Service struct {
 	tokenizer  *japanese.Tokenizer
 	dictionary *textsearch.BlockwordDictionary
@@ -135,6 +152,7 @@ func NewPreview() (Preview, error) {
 	}, nil
 }
 
+// NewService validates and prepares products with a reusable tokenizer and mask policy.
 func NewService(products []ProductInput, policy MaskPolicy) (*Service, error) {
 	if len(products) == 0 {
 		return nil, fmt.Errorf("%w: products are required", ErrInvalidProduct)
@@ -176,6 +194,7 @@ func NewService(products []ProductInput, policy MaskPolicy) (*Service, error) {
 	return service, nil
 }
 
+// Products returns a deep copy of the prepared catalog.
 func (s *Service) Products() []PreparedProduct {
 	if !s.valid() {
 		return nil
@@ -194,6 +213,7 @@ func (s *Service) Products() []PreparedProduct {
 	return copied
 }
 
+// Search returns products containing every prepared query term.
 func (s *Service) Search(request SearchRequest) (SearchResult, error) {
 	if !s.valid() {
 		return SearchResult{}, ErrInvalidService
@@ -378,6 +398,7 @@ func excludeOverlappingTokens(tokens []PreparedToken, matches []MaskMatch) {
 	}
 }
 
+// DefaultProducts returns the deterministic product fixtures used by the example.
 func DefaultProducts() []ProductInput {
 	return []ProductInput{
 		{
@@ -398,6 +419,7 @@ func DefaultProducts() []ProductInput {
 	}
 }
 
+// DefaultMaskPolicy returns the blockword policy used by the example.
 func DefaultMaskPolicy() MaskPolicy {
 	return MaskPolicy{
 		Entries: []textsearch.BlockwordEntry{{ID: "counterfeit", Text: "偽物", Severity: textsearch.SeverityHigh}},
