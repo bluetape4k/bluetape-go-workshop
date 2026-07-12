@@ -56,6 +56,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/s3-sqs-dynamodb-document-workflow`](examples/s3-sqs-dynamodb-document-workflow) | [English](examples/s3-sqs-dynamodb-document-workflow/README.md) \| [한국어](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | Local document workflow that stores objects in S3, publishes SQS events, and records DynamoDB idempotent processing state with opt-in multi-service Floci smoke coverage. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/text-moderation-masking`](examples/text-moderation-masking) | [English](examples/text-moderation-masking/README.md) \| [한국어](examples/text-moderation-masking/README.ko.md) | Local content moderation pass that uses deterministic `textsearch` blockword matching, allowlist subtraction, and Unicode-safe masking. | `textsearch` |
 | [`examples/gin-text-search-service`](examples/gin-text-search-service) | [English](examples/gin-text-search-service/README.md) \| [한국어](examples/gin-text-search-service/README.ko.md) | Gin API that exposes deterministic `textsearch` search/mask behavior with thin handlers, stable HTTP errors, and Unicode caveats. | `gin`, `textsearch` |
+| [`examples/multilingual-intake-feasibility`](examples/multilingual-intake-feasibility) | [English](examples/multilingual-intake-feasibility/README.md) \| [한국어](examples/multilingual-intake-feasibility/README.ko.md) | Local support-intake evaluator that exposes language confidence, mixed/unknown review reasons, and Japanese Kagome token byte spans. | `textsearch/language`, `textsearch/japanese`, `testing/concurrency` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -354,6 +355,26 @@ Run the focused tests:
 
 ```bash
 go test -count=1 ./examples/gin-text-search-service/...
+```
+
+## Run the Multilingual Intake Feasibility Example
+
+Print the local English, Korean, Japanese, mixed, short, and unknown intake
+report:
+
+```bash
+go run ./examples/multilingual-intake-feasibility
+```
+
+The example exposes heuristic confidence and manual-review reasons explicitly.
+Only confident non-mixed Japanese input uses Kagome; English and Korean
+tokenization remain intentionally unsupported.
+
+Run deterministic and shared-instance race tests:
+
+```bash
+go test -count=1 ./examples/multilingual-intake-feasibility/...
+go test -race -count=1 ./examples/multilingual-intake-feasibility/...
 ```
 
 ## Run the Leader Example

@@ -56,6 +56,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/s3-sqs-dynamodb-document-workflow`](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | [English](examples/s3-sqs-dynamodb-document-workflow/README.md) \| [한국어](examples/s3-sqs-dynamodb-document-workflow/README.ko.md) | S3 object 저장, SQS event 발행, DynamoDB idempotent processing state 기록을 하나로 합친 local document workflow 예제입니다. | `AWS SDK v2`, `testcontainers/floci` |
 | [`examples/text-moderation-masking`](examples/text-moderation-masking/README.ko.md) | [English](examples/text-moderation-masking/README.md) \| [한국어](examples/text-moderation-masking/README.ko.md) | Deterministic `textsearch` blockword matching, allowlist subtraction, Unicode-safe masking을 사용하는 local content moderation pass입니다. | `textsearch` |
 | [`examples/gin-text-search-service`](examples/gin-text-search-service/README.ko.md) | [English](examples/gin-text-search-service/README.md) \| [한국어](examples/gin-text-search-service/README.ko.md) | Thin handler, stable HTTP error, Unicode caveat를 포함해 deterministic `textsearch` search/mask 동작을 노출하는 Gin API 예제입니다. | `gin`, `textsearch` |
+| [`examples/multilingual-intake-feasibility`](examples/multilingual-intake-feasibility/README.ko.md) | [English](examples/multilingual-intake-feasibility/README.md) \| [한국어](examples/multilingual-intake-feasibility/README.ko.md) | Language confidence, mixed/unknown review reason, Japanese Kagome token byte span을 노출하는 local support-intake evaluator입니다. | `textsearch/language`, `textsearch/japanese`, `testing/concurrency` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -354,6 +355,25 @@ Focused test를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/gin-text-search-service/...
+```
+
+## Multilingual Intake Feasibility 예제 실행
+
+English, Korean, Japanese, mixed, short, unknown intake report를 출력합니다.
+
+```bash
+go run ./examples/multilingual-intake-feasibility
+```
+
+이 예제는 heuristic confidence와 manual-review reason을 명시적으로 노출합니다.
+Confidence가 충분하며 혼합되지 않은 Japanese 입력만 Kagome을 사용하고 English와
+Korean tokenization은 의도적으로 지원하지 않습니다.
+
+Deterministic test와 shared-instance race test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/multilingual-intake-feasibility/...
+go test -race -count=1 ./examples/multilingual-intake-feasibility/...
 ```
 
 ## Leader 예제 실행
