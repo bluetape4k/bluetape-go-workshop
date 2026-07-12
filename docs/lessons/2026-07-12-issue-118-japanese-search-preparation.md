@@ -93,8 +93,12 @@ hand-maintained as a separate contract.
 
 ## Fresh Verification Evidence
 
-All evidence below was collected sequentially from repaired HEAD
-`741234e650d1c8a4be61793dea34fd7ac180ff9e` on 2026-07-12:
+The behavioral implementation, public documentation, review repairs, and final
+proof were verified through `7f21b9bbbf89948bb6e919b7f93d032527b002ea`
+on 2026-07-12. The subsequent ledger-refresh commit changes only this lesson and
+the plan checklist; it changes no code, tests, dependencies, or public README.
+Because that commit cannot name itself, `git log` is the authority for its exact
+SHA.
 
 | Command or check | Result | Evidence |
 |---|---|---|
@@ -125,6 +129,7 @@ rune/display offsets, a shared mutable matcher, or a public compatibility surfac
 Any change to tokenization mode, normalization, mask boundary, index encoding, or
 span ownership also requires new fixtures and focused normal/race proof.
 
-Delivery stops at the local documentation commit. PR creation, issue edits, merge,
-push, branch deletion, and local synchronization are outside this task. Final
+Delivery stops at the local ledger-refresh commit on top of `7f21b9b`. PR creation,
+issue edits, merge, push, branch deletion, and local synchronization are outside
+this task. `git log` is the authority for the exact final local commit. Final
 severity count: P0=0, P1=0; no unresolved delivery blocker is known.

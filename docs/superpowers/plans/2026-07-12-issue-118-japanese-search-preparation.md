@@ -55,7 +55,7 @@ No `go.mod`, workflow, module registration, diagram, Docker fixture, or public l
 - Create: `examples/japanese-search-preparation/internal/catalogprep/service_test.go`
 - Create: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 
-- [ ] **Step 1: Write failing constructor, zero-value, validation, and deep-copy tests**
+- [x] **Step 1: Write failing constructor, zero-value, validation, and deep-copy tests**
 
 Add tests with these concrete contracts:
 
@@ -106,7 +106,7 @@ func TestProductsReturnsDeepCopy(t *testing.T) {
 
 Define `newTestService` in the test file using `DefaultProducts()` and `DefaultMaskPolicy()`.
 
-- [ ] **Step 2: Run the focused test and capture RED**
+- [x] **Step 2: Run the focused test and capture RED**
 
 Run:
 
@@ -116,7 +116,7 @@ go test -count=1 ./examples/japanese-search-preparation/internal/catalogprep
 
 Expected: FAIL because the package contract does not exist. Record the undefined symbols or missing package error; a setup/dependency error is not valid RED.
 
-- [ ] **Step 3: Implement the minimal constructor-owned contract**
+- [x] **Step 3: Implement the minimal constructor-owned contract**
 
 Create `service.go` with the exact public shape from the spec:
 
@@ -265,11 +265,11 @@ func (s *Service) prepareProduct(input ProductInput) (PreparedProduct, error) {
 }
 ```
 
-- [ ] **Step 4: Run the focused tests and capture GREEN**
+- [x] **Step 4: Run the focused tests and capture GREEN**
 
 Run the same focused command. Expected: PASS for Task 1 tests. Temporary minimal preparation may return an empty-but-owned projection only until Task 2; it must still validate upstream request limits rather than bypassing them.
 
-- [ ] **Step 5: Commit Task 1**
+- [x] **Step 5: Commit Task 1**
 
 ```bash
 git add examples/japanese-search-preparation/internal/catalogprep/service.go examples/japanese-search-preparation/internal/catalogprep/service_test.go
@@ -286,7 +286,7 @@ git commit -m "feat: define Japanese catalog preparation contract"
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service_test.go`
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 
-- [ ] **Step 1: Add failing token, normalization, POS, masking, and oversized-input tests**
+- [x] **Step 1: Add failing token, normalization, POS, masking, and oversized-input tests**
 
 Use a fixed product whose unsafe noun is observable:
 
@@ -343,11 +343,11 @@ func TestPrepareProductUsesNFCWithoutMovingSourceSpans(t *testing.T) {
 
 Add table cases for input longer than `textsearch.MaxTokenizeTextLength` and assert both `ErrInvalidProduct` and `textsearch.ErrTokenizeTextTooLong` remain inspectable with `errors.Is`.
 
-- [ ] **Step 2: Run the focused test and capture RED**
+- [x] **Step 2: Run the focused test and capture RED**
 
 Expected: FAIL because preparation/masking fields and behavior are absent or incorrect.
 
-- [ ] **Step 3: Implement preparation and masking projection**
+- [x] **Step 3: Implement preparation and masking projection**
 
 Implement `prepareField`, `prepareProduct`, `indexTerm`, and overlap helpers. The core projection is:
 
@@ -402,7 +402,7 @@ func productBySKU(t *testing.T, products []PreparedProduct, sku string) Prepared
 }
 ```
 
-- [ ] **Step 4: Run focused normal and race tests**
+- [x] **Step 4: Run focused normal and race tests**
 
 ```bash
 go test -count=1 ./examples/japanese-search-preparation/internal/catalogprep
@@ -411,7 +411,7 @@ go test -race -count=1 ./examples/japanese-search-preparation/internal/catalogpr
 
 Expected: PASS. If the NFC fixture exposes a different Kagome segmentation, preserve the contract assertion (normalization plus original slicing) and adjust only fixture-specific token lookup, not the source-span rule.
 
-- [ ] **Step 5: Commit Task 2**
+- [x] **Step 5: Commit Task 2**
 
 ```bash
 git add examples/japanese-search-preparation/internal/catalogprep
@@ -428,7 +428,7 @@ git commit -m "feat: prepare and mask Japanese catalog terms"
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service_test.go`
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 
-- [ ] **Step 1: Add failing search success, ordering, no-match, and invalid-query tests**
+- [x] **Step 1: Add failing search success, ordering, no-match, and invalid-query tests**
 
 ```go
 func TestSearchRequiresAllPreparedTermsAndSortsBySKU(t *testing.T) {
@@ -474,11 +474,11 @@ func hitSKUs(hits []SearchHit) []string {
 }
 ```
 
-- [ ] **Step 2: Run the focused test and capture RED**
+- [x] **Step 2: Run the focused test and capture RED**
 
 Expected: FAIL at the missing or incomplete `Search` implementation.
 
-- [ ] **Step 3: Implement query preparation and matcher-based search**
+- [x] **Step 3: Implement query preparation and matcher-based search**
 
 Prepare query terms with the same NFC/base-form projection. Compile patterns using term text as stable IDs:
 
@@ -496,11 +496,11 @@ matcher, err := textsearch.Compile(patterns, textsearch.Config{
 
 For each product, call `matcher.FindAll(product.IndexText)`, collect unique matched pattern IDs, and emit a hit only when every query term matched. Return matched terms in query order and sort hits by SKU. Allocate non-nil empty `QueryTerms`/`Hits` slices for successful empty results.
 
-- [ ] **Step 4: Run focused normal and race tests**
+- [x] **Step 4: Run focused normal and race tests**
 
 Expected: both PASS with exact hit and ordering assertions.
 
-- [ ] **Step 5: Commit Task 3**
+- [x] **Step 5: Commit Task 3**
 
 ```bash
 git add examples/japanese-search-preparation/internal/catalogprep
@@ -518,7 +518,7 @@ git commit -m "feat: search prepared Japanese catalog terms"
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 - Create: `examples/japanese-search-preparation/main.go`
 
-- [ ] **Step 1: Add failing bounded concurrency and preview tests**
+- [x] **Step 1: Add failing bounded concurrency and preview tests**
 
 Use `concurrencytest.NewGoroutineStressTester` with 6 workers, 6 tasks, 3 rounds, and a 5-second timeout. Share one service. Every task must assert exact hit SKUs, JP-200 masked text, and every returned source span:
 
@@ -570,11 +570,11 @@ func validateProducts(products []PreparedProduct) error {
 
 Add `TestNewPreviewDocumentsScenario` asserting three products, three searches, one masked fixture, lifecycle/boundary notes, and exact focused normal/race commands.
 
-- [ ] **Step 2: Run focused normal and race tests and capture RED**
+- [x] **Step 2: Run focused normal and race tests and capture RED**
 
 Expected: preview test FAIL before `NewPreview`; concurrency assertions may expose any shared-slice defect.
 
-- [ ] **Step 3: Implement Preview and CLI**
+- [x] **Step 3: Implement Preview and CLI**
 
 `NewPreview` constructs one service from defaults, copies its products, evaluates fixed queries `"ランニング シューズ"`, `"保存 容器"`, and `"宇宙船"`, and returns deterministic JSON-friendly slices.
 
@@ -592,7 +592,7 @@ func main() {
 }
 ```
 
-- [ ] **Step 4: Run focused proof and validate CLI JSON**
+- [x] **Step 4: Run focused proof and validate CLI JSON**
 
 ```bash
 go test -count=1 ./examples/japanese-search-preparation/...
@@ -603,7 +603,7 @@ python3 -m json.tool /tmp/japanese-search-preparation.json >/dev/null
 
 Expected: all commands PASS; output contains `JP-100`, `JP-200`, `kagome-ipa-search`, and masked `**`.
 
-- [ ] **Step 5: Commit Task 4**
+- [x] **Step 5: Commit Task 4**
 
 ```bash
 git add examples/japanese-search-preparation
@@ -620,15 +620,15 @@ git commit -m "feat: add Japanese search preparation preview"
 - Modify: `README.md`
 - Modify: `README.ko.md`
 
-- [ ] **Step 1: Write the paired example READMEs from actual output**
+- [x] **Step 1: Write the paired example READMEs from actual output**
 
 Both files must include package lesson, three-stage flow, run/test commands, representative token/POS/span/index/search/mask output, Normal-vs-Search mode intent, construct-once reuse, IPA dictionary footprint, NFC/source-span semantics, substring masking boundary, and non-goals. English public prose is authoritative; Korean content mirrors every factual section.
 
-- [ ] **Step 2: Add root navigation and run sections**
+- [x] **Step 2: Add root navigation and run sections**
 
 Insert one table row beside the other textsearch examples and one compact run section in both root locales. Link English and Korean example files explicitly.
 
-- [ ] **Step 3: Verify locale parity and links**
+- [x] **Step 3: Verify locale parity and links**
 
 ```bash
 test -f examples/japanese-search-preparation/README.md
@@ -640,7 +640,7 @@ git diff --check
 
 Expected: both locale files and both root files contain the example links/commands; diff check is clean.
 
-- [ ] **Step 4: Commit Task 5**
+- [x] **Step 4: Commit Task 5**
 
 ```bash
 git add README.md README.ko.md examples/japanese-search-preparation/README.md examples/japanese-search-preparation/README.ko.md
@@ -655,7 +655,7 @@ git commit -m "docs: explain Japanese search preparation"
 - Review all branch changes against the spec and plan.
 - Create `docs/lessons/2026-07-12-issue-118-japanese-search-preparation.md` with evidence or an evidence-backed N/A decision, as required by the Type A workflow.
 
-- [ ] **Step 1: Run fast static and focused gates**
+- [x] **Step 1: Run fast static and focused gates**
 
 ```bash
 make fmt-check
@@ -668,7 +668,7 @@ go test -race -count=1 ./examples/japanese-search-preparation/...
 
 Expected: every command PASS with no lint or race finding.
 
-- [ ] **Step 2: Run repository-wide CI sequentially**
+- [x] **Step 2: Run repository-wide CI sequentially**
 
 ```bash
 make ci
@@ -676,15 +676,15 @@ make ci
 
 Expected: tidy, format, vet, lint, all normal tests, and all race tests PASS. Do not run another Docker-backed suite in parallel.
 
-- [ ] **Step 3: Verify spec/plan acceptance line by line**
+- [x] **Step 3: Verify spec/plan acceptance line by line**
 
 Read the spec, this plan, command JSON, README pair, tests, and diff. Record each acceptance row PASS or return to the owning task. Confirm `go.mod` is unchanged and no HTTP, ranking, persistence, new dependency, or rune-offset contract appeared.
 
-- [ ] **Step 4: Run final structural and severity review**
+- [x] **Step 4: Run final structural and severity review**
 
 Read `performance-stability-scan.md`, attempt CodeGraph change detection with explicit new files, then perform the six Type A perspectives plus main integration. When the collaboration spawn schema lacks a separate `agent_type` field, explicitly inject the installed native role into each child prompt; this workflow used executor, verifier, code-reviewer, and writer lanes. P0 or P1 blocks delivery; fix, rerun affected focused/full gates, and repeat the affected lens.
 
-- [ ] **Step 5: Commit the required durable lesson**
+- [x] **Step 5: Commit the required durable lesson**
 
 Write the concrete decision, normalization/span distinction, masked-token exclusion, verification evidence, observed misses, and future guard. Then:
 
@@ -693,7 +693,7 @@ git add docs/lessons/2026-07-12-issue-118-japanese-search-preparation.md
 git commit -m "docs: record Japanese search preparation lessons"
 ```
 
-- [ ] **Step 6: Stop at the external delivery boundary**
+- [x] **Step 6: Stop at the external delivery boundary**
 
 Show branch commits, clean status, checklist counts, P0=0/P1=0, and verification evidence. PR creation, Issue #34 edit, merge, remote branch deletion, and local synchronization require explicit user authorization in the active thread.
 
