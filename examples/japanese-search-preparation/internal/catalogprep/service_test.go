@@ -2,7 +2,9 @@ package catalogprep
 
 import (
 	"errors"
+	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/bluetape4k/bluetape-go/textsearch"
@@ -197,6 +199,128 @@ func TestZeroValueServiceFailsClosed(t *testing.T) {
 	}
 }
 
+func TestSearchRequiresEveryPreparedQueryTerm(t *testing.T) {
+	result, err := newTestService(t).Search(SearchRequest{Query: "保存 容器"})
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	wantTerms := []string{"保存", "容器"}
+	if !slices.Equal(result.QueryTerms, wantTerms) {
+		t.Fatalf("QueryTerms = %#v, want %#v", result.QueryTerms, wantTerms)
+	}
+	if got, want := hitSKUs(result.Hits), []string{"JP-200"}; !slices.Equal(got, want) {
+		t.Fatalf("hit SKUs = %#v, want %#v", got, want)
+	}
+	if !slices.Equal(result.Hits[0].MatchedTerms, result.QueryTerms) {
+		t.Fatalf("MatchedTerms = %#v, want QueryTerms %#v", result.Hits[0].MatchedTerms, result.QueryTerms)
+	}
+}
+
+func TestSearchReturnsOwnedEmptyHitsForStableNonMatch(t *testing.T) {
+	result, err := newTestService(t).Search(SearchRequest{Query: "宇宙船"})
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if result.QueryTerms == nil {
+		t.Fatal("QueryTerms = nil, want owned non-nil slice")
+	}
+	if result.Hits == nil || len(result.Hits) != 0 {
+		t.Fatalf("Hits = %#v, want owned empty slice", result.Hits)
+	}
+}
+
+func TestSearchRejectsQueriesWithoutIndexableTerms(t *testing.T) {
+	for _, query := range []string{" ", "の"} {
+		t.Run(query, func(t *testing.T) {
+			_, err := newTestService(t).Search(SearchRequest{Query: query})
+			if !errors.Is(err, ErrInvalidQuery) {
+				t.Fatalf("Search(%q) error = %v, want ErrInvalidQuery", query, err)
+			}
+		})
+	}
+}
+
+func TestSearchPreservesQueryPreparationErrors(t *testing.T) {
+	query := strings.Repeat("あ", textsearch.MaxTokenizeTextLength+1)
+	_, err := newTestService(t).Search(SearchRequest{Query: query})
+	if !errors.Is(err, ErrInvalidQuery) || !errors.Is(err, textsearch.ErrTokenizeTextTooLong) {
+		t.Fatalf("Search() error = %v, want ErrInvalidQuery and ErrTokenizeTextTooLong", err)
+	}
+}
+
+func TestSearchKeepsUniqueQueryTermsInFirstSeenOrder(t *testing.T) {
+	result, err := newTestService(t).Search(SearchRequest{Query: "保存 保存 容器 保存"})
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	want := []string{"保存", "容器"}
+	if !slices.Equal(result.QueryTerms, want) {
+		t.Fatalf("QueryTerms = %#v, want %#v", result.QueryTerms, want)
+	}
+}
+
+func TestSearchSortsMultipleHitsBySKU(t *testing.T) {
+	products := []ProductInput{
+		{SKU: "JP-Z", Title: "ガラス保存容器", SupportText: "食品を保存できます。"},
+		{SKU: "JP-A", Title: "密閉保存容器", SupportText: "食品を保存できます。"},
+	}
+	service, err := NewService(products, DefaultMaskPolicy())
+	if err != nil {
+		t.Fatalf("NewService() error = %v", err)
+	}
+
+	result, err := service.Search(SearchRequest{Query: "保存 容器"})
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if got, want := hitSKUs(result.Hits), []string{"JP-A", "JP-Z"}; !slices.Equal(got, want) {
+		t.Fatalf("hit SKUs = %#v, want %#v", got, want)
+	}
+}
+
+func TestSearchDoesNotMatchInsideSpaceDelimitedIndexTerm(t *testing.T) {
+	service := newTestService(t)
+	service.products = []PreparedProduct{{SKU: "JP-INSIDE", IndexText: "長期保存"}}
+
+	result, err := service.Search(SearchRequest{Query: "保存"})
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if got := hitSKUs(result.Hits); len(got) != 0 {
+		t.Fatalf("hit SKUs = %#v, want no substring match", got)
+	}
+}
+
+func TestSearchKeepsMatcherStateLocalToEachCall(t *testing.T) {
+	service := newTestService(t)
+	tests := []struct {
+		query string
+		want  []string
+	}{
+		{query: "保存 容器", want: []string{"JP-200"}},
+		{query: "自転車", want: []string{"JP-300"}},
+		{query: "宇宙船", want: []string{}},
+	}
+
+	var wait sync.WaitGroup
+	for _, tt := range tests {
+		tt := tt
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			result, err := service.Search(SearchRequest{Query: tt.query})
+			if err != nil {
+				t.Errorf("Search(%q) error = %v", tt.query, err)
+				return
+			}
+			if got := hitSKUs(result.Hits); !slices.Equal(got, tt.want) {
+				t.Errorf("Search(%q) hit SKUs = %#v, want %#v", tt.query, got, tt.want)
+			}
+		}()
+	}
+	wait.Wait()
+}
+
 func TestProductsPreservesOwnedEmptySlices(t *testing.T) {
 	products := newTestService(t).Products()
 	for _, product := range products {
@@ -252,4 +376,12 @@ func productBySKU(t *testing.T, products []PreparedProduct, sku string) Prepared
 	}
 	t.Fatalf("product %q not found in %#v", sku, products)
 	return PreparedProduct{}
+}
+
+func hitSKUs(hits []SearchHit) []string {
+	skus := make([]string, len(hits))
+	for i, hit := range hits {
+		skus[i] = hit.SKU
+	}
+	return skus
 }

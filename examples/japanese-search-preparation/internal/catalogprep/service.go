@@ -156,11 +156,59 @@ func (s *Service) Products() []PreparedProduct {
 	return copied
 }
 
-func (s *Service) Search(SearchRequest) (SearchResult, error) {
+func (s *Service) Search(request SearchRequest) (SearchResult, error) {
 	if !s.valid() {
 		return SearchResult{}, ErrInvalidService
 	}
-	return SearchResult{}, nil
+	if strings.TrimSpace(request.Query) == "" {
+		return SearchResult{}, fmt.Errorf("%w: query is required", ErrInvalidQuery)
+	}
+
+	tokens, err := s.prepareField("", request.Query)
+	if err != nil {
+		return SearchResult{}, fmt.Errorf("%w: prepare query: %w", ErrInvalidQuery, err)
+	}
+	queryTerms := uniqueIndexTerms(tokens)
+	if len(queryTerms) == 0 {
+		return SearchResult{}, fmt.Errorf("%w: query has no indexable terms", ErrInvalidQuery)
+	}
+
+	patterns := make([]textsearch.Pattern, len(queryTerms))
+	for i, term := range queryTerms {
+		patterns[i] = textsearch.Pattern{ID: term, Text: term}
+	}
+	matcher, err := textsearch.Compile(patterns, textsearch.Config{
+		Normalize: textsearch.NormalizeNFC,
+		Boundary:  textsearch.BoundaryUnicodeWord,
+		Overlap:   textsearch.OverlapLeftmostLongest,
+	})
+	if err != nil {
+		return SearchResult{}, fmt.Errorf("%w: compile query matcher: %w", ErrInvalidQuery, err)
+	}
+
+	hits := make([]SearchHit, 0)
+	for _, product := range s.products {
+		matched := make(map[string]struct{}, len(queryTerms))
+		for _, match := range matcher.FindAll(product.IndexText) {
+			matched[match.Pattern.ID] = struct{}{}
+		}
+		if len(matched) != len(queryTerms) {
+			continue
+		}
+		hits = append(hits, SearchHit{
+			SKU:          product.SKU,
+			MatchedTerms: slices.Clone(queryTerms),
+		})
+	}
+	slices.SortFunc(hits, func(left, right SearchHit) int {
+		return strings.Compare(left.SKU, right.SKU)
+	})
+
+	return SearchResult{
+		Query:      request.Query,
+		QueryTerms: queryTerms,
+		Hits:       hits,
+	}, nil
 }
 
 func (s *Service) valid() bool {
@@ -198,6 +246,21 @@ func (s *Service) prepareProduct(input ProductInput) (PreparedProduct, error) {
 	tokens := make([]PreparedToken, 0, len(titleTokens)+len(supportTokens))
 	tokens = append(tokens, titleTokens...)
 	tokens = append(tokens, supportTokens...)
+	indexTerms := uniqueIndexTerms(tokens)
+
+	return PreparedProduct{
+		SKU:               input.SKU,
+		Title:             input.Title,
+		SupportText:       input.SupportText,
+		MaskedSupportText: maskResponse.MaskedText,
+		MaskMatches:       maskMatches,
+		Tokens:            tokens,
+		IndexTerms:        indexTerms,
+		IndexText:         strings.Join(indexTerms, " "),
+	}, nil
+}
+
+func uniqueIndexTerms(tokens []PreparedToken) []string {
 	indexTerms := make([]string, 0, len(tokens))
 	seen := make(map[string]struct{}, len(tokens))
 	for _, token := range tokens {
@@ -214,17 +277,7 @@ func (s *Service) prepareProduct(input ProductInput) (PreparedProduct, error) {
 		seen[term] = struct{}{}
 		indexTerms = append(indexTerms, term)
 	}
-
-	return PreparedProduct{
-		SKU:               input.SKU,
-		Title:             input.Title,
-		SupportText:       input.SupportText,
-		MaskedSupportText: maskResponse.MaskedText,
-		MaskMatches:       maskMatches,
-		Tokens:            tokens,
-		IndexTerms:        indexTerms,
-		IndexText:         strings.Join(indexTerms, " "),
-	}, nil
+	return indexTerms
 }
 
 func (s *Service) prepareField(field Field, input string) ([]PreparedToken, error) {
