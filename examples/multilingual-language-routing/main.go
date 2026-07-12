@@ -20,7 +20,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	flags := flag.NewFlagSet("multilingual-language-routing", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	flags.Usage = func() {
-		fmt.Fprintln(stderr, "Usage: multilingual-language-routing [--preload]")
+		_, _ = fmt.Fprintln(stderr, "Usage: multilingual-language-routing [--preload]")
 		flags.PrintDefaults()
 	}
 	preload := flags.Bool("preload", false, "preload selected language models during router construction")
@@ -31,19 +31,19 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if flags.NArg() != 0 {
-		fmt.Fprintf(stderr, "unexpected argument: %q\n", flags.Arg(0))
+		_, _ = fmt.Fprintf(stderr, "unexpected argument: %q\n", flags.Arg(0))
 		return 2
 	}
 
 	preview, err := routing.NewPreview(*preload)
 	if err != nil {
-		fmt.Fprintf(stderr, "build multilingual language routing preview: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "build multilingual language routing preview: %v\n", err)
 		return 1
 	}
 	encoder := json.NewEncoder(stdout)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(preview); err != nil {
-		fmt.Fprintf(stderr, "encode multilingual language routing preview: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "encode multilingual language routing preview: %v\n", err)
 		return 1
 	}
 	return 0
