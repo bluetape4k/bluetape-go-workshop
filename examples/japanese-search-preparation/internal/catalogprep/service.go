@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 	"strings"
 
 	"github.com/bluetape4k/bluetape-go/textsearch"
@@ -145,11 +146,10 @@ func (s *Service) Products() []PreparedProduct {
 	copied := make([]PreparedProduct, len(s.products))
 	for i, product := range s.products {
 		copied[i] = product
-		copied[i].MaskMatches = append([]MaskMatch(nil), product.MaskMatches...)
-		copied[i].IndexTerms = append([]string(nil), product.IndexTerms...)
-		copied[i].Tokens = make([]PreparedToken, len(product.Tokens))
+		copied[i].MaskMatches = slices.Clone(product.MaskMatches)
+		copied[i].IndexTerms = slices.Clone(product.IndexTerms)
+		copied[i].Tokens = slices.Clone(product.Tokens)
 		for j, token := range product.Tokens {
-			copied[i].Tokens[j] = token
 			copied[i].Tokens[j].Metadata = maps.Clone(token.Metadata)
 		}
 	}

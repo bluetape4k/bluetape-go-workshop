@@ -36,6 +36,16 @@ func TestZeroValueServiceFailsClosed(t *testing.T) {
 	}
 }
 
+func TestProductsPreservesOwnedEmptySlices(t *testing.T) {
+	products := newTestService(t).Products()
+	for _, product := range products {
+		if product.MaskMatches == nil || product.Tokens == nil || product.IndexTerms == nil {
+			t.Fatalf("Products() slices for %q = mask matches %#v, tokens %#v, index terms %#v; want non-nil empties",
+				product.SKU, product.MaskMatches, product.Tokens, product.IndexTerms)
+		}
+	}
+}
+
 func TestProductsReturnsDeepCopy(t *testing.T) {
 	service := newTestService(t)
 	service.products = []PreparedProduct{{
