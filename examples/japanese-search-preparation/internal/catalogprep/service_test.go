@@ -59,46 +59,131 @@ func TestExcludeOverlappingTokensSweepsOrderedMatches(t *testing.T) {
 }
 
 func TestNewServicePreparesAndMasksDefaultCatalog(t *testing.T) {
-	product := productBySKU(t, newTestService(t).Products(), "JP-200")
-	if product.MaskedSupportText != "電子レンジで温めて使用できます。**に注意してください。" {
-		t.Fatalf("MaskedSupportText = %q", product.MaskedSupportText)
-	}
-	if len(product.MaskMatches) != 1 || product.MaskMatches[0].Text != "偽物" {
-		t.Fatalf("MaskMatches = %#v, want one 偽物 match", product.MaskMatches)
-	}
+	products := newTestService(t).Products()
+	for _, product := range products {
+		seenSupportToken := false
+		for _, token := range product.Tokens {
+			switch token.Field {
+			case FieldTitle:
+				if seenSupportToken {
+					t.Fatalf("%s title token %q appears after support tokens", product.SKU, token.Text)
+				}
+			case FieldSupportText:
+				seenSupportToken = true
+			default:
+				t.Fatalf("%s token %q has unexpected field %q", product.SKU, token.Text, token.Field)
+			}
+			source := product.Title
+			if token.Field == FieldSupportText {
+				source = product.SupportText
+			}
+			if token.Start < 0 || token.End > len(source) || token.Start >= token.End {
+				t.Fatalf("token %q has invalid %s span %d:%d", token.Text, token.Field, token.Start, token.End)
+			}
+			if got := source[token.Start:token.End]; got != token.Text {
+				t.Fatalf("token %q span slices %q from %s", token.Text, got, token.Field)
+			}
 
-	foundMaskedToken := false
-	for _, token := range product.Tokens {
-		source := product.Title
-		if token.Field == FieldSupportText {
-			source = product.SupportText
-		}
-		if token.Start < 0 || token.End > len(source) || token.Start >= token.End {
-			t.Fatalf("token %q has invalid %s span %d:%d", token.Text, token.Field, token.Start, token.End)
-		}
-		if got := source[token.Start:token.End]; got != token.Text {
-			t.Fatalf("token %q span slices %q from %s", token.Text, got, token.Field)
-		}
-		if token.POS == "" || token.Metadata[japanese.MetadataPOS] == "" {
-			t.Fatalf("token %q is missing POS data: %#v", token.Text, token)
-		}
-		if token.Text == "偽物" {
-			foundMaskedToken = true
-			if token.Indexable {
-				t.Fatalf("masked token is indexable: %#v", token)
+			pos := strings.Split(token.Metadata[japanese.MetadataPOS], "/")
+			if len(pos) != 4 || (pos[0] != "名詞" && pos[0] != "動詞") {
+				t.Fatalf("token %q POS metadata = %q, want four-part noun or verb hierarchy", token.Text, token.Metadata[japanese.MetadataPOS])
+			}
+			reconstructed := textsearch.Token{
+				Text:       token.Text,
+				Span:       textsearch.TokenSpan{Start: token.Start, End: token.End},
+				Normalized: token.Normalized,
+				POS:        textsearch.PartOfSpeech(token.POS),
+				Metadata:   token.Metadata,
+			}
+			if !japanese.IsNoun(reconstructed) && !japanese.IsVerb(reconstructed) {
+				t.Fatalf("token %q is neither a Kagome noun nor verb: %#v", token.Text, token)
 			}
 		}
 	}
-	if !foundMaskedToken {
-		t.Fatal("selected tokens do not contain 偽物")
+
+	// These exact terms intentionally lock the workshop fixture to bluetape-go
+	// v0.18.0's Kagome IPA search-mode output and its first-seen ordering.
+	wantIndexTerms := map[string][]string{
+		"JP-100": {"軽量", "ランニング", "シューズ", "毎日", "快適", "する"},
+		"JP-200": {"ガラス", "保存", "容器", "電子", "レンジ", "温める", "使用", "できる", "注意", "する", "くださる"},
+		"JP-300": {"折りたたみ", "自転車", "通勤", "便利", "走れる"},
 	}
-	for _, term := range product.IndexTerms {
-		if term == "偽物" {
-			t.Fatalf("IndexTerms contains masked term: %#v", product.IndexTerms)
+	for _, product := range products {
+		want := wantIndexTerms[product.SKU]
+		if !slices.Equal(product.IndexTerms, want) {
+			t.Fatalf("%s IndexTerms = %#v, want Kagome v0.18 fixture %#v", product.SKU, product.IndexTerms, want)
+		}
+		if product.IndexText != strings.Join(want, " ") {
+			t.Fatalf("%s IndexText = %q, want joined terms %#v", product.SKU, product.IndexText, want)
 		}
 	}
-	if product.IndexText != strings.Join(product.IndexTerms, " ") {
-		t.Fatalf("IndexText = %q, want joined terms %#v", product.IndexText, product.IndexTerms)
+	jp100 := productBySKU(t, products, "JP-100")
+	runningTokens := 0
+	for _, token := range jp100.Tokens {
+		if token.Text == "ランニング" {
+			runningTokens++
+		}
+	}
+	if runningTokens != 2 || countTerm(jp100.IndexTerms, "ランニング") != 1 {
+		t.Fatalf("JP-100 ランニング counts = %d tokens and %d index terms, want duplicate removal to 2 and 1",
+			runningTokens, countTerm(jp100.IndexTerms, "ランニング"))
+	}
+
+	product := productBySKU(t, products, "JP-200")
+	if product.MaskedSupportText != "電子レンジで温めて使用できます。**に注意してください。" {
+		t.Fatalf("MaskedSupportText = %q", product.MaskedSupportText)
+	}
+	wantMatch := MaskMatch{ID: "counterfeit", Text: "偽物", Start: 48, End: 54}
+	if len(product.MaskMatches) != 1 || product.MaskMatches[0] != wantMatch {
+		t.Fatalf("MaskMatches = %#v, want %#v", product.MaskMatches, []MaskMatch{wantMatch})
+	}
+	match := product.MaskMatches[0]
+	if got := product.SupportText[match.Start:match.End]; got != match.Text {
+		t.Fatalf("SupportText[%d:%d] = %q, want match text %q", match.Start, match.End, got, match.Text)
+	}
+
+	foundWarmVerb := false
+	foundOverlappingToken := false
+	for _, token := range product.Tokens {
+		if token.Text == "温め" {
+			foundWarmVerb = true
+			if token.BaseForm != "温める" {
+				t.Fatalf("温め BaseForm = %q, want 温める", token.BaseForm)
+			}
+		}
+		if byteSpansOverlap(token.Start, token.End, match.Start, match.End) && token.Field == FieldSupportText {
+			foundOverlappingToken = true
+			if token.Text != "偽物" || token.Start != 48 || token.End != 54 || token.Indexable {
+				t.Fatalf("overlapping token = %#v, want excluded 偽物 at 48:54", token)
+			}
+		}
+	}
+	if !foundWarmVerb {
+		t.Fatal("selected tokens do not contain 温め verb surface")
+	}
+	if !foundOverlappingToken {
+		t.Fatal("selected tokens do not contain a token overlapping the mask match")
+	}
+	if slices.Contains(product.IndexTerms, "温め") || !slices.Contains(product.IndexTerms, "温める") {
+		t.Fatalf("IndexTerms = %#v, want base-form 温める instead of surface 温め", product.IndexTerms)
+	}
+	if slices.Contains(product.IndexTerms, "偽物") {
+		t.Fatalf("IndexTerms contains masked term: %#v", product.IndexTerms)
+	}
+}
+
+func TestUniqueIndexTermsFallsBackToNormalizedSurfaceWithoutBaseForm(t *testing.T) {
+	tokens := []PreparedToken{
+		{Text: "ガラス", Normalized: "ガラス", BaseForm: "", Indexable: true},
+		{Text: "温め", Normalized: "温め", BaseForm: "温める", Indexable: true},
+		{Text: "ガラス", Normalized: "ガラス", BaseForm: "*", Indexable: true},
+	}
+	if tokens[0].BaseForm != "" || tokens[2].BaseForm != "*" {
+		t.Fatalf("fallback fixtures have BaseForm values %q and %q, want empty and *", tokens[0].BaseForm, tokens[2].BaseForm)
+	}
+	want := []string{"ガラス", "温める"}
+	if got := uniqueIndexTerms(tokens); !slices.Equal(got, want) {
+		t.Fatalf("uniqueIndexTerms() = %#v, want normalized surface fallback and base-form preference %#v", got, want)
 	}
 }
 
@@ -522,4 +607,14 @@ func hitSKUs(hits []SearchHit) []string {
 		skus[i] = hit.SKU
 	}
 	return skus
+}
+
+func countTerm(terms []string, want string) int {
+	count := 0
+	for _, term := range terms {
+		if term == want {
+			count++
+		}
+	}
+	return count
 }
