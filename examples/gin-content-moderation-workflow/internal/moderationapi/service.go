@@ -208,25 +208,96 @@ func (s *Service) Create(ctx context.Context, request CreateRequest) (Record, er
 }
 
 // Get returns one record by canonical content ID.
-func (s *Service) Get(ctx context.Context, _ string) (Record, error) {
+func (s *Service) Get(ctx context.Context, contentID string) (Record, error) {
 	if !s.ready() {
 		return Record{}, ErrInvalidConfig
 	}
 	if err := ctx.Err(); err != nil {
 		return Record{}, err
 	}
-	return Record{}, ErrWorkflow
+	contentID = strings.TrimSpace(contentID)
+	if !contentIDPattern.MatchString(contentID) {
+		return Record{}, fmt.Errorf("%w: content_id is not path safe", ErrInvalidRequest)
+	}
+	s.mu.RLock()
+	record, exists := s.records[contentID]
+	if !exists {
+		s.mu.RUnlock()
+		return Record{}, fmt.Errorf("%w: %s", ErrRecordNotFound, contentID)
+	}
+	result := cloneRecord(*record)
+	s.mu.RUnlock()
+	return result, nil
 }
 
 // Search returns accepted records matching all prepared terms and metadata filters.
-func (s *Service) Search(ctx context.Context, _ SearchRequest) (SearchResponse, error) {
+func (s *Service) Search(ctx context.Context, request SearchRequest) (SearchResponse, error) {
 	if !s.ready() {
 		return SearchResponse{}, ErrInvalidConfig
 	}
 	if err := ctx.Err(); err != nil {
 		return SearchResponse{}, err
 	}
-	return SearchResponse{}, ErrWorkflow
+	query, metadata, limit, afterContentID, err := s.validateSearchRequest(request)
+	if err != nil {
+		return SearchResponse{}, err
+	}
+
+	var terms []string
+	if language.ContainsJapanese(query) {
+		_, terms, err = s.prepareJapaneseTerms(query)
+	} else {
+		terms, err = s.prepareSimpleTerms(query)
+	}
+	if err != nil {
+		return SearchResponse{}, fmt.Errorf("%w: prepare query terms: %w", ErrWorkflow, err)
+	}
+	if len(terms) == 0 {
+		return SearchResponse{}, fmt.Errorf("%w: query has no searchable terms", ErrInvalidRequest)
+	}
+	if err := ctx.Err(); err != nil {
+		return SearchResponse{}, err
+	}
+
+	s.mu.RLock()
+	snapshot := make([]*Record, 0, len(s.records))
+	for _, record := range s.records {
+		snapshot = append(snapshot, record)
+	}
+	s.mu.RUnlock()
+
+	hits := make([]SearchHit, 0, min(limit+1, len(snapshot)))
+	for i, record := range snapshot {
+		if i%32 == 0 {
+			if err := ctx.Err(); err != nil {
+				return SearchResponse{}, err
+			}
+		}
+		if record.ContentID <= afterContentID || (record.Outcome != OutcomeAllowed && record.Outcome != OutcomeMasked) {
+			continue
+		}
+		if !metadataMatches(record.Metadata, metadata) || !containsAllTerms(record.Terms, terms) {
+			continue
+		}
+		hits = append(hits, SearchHit{
+			ContentID:   record.ContentID,
+			Outcome:     record.Outcome,
+			DisplayText: record.DisplayText,
+			Metadata:    maps.Clone(record.Metadata),
+			Language:    record.Language,
+		})
+	}
+	slices.SortFunc(hits, func(left, right SearchHit) int {
+		return strings.Compare(left.ContentID, right.ContentID)
+	})
+
+	response := SearchResponse{Hits: hits}
+	if len(response.Hits) > limit {
+		response.Hits = response.Hits[:limit]
+		response.Truncated = true
+		response.NextAfterContentID = response.Hits[len(response.Hits)-1].ContentID
+	}
+	return response, nil
 }
 
 func (s *Service) ready() bool {
@@ -250,6 +321,53 @@ func (s *Service) validateCreateRequest(request CreateRequest) (string, map[stri
 		return "", nil, err
 	}
 	return contentID, metadata, nil
+}
+
+func (s *Service) validateSearchRequest(request SearchRequest) (string, map[string]string, int, string, error) {
+	if !utf8.ValidString(request.Query) || strings.TrimSpace(request.Query) == "" {
+		return "", nil, 0, "", fmt.Errorf("%w: query must be nonblank UTF-8", ErrInvalidRequest)
+	}
+	if utf8.RuneCountInString(request.Query) > s.config.MaximumContentRunes {
+		return "", nil, 0, "", fmt.Errorf("%w: query exceeds %d runes", ErrInvalidRequest, s.config.MaximumContentRunes)
+	}
+	metadata, err := canonicalMetadata(request.Metadata)
+	if err != nil {
+		return "", nil, 0, "", err
+	}
+	limit := request.Limit
+	if limit == 0 {
+		limit = defaultSearchLimit
+	}
+	if limit < 0 || limit > s.config.MaximumSearchResults {
+		return "", nil, 0, "", fmt.Errorf("%w: limit must be between one and %d", ErrInvalidRequest, s.config.MaximumSearchResults)
+	}
+	afterContentID := strings.TrimSpace(request.AfterContentID)
+	if afterContentID != "" && !contentIDPattern.MatchString(afterContentID) {
+		return "", nil, 0, "", fmt.Errorf("%w: after_content_id is not path safe", ErrInvalidRequest)
+	}
+	return request.Query, metadata, limit, afterContentID, nil
+}
+
+func metadataMatches(record, filters map[string]string) bool {
+	for key, value := range filters {
+		if record[key] != value {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllTerms(recordTerms, queryTerms []string) bool {
+	available := make(map[string]struct{}, len(recordTerms))
+	for _, term := range recordTerms {
+		available[term] = struct{}{}
+	}
+	for _, term := range queryTerms {
+		if _, exists := available[term]; !exists {
+			return false
+		}
+	}
+	return true
 }
 
 func canonicalMetadata(input map[string]string) (map[string]string, error) {

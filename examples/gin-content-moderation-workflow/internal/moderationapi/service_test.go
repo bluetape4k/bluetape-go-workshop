@@ -8,9 +8,11 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	concurrencytest "github.com/bluetape4k/bluetape-go/testing/concurrency"
 	"github.com/bluetape4k/bluetape-go/textsearch"
 	"github.com/bluetape4k/bluetape-go/textsearch/language"
 )
@@ -465,10 +467,330 @@ func TestCreateValidatesUTF8RuneAndIDBoundaries(t *testing.T) {
 	}
 }
 
+func TestGetReturnsDeepCopyAndValidatesID(t *testing.T) {
+	service := newCreateTestService(t)
+	created, err := service.Create(context.Background(), CreateRequest{
+		ContentID: "record-100",
+		Content:   "Please review the delivery status for order 12345.",
+		Metadata:  map[string]string{"tenant": "demo"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first, err := service.Get(context.Background(), "  record-100  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Content != created.Content || first.Metadata["tenant"] != "demo" {
+		t.Fatalf("record = %+v", first)
+	}
+	first.Metadata["tenant"] = "mutated"
+	first.Terms[0] = "mutated"
+	second, err := service.Get(context.Background(), "record-100")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Metadata["tenant"] != "demo" || slices.Contains(second.Terms, "mutated") {
+		t.Fatalf("Get exposed shared state: %+v", second)
+	}
+	if _, err := service.Get(context.Background(), "bad/id"); !errors.Is(err, ErrInvalidRequest) {
+		t.Fatalf("invalid ID err = %v", err)
+	}
+	if _, err := service.Get(context.Background(), "missing"); !errors.Is(err, ErrRecordNotFound) {
+		t.Fatalf("missing ID err = %v", err)
+	}
+}
+
+func TestSearchMatchesAllTermsMetadataAndAcceptedRecords(t *testing.T) {
+	service := newCreateTestService(t)
+	requests := []CreateRequest{
+		{ContentID: "article-100", Content: "Please review the delivery status for order 12345.", Metadata: map[string]string{"tenant": "demo", "category": "support"}},
+		{ContentID: "article-200", Content: "The delivery status includes bad details for order 67890.", Metadata: map[string]string{"tenant": "demo", "category": "support"}},
+		{ContentID: "article-300", Content: "Please review the delivery estimate for order 24680.", Metadata: map[string]string{"tenant": "demo", "category": "support"}},
+		{ContentID: "article-400", Content: "Please review the delivery status for order 13579.", Metadata: map[string]string{"tenant": "other", "category": "support"}},
+		{ContentID: "article-500", Content: "Please 配送状況を確認してください for order 97531.", Metadata: map[string]string{"tenant": "demo", "category": "support"}},
+	}
+	for _, request := range requests {
+		if _, err := service.Create(context.Background(), request); err != nil {
+			t.Fatalf("Create(%s): %v", request.ContentID, err)
+		}
+	}
+
+	response, err := service.Search(context.Background(), SearchRequest{
+		Query: "delivery status delivery",
+		Metadata: map[string]string{
+			" tenant ": "demo",
+			"category": "support",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := searchHitIDs(response.Hits); !slices.Equal(got, []string{"article-100", "article-200"}) {
+		t.Fatalf("hit IDs = %#v", got)
+	}
+	if response.Hits[1].Outcome != OutcomeMasked || !strings.Contains(response.Hits[1].DisplayText, "***") {
+		t.Fatalf("masked hit = %+v", response.Hits[1])
+	}
+	response.Hits[0].Metadata["tenant"] = "mutated"
+	again, err := service.Search(context.Background(), SearchRequest{Query: "delivery status", Metadata: map[string]string{"tenant": "demo"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again.Hits[0].Metadata["tenant"] != "demo" {
+		t.Fatalf("Search exposed shared metadata: %+v", again.Hits[0])
+	}
+}
+
+func TestSearchPaginatesAndReturnsNonNilEmptyHits(t *testing.T) {
+	service := newCreateTestService(t)
+	for _, id := range []string{"page-100", "page-200", "page-300"} {
+		if _, err := service.Create(context.Background(), CreateRequest{ContentID: id, Content: "Please review the delivery status for order 12345."}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, err := service.Search(context.Background(), SearchRequest{Query: "delivery", Limit: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !first.Truncated || first.NextAfterContentID != "page-100" || !slices.Equal(searchHitIDs(first.Hits), []string{"page-100"}) {
+		t.Fatalf("first page = %+v", first)
+	}
+	second, err := service.Search(context.Background(), SearchRequest{Query: "delivery", Limit: 2, AfterContentID: first.NextAfterContentID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Truncated || second.NextAfterContentID != "" || !slices.Equal(searchHitIDs(second.Hits), []string{"page-200", "page-300"}) {
+		t.Fatalf("second page = %+v", second)
+	}
+	empty, err := service.Search(context.Background(), SearchRequest{Query: "delivery", AfterContentID: "zzzz"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if empty.Hits == nil || len(empty.Hits) != 0 || empty.Truncated {
+		t.Fatalf("empty response = %+v", empty)
+	}
+}
+
+func TestSearchUsesJapaneseQueryPreparation(t *testing.T) {
+	service := newCreateTestService(t)
+	for _, request := range []CreateRequest{
+		{ContentID: "ja-100", Content: "配送状況を確認してください。注文番号は12345です。"},
+		{ContentID: "ja-200", Content: "保存容器を確認してください。商品番号は67890です。"},
+	} {
+		if _, err := service.Create(context.Background(), request); err != nil {
+			t.Fatal(err)
+		}
+	}
+	response, err := service.Search(context.Background(), SearchRequest{Query: "配送状況を確認した"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := searchHitIDs(response.Hits); !slices.Equal(got, []string{"ja-100"}) {
+		t.Fatalf("Japanese hit IDs = %#v", got)
+	}
+}
+
+func TestSearchValidatesRequest(t *testing.T) {
+	service := newCreateTestService(t)
+	invalid := []SearchRequest{
+		{Query: ""},
+		{Query: string([]byte{0xff})},
+		{Query: strings.Repeat("가", 8_001)},
+		{Query: "delivery", Limit: -1},
+		{Query: "delivery", Limit: 101},
+		{Query: "delivery", AfterContentID: "bad/id"},
+		{Query: "delivery", Metadata: map[string]string{" ": "demo"}},
+		{Query: "delivery", Metadata: map[string]string{"tenant": "demo", " tenant ": "other"}},
+	}
+	for _, request := range invalid {
+		if _, err := service.Search(context.Background(), request); !errors.Is(err, ErrInvalidRequest) {
+			t.Fatalf("request %+v: err = %v", request, err)
+		}
+	}
+}
+
+func TestSearchChecksCancellationDuringScan(t *testing.T) {
+	service := newCreateTestService(t)
+	for i := range 100 {
+		id := fmt.Sprintf("scan-%03d", i)
+		service.records[id] = &Record{ContentID: id, Outcome: OutcomeAllowed, DisplayText: "delivery", Metadata: map[string]string{}, Terms: []string{"delivery"}}
+	}
+	ctx := &countingCanceledContext{cancelAt: 4}
+	if _, err := service.Search(ctx, SearchRequest{Query: "delivery"}); !errors.Is(err, context.Canceled) {
+		t.Fatalf("err = %v, checks = %d", err, ctx.calls)
+	}
+}
+
+func TestSearchSnapshotAllowsWriterProgress(t *testing.T) {
+	service := newCreateTestService(t)
+	for i := range 64 {
+		id := fmt.Sprintf("active-search-%03d", i)
+		service.records[id] = &Record{ContentID: id, Outcome: OutcomeAllowed, DisplayText: "delivery", Metadata: map[string]string{}, Terms: []string{"delivery"}}
+	}
+
+	ctx := newScanGateContext()
+	searchDone := make(chan error, 1)
+	go func() {
+		_, err := service.Search(ctx, SearchRequest{Query: "delivery"})
+		searchDone <- err
+	}()
+	select {
+	case <-ctx.entered:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Search did not reach the post-snapshot scan gate")
+	}
+
+	writeDone := make(chan error, 1)
+	go func() {
+		_, err := service.Create(context.Background(), CreateRequest{ContentID: "writer-progress", Content: "Please review the delivery status for order 12345."})
+		writeDone <- err
+	}()
+	select {
+	case err := <-writeDone:
+		if err != nil {
+			t.Fatalf("Create while Search active: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Create blocked while Search was scanning its snapshot")
+	}
+	close(ctx.release)
+	select {
+	case err := <-searchDone:
+		if err != nil {
+			t.Fatalf("Search after gate release: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Search did not complete after gate release")
+	}
+}
+
+func TestServiceSharedReuseUnderBoundedConcurrency(t *testing.T) {
+	service := newCreateTestService(t)
+	if _, err := service.Create(context.Background(), CreateRequest{ContentID: "seed", Content: "Please review the delivery status for order 12345."}); err != nil {
+		t.Fatal(err)
+	}
+
+	const taskCount = 6
+	tasks := make([]concurrencytest.Task, taskCount)
+	var arrivalMu sync.Mutex
+	arrived := 0
+	release := make(chan struct{})
+	for i := range tasks {
+		index := i
+		once := &sync.Once{}
+		tasks[i] = func(ctx context.Context) error {
+			once.Do(func() {
+				arrivalMu.Lock()
+				defer arrivalMu.Unlock()
+				arrived++
+				if arrived == taskCount {
+					close(release)
+				}
+			})
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-release:
+			}
+			id := fmt.Sprintf("concurrent-%d", index)
+			if _, err := service.Create(ctx, CreateRequest{ContentID: id, Content: "Please review the delivery status for order 12345."}); err != nil && !errors.Is(err, ErrDuplicateContentID) {
+				return err
+			}
+			if _, err := service.Get(ctx, "seed"); err != nil {
+				return err
+			}
+			response, err := service.Search(ctx, SearchRequest{Query: "delivery"})
+			if err != nil {
+				return err
+			}
+			if len(response.Hits) == 0 {
+				return errors.New("Search returned no accepted records")
+			}
+			return nil
+		}
+	}
+	tester := concurrencytest.NewGoroutineStressTester(concurrencytest.Options{Workers: taskCount, RoundsPerTask: 3, Timeout: 5 * time.Second})
+	report := tester.RunT(t, tasks...)
+	if report.Completed != 18 || report.MaxConcurrent < 2 {
+		t.Fatalf("stress report = %+v", report)
+	}
+}
+
+func TestConcurrentDuplicateCreateHasOneWinner(t *testing.T) {
+	service := newCreateTestService(t)
+	start := make(chan struct{})
+	results := make(chan error, 8)
+	var workers sync.WaitGroup
+	for range 8 {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			<-start
+			_, err := service.Create(context.Background(), CreateRequest{ContentID: "same-id", Content: "Please review the delivery status for order 12345."})
+			results <- err
+		}()
+	}
+	close(start)
+	workers.Wait()
+	close(results)
+	winners := 0
+	conflicts := 0
+	for err := range results {
+		switch {
+		case err == nil:
+			winners++
+		case errors.Is(err, ErrDuplicateContentID):
+			conflicts++
+		default:
+			t.Fatalf("unexpected err = %v", err)
+		}
+	}
+	if winners != 1 || conflicts != 7 {
+		t.Fatalf("winners = %d, conflicts = %d", winners, conflicts)
+	}
+}
+
+func searchHitIDs(hits []SearchHit) []string {
+	ids := make([]string, len(hits))
+	for i, hit := range hits {
+		ids[i] = hit.ContentID
+	}
+	return ids
+}
+
 type countingCanceledContext struct {
 	cancelAt int
 	calls    int
 	canceled bool
+}
+
+type scanGateContext struct {
+	mu      sync.Mutex
+	calls   int
+	entered chan struct{}
+	release chan struct{}
+	once    sync.Once
+}
+
+func newScanGateContext() *scanGateContext {
+	return &scanGateContext{entered: make(chan struct{}), release: make(chan struct{})}
+}
+
+func (c *scanGateContext) Deadline() (time.Time, bool) { return time.Time{}, false }
+func (c *scanGateContext) Done() <-chan struct{}       { return nil }
+func (c *scanGateContext) Value(any) any               { return nil }
+func (c *scanGateContext) Err() error {
+	c.mu.Lock()
+	c.calls++
+	call := c.calls
+	c.mu.Unlock()
+	if call == 3 {
+		c.once.Do(func() { close(c.entered) })
+		<-c.release
+	}
+	return nil
 }
 
 func (c *countingCanceledContext) Deadline() (time.Time, bool) { return time.Time{}, false }
