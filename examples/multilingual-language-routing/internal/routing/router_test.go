@@ -2,10 +2,14 @@ package routing
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/bluetape4k/bluetape-go/textsearch/language"
@@ -225,5 +229,197 @@ func TestRouteReturnsCallerOwnedEvidence(t *testing.T) {
 	if second.Confidences[0].Language == "mutated" || second.Sections[0].Text == "mutated" ||
 		second.ScriptHints[0] == "mutated" || second.ReviewReasons[0] == "mutated" {
 		t.Fatalf("Route() exposed shared evidence: %#v", second)
+	}
+}
+
+func TestNewPreviewPreservesModelLoadingEquivalence(t *testing.T) {
+	lazyA, err := NewPreview(false)
+	if err != nil {
+		t.Fatalf("first NewPreview(false) error = %v", err)
+	}
+	lazyB, err := NewPreview(false)
+	if err != nil {
+		t.Fatalf("second NewPreview(false) error = %v", err)
+	}
+	preloaded, err := NewPreview(true)
+	if err != nil {
+		t.Fatalf("NewPreview(true) error = %v", err)
+	}
+
+	if !reflect.DeepEqual(lazyA, lazyB) {
+		t.Fatalf("lazy previews differ:\nfirst:  %#v\nsecond: %#v", lazyA, lazyB)
+	}
+	if lazyA.ModelLoading != "lazy" || preloaded.ModelLoading != "preloaded" {
+		t.Fatalf("model loading = %q/%q", lazyA.ModelLoading, preloaded.ModelLoading)
+	}
+	if lazyA.Config.PreloadModels || !preloaded.Config.PreloadModels {
+		t.Fatalf("preload config = %v/%v", lazyA.Config.PreloadModels, preloaded.Config.PreloadModels)
+	}
+	if !reflect.DeepEqual(lazyA.Decisions, preloaded.Decisions) {
+		t.Fatal("routing changed by model loading mode")
+	}
+	if !reflect.DeepEqual(lazyA.LowConfidenceFallback.Decision, preloaded.LowConfidenceFallback.Decision) {
+		t.Fatal("low-confidence routing changed by model loading mode")
+	}
+	if len(lazyA.Decisions) != 7 {
+		t.Fatalf("len(Decisions) = %d, want 7", len(lazyA.Decisions))
+	}
+	if lazyA.LowConfidenceFallback.Config.MinimumConfidence != 1.0 ||
+		!reflect.DeepEqual(lazyA.LowConfidenceFallback.Decision.ReviewReasons, []string{ReviewLowConfidence}) {
+		t.Fatalf("LowConfidenceFallback = %#v", lazyA.LowConfidenceFallback)
+	}
+
+	wantRoutes := map[string]struct {
+		route   string
+		reasons []string
+	}{
+		"preview-en":      {route: RouteModeration, reasons: []string{}},
+		"preview-ko":      {route: RouteModeration, reasons: []string{}},
+		"preview-ja":      {route: RouteJapaneseTokenization, reasons: []string{}},
+		"preview-zh":      {route: RouteManualReview, reasons: []string{ReviewUnsupportedLanguage}},
+		"preview-mixed":   {route: RouteManualReview, reasons: []string{ReviewMixedLanguage}},
+		"preview-short":   {route: RouteManualReview, reasons: []string{ReviewTextTooShort}},
+		"preview-unknown": {route: RouteManualReview, reasons: []string{ReviewLanguageUnknown}},
+	}
+	for _, decision := range lazyA.Decisions {
+		want, ok := wantRoutes[decision.ID]
+		if !ok || decision.Route != want.route || !reflect.DeepEqual(decision.ReviewReasons, want.reasons) {
+			t.Fatalf("Decision[%q] = route %q reasons %v", decision.ID, decision.Route, decision.ReviewReasons)
+		}
+	}
+}
+
+func TestNewPreviewDocumentsLifecycleAndHeuristicBoundaries(t *testing.T) {
+	preview, err := NewPreview(false)
+	if err != nil {
+		t.Fatalf("NewPreview(false) error = %v", err)
+	}
+	wantLifecycle := []string{
+		"Construct one detector and reuse it across requests.",
+		"Lazy loading defers model work; preloading moves it to construction without changing routes.",
+		"The example gathers three public evidence views with repeated detector work and projection allocations; production policies should request only what they use.",
+	}
+	wantBoundaries := []string{
+		"Language evidence is heuristic and must not control authentication, authorization, sanctions, or compliance.",
+		"Decisions retain original text for span inspection; callers own redaction, logging, telemetry, and access control.",
+		"Unsupported or uncertain evidence routes to manual review rather than a processor.",
+	}
+	if !reflect.DeepEqual(preview.LifecycleNotes, wantLifecycle) {
+		t.Fatalf("LifecycleNotes = %#v, want %#v", preview.LifecycleNotes, wantLifecycle)
+	}
+	if !reflect.DeepEqual(preview.HeuristicBoundaries, wantBoundaries) {
+		t.Fatalf("HeuristicBoundaries = %#v, want %#v", preview.HeuristicBoundaries, wantBoundaries)
+	}
+	wantCommands := []string{
+		"go test -count=1 ./examples/multilingual-language-routing/...",
+		"go test -race -count=1 ./examples/multilingual-language-routing/...",
+	}
+	if !reflect.DeepEqual(preview.TestCommands, wantCommands) {
+		t.Fatalf("TestCommands = %#v, want %#v", preview.TestCommands, wantCommands)
+	}
+}
+
+func TestRouterConcurrentFirstUse(t *testing.T) {
+	requests := []Request{
+		{ID: "en", Text: "Please review the delivery status for order 12345."},
+		{ID: "ko", Text: "주문 번호 12345의 배송 상태를 확인해 주세요."},
+		{ID: "ja", Text: "配送状況を確認してください。注文番号は12345です。"},
+		{ID: "zh", Text: "请确认订单12345的配送状态。"},
+		{ID: "mixed", Text: "Please check 配送状況を確認してください for order 12345."},
+		{ID: "unknown", Text: "12345 67890"},
+	}
+	for _, preload := range []bool{false, true} {
+		t.Run(fmt.Sprintf("preload=%t", preload), func(t *testing.T) {
+			config := DefaultConfig()
+			config.PreloadModels = preload
+			router, err := NewRouter(config)
+			if err != nil {
+				t.Fatalf("NewRouter() error = %v", err)
+			}
+			exerciseConcurrentRoutes(t, router, requests)
+		})
+	}
+	t.Run("GOMAXPROCS=1", func(t *testing.T) {
+		previous := runtime.GOMAXPROCS(1)
+		t.Cleanup(func() { runtime.GOMAXPROCS(previous) })
+		router, err := NewRouter(DefaultConfig())
+		if err != nil {
+			t.Fatalf("NewRouter() error = %v", err)
+		}
+		exerciseConcurrentRoutes(t, router, requests)
+	})
+}
+
+func exerciseConcurrentRoutes(t *testing.T, router *Router, requests []Request) {
+	t.Helper()
+	expected := map[string]struct {
+		route   string
+		reasons []string
+	}{
+		"en":      {route: RouteModeration, reasons: []string{}},
+		"ko":      {route: RouteModeration, reasons: []string{}},
+		"ja":      {route: RouteJapaneseTokenization, reasons: []string{}},
+		"zh":      {route: RouteManualReview, reasons: []string{ReviewUnsupportedLanguage}},
+		"mixed":   {route: RouteManualReview, reasons: []string{ReviewMixedLanguage}},
+		"unknown": {route: RouteManualReview, reasons: []string{ReviewLanguageUnknown}},
+	}
+	var completed, readyCount atomic.Int64
+	errCh := make(chan error, 18)
+	resultCh := make(chan Decision, 18)
+	for round := 0; round < 3; round++ {
+		var ready sync.WaitGroup
+		ready.Add(len(requests))
+		release := make(chan struct{})
+		var roundDone sync.WaitGroup
+		roundDone.Add(len(requests))
+		for _, request := range requests {
+			request := request
+			go func() {
+				defer roundDone.Done()
+				readyCount.Add(1)
+				ready.Done()
+				<-release
+				decision, err := router.Route(request)
+				if err != nil {
+					errCh <- err
+					return
+				}
+				resultCh <- decision
+				completed.Add(1)
+			}()
+		}
+		ready.Wait()
+		if got := readyCount.Load(); got != int64((round+1)*len(requests)) {
+			t.Fatalf("ready after round %d = %d", round, got)
+		}
+		close(release)
+		roundDone.Wait()
+	}
+	close(errCh)
+	close(resultCh)
+	for err := range errCh {
+		t.Errorf("Route error: %v", err)
+	}
+	first := make(map[string]Decision, len(requests))
+	counts := make(map[string]int, len(requests))
+	for decision := range resultCh {
+		contract, ok := expected[decision.ID]
+		if !ok || decision.Route != contract.route || !reflect.DeepEqual(decision.ReviewReasons, contract.reasons) {
+			t.Errorf("Decision[%s] = %#v, want route=%q reasons=%v", decision.ID, decision, contract.route, contract.reasons)
+		}
+		if previous, exists := first[decision.ID]; exists && !reflect.DeepEqual(decision, previous) {
+			t.Errorf("Decision[%s] changed across rounds: %#v != %#v", decision.ID, decision, previous)
+		} else if !exists {
+			first[decision.ID] = decision
+		}
+		counts[decision.ID]++
+	}
+	if completed.Load() != 18 {
+		t.Fatalf("completed = %d, want 18", completed.Load())
+	}
+	for id := range expected {
+		if counts[id] != 3 {
+			t.Fatalf("counts[%s] = %d, want 3", id, counts[id])
+		}
 	}
 }
