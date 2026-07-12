@@ -57,6 +57,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/text-moderation-masking`](examples/text-moderation-masking) | [English](examples/text-moderation-masking/README.md) \| [한국어](examples/text-moderation-masking/README.ko.md) | Local content moderation pass that uses deterministic `textsearch` blockword matching, allowlist subtraction, and Unicode-safe masking. | `textsearch` |
 | [`examples/gin-text-search-service`](examples/gin-text-search-service) | [English](examples/gin-text-search-service/README.md) \| [한국어](examples/gin-text-search-service/README.ko.md) | Gin API that exposes deterministic `textsearch` search/mask behavior with thin handlers, stable HTTP errors, and Unicode caveats. | `gin`, `textsearch` |
 | [`examples/multilingual-intake-feasibility`](examples/multilingual-intake-feasibility) | [English](examples/multilingual-intake-feasibility/README.md) \| [한국어](examples/multilingual-intake-feasibility/README.ko.md) | Local support-intake evaluator that exposes language confidence, mixed/unknown review reasons, and Japanese Kagome token byte spans. | `textsearch/language`, `textsearch/japanese`, `testing/concurrency` |
+| [`examples/japanese-search-preparation`](examples/japanese-search-preparation) | [English](examples/japanese-search-preparation/README.md) \| [한국어](examples/japanese-search-preparation/README.ko.md) | Local Japanese catalog preparation that combines Kagome Search-mode terms, source byte spans, support masking, and deterministic all-term matching. | `textsearch`, `textsearch/japanese`, `testing/concurrency` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -375,6 +376,25 @@ Run deterministic and shared-instance race tests:
 ```bash
 go test -count=1 ./examples/multilingual-intake-feasibility/...
 go test -race -count=1 ./examples/multilingual-intake-feasibility/...
+```
+
+## Run the Japanese Search Preparation Example
+
+Print the deterministic prepared-catalog and search preview:
+
+```bash
+go run ./examples/japanese-search-preparation
+```
+
+The example uses one reusable Kagome Search-mode tokenizer and dictionary to
+prepare NFC-normalized terms, exclude masked support tokens, and require every
+prepared query term to match.
+
+Run the focused normal and race tests:
+
+```bash
+go test -count=1 ./examples/japanese-search-preparation/...
+go test -race -count=1 ./examples/japanese-search-preparation/...
 ```
 
 ## Run the Leader Example

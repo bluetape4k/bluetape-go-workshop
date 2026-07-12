@@ -57,6 +57,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/text-moderation-masking`](examples/text-moderation-masking/README.ko.md) | [English](examples/text-moderation-masking/README.md) \| [한국어](examples/text-moderation-masking/README.ko.md) | Deterministic `textsearch` blockword matching, allowlist subtraction, Unicode-safe masking을 사용하는 local content moderation pass입니다. | `textsearch` |
 | [`examples/gin-text-search-service`](examples/gin-text-search-service/README.ko.md) | [English](examples/gin-text-search-service/README.md) \| [한국어](examples/gin-text-search-service/README.ko.md) | Thin handler, stable HTTP error, Unicode caveat를 포함해 deterministic `textsearch` search/mask 동작을 노출하는 Gin API 예제입니다. | `gin`, `textsearch` |
 | [`examples/multilingual-intake-feasibility`](examples/multilingual-intake-feasibility/README.ko.md) | [English](examples/multilingual-intake-feasibility/README.md) \| [한국어](examples/multilingual-intake-feasibility/README.ko.md) | Language confidence, mixed/unknown review reason, Japanese Kagome token byte span을 노출하는 local support-intake evaluator입니다. | `textsearch/language`, `textsearch/japanese`, `testing/concurrency` |
+| [`examples/japanese-search-preparation`](examples/japanese-search-preparation/README.ko.md) | [English](examples/japanese-search-preparation/README.md) \| [한국어](examples/japanese-search-preparation/README.ko.md) | Kagome Search-mode term, source byte span, support masking, deterministic all-term matching을 조합하는 local Japanese catalog preparation 예제입니다. | `textsearch`, `textsearch/japanese`, `testing/concurrency` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -374,6 +375,26 @@ Deterministic test와 shared-instance race test를 실행합니다.
 ```bash
 go test -count=1 ./examples/multilingual-intake-feasibility/...
 go test -race -count=1 ./examples/multilingual-intake-feasibility/...
+```
+
+## Japanese Search Preparation 예제 실행
+
+일본어 상품 카탈로그를 검색용으로 준비한 결과와 검색 결과를 항상 같은 JSON으로
+출력합니다.
+
+```bash
+go run ./examples/japanese-search-preparation
+```
+
+이 예제는 Kagome Search 모드 토크나이저와 사전을 한 번씩 만들고 재사용합니다.
+검색어는 NFC로 정규화하고, 마스킹된 안내 문구 토큰은 색인에서 제외하며, 준비한
+검색어가 모두 포함된 상품만 반환합니다.
+
+이 예제만 대상으로 일반 테스트와 race 테스트를 실행합니다.
+
+```bash
+go test -count=1 ./examples/japanese-search-preparation/...
+go test -race -count=1 ./examples/japanese-search-preparation/...
 ```
 
 ## Leader 예제 실행
