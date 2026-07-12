@@ -1,12 +1,16 @@
 package catalogprep
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
+	concurrencytest "github.com/bluetape4k/bluetape-go/testing/concurrency"
 	"github.com/bluetape4k/bluetape-go/textsearch"
 	"github.com/bluetape4k/bluetape-go/textsearch/japanese"
 )
@@ -356,6 +360,123 @@ func TestProductsReturnsDeepCopy(t *testing.T) {
 		second[0].Tokens[0].Metadata[japanese.MetadataPOS] == "mutated" {
 		t.Fatalf("Products() exposed shared state: %#v", second[0])
 	}
+}
+
+func TestServiceSharedReuseUnderBoundedConcurrency(t *testing.T) {
+	service := newTestService(t)
+	fixtures := []struct {
+		query string
+		want  []string
+	}{
+		{query: "ランニング シューズ", want: []string{"JP-100"}},
+		{query: "保存 容器", want: []string{"JP-200"}},
+		{query: "宇宙船", want: []string{}},
+	}
+	tasks := make([]concurrencytest.Task, 6)
+	for i := range tasks {
+		fixture := fixtures[i%len(fixtures)]
+		tasks[i] = func(ctx context.Context) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			result, err := service.Search(SearchRequest{Query: fixture.query})
+			if err != nil {
+				return err
+			}
+			if got := hitSKUs(result.Hits); !slices.Equal(got, fixture.want) {
+				return fmt.Errorf("Search(%q) hit SKUs = %#v, want %#v", fixture.query, got, fixture.want)
+			}
+			return validateProducts(service.Products())
+		}
+	}
+
+	tester := concurrencytest.NewGoroutineStressTester(concurrencytest.Options{
+		Workers:       6,
+		RoundsPerTask: 3,
+		Timeout:       5 * time.Second,
+	})
+	report := tester.RunT(t, tasks...)
+	if report.Completed != 18 || report.MaxConcurrent < 2 {
+		t.Fatalf("stress report = %+v, want 18 completions and concurrent execution", report)
+	}
+	t.Logf("stress report: Completed=%d MaxConcurrent=%d", report.Completed, report.MaxConcurrent)
+}
+
+func TestNewPreviewDocumentsScenario(t *testing.T) {
+	preview, err := NewPreview()
+	if err != nil {
+		t.Fatalf("NewPreview() error = %v", err)
+	}
+	if preview.Tokenizer != "kagome-ipa-search" {
+		t.Fatalf("Tokenizer = %q, want kagome-ipa-search", preview.Tokenizer)
+	}
+	if len(preview.Products) != 3 || len(preview.Searches) != 3 {
+		t.Fatalf("preview counts = %d products and %d searches, want 3 and 3", len(preview.Products), len(preview.Searches))
+	}
+	wantQueries := []string{"ランニング シューズ", "保存 容器", "宇宙船"}
+	wantHits := [][]string{{"JP-100"}, {"JP-200"}, {}}
+	for i, search := range preview.Searches {
+		if search.Query != wantQueries[i] || !slices.Equal(hitSKUs(search.Hits), wantHits[i]) {
+			t.Fatalf("Searches[%d] = %+v, want query %q and hits %#v", i, search, wantQueries[i], wantHits[i])
+		}
+		if search.QueryTerms == nil || search.Hits == nil {
+			t.Fatalf("Searches[%d] has nil JSON slices: %+v", i, search)
+		}
+	}
+	maskedFixtures := 0
+	for _, product := range preview.Products {
+		if product.MaskedSupportText != product.SupportText {
+			maskedFixtures++
+		}
+		if product.MaskMatches == nil || product.Tokens == nil || product.IndexTerms == nil {
+			t.Fatalf("product %q has nil JSON slices: %+v", product.SKU, product)
+		}
+	}
+	if maskedFixtures != 1 {
+		t.Fatalf("masked fixture count = %d, want 1", maskedFixtures)
+	}
+	if got := productBySKU(t, preview.Products, "JP-200").MaskedSupportText; got != "電子レンジで温めて使用できます。**に注意してください。" {
+		t.Fatalf("JP-200 MaskedSupportText = %q", got)
+	}
+	if preview.LifecycleNotes == nil || len(preview.LifecycleNotes) == 0 || preview.BoundaryNotes == nil || len(preview.BoundaryNotes) == 0 {
+		t.Fatalf("preview notes are incomplete: %+v", preview)
+	}
+	wantCommands := []string{
+		"go test -count=1 ./examples/japanese-search-preparation/...",
+		"go test -race -count=1 ./examples/japanese-search-preparation/...",
+	}
+	if !slices.Equal(preview.Commands, wantCommands) {
+		t.Fatalf("Commands = %#v, want %#v", preview.Commands, wantCommands)
+	}
+}
+
+func validateProducts(products []PreparedProduct) error {
+	if len(products) != 3 {
+		return fmt.Errorf("product count = %d, want 3", len(products))
+	}
+	if products[1].SKU != "JP-200" || products[1].MaskedSupportText != "電子レンジで温めて使用できます。**に注意してください。" {
+		return fmt.Errorf("JP-200 product = %+v, want exact masked support text", products[1])
+	}
+	for _, product := range products {
+		for _, token := range product.Tokens {
+			var source string
+			switch token.Field {
+			case FieldTitle:
+				source = product.Title
+			case FieldSupportText:
+				source = product.SupportText
+			default:
+				return fmt.Errorf("token %q has unexpected field %q", token.Text, token.Field)
+			}
+			if token.Start < 0 || token.End > len(source) || token.Start >= token.End {
+				return fmt.Errorf("token %q has invalid %s source span %d:%d", token.Text, token.Field, token.Start, token.End)
+			}
+			if got := source[token.Start:token.End]; got != token.Text {
+				return fmt.Errorf("token %q span slices %q from %s", token.Text, got, token.Field)
+			}
+		}
+	}
+	return nil
 }
 
 func newTestService(t *testing.T) *Service {

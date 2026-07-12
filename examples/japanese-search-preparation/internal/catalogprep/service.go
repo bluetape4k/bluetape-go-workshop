@@ -97,6 +97,44 @@ type Service struct {
 	products   []PreparedProduct
 }
 
+// NewPreview builds the deterministic catalog preparation payload printed by the example command.
+func NewPreview() (Preview, error) {
+	service, err := NewService(DefaultProducts(), DefaultMaskPolicy())
+	if err != nil {
+		return Preview{}, fmt.Errorf("build catalog preparation service: %w", err)
+	}
+
+	queries := []string{"ランニング シューズ", "保存 容器", "宇宙船"}
+	searches := make([]SearchResult, len(queries))
+	for i, query := range queries {
+		result, err := service.Search(SearchRequest{Query: query})
+		if err != nil {
+			return Preview{}, fmt.Errorf("search preview query %q: %w", query, err)
+		}
+		searches[i] = result
+	}
+
+	return Preview{
+		Scenario:  "prepare a Japanese product catalog for deterministic term search and masking",
+		Tokenizer: "kagome-ipa-search",
+		LifecycleNotes: []string{
+			"Construct one service at application startup and reuse its Kagome tokenizer and compiled blockword dictionary across requests.",
+			"The Kagome IPA dictionary has a binary and memory footprint, so tokenizer construction belongs outside the query path.",
+		},
+		BoundaryNotes: []string{
+			"NFC normalization prepares comparison terms while token spans remain UTF-8 byte offsets into each original title or support-text field.",
+			"Blockword masking uses substring matching in Japanese support text; it is not a semantic moderation or security boundary.",
+			"Search uses Unicode word boundaries over the space-delimited prepared index so a query term does not match inside another term.",
+		},
+		Products: service.Products(),
+		Searches: searches,
+		Commands: []string{
+			"go test -count=1 ./examples/japanese-search-preparation/...",
+			"go test -race -count=1 ./examples/japanese-search-preparation/...",
+		},
+	}, nil
+}
+
 func NewService(products []ProductInput, policy MaskPolicy) (*Service, error) {
 	if len(products) == 0 {
 		return nil, fmt.Errorf("%w: products are required", ErrInvalidProduct)
