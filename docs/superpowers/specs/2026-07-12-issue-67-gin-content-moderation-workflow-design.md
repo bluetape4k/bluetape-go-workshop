@@ -300,10 +300,12 @@ entries are never exposed for caller mutation.
    from the shared Japanese tokenizer for the Japanese route, or normalized
    Unicode-word terms from bluetape-go's simple tokenizer for English/Korean.
    Tokenization failure returns an error and no record.
-6. Stamp the complete candidate with the injected clock, check context, acquire
-   the write lock, check context again, reject duplicate content ID, enforce
-   store capacity, and commit the immutable value atomically. No clock,
-   detector, tokenizer, or matcher call occurs while holding the store lock.
+6. Build the unstamped candidate, check context, acquire the write lock, check
+   context again, reject duplicate content ID, enforce store capacity, stamp it
+   with the non-blocking injected clock, check context once more, and commit the
+   immutable value atomically. No detector, tokenizer, or matcher call occurs
+   while holding the store lock. The clock is serialized by that lock and is
+   never called for duplicate or over-capacity requests.
 
 Manual-review is a successful stored outcome, not an HTTP or service error. Its
 display text is a fixed non-sensitive placeholder rather than the unreviewed
@@ -464,9 +466,12 @@ concurrency contracts; request projections are local. The record map is the
 only application mutable state and is guarded by `sync.RWMutex`.
 
 Duplicate creation is linearized inside the write lock: concurrent requests
-for one ID yield exactly one success and the rest conflicts. No context check,
-tokenization, detection, or masking is performed while holding the store lock.
-Get and search return deep copies so callers cannot race with internal state.
+for one ID yield exactly one success and the rest conflicts. Only bounded
+constant-time commit operations run under that lock: context checks,
+duplicate/capacity checks, the documented non-blocking serialized clock,
+stamping, and insertion. Detection, tokenization, masking, and other expensive
+work remain outside. Get and search return deep copies so callers cannot race
+with internal state.
 
 Focused tests and the race detector will prove concurrent reuse, duplicate
 linearization, simultaneous create/search/get, and result-copy isolation. A
@@ -499,9 +504,10 @@ Service tests cover:
 - returned map/slice mutation isolation; and
 - concurrent reuse under `go test -race`.
 
-Cancellation tests use a deterministic counting context for scan checkpoints
-and a test clock that cancels the context before the commit-lock check; they do
-not sleep or add mutable production hooks.
+Cancellation tests use pre-canceled contexts for every workflow method, a
+deterministic counting context for scan checkpoints, and a test clock that
+cancels the context before the final under-lock commit check. They do not sleep
+or add mutable production hooks.
 
 HTTP tests cover successful create/get/search, strict JSON decoding, body
 closure, the 64 KiB boundary, timeout cancellation through an injected service,
