@@ -400,7 +400,8 @@ go test -race -count=1 ./examples/japanese-search-preparation/...
 
 ## Multilingual Language Routing 예제 실행
 
-Lazy 또는 preloaded routing preview를 항상 같은 JSON으로 출력합니다.
+Lazy와 preloaded mode는 동일한 routing decision을 출력하며, lifecycle/config
+metadata에는 선택한 mode가 반영됩니다.
 
 ```bash
 go run ./examples/multilingual-language-routing

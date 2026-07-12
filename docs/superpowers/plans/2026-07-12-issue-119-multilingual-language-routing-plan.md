@@ -77,7 +77,7 @@ catalog, or AGENTS file should change. Any such diff is a stop condition.
 - Create: `examples/multilingual-language-routing/internal/routing/router.go`
 - Create: `examples/multilingual-language-routing/internal/routing/router_test.go`
 
-- [ ] **Step 1: Write failing configuration and input tests**
+- [x] **Step 1: Write failing configuration and input tests**
 
 Create `router_test.go` in package `routing` with exact table assertions:
 Its import block includes `errors`, `math`, `reflect`, `slices`, `strings`,
@@ -143,7 +143,7 @@ func TestRouteRejectsInvalidRequests(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run tests and observe the RED state**
+- [x] **Step 2: Run tests and observe the RED state**
 
 Run:
 
@@ -154,7 +154,7 @@ go test -count=1 ./examples/multilingual-language-routing/internal/routing
 Expected: FAIL to compile because `Config`, `DefaultConfig`, `NewRouter`,
 `Router`, `Request`, `ErrInvalidConfig`, and `ErrInvalidRequest` do not exist.
 
-- [ ] **Step 3: Add the minimal configuration, types, and constructor**
+- [x] **Step 3: Add the minimal configuration, types, and constructor**
 
 Create `router.go` with package documentation, English GoDoc, and these exact
 contracts:
@@ -281,11 +281,11 @@ func (r *Router) Route(request Request) (Decision, error) {
 }
 ```
 
-- [ ] **Step 4: Run configuration/input tests and observe GREEN**
+- [x] **Step 4: Run configuration/input tests and observe GREEN**
 
 Run the focused package test. Expected: PASS with no race or compile failure.
 
-- [ ] **Step 5: Write failing route and evidence table tests**
+- [x] **Step 5: Write failing route and evidence table tests**
 
 Add fixtures with exact expected routes and reasons:
 
@@ -384,12 +384,12 @@ v0.18.0 fixture is detected as Korean below `1.0`, while its Korean plus
 does not match, stop and reopen the spec rather than changing the threshold or
 weakening the test.
 
-- [ ] **Step 6: Run route tests and observe the RED state**
+- [x] **Step 6: Run route tests and observe the RED state**
 
 Run the focused package test. Expected: FAIL because `Route` does not project
 confidence/sections/hints or apply the route matrix.
 
-- [ ] **Step 7: Implement the complete route decision**
+- [x] **Step 7: Implement the complete route decision**
 
 Add `"unicode/utf8"` to the `router.go` import block. Replace the provisional
 `Route` body after validation with:
@@ -496,7 +496,7 @@ func hasMultipleLanguages(values []language.Section) bool {
 }
 ```
 
-- [ ] **Step 8: Run focused tests and refactor while green**
+- [x] **Step 8: Run focused tests and refactor while green**
 
 Run:
 
@@ -506,7 +506,7 @@ go test -count=1 ./examples/multilingual-language-routing/internal/routing
 
 Expected: PASS. Then run `gofmt` on both files and rerun the same command.
 
-- [ ] **Step 9: Commit Task 1**
+- [x] **Step 9: Commit Task 1**
 
 ```bash
 git add examples/multilingual-language-routing/internal/routing/router.go \
@@ -528,7 +528,7 @@ owned by later tasks.
 - Create: `examples/multilingual-language-routing/internal/routing/preview.go`
 - Modify: `examples/multilingual-language-routing/internal/routing/router_test.go`
 
-- [ ] **Step 1: Write failing preview and lifecycle tests**
+- [x] **Step 1: Write failing preview and lifecycle tests**
 
 Add tests that call `NewPreview(false)` twice and `NewPreview(true)` once. Assert:
 
@@ -566,11 +566,11 @@ views. The test must not claim that an in-process comparison measures startup
 time, memory, or model-cache behavior; it proves option wiring and route
 equivalence only.
 
-- [ ] **Step 2: Run preview tests and observe RED**
+- [x] **Step 2: Run preview tests and observe RED**
 
 Expected: compile failure because `Preview` and `NewPreview` do not exist.
 
-- [ ] **Step 3: Implement fixed preview data**
+- [x] **Step 3: Implement fixed preview data**
 
 Create `preview.go` with:
 
@@ -640,12 +640,12 @@ func NewPreview(preload bool) (Preview, error) {
 }
 ```
 
-- [ ] **Step 4: Run preview tests and observe GREEN**
+- [x] **Step 4: Run preview tests and observe GREEN**
 
 Run the focused package test. Expected: PASS and exact decision equality across
 model-loading modes.
 
-- [ ] **Step 5: Write the failing bounded concurrency test**
+- [x] **Step 5: Write the failing bounded concurrency test**
 
 Use six requests per round and three rounds. The helper below makes the entry
 gate and exact call arithmetic explicit:
@@ -741,7 +741,7 @@ func TestRouterConcurrentFirstUse(t *testing.T) {
 }
 ```
 
-- [ ] **Step 6: Run normal and race tests**
+- [x] **Step 6: Run normal and race tests**
 
 ```bash
 go test -count=1 -run '^TestRouterConcurrentFirstUse$' ./examples/multilingual-language-routing/internal/routing
@@ -756,7 +756,7 @@ returns exactly three identical decisions per request and 18 total decisions,
 and produces no race report. The test makes no claim about instrumented overlap
 inside the upstream detector.
 
-- [ ] **Step 7: Commit Task 2**
+- [x] **Step 7: Commit Task 2**
 
 ```bash
 git add examples/multilingual-language-routing/internal/routing/preview.go \
@@ -777,7 +777,7 @@ Record both normal and race commands in the Lore body.
 - Create: `examples/multilingual-language-routing/main.go`
 - Create: `examples/multilingual-language-routing/main_test.go`
 
-- [ ] **Step 1: Write failing CLI tests**
+- [x] **Step 1: Write failing CLI tests**
 
 Test `run(args, stdout, stderr)` directly:
 
@@ -829,11 +829,11 @@ func TestRunQuotesUnexpectedArgument(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run CLI tests and observe RED**
+- [x] **Step 2: Run CLI tests and observe RED**
 
 Expected: compile failure because `run` and `main.go` do not exist.
 
-- [ ] **Step 3: Implement the CLI seam**
+- [x] **Step 3: Implement the CLI seam**
 
 Create `main.go`:
 
@@ -880,7 +880,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 }
 ```
 
-- [ ] **Step 4: Run CLI and package proof**
+- [x] **Step 4: Run CLI and package proof**
 
 ```bash
 go test -count=1 ./examples/multilingual-language-routing/...
@@ -892,7 +892,7 @@ go run ./examples/multilingual-language-routing --preload
 Expected: tests PASS; both commands exit 0 with valid indented JSON; decoded
 decisions are equal and model-loading/config metadata reflects the mode.
 
-- [ ] **Step 5: Commit Task 3**
+- [x] **Step 5: Commit Task 3**
 
 ```bash
 git add examples/multilingual-language-routing/main.go \
@@ -915,7 +915,7 @@ asset.
 - Modify: `README.md`
 - Modify: `README.ko.md`
 
-- [ ] **Step 1: Capture actual deterministic output**
+- [x] **Step 1: Capture actual deterministic output**
 
 Run both `go run` commands from Task 3. Select representative JSON directly
 from stdout for English/Korean shared moderation, Japanese tokenization,
@@ -923,7 +923,7 @@ Chinese unsupported review, mixed ordered reasons, and the separately labeled
 threshold `1.0` low-confidence fallback. Do not
 hand-invent numeric confidences or byte offsets.
 
-- [ ] **Step 2: Write the English README**
+- [x] **Step 2: Write the English README**
 
 Use title `# multilingual-language-routing`, then `English | [한국어](README.ko.md)`.
 Include these exact sections:
@@ -938,14 +938,14 @@ Include these exact sections:
    gather-only-needed guidance, and no in-process startup/memory claim.
 7. Boundaries: no processor execution, no security/compliance decision, original-text redaction/logging/access-control duty, no certainty claim.
 
-- [ ] **Step 3: Write the Korean README with source-equivalent meaning**
+- [x] **Step 3: Write the Korean README with source-equivalent meaning**
 
 Use title `# multilingual-language-routing`, then `[English](README.md) | 한국어`.
 Preserve every command, route/reason value, code symbol, numeric threshold, and
 boundary from the English README. Use natural Korean technical prose; do not
 abbreviate lifecycle, security, or privacy guidance.
 
-- [ ] **Step 4: Update root README navigation in milestone order**
+- [x] **Step 4: Update root README navigation in milestone order**
 
 Insert `examples/multilingual-language-routing` immediately after
 `examples/japanese-search-preparation` in both root tables and run sections.
@@ -953,7 +953,7 @@ Use English public prose in `README.md` and source-equivalent Korean in
 `README.ko.md`. Add both run commands and both focused test commands without
 reordering existing examples.
 
-- [ ] **Step 5: Verify documentation against the program**
+- [x] **Step 5: Verify documentation against the program**
 
 ```bash
 go run ./examples/multilingual-language-routing
@@ -965,7 +965,7 @@ Compare README snippets to stdout field-for-field. Search both locales for all
 route values, all six review reasons, `0.70`, `8`, `--preload`, `UTF-8`,
 `authentication`, `authorization`, `compliance`, and redaction/logging wording.
 
-- [ ] **Step 6: Commit Task 4**
+- [x] **Step 6: Commit Task 4**
 
 ```bash
 git add README.md README.ko.md \
@@ -986,7 +986,7 @@ code-review perspectives, then `finishing-a-development-branch` for delivery.
 - Create: `docs/lessons/2026-07-12-issue-119-multilingual-language-routing.md`
 - Optionally create only when useful: `docs/review/2026-07-12-issue-119-multilingual-language-routing-review.md`
 
-- [ ] **Step 1: Run focused verification from scratch**
+- [x] **Step 1: Run focused verification from scratch**
 
 ```bash
 go test -count=1 ./examples/multilingual-language-routing/...
@@ -998,7 +998,7 @@ go run ./examples/multilingual-language-routing --preload
 Every command must return an observed exit code 0. Lost process handles or
 PASS-looking output without an exit code are invalid and must be rerun.
 
-- [ ] **Step 2: Run repository gates in authoritative order**
+- [x] **Step 2: Run repository gates in authoritative order**
 
 Run targeted cheap checks first, then the single authoritative gate:
 
@@ -1015,7 +1015,7 @@ git diff --check origin/develop...HEAD
 in parallel across agents or worktrees. A fail-then-pass requires root-cause
 investigation before acceptance.
 
-- [ ] **Step 3: Audit exact diff and conditional hazards**
+- [x] **Step 3: Audit exact diff and conditional hazards**
 
 Confirm only the planned example, README pair, spec/plan, `.gitignore`, and
 lesson/review artifacts changed. Record concrete N/A evidence:
@@ -1027,7 +1027,7 @@ lesson/review artifacts changed. Record concrete N/A evidence:
 - public bluetape-go API/CHANGELOG: N/A, workshop-internal package only;
 - diagram asset: N/A, approved small table/linear flow is clearer.
 
-- [ ] **Step 4: Run spec/plan verifier and pre-PR review**
+- [x] **Step 4: Run spec/plan verifier and pre-PR review**
 
 The verifier maps every spec acceptance row and every plan checkbox to current
 files and fresh commands. Then run performance, stability, security,
@@ -1035,7 +1035,7 @@ operator/Ops, developer/API, and user/caller code-review lenses plus main
 integration. P0/P1 blocks delivery; fix, rerun focused proof, and rerun only
 affected lenses. Resolve or justify every P2/P3.
 
-- [ ] **Step 5: Write and commit the lesson**
+- [x] **Step 5: Write and commit the lesson**
 
 Write concise context, decision, surprising detector/fixture or concurrency
 evidence, outcome, exact verification commands, review misses, and future guard.
