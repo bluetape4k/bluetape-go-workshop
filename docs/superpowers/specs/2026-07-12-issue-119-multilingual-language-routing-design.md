@@ -213,12 +213,21 @@ The zero value is intentionally unusable. Calling `Route` on a nil or
 uninitialized router fails closed with `ErrInvalidConfig` instead of panicking.
 All returned slices are caller-owned copies.
 
-`Preview` includes a scenario name, configuration, a `model_loading` value of
-`lazy` or `preloaded`, qualitative lifecycle notes, heuristic boundaries, fixed
-decisions, and validation commands. The lifecycle field is the only intentional
+`Preview` includes a scenario name, default configuration, a `model_loading`
+value of `lazy` or `preloaded`, qualitative lifecycle notes, heuristic
+boundaries, fixed default-policy decisions, one explicit low-confidence policy
+check, and validation commands. The lifecycle field is the only intentional
 difference in lesson behavior between equivalent lazy and preloaded previews;
 the serialized `preload_models` configuration field also reflects the selected
-mode. The request decisions themselves must compare equal.
+mode. Both the default request decisions and low-confidence policy check must
+compare equal across model-loading modes.
+
+The dedicated low-confidence check uses the same detector subset and lifecycle
+but raises `MinimumConfidence` to `1.0` for the fixed mixed fixture
+`support 문의 订单 delivery`. Under pinned v0.18.0 its detected confidence is
+below `1.0`, so the check produces `low-confidence` without changing the
+default `0.70` policy. The exact confidence is test evidence, not a documented
+accuracy guarantee.
 
 ## Errors
 
@@ -257,13 +266,13 @@ go run ./examples/multilingual-language-routing
 go run ./examples/multilingual-language-routing --preload
 ```
 
-Fixtures cover confident English, Korean, Japanese with Kana, Chinese/Han-only,
-mixed English/Japanese, short text, numeric unknown text, and low-confidence
-mixed input. The fixed low-confidence fixture will be locked against v0.18.0
-with confidence below `0.70`; the current candidate `문의 注文 support` reports a
-detected confidence of `0` for the configured subset and also exercises ordered
-mixed-input reasons. Tests assert the contract instead of documenting the
-numeric value as a universal detector guarantee.
+Default-policy fixtures cover confident English, Korean, Japanese with Kana,
+Chinese/Han-only, mixed English/Japanese, short text, and numeric unknown text.
+A separately labeled low-confidence policy check uses threshold `1.0` and the
+fixed mixed fixture `support 문의 订单 delivery`. Tests lock only that the pinned
+v0.18.0 result is detected below the configured threshold and produces ordered
+`low-confidence` plus `mixed-language` reasons; documentation does not publish
+the numeric confidence as a universal detector guarantee.
 
 Within one mode, repeated output is byte-identical. Lazy and preloaded outputs
 have identical request decisions; only explicit lifecycle/configuration
@@ -300,9 +309,10 @@ text in logs or telemetry.
    evidence and cannot gate authentication, authorization, sanctions, or
    compliance decisions.
 7. **A configured low-confidence case changes silently after dependency
-   upgrades.** Lock the fixture and threshold in tests; a future detector
-   change must force an intentional fixture/policy review rather than weakening
-   the assertion.
+   upgrades.** Keep the default threshold at `0.70`, isolate a threshold `1.0`
+   policy check, and lock only `detected && confidence < threshold` plus ordered
+   reasons. A future detector change must force an intentional fixture/policy
+   review rather than weakening the assertion.
 
 ## Testing
 
@@ -316,8 +326,8 @@ Tests are written before implementation and cover:
 4. Chinese and Han-only ambiguity selecting manual review with the correct
    reason;
 5. blank ID, blank text, and oversized text with `errors.Is` preservation;
-6. short, numeric unknown, fixed low-confidence, and mixed fixtures with exact
-   ordered reasons;
+6. short, numeric unknown, and mixed default fixtures plus the separate
+   threshold `1.0` low-confidence check with exact ordered reasons;
 7. four descending confidence entries and stable ISO codes;
 8. distinct-language section mixing and exact UTF-8 byte-span slicing;
 9. deterministic, non-nil caller-owned slices;
@@ -406,7 +416,7 @@ clearer and more inspectable as text for this small example.
 | Issue requirement | Design evidence |
 |---|---|
 | Small language subset | One reusable English/Korean/Japanese/Chinese detector. |
-| Confidence lists and explicit low-confidence fallback | Four descending confidence entries plus a locked below-threshold fixture. |
+| Confidence lists and explicit low-confidence fallback | Four descending confidence entries plus a separate threshold `1.0` check that preserves the default `0.70` policy. |
 | Mixed sections and script hints | Detector sections with exact byte slices; Latin/Hangul/Kana/Han hints. |
 | Deterministic routing policy | Ordered reasons and one explicit route matrix. |
 | Lazy/preloaded lifecycle comparison | One constructor path, `--preload`, equal decisions, qualitative metadata only. |
@@ -432,6 +442,7 @@ against this exact artifact.
 | P2 | Performance | Three detector queries per request could be mistaken for a production hot-path template. | Documented the teaching cost and production guidance to gather only required evidence. |
 | P2 | Operator/Ops | CLI error/help behavior and partial-output boundary were not explicit. | Added injected CLI seams, non-zero error behavior, standard help, stderr, and no partial JSON. |
 | P2 | User/caller | Canonical ID behavior and lazy/preloaded comparison fields were ambiguous. | Specified trimmed IDs, byte-exact text, equal decisions, and the two explicit lifecycle/config fields. |
+| P1 | Evidence integrity | Planning-time v0.18.0 execution disproved the original claim that `문의 注文 support` was below the default `0.70` threshold. | With user approval, preserved default `0.70` and isolated a threshold `1.0` check using stable fixture `support 문의 订单 delivery`; tests assert the relation, not a universal numeric claim. |
 
 Integration review found no remaining contradiction, unsupported assumption,
 or open material user decision. Latest convergence: P0=0, P1=0. The listed P2
