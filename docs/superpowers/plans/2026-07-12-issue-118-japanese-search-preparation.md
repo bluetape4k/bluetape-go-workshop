@@ -682,7 +682,7 @@ Read the spec, this plan, command JSON, README pair, tests, and diff. Record eac
 
 - [ ] **Step 4: Run final structural and severity review**
 
-Read `performance-stability-scan.md`, attempt CodeGraph change detection with explicit new files, then perform the six Type A perspectives plus main integration. Because this environment's collaboration API cannot supply the required native `agent_type`, record that constraint and perform unavailable lanes in the main session. P0 or P1 blocks delivery; fix, rerun affected focused/full gates, and repeat the affected lens.
+Read `performance-stability-scan.md`, attempt CodeGraph change detection with explicit new files, then perform the six Type A perspectives plus main integration. When the collaboration spawn schema lacks a separate `agent_type` field, explicitly inject the installed native role into each child prompt; this workflow used executor, verifier, code-reviewer, and writer lanes. P0 or P1 blocks delivery; fix, rerun affected focused/full gates, and repeat the affected lens.
 
 - [ ] **Step 5: Commit the required durable lesson**
 
