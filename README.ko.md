@@ -58,6 +58,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/gin-text-search-service`](examples/gin-text-search-service/README.ko.md) | [English](examples/gin-text-search-service/README.md) \| [한국어](examples/gin-text-search-service/README.ko.md) | Thin handler, stable HTTP error, Unicode caveat를 포함해 deterministic `textsearch` search/mask 동작을 노출하는 Gin API 예제입니다. | `gin`, `textsearch` |
 | [`examples/multilingual-intake-feasibility`](examples/multilingual-intake-feasibility/README.ko.md) | [English](examples/multilingual-intake-feasibility/README.md) \| [한국어](examples/multilingual-intake-feasibility/README.ko.md) | Language confidence, mixed/unknown review reason, Japanese Kagome token byte span을 노출하는 local support-intake evaluator입니다. | `textsearch/language`, `textsearch/japanese`, `testing/concurrency` |
 | [`examples/japanese-search-preparation`](examples/japanese-search-preparation/README.ko.md) | [English](examples/japanese-search-preparation/README.md) \| [한국어](examples/japanese-search-preparation/README.ko.md) | Kagome Search-mode term, source byte span, support masking, deterministic all-term matching을 조합하는 local Japanese catalog preparation 예제입니다. | `textsearch`, `textsearch/japanese`, `testing/concurrency` |
+| [`examples/multilingual-language-routing`](examples/multilingual-language-routing/README.ko.md) | [English](examples/multilingual-language-routing/README.md) \| [한국어](examples/multilingual-language-routing/README.ko.md) | English/Korean moderation, Japanese tokenization, fail-closed multilingual routing을 근거와 함께 보여주고 lifecycle 및 concurrency를 deterministic하게 검증하는 예제입니다. | `textsearch/language`, `testing/concurrency` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -395,6 +396,25 @@ go run ./examples/japanese-search-preparation
 ```bash
 go test -count=1 ./examples/japanese-search-preparation/...
 go test -race -count=1 ./examples/japanese-search-preparation/...
+```
+
+## Multilingual Language Routing 예제 실행
+
+Lazy 또는 preloaded routing preview를 항상 같은 JSON으로 출력합니다.
+
+```bash
+go run ./examples/multilingual-language-routing
+go run ./examples/multilingual-language-routing --preload
+```
+
+이 예제는 heuristic language evidence와 application route policy를 분리하고,
+지원하지 않거나 불확실한 입력은 manual review로 보냅니다.
+
+이 예제만 대상으로 일반 테스트와 race 테스트를 실행합니다.
+
+```bash
+go test -count=1 ./examples/multilingual-language-routing/...
+go test -race -count=1 ./examples/multilingual-language-routing/...
 ```
 
 ## Leader 예제 실행
