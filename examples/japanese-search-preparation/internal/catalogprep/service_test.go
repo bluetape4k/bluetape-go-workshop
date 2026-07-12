@@ -9,6 +9,49 @@ import (
 	"github.com/bluetape4k/bluetape-go/textsearch/japanese"
 )
 
+func TestExcludeOverlappingTokensSweepsOrderedMatches(t *testing.T) {
+	tests := []struct {
+		name    string
+		tokens  []PreparedToken
+		matches []MaskMatch
+		want    []bool
+	}{
+		{
+			name:   "no matches",
+			tokens: []PreparedToken{{Start: 0, End: 5, Indexable: true}},
+			want:   []bool{true},
+		},
+		{
+			name: "before between after boundaries overlaps and advances",
+			tokens: []PreparedToken{
+				{Start: 0, End: 5, Indexable: true},
+				{Start: 5, End: 10, Indexable: true},
+				{Start: 10, End: 12, Indexable: true},
+				{Start: 20, End: 25, Indexable: true},
+				{Start: 25, End: 30, Indexable: true},
+				{Start: 30, End: 35, Indexable: true},
+				{Start: 40, End: 45, Indexable: true},
+			},
+			matches: []MaskMatch{
+				{Start: 10, End: 20},
+				{Start: 30, End: 40},
+			},
+			want: []bool{true, true, false, true, true, false, true},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			excludeOverlappingTokens(tt.tokens, tt.matches)
+			for i, token := range tt.tokens {
+				if token.Indexable != tt.want[i] {
+					t.Fatalf("token %d span %d:%d Indexable = %t, want %t", i, token.Start, token.End, token.Indexable, tt.want[i])
+				}
+			}
+		})
+	}
+}
+
 func TestNewServicePreparesAndMasksDefaultCatalog(t *testing.T) {
 	product := productBySKU(t, newTestService(t).Products(), "JP-200")
 	if product.MaskedSupportText != "電子レンジで温めて使用できます。**に注意してください。" {

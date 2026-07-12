@@ -193,14 +193,7 @@ func (s *Service) prepareProduct(input ProductInput) (PreparedProduct, error) {
 			End:   match.End,
 		}
 	}
-	for i := range supportTokens {
-		for _, match := range maskResponse.Matches {
-			if byteSpansOverlap(supportTokens[i].Start, supportTokens[i].End, match.Start, match.End) {
-				supportTokens[i].Indexable = false
-				break
-			}
-		}
-	}
+	excludeOverlappingTokens(supportTokens, maskMatches)
 
 	tokens := make([]PreparedToken, 0, len(titleTokens)+len(supportTokens))
 	tokens = append(tokens, titleTokens...)
@@ -275,6 +268,23 @@ func indexTerm(token PreparedToken) string {
 
 func byteSpansOverlap(firstStart, firstEnd, secondStart, secondEnd int) bool {
 	return firstStart < secondEnd && secondStart < firstEnd
+}
+
+// excludeOverlappingTokens sweeps tokens and matches ordered by byte position.
+func excludeOverlappingTokens(tokens []PreparedToken, matches []MaskMatch) {
+	matchIndex := 0
+	for i := range tokens {
+		for matchIndex < len(matches) && matches[matchIndex].End <= tokens[i].Start {
+			matchIndex++
+		}
+		if matchIndex == len(matches) {
+			return
+		}
+		match := matches[matchIndex]
+		if byteSpansOverlap(tokens[i].Start, tokens[i].End, match.Start, match.End) {
+			tokens[i].Indexable = false
+		}
+	}
 }
 
 func DefaultProducts() []ProductInput {
