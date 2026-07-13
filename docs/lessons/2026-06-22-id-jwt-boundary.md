@@ -64,7 +64,7 @@
   per-color marker parity, endpoint contact with the intended boundary at
   native pixels, and full-size readability. A valid SVG alone is not evidence.
 - Connector bends reserve at least 24 px of straight terminal distance for the
-  marker footprint and enough bend clearance to keep the arrowhead detached
+  marker footprint and enough bend clearance to keep the arrowhead clear
   from the corner. Automated geometry success alone is insufficient.
 - JWT failures visibly terminate before UUID generation, so the diagrams never
   imply that identifiers authorize a request.
