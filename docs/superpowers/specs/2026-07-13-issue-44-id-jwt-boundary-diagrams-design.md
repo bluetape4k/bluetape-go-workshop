@@ -116,8 +116,9 @@ should introduce the demo workflow before exposing component detail.
   diagram must not imply that encoding encrypts claims or that UUID v7 grants
   authorization.
 - Visual baselines: best-practices `utils-idgenerators-diagram-03` for grouped
-  responsibility and the nearest approved framework-boundary architecture
-  sample.
+  responsibility and approved framework-boundary architecture
+  `leader-ktor-architecture-01` for explicit application, integration, API,
+  and backend ownership regions.
 
 ### Sequence
 
@@ -135,7 +136,11 @@ should introduce the demo workflow before exposing component detail.
   token, and verified-but-forbidden role/scope map to stable `401`/`403`
   responses before ID generation. Keep failure branches compact instead of
   duplicating the full success sequence.
-- Visual baseline: best-practices `sequence-workflow-sample`.
+- Visual baselines: best-practices `sequence-workflow-sample` plus the nearest
+  repo-local Gin sequence,
+  `docs/images/readme-diagrams/gin-audit-query-api-sequence.png`. The Gin
+  sequence is authoritative for the local participant, activation, message,
+  branch-frame, and palette family.
 
 ## README and Lesson Integration
 
@@ -165,9 +170,21 @@ for the same example.
   grid for the final README assets.
 - Use short orthogonal connectors, explicit per-color fixed-size markers, and
   rounded bends only where the route actually changes direction.
-- Reserve terminal distance for the rendered arrowhead. A bend must not sit so
-  close to a target that the PNG arrowhead appears reversed, detached, or aimed
-  along the previous segment.
+- Primary/scenario markers use `markerWidth="14"`, `markerHeight="14"`,
+  `viewBox="0 0 14 14"`, `refX="12"`, `refY="7"`, and the filled triangle
+  `M2 2 L12 7 L2 12 Z`.
+- Sequence markers use `markerWidth="16"`, `markerHeight="16"`,
+  `viewBox="0 0 16 16"`, `refX="13"`, `refY="8"`, and the filled triangle
+  `M3 3 L13 8 L3 13 Z`.
+- Every directional marker uses `markerUnits="userSpaceOnUse"`,
+  `orient="auto"`, an explicit semantic-color fill, and a separate marker for
+  each connector color.
+- Primary and sequence connectors reserve at least 24 px of straight terminal
+  distance after the final bend. A bend must not sit so close to a target that
+  the PNG arrowhead appears reversed, detached, or aimed along the previous
+  segment.
+- Connectors attach perpendicularly at card boundaries, never inside a card,
+  with endpoint corner clearance of at least `max(8 px, rx / 2)`.
 - Inspect both SVG geometry and the converted PNG. Passing XML/render commands
   is not visual evidence.
 - Work one asset at a time: edit SVG, validate XML, render 2x PNG, run automated

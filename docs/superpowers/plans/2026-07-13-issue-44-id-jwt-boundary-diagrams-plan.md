@@ -34,8 +34,8 @@ Run:
 
 ```bash
 sed -n '1,220p' examples/id-jwt-boundary/README.md
-sed -n '1,380p' examples/id-jwt-boundary/internal/idjwtboundary/service.go
-sed -n '1,220p' examples/id-jwt-boundary/internal/idjwtboundary/service_test.go
+sed -n '1,430p' examples/id-jwt-boundary/internal/idjwtboundary/service.go
+sed -n '1,380p' examples/id-jwt-boundary/internal/idjwtboundary/service_test.go
 ```
 
 Expected: bounded `/tokens` and `/orders` JSON, fixed-HMAC demo composition, expected issuer/audience/expiration parsing, `customer` role, `orders:create` scope, validation before two UUID v7 generations, and stable public error mapping are present.
@@ -47,22 +47,51 @@ Open these PNGs at original detail:
 ```text
 /Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/workflow-image-upload.png
 /Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/utils-idgenerators-diagram-03.png
+/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/leader-ktor-architecture-01.png
 /Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/sequence-workflow-sample.png
+/Users/debop/work/bluetape4k/bluetape-go-workshop/.worktrees/docs-issue-44-id-jwt-boundary-diagrams/docs/images/readme-diagrams/gin-audit-query-api-sequence.png
 ```
 
-Expected: scenario stages read in one direction, architecture uses responsibility regions rather than a box grid, and sequence messages have rectangular participants, dashed lifelines, numbered labels, visible arrowheads, and transparent branch frames.
+Original-detail inspection ledger:
+
+- `workflow-image-upload.png` — 1200x480; numbered primary stages read left to
+  right, with supporting responsibility cards below the main path.
+- `utils-idgenerators-diagram-03.png` — 6000x3400; timestamp, machine,
+  sequence, packing, and result responsibilities form semantic regions rather
+  than a uniform grid.
+- `leader-ktor-architecture-01.png` — 2640x1800; application code, Ktor
+  process, integration layer, core API, and backend implementations have clear
+  framework and ownership boundaries.
+- `sequence-workflow-sample.png` — 3720x2272; rectangular participants,
+  dashed lifelines, activations, numbered message pills, visible call/return
+  heads, and a transparent retry frame establish the catalog sequence family.
+- `gin-audit-query-api-sequence.png` — 3360x2520; the nearest repo-local Gin
+  reference preserves the same signals while adding a Gin adapter boundary,
+  explicit success/error branches, and sender-colored messages.
+
+Expected: scenario stages read in one direction; architecture uses responsibility
+regions and explicit framework/application/provider boundaries rather than a box
+grid; and both sequence references use rectangular participants, dashed
+lifelines, activation bars, numbered labels, visible arrowheads, and transparent
+branch frames. The repo-local Gin sequence is the nearest module-family baseline.
 
 - [ ] **Step 3: Lock marker geometry**
 
 Use these exact invariants:
 
 ```text
-primary/scenario marker: 14x14 user-space marker, 10x10 filled triangle
-sequence marker: 13x13 user-space marker, 10x10 filled triangle
-marker orientation: orient="auto"
-primary terminal segment after final bend: >= 20 px
-sequence terminal segment after final bend: >= 16 px
-connector endpoint: card boundary, never inside the card
+primary/scenario marker: markerWidth="14" markerHeight="14" viewBox="0 0 14 14"
+primary/scenario reference: refX="12" refY="7"
+primary/scenario triangle: d="M2 2 L12 7 L2 12 Z" with explicit fill
+sequence marker: markerWidth="16" markerHeight="16" viewBox="0 0 16 16"
+sequence reference: refX="13" refY="8"
+sequence triangle: d="M3 3 L13 8 L3 13 Z" with explicit fill
+all markers: markerUnits="userSpaceOnUse" orient="auto"
+marker color: explicit marker per semantic connector color
+primary and sequence terminal segment after final bend: >= 24 px
+attachment: perpendicular to the touched card edge
+endpoint corner clearance: >= max(8 px, rx / 2)
+connector endpoint: exactly on the card boundary, never inside the card
 ```
 
 Expected: the final segment determines rendered arrow direction, and no bend occupies the marker footprint.
@@ -96,7 +125,7 @@ UUIDs are identifiers, not credentials
 The fixed HMAC secret is local demo material only
 ```
 
-Use blue for request progress, violet for JWT trust, and olive for authorized ID creation. Every progression line is orthogonal, terminates on a card edge, and leaves at least 20 px after its final bend.
+Use blue for request progress, violet for JWT trust, and olive for authorized ID creation. Every progression line is orthogonal, attaches perpendicularly to a card edge with the required corner clearance, and leaves at least 24 px after its final bend.
 
 - [ ] **Step 2: Validate and render the scenario**
 
@@ -181,8 +210,9 @@ Open the final PNG at full and original detail. For every connector compare the 
 
 ```text
 arrowhead direction matches the final path segment
-final segment is >= 20 px after the last bend
+final segment is >= 24 px after the last bend
 marker tip contacts the intended card boundary
+attachment is perpendicular with corner clearance >= max(8 px, rx / 2)
 bend/corner does not overlap the marker footprint
 no connector crosses a card, label, lane title, or another line
 no connector rides a card edge or appears tangent
@@ -231,7 +261,7 @@ invalid order -> 400 invalid_request before UUID generation
 ID generation failure -> 500 internal_error without internals
 ```
 
-Use solid calls, dashed returns, red only for failures, violet for JWT messages, and olive for UUID creation. Each 13x13 marker uses `markerUnits="userSpaceOnUse"`, `orient="auto"`, matching fill color, and at least 16 px of straight terminal route after the last bend.
+Use solid calls, dashed returns, red only for failures, violet for JWT messages, and olive for UUID creation. Each explicit per-color sequence marker uses the locked 16x16 geometry, `markerUnits="userSpaceOnUse"`, `orient="auto"`, matching fill color, and at least 24 px of straight terminal route after the last bend. Attach message endpoints perpendicularly at participant or activation boundaries with corner clearance of at least `max(8 px, rx / 2)` where rounded cards are involved.
 
 - [ ] **Step 2: Validate and render the sequence**
 
