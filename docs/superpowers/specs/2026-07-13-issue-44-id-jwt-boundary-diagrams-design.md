@@ -2,8 +2,8 @@
 
 ## Status
 
-Approved in conversation on 2026-07-13. This written spec must be reviewed
-before the implementation plan and diagram work begin.
+Approved in conversation on 2026-07-13; the written spec was reviewed and
+approved before the implementation plan and diagram work began.
 
 ## Classification
 
