@@ -16,9 +16,29 @@ Gateway는 `subject`, `role`, `scope` claim이 들어 있는 signed JWT로 요�
 전달합니다. Order service는 issuer, audience, expiration, role, scope를 검증한 뒤
 내부 order ID와 request ID를 생성합니다.
 
+![ID와 JWT boundary scenario](../../docs/images/readme-diagrams/id-jwt-boundary-scenario.png)
+
+이 scenario는 local demo issuer와 보호된 API boundary를 분리해서 보여줍니다.
+`POST /tokens`는 fixed-HMAC demo token을 발급해 예제를 바로 실행할 수 있게 하는
+편의 endpoint입니다. 보호된 boundary인 `POST /orders`는 token을 검증하고,
+`customer`와 `orders:create` local policy를 적용하고, 주문을 검증한 뒤에만 내부
+ID를 생성합니다.
+
 이 예제는 완전한 auth system이 아닙니다. 검증된 token에서 무엇을 신뢰하고,
 application이 자체 workflow를 위해 무엇을 새로 생성해야 하는지 보여주는 boundary
 예제입니다.
+
+## Architecture
+
+![ID와 JWT boundary architecture](../../docs/images/readme-diagrams/id-jwt-boundary-architecture.png)
+
+Runtime의 책임은 계층별로 분명하게 나뉩니다. `main`과 `net/http`는 loopback
+listener와 server timeout을 소유하고, Gin은 routing, recovery, trusted proxy 비활성
+설정을 담당합니다. Route adapter는 8 KiB body limit, JSON 처리, public status
+mapping을 소유합니다. Boundary service는 claim 조립, trust 검증, local
+authorization, 주문 검증을 소유합니다. `bluetape-go/jwt` provider는 claim을
+서명하고 parse하며, `bluetape-go/id` generator는 보호된 요청의 authorization과
+validation이 모두 끝난 뒤에만 UUID v7 값을 생성합니다.
 
 ## What It Demonstrates
 
@@ -106,6 +126,15 @@ curl -X POST http://127.0.0.1:8096/orders \
 | `GET` | `/healthz` | Process liveness 전용입니다. |
 | `POST` | `/tokens` | Local fixed-HMAC demo token을 발급합니다. |
 | `POST` | `/orders` | Bearer token을 검증하고 내부 ID를 생성합니다. |
+
+## Protected Order Sequence
+
+![ID와 JWT protected order sequence](../../docs/images/readme-diagrams/id-jwt-boundary-sequence.png)
+
+보호된 요청은 JSON parse, trust 검증, local policy, 주문 validation을 UUID 생성보다
+먼저 수행합니다. 따라서 missing, invalid, expired, forbidden token은 내부 ID를
+요청하기 전에 boundary를 빠져나갑니다. 잘못된 주문 입력도 UUID v7 generator를
+호출하기 전에 종료됩니다.
 
 ## Boundary Notes
 

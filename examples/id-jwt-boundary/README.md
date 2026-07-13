@@ -17,9 +17,29 @@ service. The gateway proves request context with a signed JWT containing
 audience, expiration, role, and scope before generating internal order and
 request IDs.
 
+![ID and JWT boundary scenario](../../docs/images/readme-diagrams/id-jwt-boundary-scenario.png)
+
+The scenario separates the local demo issuer from the protected API boundary.
+`POST /tokens` is a runnable convenience for issuing a fixed-HMAC demo token;
+`POST /orders` is the protected boundary that verifies the token, applies the
+local `customer` and `orders:create` policy, validates the order, and only then
+creates internal IDs.
+
 This is not a full auth system. It is the boundary where an application decides
 what to trust from a verified token and what it must generate for its own
 internal workflow.
+
+## Architecture
+
+![ID and JWT boundary architecture](../../docs/images/readme-diagrams/id-jwt-boundary-architecture.png)
+
+Ownership stays explicit across the runtime. `main` and `net/http` own the
+loopback listener and server timeouts; Gin owns routing, recovery, and the
+disabled trusted-proxy setting; route adapters own the 8 KiB body limit, JSON
+handling, and public status mapping. The boundary service owns claim assembly,
+trust checks, local authorization, and order validation. The `bluetape-go/jwt`
+provider signs and parses claims, while the `bluetape-go/id` generator creates
+UUID v7 values only after the protected request is authorized and valid.
 
 ## What It Demonstrates
 
@@ -108,6 +128,15 @@ Expected public error codes include `missing_token`, `invalid_token`,
 | `GET` | `/healthz` | Process liveness only. |
 | `POST` | `/tokens` | Issue a local fixed-HMAC demo token. |
 | `POST` | `/orders` | Verify a bearer token and create internal IDs. |
+
+## Protected Order Sequence
+
+![ID and JWT protected order sequence](../../docs/images/readme-diagrams/id-jwt-boundary-sequence.png)
+
+The protected request keeps parsing, trust verification, local policy, and
+order validation ahead of UUID generation. Missing, invalid, expired, or
+forbidden tokens therefore leave the boundary before either internal ID is
+requested; invalid order input also exits before the UUID v7 generator runs.
 
 ## Boundary Notes
 

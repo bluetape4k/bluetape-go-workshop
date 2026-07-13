@@ -54,3 +54,17 @@
   explicit identifier/key tradeoff comparisons.
 - Issue #78 should avoid reimplementing auth. Compose this example with later
   storage/cache/realtime examples through clearly documented trust boundaries.
+
+## Diagram Evidence
+
+- The scenario, architecture, and protected-order sequence are grounded in the
+  current example source and are shared by both README locales in the same
+  asset order.
+- SVG-to-PNG review must verify rendered arrowhead direction, explicit
+  per-color marker parity, endpoint contact with the intended boundary at
+  native pixels, and full-size readability. A valid SVG alone is not evidence.
+- Connector bends reserve at least 24 px of straight terminal distance for the
+  marker footprint and enough bend clearance to keep the arrowhead detached
+  from the corner. Automated geometry success alone is insufficient.
+- JWT failures visibly terminate before UUID generation, so the diagrams never
+  imply that identifiers authorize a request.
