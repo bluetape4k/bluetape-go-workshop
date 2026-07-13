@@ -55,6 +55,35 @@ Live smoke coverage used the README flow:
 - Step 6-R six-lane review: P0 = 0, P1 = 0.
 - Review artifact: `docs/review/2026-06-22-issue-29-batch-integration-code-review.md`.
 
+## Diagram Review Lessons
+
+- Treat the CairoSVG-rendered PNG as authoritative for arrowhead direction.
+  Marker definitions and SVG path order are not sufficient evidence. Inspect
+  every left-, right-, up-, and down-facing head in the final PNG, with
+  native-pixel crops for dense or bent connector regions.
+- Reserve the arrowhead size in the terminal segment before the target. For a
+  14 px primary architecture head, move the final bend early enough to leave
+  at least 14 px of straight, perpendicular approach. Do not shrink the marker
+  to make a cramped route appear valid.
+- Keep incoming and outgoing relationships on separate card ports and
+  corridors. The first architecture draft overlapped the downward
+  `Gin Router -> Service` path with the upward scheduled-admission path. Moving
+  the latter to a dedicated Service right-side port made both directions
+  unambiguous in the PNG.
+- A short segment after a bend can rotate or crowd the rendered head even when
+  geometry scripts pass. The `Service -> Job + Step` route needed its terminal
+  segment increased from 4 px to 18 px. The `Job + Step -> Checkpoint Store`
+  route replaced a 5 px horizontal tail with an 88 px straight vertical entry
+  so the head points down into the target edge.
+- Do not accept `paths=0`, `connectors=0`, or another weak generic audit count
+  as PASS. Add an audit-recognized connector class or a targeted invariant, then
+  require meaningful nonzero counts. The repaired architecture records
+  `connectors=13`, `paths=2`, and `q_bends=6` with zero intrusion, crossing,
+  endpoint, geometry, or mixed-corner failures.
+- After the last coordinate or connector-class change, rerender at 2x and
+  repeat both the whole-image inspection and focused original-pixel crops.
+  Earlier visual approval is stale after any geometry change.
+
 ## Follow-Up Risks
 
 - Process restart resets all demo state by design. Do not describe the in-memory
