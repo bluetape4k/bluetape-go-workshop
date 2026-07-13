@@ -2,8 +2,8 @@
 
 ## Status
 
-Approved in conversation on 2026-07-13; awaiting review of this written spec
-before diagram implementation.
+Approved in conversation on 2026-07-13; the written spec was reviewed and
+approved before diagram implementation.
 
 ## Classification
 
@@ -183,4 +183,3 @@ remote-branch deletion occurs without explicit user approval.
   codes.
 - No redesign of existing 0.5.0 example diagrams.
 - No diagrams for later milestones in this PR.
-
