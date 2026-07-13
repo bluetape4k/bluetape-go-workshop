@@ -98,9 +98,9 @@
   <text class="card-sub" x="318" y="552">8 KiB body limit</text>
   <text class="tiny" x="318" y="571">JSON bind + status serialize</text>
 
-  <rect class="card-red" x="300" y="664" width="205" height="66" rx="11"/>
-  <text class="card-title" x="318" y="692">Route response map</text>
-  <text class="card-sub" x="318" y="714">allowlisted JSON + status</text>
+  <rect class="card-red" x="300" y="706" width="205" height="66" rx="11"/>
+  <text class="card-title" x="318" y="734">Route response map</text>
+  <text class="card-sub" x="318" y="756">allowlisted JSON + status</text>
 
   <!-- Shared Service ownership, with token/order duties kept separate -->
   <rect class="card-blue" x="570" y="330" width="300" height="102" rx="12"/>
@@ -174,7 +174,7 @@
   <path class="authorized-flow" data-connector="uuid-provider-to-accepted-order" d="M 1135 660 H 1195"/>
 
   <!-- Failure mapping remains separate from UUID generation -->
-  <path class="error-flow" data-connector="gin-status-map-to-stable-error" d="M 505 697 H 535 Q 550 697 550 712 V 750 Q 550 770 570 770 H 1100 Q 1120 770 1120 750 V 734 Q 1120 714 1140 714 H 1185"/>
+  <path class="error-flow" data-connector="route-response-map-to-stable-error" d="M 505 739 H 1185"/>
 
   <!-- Explicit boundary ports make ownership attachment visible -->
   <circle class="port" cx="240" cy="381" r="4" stroke="#2563eb"/>
