@@ -162,7 +162,7 @@ Expected: PASS.
 
 - [ ] **Step 4: Run focused race proof**
 
-Run: `go test -count=20 ./examples/audit-order-history/internal/orderhistory -run TestService_Concurrent`
+Run: `go test -count=20 ./examples/audit-order-history/internal/orderhistory -run '^TestServiceConcurrent'`
 
 Expected: all 20 deterministic repetitions PASS with exact winner/error counts.
 

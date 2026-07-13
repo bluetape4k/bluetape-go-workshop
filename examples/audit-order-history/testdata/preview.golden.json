@@ -1,0 +1,56 @@
+{
+  "current": {
+    "order_id": "order-1001",
+    "status": "shipped",
+    "revision": 3,
+    "updated_at": "2026-07-13T09:10:00Z"
+  },
+  "history": [
+    {
+      "event_id": "command-create-1001",
+      "event_type": "order.created",
+      "revision": 1,
+      "occurred_at": "2026-07-13T09:00:00Z",
+      "author": "workshop-preview",
+      "status_after": "pending"
+    },
+    {
+      "event_id": "command-confirm-1001",
+      "event_type": "order.confirmed",
+      "revision": 2,
+      "occurred_at": "2026-07-13T09:05:00Z",
+      "author": "workshop-preview",
+      "status_before": "pending",
+      "status_after": "confirmed"
+    },
+    {
+      "event_id": "command-ship-1001",
+      "event_type": "order.shipped",
+      "revision": 3,
+      "occurred_at": "2026-07-13T09:10:00Z",
+      "author": "workshop-preview",
+      "status_before": "confirmed",
+      "status_after": "shipped"
+    }
+  ],
+  "recent_history": [
+    {
+      "event_id": "command-ship-1001",
+      "event_type": "order.shipped",
+      "revision": 3,
+      "occurred_at": "2026-07-13T09:10:00Z",
+      "author": "workshop-preview",
+      "status_before": "confirmed",
+      "status_after": "shipped"
+    },
+    {
+      "event_id": "command-confirm-1001",
+      "event_type": "order.confirmed",
+      "revision": 2,
+      "occurred_at": "2026-07-13T09:05:00Z",
+      "author": "workshop-preview",
+      "status_before": "pending",
+      "status_after": "confirmed"
+    }
+  ]
+}
