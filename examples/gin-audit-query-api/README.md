@@ -6,6 +6,14 @@ Application-shaped Gin API for querying bluetape-go `audit` history. Search
 filters are submitted as a POST JSON body instead of a URL query string, so the
 contract does not depend on URL length as revision and time filters grow.
 
+## Reader Scenario
+
+![Gin audit query API reader scenario](../../docs/images/readme-diagrams/gin-audit-query-api-scenario.png)
+
+The fixed `order-1001` history makes both pagination requests reproducible: the
+first page returns revisions 4 and 3, then `next.to_revision: 2` starts the next
+inclusive page. The exact-revision route reads the same fixture independently.
+
 ## Package Lesson
 
 | Component | Owns |
@@ -19,6 +27,22 @@ The service queries exactly one aggregate. It gives `audit.Query` `limit + 1`,
 returns only the requested count, and uses the first unseen revision as an
 inclusive continuation when another entry exists. Pages therefore neither
 repeat nor skip a revision.
+
+## Architecture
+
+![Gin audit query API component architecture](../../docs/images/readme-diagrams/gin-audit-query-api-architecture.png)
+
+The Gin adapter and query service remain application-owned. They depend on the
+storage-independent `audit.HistoryReader` contract, while this runnable example
+wires `MemoryRepository` only as deterministic demo storage.
+
+## Search Sequence
+
+![Gin audit history search sequence](../../docs/images/readme-diagrams/gin-audit-query-api-sequence.png)
+
+The successful branch reads `limit + 1` entries before projecting the requested
+page and cursor. Invalid JSON and expired deadlines stop at the Gin boundary and
+return a public error without exposing raw input or repository details.
 
 ## Run
 

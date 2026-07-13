@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="920" viewBox="0 0 1560 920" role="img" aria-labelledby="title desc">
+  <title id="title">Gin audit query API component architecture</title>
+  <desc id="desc">Static component ownership from the HTTP caller through the Gin adapter and query service to the bluetape-go HistoryReader contract and the example MemoryRepository fixture.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-18%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="dependency-arrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .canvas { fill: #f8fafc; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 38px; fill: #0f172a; }
+      .subtitle, .zone-title, .card-sub, .relation, .note, .tag { font-family: "Comic Mono", monospace; }
+      .subtitle { font-size: 15px; fill: #475569; }
+      .zone-title { font-size: 13px; font-weight: 700; fill: #334155; }
+      .card-title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 22px; fill: #0f172a; }
+      .card-title-compact { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 18px; fill: #0f172a; }
+      .card-sub { font-size: 12px; fill: #475569; }
+      .relation { font-size: 11px; font-weight: 700; fill: #64748b; }
+      .note { font-size: 12px; fill: #475569; }
+      .tag { font-size: 11px; font-weight: 700; }
+      .process { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.8; }
+      .zone { stroke-width: 1.6; }
+      .card { stroke-width: 2; filter: url(#shadow); }
+      .dependency { fill: none; stroke: #64748b; stroke-width: 2.5; stroke-linecap: round; marker-end: url(#dependency-arrow); }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1560" height="920"/>
+  <text class="title" x="780" y="70" text-anchor="middle">Gin Audit Query API Component Architecture</text>
+  <text class="subtitle" x="780" y="101" text-anchor="middle">The example owns HTTP policy and pagination; bluetape-go supplies the reader contract and repository behavior.</text>
+
+  <rect class="process" x="48" y="140" width="1464" height="574" rx="22"/>
+  <text class="zone-title" x="76" y="170">GIN AUDIT QUERY API PROCESS</text>
+
+  <g id="caller-zone">
+    <rect class="zone" x="82" y="208" width="230" height="430" rx="18" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text class="zone-title" x="104" y="237">HTTP CLIENT</text>
+    <rect class="card" x="108" y="290" width="178" height="250" rx="14" fill="#ffffff" stroke="#64748b"/>
+    <text class="card-title" x="197" y="337" text-anchor="middle">Caller</text>
+    <text class="card-sub" x="197" y="378" text-anchor="middle">submits JSON search</text>
+    <text class="card-sub" x="197" y="404" text-anchor="middle">follows next cursor</text>
+    <text class="card-sub" x="197" y="430" text-anchor="middle">reads exact revision</text>
+    <rect x="132" y="474" width="130" height="36" rx="18" fill="#e2e8f0" stroke="#94a3b8"/>
+    <text class="tag" x="197" y="497" text-anchor="middle" fill="#475569">outside process</text>
+  </g>
+
+  <g id="adapter-zone">
+    <rect class="zone" x="350" y="208" width="266" height="430" rx="18" fill="#eff6ff" stroke="#93c5fd"/>
+    <text class="zone-title" x="372" y="237">GIN HTTP BOUNDARY</text>
+    <rect class="card" x="376" y="276" width="214" height="278" rx="14" fill="#dbeafe" stroke="#2563eb"/>
+    <text class="card-title" x="483" y="321" text-anchor="middle">Gin Adapter</text>
+    <text class="card-sub" x="483" y="360" text-anchor="middle">strict JSON decoding</text>
+    <text class="card-sub" x="483" y="386" text-anchor="middle">32 KiB body limit</text>
+    <text class="card-sub" x="483" y="412" text-anchor="middle">2 s request timeout</text>
+    <text class="card-sub" x="483" y="438" text-anchor="middle">public error mapping</text>
+    <text class="card-sub" x="483" y="464" text-anchor="middle">safe request logging</text>
+    <rect x="405" y="493" width="156" height="36" rx="18" fill="#bfdbfe" stroke="#60a5fa"/>
+    <text class="tag" x="483" y="516" text-anchor="middle" fill="#1d4ed8">example ownership</text>
+  </g>
+
+  <g id="service-zone">
+    <rect class="zone" x="654" y="208" width="266" height="430" rx="18" fill="#fffaf0" stroke="#f59e0b"/>
+    <text class="zone-title" x="676" y="237">QUERY MODULE</text>
+    <rect class="card" x="680" y="276" width="214" height="278" rx="14" fill="#fef3c7" stroke="#d97706"/>
+    <text class="card-title" x="787" y="321" text-anchor="middle">Query Service</text>
+    <text class="card-sub" x="787" y="360" text-anchor="middle">aggregate scope</text>
+    <text class="card-sub" x="787" y="386" text-anchor="middle">request validation</text>
+    <text class="card-sub" x="787" y="412" text-anchor="middle">limit + 1 lookup</text>
+    <text class="card-sub" x="787" y="438" text-anchor="middle">continuation cursor</text>
+    <text class="card-sub" x="787" y="464" text-anchor="middle">response projection</text>
+    <rect x="709" y="493" width="156" height="36" rx="18" fill="#fde68a" stroke="#f59e0b"/>
+    <text class="tag" x="787" y="516" text-anchor="middle" fill="#92400e">example ownership</text>
+  </g>
+
+  <g id="contract-zone">
+    <rect class="zone" x="958" y="208" width="244" height="430" rx="18" fill="#faf5ff" stroke="#c084fc"/>
+    <text class="zone-title" x="980" y="237">BLUETAPE-GO CONTRACT</text>
+    <rect class="card" x="984" y="304" width="192" height="222" rx="14" fill="#f3e8ff" stroke="#7c3aed"/>
+    <text class="card-title" x="1080" y="354" text-anchor="middle">HistoryReader</text>
+    <text class="card-sub" x="1080" y="389" text-anchor="middle">Find(ctx, Query)</text>
+    <text class="card-sub" x="1080" y="415" text-anchor="middle">FindRevision(...)</text>
+    <text class="card-sub" x="1080" y="454" text-anchor="middle">stable reader interface</text>
+    <rect x="1012" y="475" width="136" height="28" rx="14" fill="#e9d5ff" stroke="#c084fc"/>
+    <text class="tag" x="1080" y="494" text-anchor="middle" fill="#6d28d9">library boundary</text>
+  </g>
+
+  <g id="repository-zone">
+    <rect class="zone" x="1240" y="208" width="238" height="430" rx="18" fill="#ecfdf5" stroke="#6ee7b7"/>
+    <text class="zone-title" x="1262" y="237">EXAMPLE FIXTURE</text>
+    <rect class="card" x="1266" y="276" width="186" height="278" rx="14" fill="#d1fae5" stroke="#059669"/>
+    <text class="card-title-compact" x="1359" y="321" text-anchor="middle">MemoryRepository</text>
+    <text class="card-sub" x="1359" y="360" text-anchor="middle">HistoryReader impl</text>
+    <text class="card-sub" x="1359" y="386" text-anchor="middle">fixed order events</text>
+    <text class="card-sub" x="1359" y="412" text-anchor="middle">deterministic revisions</text>
+    <text class="card-sub" x="1359" y="451" text-anchor="middle">created / confirmed</text>
+    <text class="card-sub" x="1359" y="477" text-anchor="middle">packed / shipped</text>
+    <rect x="1291" y="493" width="136" height="36" rx="18" fill="#a7f3d0" stroke="#34d399"/>
+    <text class="tag" x="1359" y="516" text-anchor="middle" fill="#047857">demo data only</text>
+  </g>
+
+  <text class="relation" x="331" y="377" text-anchor="middle">HTTP</text>
+  <text class="relation" x="635" y="377" text-anchor="middle">calls</text>
+  <text class="relation" x="939" y="377" text-anchor="middle">depends</text>
+  <text class="relation" x="1221" y="377" text-anchor="middle">implemented by</text>
+  <path class="dependency" data-connector="caller-to-gin-adapter" d="M 312 415 L 348 415"/>
+  <path class="dependency" data-connector="gin-adapter-to-query-service" d="M 616 415 L 652 415"/>
+  <path class="dependency" data-connector="query-service-to-history-reader" d="M 920 415 L 956 415"/>
+  <path class="dependency" data-connector="history-reader-to-memory-repository" d="M 1202 415 L 1238 415"/>
+
+  <g id="production-boundary-note">
+    <rect x="126" y="754" width="1308" height="108" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
+    <text class="tag" x="160" y="791" fill="#1d4ed8">EXAMPLE BOUNDARY</text>
+    <text class="note" x="320" y="791">Loopback listener, Gin policies, query projection, and fixed in-memory history.</text>
+    <text class="tag" x="160" y="829" fill="#be123c">PRODUCTION OWNER</text>
+    <text class="note" x="320" y="829">Authentication, tenant authorization, metadata redaction, and durable repository wiring.</text>
+  </g>
+</svg>
