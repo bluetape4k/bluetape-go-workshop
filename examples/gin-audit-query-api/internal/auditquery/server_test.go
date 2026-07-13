@@ -68,13 +68,13 @@ func TestHTTPSearchAndDetail(t *testing.T) {
 	}
 
 	detail := httptest.NewRecorder()
-	engine.ServeHTTP(detail, httptest.NewRequest(http.MethodGet, "/audit/aggregates/order/order-1001/revisions/3", nil))
+	engine.ServeHTTP(detail, httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/audit/aggregates/order/order-1001/revisions/3", nil))
 	if detail.Code != http.StatusOK || !strings.Contains(detail.Body.String(), `"event_type":"order.packed"`) {
 		t.Fatalf("detail status = %d, body = %s", detail.Code, detail.Body.String())
 	}
 
 	missing := httptest.NewRecorder()
-	engine.ServeHTTP(missing, httptest.NewRequest(http.MethodGet, "/audit/aggregates/order/order-1001/revisions/99", nil))
+	engine.ServeHTTP(missing, httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/audit/aggregates/order/order-1001/revisions/99", nil))
 	assertPublicError(t, missing, http.StatusNotFound, "audit_entry_not_found")
 }
 
@@ -109,7 +109,7 @@ func TestHTTPStrictJSONAndRouteFailures(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			body := &trackingBody{Reader: bytes.NewReader(test.body)}
-			request := httptest.NewRequest(test.method, test.path, body)
+			request := httptest.NewRequestWithContext(context.Background(), test.method, test.path, body)
 			if test.contentType != "" {
 				request.Header.Set("Content-Type", test.contentType)
 			}
@@ -157,7 +157,7 @@ func TestHTTPTimeoutAndClientCancellation(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	request := httptest.NewRequest(http.MethodPost, "/audit/history/search", strings.NewReader(`{"aggregate":{"type":"order","id":"order-1"}}`)).WithContext(ctx)
+	request := httptest.NewRequestWithContext(ctx, http.MethodPost, "/audit/history/search", strings.NewReader(`{"aggregate":{"type":"order","id":"order-1"}}`))
 	request.Header.Set("Content-Type", "application/json")
 	canceled := httptest.NewRecorder()
 	engine.ServeHTTP(canceled, request)
@@ -230,7 +230,7 @@ func newHTTPTestEngine(t *testing.T, config HTTPConfig) (http.Handler, *bytes.Bu
 
 func performJSONRequest(t *testing.T, handler http.Handler, method string, path string, body string) *httptest.ResponseRecorder {
 	t.Helper()
-	request := httptest.NewRequest(method, path, strings.NewReader(body))
+	request := httptest.NewRequestWithContext(context.Background(), method, path, strings.NewReader(body))
 	request.Header.Set("Content-Type", "application/json")
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, request)

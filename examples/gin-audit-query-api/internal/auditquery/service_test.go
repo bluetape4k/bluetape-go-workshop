@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -317,7 +318,7 @@ func TestNormalizeAggregate(t *testing.T) {
 		{name: "blank id", request: AggregateRequest{Type: "order"}, wantErr: ErrInvalidRequest},
 		{name: "path separator", request: AggregateRequest{Type: "order", ID: "tenant/order-1"}, wantErr: ErrInvalidRequest},
 		{name: "percent escape", request: AggregateRequest{Type: "order", ID: "order%2F1"}, wantErr: ErrInvalidRequest},
-		{name: "too long", request: AggregateRequest{Type: "order", ID: "a" + string(make([]byte, 128))}, wantErr: ErrInvalidRequest},
+		{name: "too long", request: AggregateRequest{Type: "order", ID: strings.Repeat("a", 129)}, wantErr: ErrInvalidRequest},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
