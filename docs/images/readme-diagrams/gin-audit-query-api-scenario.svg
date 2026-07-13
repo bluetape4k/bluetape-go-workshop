@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Gin audit query API reader scenario</title>
+  <desc id="desc">A five-step reader workflow that seeds fixed order history, requests the newest page, follows an inclusive continuation cursor, and fetches one exact revision.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-16%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#203040" flood-opacity="0.11"/>
+    </filter>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .canvas { fill: #f6f9fc; }
+      .frame { fill: #ffffff; stroke: #c7d7e7; stroke-width: 2; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 36px; fill: #22344a; }
+      .subtitle, .mono, .footer { font-family: "Comic Mono", monospace; fill: #536476; }
+      .subtitle { font-size: 15px; }
+      .label { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 20px; fill: #22344a; }
+      .mono { font-size: 13px; }
+      .step { font-family: "Comic Mono", monospace; font-size: 15px; font-weight: 700; fill: #ffffff; }
+      .band-title { font-family: "Comic Mono", monospace; font-size: 13px; font-weight: 700; fill: #475569; }
+      .card { stroke-width: 2; filter: url(#shadow); }
+      .main-line { fill: none; stroke: #64748b; stroke-width: 2.5; stroke-linecap: round; marker-end: url(#arrow); }
+      .support-line { fill: none; stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 7 7; stroke-linecap: round; }
+      .footer { font-size: 12px; }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1440" height="720"/>
+  <rect class="frame" x="28" y="24" width="1384" height="672" rx="24"/>
+  <text class="title" x="64" y="78">Read Audit History Without Losing the Cursor</text>
+  <text class="subtitle" x="66" y="108">Seed fixed events / read newest entries / follow next.to_revision / inspect one exact revision</text>
+
+  <!-- Reader path: preserve the best-practice numbered main row. -->
+  <g id="step-1" transform="translate(64,150)">
+    <circle cx="24" cy="24" r="20" fill="#4f83bf"/>
+    <text class="step" x="24" y="29" text-anchor="middle">1</text>
+    <rect class="card" x="0" y="56" width="220" height="118" rx="14" fill="#e8f3ff" stroke="#4f83bf"/>
+    <text class="label" x="110" y="89" text-anchor="middle">Seed Order History</text>
+    <text class="mono" x="110" y="117" text-anchor="middle">order-1001 / revisions 1-4</text>
+    <text class="mono" x="110" y="141" text-anchor="middle">created to shipped</text>
+  </g>
+
+  <g id="step-2" transform="translate(336,150)">
+    <circle cx="24" cy="24" r="20" fill="#3e9868"/>
+    <text class="step" x="24" y="29" text-anchor="middle">2</text>
+    <rect class="card" x="0" y="56" width="220" height="118" rx="14" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="label" x="110" y="89" text-anchor="middle">Request Newest Page</text>
+    <text class="mono" x="110" y="117" text-anchor="middle">POST /audit/history/search</text>
+    <text class="mono" x="110" y="141" text-anchor="middle">limit: 2</text>
+  </g>
+
+  <g id="step-3" transform="translate(608,150)">
+    <circle cx="24" cy="24" r="20" fill="#b9851b"/>
+    <text class="step" x="24" y="29" text-anchor="middle">3</text>
+    <rect class="card" x="0" y="56" width="220" height="118" rx="14" fill="#fff3d9" stroke="#b9851b"/>
+    <text class="label" x="110" y="89" text-anchor="middle">Receive Page</text>
+    <text class="mono" x="110" y="117" text-anchor="middle">revisions 4, 3</text>
+    <text class="mono" x="110" y="141" text-anchor="middle">next.to_revision: 2</text>
+  </g>
+
+  <g id="step-4" transform="translate(880,150)">
+    <circle cx="24" cy="24" r="20" fill="#755bc6"/>
+    <text class="step" x="24" y="29" text-anchor="middle">4</text>
+    <rect class="card" x="0" y="56" width="220" height="118" rx="14" fill="#f1ecff" stroke="#755bc6"/>
+    <text class="label" x="110" y="89" text-anchor="middle">Follow Cursor</text>
+    <text class="mono" x="110" y="117" text-anchor="middle">POST search again</text>
+    <text class="mono" x="110" y="141" text-anchor="middle">to_revision: 2</text>
+  </g>
+
+  <g id="step-5" transform="translate(1152,150)">
+    <circle cx="24" cy="24" r="20" fill="#c65f76"/>
+    <text class="step" x="24" y="29" text-anchor="middle">5</text>
+    <rect class="card" x="0" y="56" width="220" height="118" rx="14" fill="#fdecef" stroke="#c65f76"/>
+    <text class="label" x="110" y="89" text-anchor="middle">Inspect Revision</text>
+    <text class="mono" x="110" y="117" text-anchor="middle">GET .../revisions/3</text>
+    <text class="mono" x="110" y="141" text-anchor="middle">one immutable entry</text>
+  </g>
+
+  <path class="main-line" data-connector="step-1-to-step-2" d="M 284 265 L 334 265"/>
+  <path class="main-line" data-connector="step-2-to-step-3" d="M 556 265 L 606 265"/>
+  <path class="main-line" data-connector="step-3-to-step-4" d="M 828 265 L 878 265"/>
+  <path class="main-line" data-connector="step-4-to-step-5" d="M 1100 265 L 1150 265"/>
+
+  <!-- Supporting concerns stay below the reader path. -->
+  <rect x="64" y="404" width="1308" height="194" rx="18" fill="#f8fafc" stroke="#d6e3ef" stroke-width="1.6"/>
+  <text class="band-title" x="90" y="434">SUPPORTING CONTRACTS</text>
+
+  <path class="support-line" data-connector="step-2-to-input-boundary" d="M 446 324 L 446 462"/>
+  <path class="support-line" data-connector="step-3-to-pagination-contract" d="M 718 324 L 718 462"/>
+  <path class="support-line" data-connector="step-4-to-trust-boundary" d="M 990 324 L 990 462"/>
+
+  <g id="support-input">
+    <rect class="card" x="316" y="462" width="260" height="94" rx="12" fill="#e9f7f6" stroke="#2e8f89"/>
+    <text class="label" x="446" y="494" text-anchor="middle">Strict Input Boundary</text>
+    <text class="mono" x="446" y="521" text-anchor="middle">JSON only / 32 KiB body</text>
+    <text class="mono" x="446" y="543" text-anchor="middle">2 s request deadline</text>
+  </g>
+
+  <g id="support-pagination">
+    <rect class="card" x="588" y="462" width="260" height="94" rx="12" fill="#fff8e1" stroke="#d6a441"/>
+    <text class="label" x="718" y="494" text-anchor="middle">Pagination Contract</text>
+    <text class="mono" x="718" y="521" text-anchor="middle">limit + 1 detects more</text>
+    <text class="mono" x="718" y="543" text-anchor="middle">inclusive next revision</text>
+  </g>
+
+  <g id="support-boundary">
+    <rect class="card" x="860" y="462" width="260" height="94" rx="12" fill="#fce7f3" stroke="#c65f76"/>
+    <text class="label" x="990" y="494" text-anchor="middle">Example Trust Boundary</text>
+    <text class="mono" x="990" y="521" text-anchor="middle">loopback listener only</text>
+    <text class="mono" x="990" y="543" text-anchor="middle">auth / tenant / redaction external</text>
+  </g>
+
+  <g id="legend">
+    <line x1="92" y1="638" x2="144" y2="638" class="main-line"/>
+    <text class="footer" x="164" y="643">reader path</text>
+    <line x1="288" y1="638" x2="340" y2="638" class="support-line"/>
+    <text class="footer" x="360" y="643">supporting contract</text>
+    <text class="footer" x="1346" y="643" text-anchor="end">Metadata is returned with entries; metadata filtering is outside this example.</text>
+  </g>
+</svg>

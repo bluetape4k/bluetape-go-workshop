@@ -7,6 +7,15 @@ bluetape-go `audit` 이력을 Gin API로 조회하는 application-shaped 예제�
 시간 범위가 늘어나도 URL 길이에 기대지 않고, 요청 계약을 구조적으로 확장할 수
 있습니다.
 
+## Reader Scenario
+
+![Gin audit query API reader scenario](../../docs/images/readme-diagrams/gin-audit-query-api-scenario.png)
+
+고정된 `order-1001` 이력을 사용하므로 pagination 요청을 같은 결과로 반복할 수
+있습니다. 첫 page는 revision 4와 3을 반환하고, `next.to_revision: 2`로 다음
+inclusive page를 시작합니다. Exact-revision route도 같은 fixture를 독립적으로
+조회합니다.
+
 ## Package Lesson
 
 | Component | Owns |
@@ -20,6 +29,22 @@ Service는 하나의 aggregate만 조회합니다. `audit.Query`에 `limit + 1`�
 다음 entry가 있는지 확인하고, 응답에는 요청한 개수만 담습니다. 남은 entry가
 있으면 아직 반환하지 않은 첫 revision을 inclusive continuation으로 돌려줍니다.
 이 방식은 page 사이에서 revision을 중복하거나 건너뛰지 않습니다.
+
+## Architecture
+
+![Gin audit query API component architecture](../../docs/images/readme-diagrams/gin-audit-query-api-architecture.png)
+
+Gin adapter와 query service는 application이 소유합니다. 두 component는 저장
+방식과 분리된 `audit.HistoryReader` 계약에 의존하며, 이 실행 예제는 결과가
+일정한 demo storage로만 `MemoryRepository`를 연결합니다.
+
+## Search Sequence
+
+![Gin audit history search sequence](../../docs/images/readme-diagrams/gin-audit-query-api-sequence.png)
+
+성공 경로는 `limit + 1`개 entry를 읽은 뒤 요청한 page와 cursor를 만듭니다.
+잘못된 JSON과 deadline 초과는 Gin 경계에서 멈추고, raw input이나 repository
+세부 정보 없이 public error를 반환합니다.
 
 ## Run
 
