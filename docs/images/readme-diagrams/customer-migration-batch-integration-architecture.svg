@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Customer Migration Batch Integration Architecture</title>
+  <desc id="desc">Four-layer component architecture showing the Gin HTTP boundary, operational run lifecycle, batch execution policies, and process-local checkpoint, sink, dead-letter, and report stores.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-18%" width="120%" height="145%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#203040" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#4f83bf"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#755bc6"/>
+    </marker>
+    <style>
+      .canvas { fill: #f6f9fc; }
+      .frame { fill: #ffffff; stroke: #c7d7e7; stroke-width: 2; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 36px; fill: #22344a; }
+      .subtitle, .layer-title, .mono, .relation, .legend, .footer { font-family: "Comic Mono", monospace; }
+      .subtitle { font-size: 14px; fill: #536476; }
+      .layer-title { font-size: 12px; font-weight: 700; fill: #475569; letter-spacing: 0.6px; }
+      .card-title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 20px; fill: #22344a; }
+      .mono { font-size: 11px; fill: #536476; }
+      .relation { font-size: 10px; font-weight: 700; fill: #64748b; }
+      .legend, .footer { font-size: 11px; fill: #536476; }
+      .layer { stroke-width: 1.5; }
+      .card { stroke-width: 2; filter: url(#shadow); }
+      .ownership { fill: none; stroke: #4f83bf; stroke-width: 2.5; stroke-linecap: round; marker-end: url(#arrow-blue); }
+      .admission { fill: none; stroke: #755bc6; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 8 7; marker-end: url(#arrow-violet); }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1400" height="900"/>
+  <rect class="frame" x="26" y="22" width="1348" height="856" rx="22"/>
+  <text class="title" x="700" y="66" text-anchor="middle">Customer Migration Batch Integration Architecture</text>
+  <text class="subtitle" x="700" y="94" text-anchor="middle">The example owns bounded HTTP policy, run admission, restart-safe batch behavior, and deterministic process-local state.</text>
+
+  <g id="http-layer">
+    <rect class="layer" x="54" y="124" width="1292" height="132" rx="18" fill="#eff6ff" stroke="#93c5fd"/>
+    <text class="layer-title" x="76" y="150">HTTP BOUNDARY</text>
+
+    <rect class="card" x="92" y="169" width="220" height="66" rx="13" fill="#ffffff" stroke="#64748b"/>
+    <text class="card-title" x="202" y="195" text-anchor="middle">Operator</text>
+    <text class="mono" x="202" y="218" text-anchor="middle">manual start / scheduled tick</text>
+
+    <rect class="card" x="390" y="169" width="250" height="66" rx="13" fill="#dbeafe" stroke="#2563eb"/>
+    <text class="card-title" x="515" y="195" text-anchor="middle">Gin Router</text>
+    <text class="mono" x="515" y="218" text-anchor="middle">routes + request boundary</text>
+
+    <rect class="card" x="718" y="169" width="306" height="66" rx="13" fill="#e8f3ff" stroke="#4f83bf"/>
+    <text class="card-title" x="871" y="195" text-anchor="middle">JSON / Status Mapping</text>
+    <text class="mono" x="871" y="218" text-anchor="middle">bounded decode + public responses</text>
+
+    <rect class="card" x="1102" y="169" width="206" height="66" rx="13" fill="#f8fafc" stroke="#94a3b8"/>
+    <text class="card-title" x="1205" y="195" text-anchor="middle">HTTP Report</text>
+    <text class="mono" x="1205" y="218" text-anchor="middle">run snapshot projection</text>
+  </g>
+
+  <g id="operations-layer">
+    <rect class="layer" x="54" y="276" width="1292" height="142" rx="18" fill="#fffaf0" stroke="#f3c66b"/>
+    <text class="layer-title" x="76" y="302">OPERATIONS LIFECYCLE</text>
+
+    <rect class="card" x="390" y="321" width="250" height="76" rx="13" fill="#fef3c7" stroke="#d97706"/>
+    <text class="card-title" x="515" y="349" text-anchor="middle">Service</text>
+    <text class="mono" x="515" y="373" text-anchor="middle">starts runs + owns lifecycle</text>
+
+    <rect class="card" x="718" y="321" width="250" height="76" rx="13" fill="#fff7df" stroke="#c99728"/>
+    <text class="card-title" x="843" y="349" text-anchor="middle">Active-run Guard</text>
+    <text class="mono" x="843" y="373" text-anchor="middle">cancel + immutable snapshots</text>
+
+    <rect class="card" x="1050" y="321" width="258" height="76" rx="13" fill="#f1ecff" stroke="#755bc6"/>
+    <text class="card-title" x="1179" y="349" text-anchor="middle">Leader Gate</text>
+    <text class="mono" x="1179" y="373" text-anchor="middle">scheduled admission only</text>
+  </g>
+
+  <g id="batch-layer">
+    <rect class="layer" x="54" y="438" width="1292" height="150" rx="18" fill="#f0fdf4" stroke="#86d5a5"/>
+    <text class="layer-title" x="76" y="464">BATCH EXECUTION</text>
+
+    <rect class="card" x="92" y="486" width="220" height="80" rx="13" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="card-title" x="202" y="515" text-anchor="middle">Job + Step</text>
+    <text class="mono" x="202" y="540" text-anchor="middle">chunk size 2 / checkpoint key</text>
+
+    <rect class="card" x="390" y="486" width="220" height="80" rx="13" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="card-title" x="500" y="515" text-anchor="middle">Reader</text>
+    <text class="mono" x="500" y="540" text-anchor="middle">restores NextIndex</text>
+
+    <rect class="card" x="688" y="486" width="250" height="80" rx="13" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="card-title" x="813" y="515" text-anchor="middle">Processor</text>
+    <text class="mono" x="813" y="540" text-anchor="middle">retry / skip policy</text>
+
+    <rect class="card" x="1016" y="486" width="292" height="80" rx="13" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="card-title" x="1162" y="515" text-anchor="middle">Idempotent Writer</text>
+    <text class="mono" x="1162" y="540" text-anchor="middle">duplicate becomes no-op</text>
+  </g>
+
+  <g id="state-layer">
+    <rect class="layer" x="54" y="608" width="1292" height="150" rx="18" fill="#faf5ff" stroke="#c7a7ef"/>
+    <text class="layer-title" x="76" y="634">PROCESS-LOCAL STATE</text>
+
+    <rect class="card" x="92" y="656" width="250" height="80" rx="13" fill="#f3e8ff" stroke="#7c3aed"/>
+    <text class="card-title" x="217" y="685" text-anchor="middle">Checkpoint Store</text>
+    <text class="mono" x="217" y="710" text-anchor="middle">customer-migration / NextIndex</text>
+
+    <rect class="card" x="390" y="656" width="250" height="80" rx="13" fill="#f8fafc" stroke="#64748b"/>
+    <text class="card-title" x="515" y="685" text-anchor="middle">Run Report</text>
+    <text class="mono" x="515" y="710" text-anchor="middle">status + counters + error</text>
+
+    <rect class="card" x="688" y="656" width="250" height="80" rx="13" fill="#fff3d9" stroke="#b9851b"/>
+    <text class="card-title" x="813" y="685" text-anchor="middle">Dead-Letter Store</text>
+    <text class="mono" x="813" y="710" text-anchor="middle">skipped cust-1004</text>
+
+    <rect class="card" x="1016" y="656" width="292" height="80" rx="13" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="card-title" x="1162" y="685" text-anchor="middle">Customer Sink</text>
+    <text class="mono" x="1162" y="710" text-anchor="middle">idempotent migrated records</text>
+  </g>
+
+  <text class="relation" x="351" y="194" text-anchor="middle">POST</text>
+  <path class="ownership" data-connector="operator-to-gin" d="M 312 202 L 388 202"/>
+  <text class="relation" x="679" y="194" text-anchor="middle">maps</text>
+  <path class="ownership" data-connector="gin-to-mapping" d="M 640 202 L 716 202"/>
+  <text class="relation" x="1063" y="194" text-anchor="middle">projects</text>
+  <path class="ownership" data-connector="mapping-to-report" d="M 1024 202 L 1100 202"/>
+
+  <path class="ownership" data-connector="gin-to-service" d="M 515 235 L 515 319"/>
+  <text class="relation" x="527" y="282">delegates</text>
+  <path class="ownership" data-connector="service-to-lifecycle" d="M 640 359 L 716 359"/>
+  <text class="relation" x="678" y="351" text-anchor="middle">owns</text>
+  <path class="admission" data-connector="service-to-leader-gate" d="M 515 321 L 515 298 Q 515 288 525 288 L 1169 288 Q 1179 288 1179 298 L 1179 319"/>
+  <text class="relation" x="847" y="280" text-anchor="middle">scheduled admission</text>
+
+  <path class="ownership" data-connector="service-to-job" d="M 390 359 L 370 359 Q 360 359 360 369 L 360 460 Q 360 470 350 470 L 212 470 Q 202 470 202 480 L 202 484"/>
+  <text class="relation" x="350" y="430" text-anchor="end">runs</text>
+  <path class="ownership" data-connector="job-to-reader" d="M 312 526 L 388 526"/>
+  <path class="ownership" data-connector="reader-to-processor" d="M 610 526 L 686 526"/>
+  <path class="ownership" data-connector="processor-to-writer" d="M 938 526 L 1014 526"/>
+
+  <path class="ownership" data-connector="job-to-checkpoint" d="M 202 566 L 202 644 Q 202 654 212 654 L 217 654"/>
+  <path class="ownership" data-connector="processor-to-dead-letter" d="M 813 566 L 813 654"/>
+  <path class="ownership" data-connector="writer-to-sink" d="M 1162 566 L 1162 654"/>
+
+  <g id="legend">
+    <line x1="82" y1="817" x2="130" y2="817" stroke="#4f83bf" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+    <text class="legend" x="146" y="821">owned call or state dependency</text>
+    <line x1="390" y1="817" x2="438" y2="817" stroke="#755bc6" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrow-violet)"/>
+    <text class="legend" x="454" y="821">leader-guarded scheduled admission</text>
+    <text class="footer" x="1318" y="821" text-anchor="end">The scheduler is a deterministic tick, not a durable queue.</text>
+  </g>
+</svg>
