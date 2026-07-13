@@ -145,7 +145,7 @@ Show visible numbered messages in this order:
 15. `save next_index=5`
 16. `200 completed report`
 
-Use transparent `alt writer crash` and `restart while leader` frames, five dashed lifelines, activation bars, 16x16 explicit per-color message markers, and labels above continuous message lines.
+Use transparent `alt writer crash` and `restart while leader` frames, five dashed lifelines, activation bars, the established 13x13 user-space per-color message markers with 10x10 filled triangles, and labels above continuous message lines.
 
 - [ ] **Step 2: Validate and render the sequence asset**
 
@@ -234,4 +234,3 @@ Push `docs/issue-75-customer-migration-diagrams`, create an English PR referenci
 - [ ] **Step 5: Wait for CI and stop before merge**
 
 Verify live PR body, labels, milestone, assignee, checks, review threads, and head SHA. Report the PR URL and local worktree path. Do not merge or delete the remote branch until the user explicitly approves the merge.
-

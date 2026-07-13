@@ -145,8 +145,9 @@ claims. Diagram labels remain English so the same assets serve both locales.
 - Use text-only cards unless a verified catalog infrastructure icon materially
   improves comprehension.
 - Use explicit per-color, fixed-size markers and rounded orthogonal connectors.
-- Scenario and architecture primary arrows use the 14x14 role; sequence
-  messages use the 16x16 role.
+- Scenario and architecture primary arrows use the 14x14 role. Sequence
+  messages use the established 13x13 user-space marker with a 10x10 filled
+  triangle and explicit per-color definitions.
 - Work one asset at a time: SVG edit, XML validation, CairoSVG 2x render,
   automated audits, then final full-size PNG inspection.
 
