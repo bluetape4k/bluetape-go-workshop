@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1220" viewBox="0 0 1600 1220" role="img" aria-labelledby="title desc">
+  <title id="title">Transactional outbox retry and cancellation sequence</title>
+  <desc id="desc">An order and outbox entry commit together, the relay retries one stable event identity after a transient Redis publish failure, and caller cancellation exits without retry or dead-letter mutation.</desc>
+  <defs>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .frame { fill: #fbfaf6; stroke: #78909c; stroke-width: 2.5; }
+      .phase { fill: none; stroke: #a9bcc7; stroke-width: 2; stroke-dasharray: 9 7; }
+      .alt { fill: #f4ecf7; fill-opacity: .12; stroke: #8a5ca8; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .title { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 36px; fill: #203240; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .participant { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 20px; fill: #203240; }
+      .role { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #536d7d; }
+      .phase-title { font-family: 'Comic Mono', monospace; font-size: 13px; font-weight: 700; fill: #47616f; }
+      .detail, .num { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #344b59; }
+      .num { font-weight: 700; }
+      .note { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #5d4a68; }
+      .card { fill: #ffffff; stroke: #607d8d; stroke-width: 2; }
+      .card.service { fill: #eef2ff; stroke: #6579b8; }
+      .card.sql-card { fill: #edf7ea; stroke: #6f9b62; }
+      .card.relay-card { fill: #eaf3fb; stroke: #4d75a3; }
+      .card.publisher-card { fill: #fce9e9; stroke: #b64b4b; }
+      .card.redis-card { fill: #fff1f1; stroke: #c76a6a; }
+      .lifeline { stroke: #9aadb8; stroke-width: 2; stroke-dasharray: 8 8; }
+      .activation { fill: #fffaf0; stroke: #aa8d5a; stroke-width: 1.5; }
+      .pill { fill: #fffefd; stroke-width: 1.3; }
+      .pill.blue { stroke: #78a7c0; }
+      .pill.green { stroke: #83aa78; }
+      .pill.amber { stroke: #c59a5a; }
+      .pill.red { stroke: #cf7a7a; }
+      .pill.purple { stroke: #aa83bb; }
+      .callBlue, .sql, .return, .callAmber, .callRed, .returnRed, .callPurple { fill: none; stroke-width: 3.5; stroke-linecap: round; }
+      .callBlue { stroke: #3e7b9f; marker-end: url(#seq-blue); }
+      .sql { stroke: #4f8b63; marker-end: url(#seq-green); }
+      .return { stroke: #4f8b63; stroke-dasharray: 7 6; marker-end: url(#seq-green); }
+      .callAmber { stroke: #b07a35; marker-end: url(#seq-amber); }
+      .callRed { stroke: #bd4b4b; marker-end: url(#seq-red); }
+      .returnRed { stroke: #bd4b4b; stroke-dasharray: 7 6; marker-end: url(#seq-red); }
+      .callPurple { stroke: #8a5ca8; marker-end: url(#seq-purple); }
+    </style>
+    <marker id="seq-blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3e7b9f" stroke="#3e7b9f" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-green" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#4f8b63" stroke="#4f8b63" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-amber" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b07a35" stroke="#b07a35" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-red" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#bd4b4b" stroke="#bd4b4b" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-purple" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#8a5ca8" stroke="#8a5ca8" stroke-dasharray="none"/>
+    </marker>
+  </defs>
+
+  <rect class="frame" x="20" y="20" width="1560" height="1180" rx="22"/>
+  <text class="title" x="800" y="62" text-anchor="middle">One committed event, retried with the same identity</text>
+  <text class="subtitle" x="800" y="92" text-anchor="middle">Time flows downward. SQL owns durability; Redis delivery remains at-least-once.</text>
+
+  <rect class="card" x="45" y="120" width="170" height="82" rx="12"/>
+  <text class="participant" x="130" y="153" text-anchor="middle">Application</text>
+  <text class="role" x="130" y="178" text-anchor="middle">runtime owner</text>
+
+  <rect class="card service" x="295" y="120" width="170" height="82" rx="12"/>
+  <text class="participant" x="380" y="153" text-anchor="middle">Order Service</text>
+  <text class="role" x="380" y="178" text-anchor="middle">transaction owner</text>
+
+  <rect class="card sql-card" x="555" y="120" width="170" height="82" rx="12"/>
+  <text class="participant" x="640" y="153" text-anchor="middle">PostgreSQL</text>
+  <text class="role" x="640" y="178" text-anchor="middle">orders + outbox</text>
+
+  <rect class="card relay-card" x="815" y="120" width="170" height="82" rx="12"/>
+  <text class="participant" x="900" y="153" text-anchor="middle">Relay</text>
+  <text class="role" x="900" y="178" text-anchor="middle">claim + state</text>
+
+  <rect class="card publisher-card" x="1075" y="120" width="170" height="82" rx="12"/>
+  <text class="participant" x="1160" y="153" text-anchor="middle">Redis Publisher</text>
+  <text class="role" x="1160" y="178" text-anchor="middle">released adapter</text>
+
+  <rect class="card redis-card" x="1345" y="120" width="170" height="82" rx="12"/>
+  <text class="participant" x="1430" y="153" text-anchor="middle">Redis Stream</text>
+  <text class="role" x="1430" y="178" text-anchor="middle">transport</text>
+
+  <line class="lifeline" x1="130" y1="202" x2="130" y2="1160"/>
+  <line class="lifeline" x1="380" y1="202" x2="380" y2="1160"/>
+  <line class="lifeline" x1="640" y1="202" x2="640" y2="1160"/>
+  <line class="lifeline" x1="900" y1="202" x2="900" y2="1160"/>
+  <line class="lifeline" x1="1160" y1="202" x2="1160" y2="1160"/>
+  <line class="lifeline" x1="1430" y1="202" x2="1430" y2="1160"/>
+
+  <rect class="phase" x="42" y="225" width="1516" height="185" rx="16"/>
+  <text class="phase-title" x="62" y="249">ORDER + OUTBOX COMMIT</text>
+  <rect class="phase" x="42" y="420" width="1516" height="515" rx="16"/>
+  <text class="phase-title" x="62" y="444">TRANSIENT FAILURE, THEN RETRY</text>
+  <rect class="alt" x="42" y="945" width="1516" height="215" rx="16"/>
+  <text class="phase-title" x="62" y="970">alt independent cancellation path</text>
+
+  <rect class="activation" x="374" y="260" width="12" height="135" rx="5"/>
+  <rect class="activation" x="634" y="310" width="12" height="90" rx="5"/>
+  <rect class="activation" x="894" y="440" width="12" height="485" rx="5"/>
+  <rect class="activation" x="1154" y="550" width="12" height="345" rx="5"/>
+  <rect class="activation" x="1424" y="595" width="12" height="300" rx="5"/>
+  <rect class="activation" x="634" y="995" width="12" height="62" rx="5"/>
+  <rect class="activation" x="894" y="990" width="12" height="140" rx="5"/>
+  <rect class="activation" x="1154" y="1065" width="12" height="65" rx="5"/>
+
+  <path class="callBlue connector" d="M130 275 H374"/>
+  <rect class="pill blue" x="176" y="245" width="158" height="25" rx="12"/>
+  <text class="num" x="188" y="263">1</text><text class="detail" x="208" y="263">Place(command)</text>
+
+  <path class="sql connector" d="M386 330 H634"/>
+  <rect class="pill green" x="430" y="300" width="166" height="25" rx="12"/>
+  <text class="num" x="442" y="318">2</text><text class="detail" x="462" y="318">order + Enqueue</text>
+
+  <path class="return connector" d="M634 385 H386"/>
+  <rect class="pill green" x="438" y="355" width="150" height="25" rx="12"/>
+  <text class="num" x="450" y="373">3</text><text class="detail" x="470" y="373">commit both</text>
+
+  <path class="callBlue connector" d="M130 460 H894"/>
+  <rect class="pill blue" x="406" y="432" width="206" height="25" rx="12"/>
+  <text class="num" x="418" y="450">4</text><text class="detail" x="438" y="450">RunOnce after commit</text>
+
+  <path class="sql connector" d="M894 498 H646"/>
+  <rect class="pill green" x="690" y="470" width="166" height="25" rx="12"/>
+  <text class="num" x="702" y="488">5</text><text class="detail" x="722" y="488">claim attempt 1</text>
+
+  <path class="return connector" d="M646 536 H894"/>
+  <rect class="pill green" x="688" y="508" width="170" height="25" rx="12"/>
+  <text class="num" x="700" y="526">6</text><text class="detail" x="720" y="526">claimed record</text>
+
+  <path class="callAmber connector" d="M906 574 H1154"/>
+  <rect class="pill amber" x="944" y="546" width="172" height="25" rx="12"/>
+  <text class="num" x="956" y="564">7</text><text class="detail" x="976" y="564">Publish(stable ID)</text>
+
+  <path class="callRed connector" d="M1166 612 H1424"/>
+  <rect class="pill red" x="1218" y="584" width="156" height="25" rx="12"/>
+  <text class="num" x="1230" y="602">8</text><text class="detail" x="1250" y="602">XADD attempt</text>
+
+  <path class="returnRed connector" d="M1424 650 H1166"/>
+  <rect class="pill red" x="1192" y="622" width="206" height="25" rx="12"/>
+  <text class="num" x="1204" y="640">9</text><text class="detail" x="1224" y="640">error / ambiguous outcome</text>
+
+  <path class="callAmber connector" d="M894 688 H646"/>
+  <rect class="pill amber" x="676" y="660" width="194" height="25" rx="12"/>
+  <text class="num" x="688" y="678">10</text><text class="detail" x="714" y="678">retry_at = now + 250ms</text>
+
+  <path class="callBlue connector" d="M130 726 H894"/>
+  <rect class="pill blue" x="400" y="698" width="218" height="25" rx="12"/>
+  <text class="num" x="412" y="716">11</text><text class="detail" x="438" y="716">RunOnce after clock advance</text>
+
+  <path class="sql connector" d="M894 764 H646"/>
+  <rect class="pill green" x="686" y="736" width="176" height="25" rx="12"/>
+  <text class="num" x="698" y="754">12</text><text class="detail" x="724" y="754">claim attempt 2</text>
+
+  <path class="callAmber connector" d="M906 802 H1154"/>
+  <rect class="pill amber" x="928" y="774" width="202" height="25" rx="12"/>
+  <text class="num" x="940" y="792">13</text><text class="detail" x="966" y="792">Publish(same event_id)</text>
+
+  <path class="callRed connector" d="M1166 840 H1424"/>
+  <rect class="pill red" x="1214" y="812" width="164" height="25" rx="12"/>
+  <text class="num" x="1226" y="830">14</text><text class="detail" x="1252" y="830">XADD attempt</text>
+
+  <path class="returnRed connector" d="M1424 878 H1166"/>
+  <rect class="pill red" x="1218" y="850" width="156" height="25" rx="12"/>
+  <text class="num" x="1230" y="868">15</text><text class="detail" x="1256" y="868">XADD success</text>
+
+  <path class="sql connector" d="M894 916 H646"/>
+  <rect class="pill green" x="684" y="888" width="180" height="25" rx="12"/>
+  <text class="num" x="696" y="906">16</text><text class="detail" x="722" y="906">mark published</text>
+
+  <path class="callPurple connector" d="M894 1005 H646"/>
+  <rect class="pill purple" x="684" y="977" width="178" height="25" rx="12"/>
+  <text class="num" x="696" y="995">17</text><text class="detail" x="722" y="995">claim attempt 1</text>
+
+  <path class="callPurple connector" d="M646 1040 H894"/>
+  <rect class="pill purple" x="686" y="1012" width="174" height="25" rx="12"/>
+  <text class="num" x="698" y="1030">18</text><text class="detail" x="724" y="1030">claimed record</text>
+
+  <path class="callPurple connector" d="M906 1075 H1154"/>
+  <rect class="pill purple" x="938" y="1047" width="184" height="25" rx="12"/>
+  <text class="num" x="950" y="1065">19</text><text class="detail" x="976" y="1065">Publish; caller cancels</text>
+
+  <path class="callPurple connector" d="M1154 1110 H906"/>
+  <rect class="pill purple" x="940" y="1082" width="182" height="25" rx="12"/>
+  <text class="num" x="952" y="1100">20</text><text class="detail" x="978" y="1100">context.Canceled</text>
+  <text class="note" x="800" y="1144" text-anchor="middle">Relay exits: no MarkFailed, no retry schedule, no dead letter. The claimed row waits for lease recovery.</text>
+
+  <text class="subtitle" x="800" y="1182" text-anchor="middle">Stable event_id and idempotency_key identify every attempt; attempts is diagnostics only.</text>
+</svg>

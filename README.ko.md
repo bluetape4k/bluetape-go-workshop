@@ -62,6 +62,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/gin-content-moderation-workflow`](examples/gin-content-moderation-workflow/README.ko.md) | [English](examples/gin-content-moderation-workflow/README.md) \| [한국어](examples/gin-content-moderation-workflow/README.ko.md) | 다국어 routing, masking, inspectable record, bounded POST JSON search를 조합한 실행형 Gin workflow 예제입니다. | `gin`, `textsearch/language`, `textsearch/japanese` |
 | [`examples/audit-order-history`](examples/audit-order-history/README.ko.md) | [English](examples/audit-order-history/README.md) \| [한국어](examples/audit-order-history/README.ko.md) | 변경 가능한 current state와 불변 audit history, 제한된 filtered query를 비교하는 주문 상태 service입니다. | `audit` |
 | [`examples/gin-audit-query-api`](examples/gin-audit-query-api/README.ko.md) | [English](examples/gin-audit-query-api/README.md) \| [한국어](examples/gin-audit-query-api/README.ko.md) | Strict POST JSON audit-history filter, revision pagination, aggregate/revision detail lookup을 제공하는 Gin API입니다. | `gin`, `audit` |
+| [`examples/transactional-outbox-publisher`](examples/transactional-outbox-publisher/README.ko.md) | [English](examples/transactional-outbox-publisher/README.md) \| [한국어](examples/transactional-outbox-publisher/README.ko.md) | PostgreSQL order와 audit event를 함께 commit한 뒤 릴리스된 SQL outbox relay와 Redis Streams adapter로 at-least-once 발행하는 예제입니다. | `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -198,6 +199,28 @@ PostgreSQL-backed handler/service/repository test를 실행합니다.
 
 ```bash
 go test -count=1 ./examples/gin-sql-order-service/...
+```
+
+## Transactional Outbox Publisher 예제 실행
+
+PostgreSQL과 Redis를 시작한 뒤 endpoint를 지정합니다. Order와 outbox event를 함께
+commit하고, commit된 event를 Redis Streams로 relay합니다.
+
+```bash
+export DATABASE_URL='postgres://bluetape:bluetape@127.0.0.1:5432/bluetape?sslmode=disable'
+export REDIS_ADDR='127.0.0.1:6379'
+export REDIS_STREAM='workshop:transactional-outbox'
+go run ./examples/transactional-outbox-publisher
+```
+
+[예제 README](examples/transactional-outbox-publisher/README.ko.md)에서 버전을 고정한
+container command, expected JSON과 stream field, 재실행 identity, race test,
+production at-least-once boundary를 확인할 수 있습니다.
+
+PostgreSQL과 Redis Testcontainers suite를 실행합니다.
+
+```bash
+go test -count=1 ./examples/transactional-outbox-publisher/...
 ```
 
 ## S3 Floci Storage 예제 실행

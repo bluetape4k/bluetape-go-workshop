@@ -36,7 +36,7 @@ or changelog edit is planned. Any such diff stops the task for reapproval.
 
 **Complexity:** Medium. **Depends on:** approved spec. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `model.go`, `schema.go`, `service_test.go`, then `service.go`.
 
-- [ ] **Step 1: Write constructor and validation tests first**
+- [x] **Step 1: Write constructor and validation tests first**
 
 Create table tests for nil store, blank/invalid/oversized author, nil clock,
 zero-value/nil service, nil database/context, pre-cancelled context,
@@ -66,13 +66,13 @@ func TestNewServiceRejectsInvalidConfiguration(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox`
 
 Expected: FAIL because the package and constructor contracts do not exist.
 
-- [ ] **Step 3: Implement minimal values and constructor**
+- [x] **Step 3: Implement minimal values and constructor**
 
 ```go
 const (
@@ -106,7 +106,7 @@ Trim and bound author to 1..128 valid UTF-8 runes, default `Now` to UTC
 `time.Now`, preserve caller identifiers after trimming, and make nil/zero-value
 methods fail closed with `%w`-wrapped sentinels.
 
-- [ ] **Step 4: Add schema creation and command validation**
+- [x] **Step 4: Add schema creation and command validation**
 
 `Service.CreateSchema` executes fixed, parameter-free example DDL and delegates
 to its configured `sqloutbox.Store`:
@@ -125,7 +125,7 @@ Normalize nil context to `context.Background`, preserve cancellation, validate
 IDs as valid UTF-8 with 1..128 runes, require positive total, and normalize
 `CreatedAt` to UTC before opening a transaction.
 
-- [ ] **Step 5: Run GREEN and format**
+- [x] **Step 5: Run GREEN and format**
 
 ```bash
 gofmt -w examples/transactional-outbox-publisher/internal/orderoutbox/*.go
@@ -138,7 +138,7 @@ Expected: PASS and `git diff --check` clean.
 
 **Complexity:** High. **Depends on:** Task 1. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `service_test.go`, then `model.go` and `service.go`.
 
-- [ ] **Step 1: Write PostgreSQL atomicity tests**
+- [x] **Step 1: Write PostgreSQL atomicity tests**
 
 Use one `TestServicePlacePostgreSQL` with sequential subtests sharing one
 `postgrestestcontainer.Start` instance under a 90-second context, pgx
@@ -160,13 +160,13 @@ assertTableCount(ctx, t, db, ordersTable, 1)
 assertTableCount(ctx, t, db, outboxTable, 1)
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestServicePlace'`
 
 Expected: FAIL because `Place` and audit entry construction are absent.
 
-- [ ] **Step 3: Build one released-contract audit entry**
+- [x] **Step 3: Build one released-contract audit entry**
 
 Marshal only customer ID, status, and total cents. Call
 `audit.NewAggregateID`, `audit.NewDomainEvent`, and `audit.NewEntry` with initial
@@ -174,7 +174,7 @@ revision, event type `order.placed`, caller command ID for both identity fields,
 `OccurredAt=CreatedAt`, and `RecordedAt=service clock`. Wrap all errors with
 `%w`; do not add caller JSON, metadata, snapshots, or generated IDs.
 
-- [ ] **Step 4: Implement one transaction**
+- [x] **Step 4: Implement one transaction**
 
 ```go
 err = sqlkit.WithTx(ctx, db, nil, func(ctx context.Context, tx *sql.Tx) error {
@@ -197,7 +197,7 @@ err = sqlkit.WithTx(ctx, db, nil, func(ctx context.Context, tx *sql.Tx) error {
 Return `Order` only after commit. Never call Redis, publisher, or relay inside
 the transaction.
 
-- [ ] **Step 5: Run GREEN and focused race**
+- [x] **Step 5: Run GREEN and focused race**
 
 ```bash
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestServicePlace'
@@ -210,7 +210,7 @@ Expected: exact table counts and rollback assertions PASS; race is clean.
 
 **Complexity:** High. **Depends on:** Task 2. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `relay_test.go` and shared test helpers only.
 
-- [ ] **Step 1: Write deterministic success/retry tests**
+- [x] **Step 1: Write deterministic success/retry tests**
 
 Use the same mutable clock in `sqloutbox.Options.Now` and `RelayOptions.Now`.
 Configure `RecordingPublisher` to fail `command-retry` once. Assert first
@@ -231,14 +231,14 @@ relay, err := sqloutbox.NewRelay(store, publisher, sqloutbox.RelayOptions{
 })
 ```
 
-- [ ] **Step 2: Add dead-letter and cancellation tests**
+- [x] **Step 2: Add dead-letter and cancellation tests**
 
 Fail three eligible attempts and assert final `dead_letter`, attempts 3, and no
 published result. For cancellation, a `PublisherFunc` cancels the caller and
 returns `ctx.Err()`; assert `context.Canceled`, status remains `claimed`,
 attempts 1, and no retry/dead-letter write.
 
-- [ ] **Step 3: Prove continuous `Run` joins without sleeps**
+- [x] **Step 3: Prove continuous `Run` joins without sleeps**
 
 A `PublisherFunc` closes `started`, waits on `ctx.Done`, and returns the context
 error. Start `Relay.Run`, wait for `started`, cancel, and join through a bounded
@@ -253,7 +253,7 @@ case <-time.After(5 * time.Second):
 }
 ```
 
-- [ ] **Step 4: Add bounded concurrent `RunOnce` stress proof**
+- [x] **Step 4: Add bounded concurrent `RunOnce` stress proof**
 
 Enqueue 12 independent aggregate records, start four `RunOnce` workers from a
 closed barrier channel, and use concurrent-safe `RecordingPublisher`. Across all
@@ -261,7 +261,7 @@ worker results require exactly 12 claimed, 12 published, zero failed/dead-letter
 12 unique event IDs, and all 12 SQL rows `published`. Repeat the normal test 10
 times; no goroutine may poll after its one call returns.
 
-- [ ] **Step 5: Run RED then GREEN/race**
+- [x] **Step 5: Run RED then GREEN/race**
 
 ```bash
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestRelay'
@@ -276,7 +276,7 @@ Do not reimplement relay/store behavior in workshop code.
 
 **Complexity:** High. **Depends on:** Tasks 2-3. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `integration_test.go` only unless a source-backed application gap appears.
 
-- [ ] **Step 1: Write one sequential dual-container test**
+- [x] **Step 1: Write one sequential dual-container test**
 
 Start PostgreSQL then Redis with released fixtures under one 120-second context.
 Open/ping both clients and register cleanup. Do not use `t.Parallel`.
@@ -293,7 +293,7 @@ if err := client.Ping(ctx).Err(); err != nil { t.Fatal(err) }
 Place one order and construct only `redisstreams.New`, then one
 `Relay.RunOnce` with claim limit 1.
 
-- [ ] **Step 2: Verify every documented Redis field**
+- [x] **Step 2: Verify every documented Redis field**
 
 Read at most two entries using `XRangeN(ctx, stream, "-", "+", 2)`. Require
 exactly one message and exact values for `record_id`, `status`,
@@ -302,7 +302,7 @@ exactly one message and exact values for `record_id`, `status`,
 `entry_json`. Decode `entry_json` with `audit.DecodeEntryJSON` and require scalar
 parity. Query PostgreSQL for `published` and attempts 1.
 
-- [ ] **Step 3: Run integration and race sequentially**
+- [x] **Step 3: Run integration and race sequentially**
 
 ```bash
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run '^TestRedisStreamsIntegration$'
@@ -316,7 +316,7 @@ diagnosed, not dismissed as container noise.
 
 **Complexity:** High. **Depends on:** Task 4. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `main_test.go`, then `main.go`.
 
-- [ ] **Step 1: Write configuration and output tests**
+- [x] **Step 1: Write configuration and output tests**
 
 Define unexported `appConfig`, `loadConfig(getenv, now)`, `openDependencies`,
 `dependencies.Close`, `execute(ctx, db, redisClient, config, output)`, and
@@ -338,13 +338,13 @@ type runOutput struct {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `go test -count=1 ./examples/transactional-outbox-publisher -run 'Test(LoadConfig|Execute|Run)'`
 
 Expected: FAIL because main-package runtime boundaries do not exist.
 
-- [ ] **Step 3: Implement client ownership, readiness, and batch execution**
+- [x] **Step 3: Implement client ownership, readiness, and batch execution**
 
 `run` opens pgx and go-redis clients, immediately defers close, uses bounded
 child contexts for both Pings, and joins close errors with the return error.
@@ -368,7 +368,7 @@ Read one candidate with `XRevRangeN`, require its `event_id` and
 `idempotency_key` equal the command ID, then render JSON. Never call `XAdd` from
 workshop code.
 
-- [ ] **Step 4: Run GREEN and focused race**
+- [x] **Step 4: Run GREEN and focused race**
 
 ```bash
 gofmt -w examples/transactional-outbox-publisher/*.go
@@ -383,7 +383,7 @@ against disposable PostgreSQL and Redis endpoints and requires JSON exit 0.
 
 **Complexity:** High. **Depends on:** Tasks 2-5. **Pattern skill:** `bluetape-diagram` with `common.md` and `architecture.md`. **Write scope:** architecture SVG/PNG only.
 
-- [ ] **Step 1: Open source and full-size references**
+- [x] **Step 1: Open source and full-size references**
 
 Use best-practice reference
 `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/external-redis-fast-architecture.png`
@@ -392,7 +392,7 @@ and repo-local reference
 Record both paths. The reader question is who owns transaction, clients, relay,
 durable rows, and Redis transport.
 
-- [ ] **Step 2: Draw the static ownership asset**
+- [x] **Step 2: Draw the static ownership asset**
 
 Create `transactional-outbox-publisher-architecture.svg` with Architects
 Daughter/Comic Mono, catalog database/Redis icons, and separate application,
@@ -409,7 +409,7 @@ Prefer straight horizontal links. Rounded orthogonal bends use separate ports,
 at least `max(8px, rx/2)` corner clearance, and a terminal segment long enough
 for a 14x14 primary arrowhead. No connector may hug or enter a card.
 
-- [ ] **Step 3: Parse, render, audit, then inspect at full size**
+- [x] **Step 3: Parse, render, audit, then inspect at full size**
 
 ```bash
 xmllint --noout docs/images/readme-diagrams/transactional-outbox-publisher-architecture.svg
@@ -430,7 +430,7 @@ evidence overrides scripts.
 
 **Complexity:** High. **Depends on:** Task 6 and final relay behavior. **Pattern skill:** `bluetape-diagram` with `common.md` and `sequence.md`. **Write scope:** sequence SVG/PNG only.
 
-- [ ] **Step 1: Open both sequence references at full size**
+- [x] **Step 1: Open both sequence references at full size**
 
 Use best-practice reference
 `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/leader-core-sequence-03.png`
@@ -439,7 +439,7 @@ and repo-local reference
 The reader question is how one stable event is attempted twice while the SQL
 commit remains atomic.
 
-- [ ] **Step 2: Draw the chronological asset**
+- [x] **Step 2: Draw the chronological asset**
 
 Participants are Application, Service, PostgreSQL, Relay, Redis Publisher, and
 Redis Stream. Add lifelines, activation bars, visible numbered pills, and
@@ -448,7 +448,7 @@ publish plus retry scheduling, attempt 2 with unchanged identity, append plus
 published completion, and alternate caller cancellation without retry/dead
 letter. Use explicit per-color 16x16 arrowheads and continuous message lines.
 
-- [ ] **Step 3: Run common and sequence-specific proof**
+- [x] **Step 3: Run common and sequence-specific proof**
 
 Run all Task 6 common commands against the sequence asset plus:
 
@@ -466,7 +466,7 @@ branch. SVG-only or contact-sheet evidence is invalid.
 
 **Complexity:** Medium. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-writer`, `bluetape-diagram`. **Write scope:** example and root README locale pairs.
 
-- [ ] **Step 1: Write the English README from verified behavior**
+- [x] **Step 1: Write the English README from verified behavior**
 
 Include language switch, both diagrams, pinned PostgreSQL/Redis container
 prerequisites matching v0.18.0 fixtures, readiness, environment variables,
@@ -486,19 +486,19 @@ docker run --rm -d --name workshop-outbox-postgres -e POSTGRES_DB=bluetape -e PO
 docker run --rm -d --name workshop-outbox-redis -p 6379:6379 redis:7.4-alpine
 ```
 
-- [ ] **Step 2: Produce natural Korean source parity**
+- [x] **Step 2: Produce natural Korean source parity**
 
 Use `bluetape-writer`. Preserve every command, field, warning, diagram embed,
 and ownership boundary. Share the English-label assets and add the required
 language switch.
 
-- [ ] **Step 3: Add root navigation/run parity**
+- [x] **Step 3: Add root navigation/run parity**
 
 Add an audit/outbox-adjacent row in both root tables with packages
 `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`,
 and `testcontainers/redis`. Add matched English/Korean run/test sections.
 
-- [ ] **Step 4: Verify docs and diagram exposure**
+- [x] **Step 4: Verify docs and diagram exposure**
 
 ```bash
 rg -n 'transactional-outbox-publisher|at-least-once|event_id|idempotency_key|go run ./examples/transactional-outbox-publisher' README.md README.ko.md examples/transactional-outbox-publisher/README*.md
@@ -514,7 +514,7 @@ delivery caveats, and navigation.
 
 **Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-go-patterns`, `bluetape-diagram`. **Write scope:** repairs, review artifact, lesson.
 
-- [ ] **Step 1: Run fresh proof in order**
+- [x] **Step 1: Run fresh proof in order**
 
 ```bash
 gofmt -w examples/transactional-outbox-publisher/*.go examples/transactional-outbox-publisher/internal/orderoutbox/*.go
@@ -531,14 +531,14 @@ make ci
 Expected: every command exits 0 with fresh observed output. Lost handles,
 truncated output without exit status, and retry-only PASS are not evidence.
 
-- [ ] **Step 2: Complete performance/stability and Type A verification**
+- [x] **Step 2: Complete performance/stability and Type A verification**
 
 Inspect unbounded Redis reads, retry/poll loops, DB round trips, context/timer/
 goroutine ownership, client closure, readiness, provider error exposure, and
 container startup. Map the exact spec and plan to the final diff, tests, locale
 pair, navigation, and both PNGs. Repair all P0/P1 and rerun affected proof.
 
-- [ ] **Step 3: Converge six review perspectives**
+- [x] **Step 3: Converge six review perspectives**
 
 Review performance, stability, security, Ops, developer/API, and user/caller,
 then integrate in the main session. Write
@@ -546,7 +546,7 @@ then integrate in the main session. Write
 P0=0/P1=0. Diagram rows record commands, nonzero counts, PNG dimensions,
 reference paths, and full-size inspection notes rather than “passed”.
 
-- [ ] **Step 4: Commit the durable lesson before PR**
+- [x] **Step 4: Commit the durable lesson before PR**
 
 Create `docs/lessons/2026-07-14-issue-57-transactional-outbox-publisher.md`
 covering transaction ownership, deterministic retry clock, ambiguous duplicate

@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Transactional outbox publisher architecture</title>
+  <desc id="desc">The application owns clients, shutdown, the order service, one SQL transaction, and the relay. PostgreSQL commits an order row and outbox row together before the released Redis Streams publisher appends the event.</desc>
+  <defs>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .title { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 38px; fill: #203240; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 16px; fill: #536d7d; }
+      .region-title { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 25px; fill: #29404f; }
+      .card-title { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 23px; fill: #203240; }
+      .card-text { font-family: 'Comic Mono', monospace; font-size: 14px; fill: #344b59; }
+      .label { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #35505f; }
+      .tiny { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #536d7d; }
+      .connector { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .command-flow { stroke: #47616f; marker-end: url(#arrow-neutral); }
+      .sql-flow { stroke: #4f7f68; marker-end: url(#arrow-sql); }
+      .relay-flow { stroke: #4d75a3; marker-end: url(#arrow-relay); }
+      .redis-flow { stroke: #b64b4b; marker-end: url(#arrow-redis); }
+    </style>
+    <marker id="arrow-neutral" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#47616f"/>
+    </marker>
+    <marker id="arrow-sql" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#4f7f68"/>
+    </marker>
+    <marker id="arrow-relay" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#4d75a3"/>
+    </marker>
+    <marker id="arrow-redis" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#b64b4b"/>
+    </marker>
+  </defs>
+
+  <rect width="1500" height="900" fill="#fbfaf6"/>
+  <text class="title" x="750" y="58" text-anchor="middle">Commit in SQL, then publish from the outbox</text>
+  <text class="subtitle" x="750" y="92" text-anchor="middle">One application-owned transaction makes the order and event durable before Redis is touched.</text>
+
+  <rect x="45" y="145" width="750" height="700" rx="22" fill="#f3f8fb" stroke="#9bb5c5" stroke-width="2"/>
+  <text class="region-title" x="75" y="190">Application process</text>
+  <rect x="825" y="145" width="350" height="700" rx="22" fill="#f2f8ef" stroke="#98b78d" stroke-width="2"/>
+  <text class="region-title" x="855" y="190">PostgreSQL durable source</text>
+  <rect x="1205" y="145" width="250" height="700" rx="22" fill="#fff3f3" stroke="#d69a9a" stroke-width="2"/>
+  <text class="region-title" x="1235" y="190">Redis</text>
+
+  <rect id="command-card" class="card" x="80" y="250" width="180" height="120" rx="14" fill="#ffffff" stroke="#607d8d" stroke-width="2.5"/>
+  <text class="card-title" x="170" y="290" text-anchor="middle">Command</text>
+  <text class="card-text" x="170" y="322" text-anchor="middle">stable command_id</text>
+  <text class="card-text" x="170" y="347" text-anchor="middle">order + customer</text>
+
+  <rect id="service-card" class="card" x="310" y="235" width="215" height="150" rx="14" fill="#e8eefb" stroke="#6579b8" stroke-width="2.5"/>
+  <text class="card-title" x="418" y="278" text-anchor="middle">Order Service</text>
+  <text class="card-text" x="418" y="312" text-anchor="middle">validate values</text>
+  <text class="card-text" x="418" y="337" text-anchor="middle">build audit.Entry</text>
+  <text class="card-text" x="418" y="362" text-anchor="middle">owns transaction</text>
+
+  <rect id="transaction-card" class="card" x="570" y="225" width="190" height="170" rx="14" fill="#e9f7ef" stroke="#4f7f68" stroke-width="2.5"/>
+  <text class="card-title" x="665" y="267" text-anchor="middle">sqlkit.WithTx</text>
+  <text class="card-text" x="665" y="302" text-anchor="middle">1. insert order</text>
+  <text class="card-text" x="665" y="329" text-anchor="middle">2. Store.Enqueue</text>
+  <line x1="600" y1="349" x2="730" y2="349" stroke="#83a997" stroke-width="2"/>
+  <text class="card-text" x="665" y="376" text-anchor="middle">commit or rollback both</text>
+
+  <rect id="order-row-card" class="card" x="865" y="235" width="270" height="145" rx="14" fill="#ffffff" stroke="#6f9b62" stroke-width="2.5"/>
+  <g data-bluetape4k-icon="database" transform="translate(890 264)">
+    <ellipse cx="24" cy="10" rx="22" ry="8" fill="#7fae72"/>
+    <path d="M2 10 V42 C2 49 46 49 46 42 V10" fill="#dcefd7" stroke="#6f9b62" stroke-width="2"/>
+    <ellipse cx="24" cy="42" rx="22" ry="8" fill="#c8e4c1" stroke="#6f9b62" stroke-width="2"/>
+  </g>
+  <text class="card-title" x="955" y="278">Order row</text>
+  <text class="card-text" x="955" y="312">status = placed</text>
+  <text class="card-text" x="955" y="338">business state</text>
+  <text class="tiny" x="955" y="362">same commit</text>
+
+  <rect id="outbox-row-card" class="card" x="865" y="455" width="270" height="165" rx="14" fill="#edf7ea" stroke="#6f9b62" stroke-width="2.5"/>
+  <g data-bluetape4k-icon="database" transform="translate(890 486)">
+    <ellipse cx="24" cy="10" rx="22" ry="8" fill="#7fae72"/>
+    <path d="M2 10 V42 C2 49 46 49 46 42 V10" fill="#dcefd7" stroke="#6f9b62" stroke-width="2"/>
+    <ellipse cx="24" cy="42" rx="22" ry="8" fill="#c8e4c1" stroke="#6f9b62" stroke-width="2"/>
+  </g>
+  <text class="card-title" x="955" y="500">Outbox row</text>
+  <text class="card-text" x="955" y="534">pending to claimed</text>
+  <text class="card-text" x="955" y="560">published / retry</text>
+  <text class="tiny" x="955" y="592">event_id stays stable</text>
+
+  <rect id="runtime-card" class="card" x="80" y="625" width="180" height="145" rx="14" fill="#fff8dc" stroke="#b69a4c" stroke-width="2.5"/>
+  <text class="card-title" x="170" y="665" text-anchor="middle">Runtime owner</text>
+  <text class="card-text" x="170" y="698" text-anchor="middle">*sql.DB + Redis client</text>
+  <text class="card-text" x="170" y="724" text-anchor="middle">bounded Ping</text>
+  <text class="card-text" x="170" y="750" text-anchor="middle">signal + Close</text>
+
+  <rect id="relay-card" class="card" x="310" y="625" width="215" height="145" rx="14" fill="#eaf3fb" stroke="#4d75a3" stroke-width="2.5"/>
+  <text class="card-title" x="418" y="665" text-anchor="middle">sqloutbox.Relay</text>
+  <text class="card-text" x="418" y="698" text-anchor="middle">claim committed rows</text>
+  <text class="card-text" x="418" y="724" text-anchor="middle">mark outcome in SQL</text>
+  <text class="tiny" x="418" y="750" text-anchor="middle">at-least-once</text>
+
+  <rect id="publisher-card" class="card" x="570" y="625" width="190" height="145" rx="14" fill="#fce9e9" stroke="#b64b4b" stroke-width="2.5"/>
+  <text class="card-title" x="665" y="665" text-anchor="middle">redisstreams</text>
+  <text class="card-text" x="665" y="698" text-anchor="middle">released Publisher</text>
+  <text class="card-text" x="665" y="724" text-anchor="middle">one XADD</text>
+  <text class="tiny" x="665" y="750" text-anchor="middle">no SQL ownership</text>
+
+  <rect id="redis-stream-card" class="card" x="1235" y="625" width="190" height="145" rx="14" fill="#fce3e3" stroke="#b64b4b" stroke-width="2.5"/>
+  <g data-bluetape4k-icon="redis" transform="translate(1250 643) scale(1.15)">
+    <path d="M45.536 34.95c-2.013 1.05-12.44 5.337-14.66 6.494s-3.453 1.146-5.207.308-12.85-5.32-14.85-6.276-2.04-1.613-.077-2.382l15.332-5.936c2.332-.836 3.14-.867 5.126-.14S43.55 31.87 45.51 32.6s2.037 1.31.024 2.36z" fill="#d82c20"/>
+    <path d="M45.536 38.764c-2.013 1.05-12.44 5.337-14.66 6.494s-3.453 1.146-5.207.308-12.85-5.32-14.85-6.276c-1-.478-1.524-.88-1.524-1.26v-3.813s14.447-3.145 16.78-3.982 3.14-.867 5.126-.14 13.853 2.868 15.814 3.587v3.76c0 .377-.452.8-1.477 1.324z" fill="#a41e11"/>
+    <path d="M45.536 28.733c-2.013 1.05-12.44 5.337-14.66 6.494s-3.453 1.146-5.207.308-12.85-5.32-14.85-6.276-2.04-1.613-.077-2.382l15.332-5.935c2.332-.837 3.14-.867 5.126-.14s12.35 4.853 14.312 5.57 2.037 1.31.024 2.36z" fill="#d82c20"/>
+  </g>
+  <text class="card-title" x="1360" y="666" text-anchor="middle">Redis Stream</text>
+  <text class="card-text" x="1260" y="708">13 provider fields</text>
+  <text class="card-text" x="1260" y="734">stable event identity</text>
+  <text class="tiny" x="1260" y="758">SQL remains durable truth</text>
+
+  <path id="command-to-service" class="connector command-flow" data-connector="command-to-service" d="M260 310 H310"/>
+  <path id="service-to-transaction" class="connector sql-flow" data-connector="service-to-transaction" d="M525 310 H570"/>
+  <path id="transaction-to-order" class="connector sql-flow" data-connector="transaction-to-order" d="M760 290 H865"/>
+  <path id="transaction-to-outbox" class="connector sql-flow" data-connector="transaction-to-outbox" d="M760 330 H800 Q812 330 812 342 V488 Q812 500 824 500 H865"/>
+  <text class="label" x="780" y="318">same SQL tx</text>
+
+  <path id="runtime-to-relay" class="connector relay-flow" data-connector="runtime-to-relay" d="M260 698 H310"/>
+  <path id="relay-to-outbox" class="connector relay-flow" data-connector="relay-to-outbox" d="M418 625 V587 Q418 575 430 575 H865"/>
+  <text class="label" x="555" y="563">claim + status update</text>
+  <path id="relay-to-publisher" class="connector redis-flow" data-connector="relay-to-publisher" d="M525 698 H570"/>
+  <path id="publisher-to-stream" class="connector redis-flow" data-connector="publisher-to-stream" d="M760 698 H1235"/>
+  <text class="label" x="920" y="686">publish after commit</text>
+
+  <rect x="310" y="800" width="850" height="32" rx="10" fill="#ffffff" stroke="#b8c7d0"/>
+  <text class="tiny" x="735" y="821" text-anchor="middle">SQL is durable truth | Redis delivery is asynchronous | consumers deduplicate with event_id or idempotency_key</text>
+</svg>
