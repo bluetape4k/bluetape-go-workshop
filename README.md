@@ -62,6 +62,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/gin-content-moderation-workflow`](examples/gin-content-moderation-workflow) | [English](examples/gin-content-moderation-workflow/README.md) \| [한국어](examples/gin-content-moderation-workflow/README.ko.md) | Runnable Gin workflow for multilingual routing, masking, inspectable records, and bounded POST JSON search. | `gin`, `textsearch/language`, `textsearch/japanese` |
 | [`examples/audit-order-history`](examples/audit-order-history) | [English](examples/audit-order-history/README.md) \| [한국어](examples/audit-order-history/README.ko.md) | Order status service that contrasts mutable current state with immutable audit history and bounded filtered queries. | `audit` |
 | [`examples/gin-audit-query-api`](examples/gin-audit-query-api) | [English](examples/gin-audit-query-api/README.md) \| [한국어](examples/gin-audit-query-api/README.ko.md) | Gin API for strict POST JSON audit-history filters, revision pagination, and aggregate/revision detail lookup. | `gin`, `audit` |
+| [`examples/transactional-outbox-publisher`](examples/transactional-outbox-publisher) | [English](examples/transactional-outbox-publisher/README.md) \| [한국어](examples/transactional-outbox-publisher/README.ko.md) | PostgreSQL order and audit-event commit followed by at-least-once publication through the released SQL outbox relay and Redis Streams adapter. | `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -197,6 +198,28 @@ Run the PostgreSQL-backed handler, service, and repository tests:
 
 ```bash
 go test -count=1 ./examples/gin-sql-order-service/...
+```
+
+## Run the Transactional Outbox Publisher Example
+
+Start PostgreSQL and Redis, then provide their endpoints to commit one order
+and its outbox event before relaying the committed event to Redis Streams:
+
+```bash
+export DATABASE_URL='postgres://bluetape:bluetape@127.0.0.1:5432/bluetape?sslmode=disable'
+export REDIS_ADDR='127.0.0.1:6379'
+export REDIS_STREAM='workshop:transactional-outbox'
+go run ./examples/transactional-outbox-publisher
+```
+
+The [example README](examples/transactional-outbox-publisher/README.md) includes
+pinned container commands, expected JSON and stream fields, rerun identities,
+race tests, and production at-least-once boundaries.
+
+Run the PostgreSQL and Redis Testcontainers suite:
+
+```bash
+go test -count=1 ./examples/transactional-outbox-publisher/...
 ```
 
 ## Run the S3 Floci Storage Example
