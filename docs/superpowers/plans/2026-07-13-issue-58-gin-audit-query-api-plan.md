@@ -50,7 +50,7 @@ the example, root links, and issue-specific durable artifacts.
 **Files:** Create `model.go`, `service.go`, and `service_test.go` under
 `examples/gin-audit-query-api/internal/auditquery/`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Test default limits `20/100`, nil and typed-nil `audit.HistoryReader`,
 non-positive limits, default above maximum, maximum above 100, path-unsafe
@@ -65,7 +65,7 @@ if service != nil || !errors.Is(err, ErrInvalidConfig) {
 }
 ~~~
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ~~~bash
 go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'Test(DefaultServiceConfig|NewService|Validate)'
@@ -73,14 +73,14 @@ go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'Test(D
 
 Expected: FAIL because the package and symbols do not exist.
 
-- [ ] **Step 3: Implement the minimum contract**
+- [x] **Step 3: Implement the minimum contract**
 
 Define the exact spec types/tags, three sentinels, default config, canonical ID
 validation, typed-nil detection, context normalization, and constructor. Use
 `audit.NewAggregateID` and `audit.Query.Validate` rather than duplicating audit
 semantics. Preserve own and audit sentinels with `%w`.
 
-- [ ] **Step 4: Run GREEN, format, and commit**
+- [x] **Step 4: Run GREEN, format, and commit**
 
 ~~~bash
 gofmt -w examples/gin-audit-query-api/internal/auditquery/*.go
@@ -97,7 +97,7 @@ Expected: PASS.
 
 **Files:** Modify `service.go` and `service_test.go`.
 
-- [ ] **Step 1: Write failing behavior tests**
+- [x] **Step 1: Write failing behavior tests**
 
 Use a real memory repository to prove ascending/newest pages, first-unseen
 inclusive continuation, inclusive revision/time filters, defaults, custom
@@ -119,7 +119,7 @@ Embed `audit.HistoryReader` in a fake overriding `Find` to return cancellation,
 deadline, `audit.ValidationError`, and an opaque sentinel. Assert one call and
 preserved `errors.Is`/`errors.As`.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ~~~bash
 go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'TestService_(Search|Get)'
@@ -127,7 +127,7 @@ go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'TestSe
 
 Expected: FAIL because `Search` and `Get` are absent.
 
-- [ ] **Step 3: Implement minimal behavior**
+- [x] **Step 3: Implement minimal behavior**
 
 `Search` validates one exact aggregate, uses `effectiveLimit + 1`, invokes the
 reader once, trims the extra entry, and returns its revision in
@@ -135,13 +135,13 @@ reader once, trims the extra entry, and returns its revision in
 revision with limit one and maps empty to `ErrEntryNotFound`. Both preserve
 reader causes and fail closed on zero-value service.
 
-- [ ] **Step 4: Add bounded concurrent/cancellation tests**
+- [x] **Step 4: Add bounded concurrent/cancellation tests**
 
 Use a start barrier and exact counts, never sleeps, for concurrent search/detail
 reads. Add pre-canceled contexts and prove invalid input does not invoke the
 reader.
 
-- [ ] **Step 5: Run GREEN, race, and commit**
+- [x] **Step 5: Run GREEN, race, and commit**
 
 ~~~bash
 gofmt -w examples/gin-audit-query-api/internal/auditquery/*.go
@@ -159,14 +159,14 @@ Expected: PASS with no duplicate, gap, retry, or race.
 
 **Files:** Create `fixture.go` and `fixture_test.go`.
 
-- [ ] **Step 1: Write failing fixture tests**
+- [x] **Step 1: Write failing fixture tests**
 
 Require two aggregates with revisions `1..4` and `1..2`, fixed UTC timestamps,
 unique event/idempotency IDs, author `workshop`, safe `source=fixture` metadata,
 valid payload/change metadata, exact lifecycle order, defensive copies, and a
 pre-canceled seed leaving the repository empty.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ~~~bash
 go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'TestSeedRepository'
@@ -174,12 +174,12 @@ go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'TestSe
 
 Expected: FAIL because `SeedRepository` is absent.
 
-- [ ] **Step 3: Implement validated entries**
+- [x] **Step 3: Implement validated entries**
 
 Use `audit.NewAggregateID`, `NewDomainEvent`, `NewChangeMetadata`, and
 `NewEntry`. Append each aggregate as one contiguous batch and wrap every cause.
 
-- [ ] **Step 4: Run GREEN and commit**
+- [x] **Step 4: Run GREEN and commit**
 
 ~~~bash
 gofmt -w examples/gin-audit-query-api/internal/auditquery/*.go
@@ -194,13 +194,13 @@ git commit -m "feat: seed deterministic audit history"
 
 **Files:** Create `server.go` and `server_test.go`.
 
-- [ ] **Step 1: Write failing route/response tests**
+- [x] **Step 1: Write failing route/response tests**
 
 Define a narrow `QueryService` interface. Test health, successful POST/detail,
 empty search, detail 404, wrong method, trailing slash, encoded/path-unsafe
 IDs, invalid revision, and nil/typed-nil dependencies.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ~~~bash
 go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'Test(NewEngine|HTTP)'
@@ -208,7 +208,7 @@ go test -count=1 ./examples/gin-audit-query-api/internal/auditquery -run 'Test(N
 
 Expected: FAIL because the adapter is absent.
 
-- [ ] **Step 3: Implement engine and error mapping**
+- [x] **Step 3: Implement engine and error mapping**
 
 Use defaults `32 << 10` and two seconds; `gin.New`; method-not-allowed; no
 trailing redirect; raw non-unescaped paths; no trusted proxies. Register only
@@ -216,25 +216,25 @@ the three spec routes. Map audit sentinels before `ErrInvalidRequest`, then
 not-found, adapter timeout, and opaque failures. Log only route template,
 method, status, code, and elapsed.
 
-- [ ] **Step 4: Write failing strict-input tests**
+- [x] **Step 4: Write failing strict-input tests**
 
 Cover missing/wrong content type, invalid charset, unsupported encoding, invalid
 UTF-8, empty/malformed JSON, nested duplicate keys, unknown fields, trailing
 JSON, one-byte oversize, and request-body closure on every path.
 
-- [ ] **Step 5: Implement strict decoding**
+- [x] **Step 5: Implement strict decoding**
 
 Use `mime.ParseMediaType`, `http.MaxBytesReader`, UTF-8 validation, duplicate-key
 rejection, `DisallowUnknownFields`, and one-value EOF validation.
 
-- [ ] **Step 6: Prove timeout/cancellation/redaction**
+- [x] **Step 6: Prove timeout/cancellation/redaction**
 
 A blocking fake returns on context completion. Assert adapter deadline gives
 408, client cancellation is preserved without an unreliable response, and
 secret-like body, aggregate, metadata, and reader error values never appear in
 public errors or logs.
 
-- [ ] **Step 7: Run GREEN, race, and commit**
+- [x] **Step 7: Run GREEN, race, and commit**
 
 ~~~bash
 gofmt -w examples/gin-audit-query-api/internal/auditquery/*.go
@@ -250,7 +250,7 @@ git commit -m "feat: expose audit queries through Gin"
 
 **Files:** Create `main.go` and `main_test.go`.
 
-- [ ] **Step 1: Write failing runtime tests**
+- [x] **Step 1: Write failing runtime tests**
 
 Test default, IPv4/IPv6 loopback, localhost, invalid/missing ports,
 hostname/non-loopback rejection, and explicit remote opt-in. Assert fixed
@@ -258,7 +258,7 @@ header/read/write/idle/max-header values. Fake servers prove listen failure,
 normal shutdown, shutdown failure then close, close failure aggregation, and
 listener join without sleeps or a public listener.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ~~~bash
 go test -count=1 ./examples/gin-audit-query-api -run 'Test(ResolveHTTPAddr|NewHTTPServer|RunServer)'
@@ -266,14 +266,14 @@ go test -count=1 ./examples/gin-audit-query-api -run 'Test(ResolveHTTPAddr|NewHT
 
 Expected: FAIL because runtime functions are absent.
 
-- [ ] **Step 3: Implement wiring and lifecycle**
+- [x] **Step 3: Implement wiring and lifecycle**
 
 Seed a memory repository, construct service/engine, use Gin release mode,
 resolve address, create one `http.Server`, and use `signal.NotifyContext`.
 `RunServer` owns a buffered result channel, joins it after shutdown, and forces
 `Close` on graceful failure.
 
-- [ ] **Step 4: Run GREEN, race, and commit**
+- [x] **Step 4: Run GREEN, race, and commit**
 
 ~~~bash
 gofmt -w examples/gin-audit-query-api/*.go
@@ -289,24 +289,24 @@ git commit -m "feat: run Gin audit query server"
 
 **Files:** Create both example READMEs; modify both root READMEs.
 
-- [ ] **Step 1: Write source-equivalent locale docs**
+- [x] **Step 1: Write source-equivalent locale docs**
 
 Include language switch, lesson, routes, run command, POST/detail curls,
 response shapes, both continuation directions, metadata-filter non-goal,
 loopback/remote behavior, and auth/tenant/payload/retention/size/durability/
 rate-limit/health boundaries.
 
-- [ ] **Step 2: Add both root navigation entries**
+- [x] **Step 2: Add both root navigation entries**
 
 Place the example beside `audit-order-history` in each root README.
 
-- [ ] **Step 3: Run bounded live smoke**
+- [x] **Step 3: Run bounded live smoke**
 
 Start on an unused loopback port, poll `/healthz` with a bounded readiness loop,
 run the documented POST and detail curls, validate with `jq`, terminate, and
 assert process exit. No fixed sleep is readiness evidence.
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 ~~~bash
 go test -count=1 ./examples/gin-audit-query-api/...
@@ -319,7 +319,7 @@ git commit -m "docs: explain Gin audit query example"
 
 **Complexity:** High. **Depends on:** Tasks 1-6.
 
-- [ ] **Step 1: Run fresh validation**
+- [x] **Step 1: Run fresh validation**
 
 ~~~bash
 gofmt -w examples/gin-audit-query-api/*.go examples/gin-audit-query-api/internal/auditquery/*.go
@@ -331,13 +331,13 @@ make ci
 
 Any failure returns to its owner and requires affected proof from the beginning.
 
-- [ ] **Step 2: Verify spec/plan and six review perspectives**
+- [x] **Step 2: Verify spec/plan and six review perspectives**
 
 Re-read the exact spec, plan, issue, diff, tests, docs, and triggered hazards.
 Map every acceptance criterion. Converge performance, stability, security,
 operator, developer/API, user/caller, and main integration at P0=0/P1=0.
 
-- [ ] **Step 3: Commit lesson and review repairs**
+- [x] **Step 3: Commit lesson and review repairs**
 
 The lesson records aggregate-scoped POST selection, metadata-filter rejection,
 first-unseen inclusive pagination, strict Gin ownership, actual proof, misses,

@@ -1,3 +1,4 @@
+// Package auditquery implements the Gin audit query API workshop example.
 package auditquery
 
 import (
@@ -16,6 +17,7 @@ type fixtureTransition struct {
 	reason    string
 }
 
+// SeedRepository appends deterministic order histories to repository.
 func SeedRepository(ctx context.Context, repository audit.Repository) error {
 	if repository == nil || isNilInterface(repository) {
 		return fmt.Errorf("%w: repository is required", ErrInvalidConfig)
