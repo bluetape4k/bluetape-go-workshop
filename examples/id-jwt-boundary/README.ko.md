@@ -131,7 +131,7 @@ curl -X POST http://127.0.0.1:8096/orders \
 
 ![ID와 JWT protected order sequence](../../docs/images/readme-diagrams/id-jwt-boundary-sequence.png)
 
-보호된 요청은 JSON parse, trust 검증, local policy, 주문 validation을 UUID 생성보다
+보호된 요청은 JSON parse, trust 검증, local policy, 주문 검증을 UUID 생성보다
 먼저 수행합니다. 따라서 missing, invalid, expired, forbidden token은 내부 ID를
 요청하기 전에 boundary를 빠져나갑니다. 잘못된 주문 입력도 UUID v7 generator를
 호출하기 전에 종료됩니다.
