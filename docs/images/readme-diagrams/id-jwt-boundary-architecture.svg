@@ -77,7 +77,7 @@
   <text class="card-sub" x="88" y="554">Bearer JWT + order JSON</text>
   <text class="tiny" x="88" y="573">SKU / quantity</text>
 
-  <!-- Gin-owned runtime and adapter responsibilities -->
+  <!-- HTTP runtime and adapter responsibilities -->
   <rect class="card-blue" x="300" y="182" width="205" height="68" rx="11"/>
   <text class="card-title" x="318" y="205">main + net/http</text>
   <text class="card-sub" x="318" y="226">loopback binding</text>

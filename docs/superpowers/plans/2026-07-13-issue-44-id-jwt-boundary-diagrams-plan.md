@@ -165,10 +165,10 @@ Caller and demo boundary
   Demo Client -> POST /tokens
   Order Client -> Bearer JWT + order JSON
 
-Gin HTTP boundary
-  loopback HTTP server + timeouts
-  Recovery + no trusted proxies
-  8 KiB body limit + JSON/status mapping
+HTTP runtime boundary
+  main + net/http: loopback HTTP server + timeouts
+  Gin Router: routing + Recovery + no trusted proxies
+  route adapters: 8 KiB body limit + JSON/status mapping
 
 Application trust boundary
   IssueToken: request validation + claim assembly
@@ -177,8 +177,8 @@ Application trust boundary
   Order validation + allowlisted public errors
 
 bluetape-go providers
-  jwt.FixedHMACProvider: compose/parse signed claims
-  id.UUIDV7Generator: order_id and request_id after authorization
+  jwt.Provider from NewFixedHMACProvider(HS256, ...): compose/parse signed claims
+  id.StringGenerator from NewUUIDV7Generator(): order_id and request_id after authorization
 
 Public outcomes
   200 demo token
