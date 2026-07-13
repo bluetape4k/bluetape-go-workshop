@@ -27,6 +27,8 @@ back to the previous successful chunk. A leader-held scheduled tick restarts
 from that checkpoint, accepts replayed `cust-1003` as a duplicate no-op,
 dead-letters `cust-1004`, writes `cust-1005`, and finishes at `NextIndex=5`.
 
+![Customer migration crash and restart scenario](../../docs/images/readme-diagrams/customer-migration-batch-integration-scenario.png)
+
 ## Built From the Smaller 0.5.0 Examples
 
 | Source example | Integrated here as |
@@ -112,6 +114,14 @@ with `not_leader`. Caller cancellation returns `408 Request Timeout` with
 `crash_after_new_writes`, oversized bodies, missing reports, and idle cancel
 requests return stable error codes.
 
+## Architecture
+
+The four layers separate the HTTP boundary, operational run lifecycle, batch
+policies, and process-local state. Solid arrows show owned calls or state
+dependencies; the dashed path is the leader-guarded scheduled admission path.
+
+![Customer migration batch integration architecture](../../docs/images/readme-diagrams/customer-migration-batch-integration-architecture.png)
+
 ## Operations Contract
 
 Gin owns routing, bounded JSON body decoding, and HTTP status mapping. The
@@ -127,6 +137,15 @@ Tests drive the loop with manual ticks so the example stays deterministic.
 HTTP responses expose customer IDs and counts only. Fixture email values stay
 inside the internal sink and never appear in public status, report, or error
 responses.
+
+## Crash and Restart Sequence
+
+The manual run writes `cust-1003` before the injected writer crash, but rolls
+the checkpoint back to `NextIndex=2`. The leader-held scheduled run restores
+that checkpoint, absorbs the replay as a duplicate no-op, and completes at
+`NextIndex=5`.
+
+![Customer migration crash and leader-held restart sequence](../../docs/images/readme-diagrams/customer-migration-batch-integration-sequence.png)
 
 ## Runbook Notes
 

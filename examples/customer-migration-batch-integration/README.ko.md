@@ -27,6 +27,8 @@ checkpoint에서 재시작하고, replay된 `cust-1003`을 duplicate no-op으로
 `cust-1004`를 dead-letter로 기록하고, `cust-1005`를 write한 뒤 `NextIndex=5`에서
 완료됩니다.
 
+![Customer migration crash and restart scenario](../../docs/images/readme-diagrams/customer-migration-batch-integration-scenario.png)
+
 ## 작은 0.5.0 예제들의 통합 위치
 
 | 원본 예제 | 이 예제에서의 역할 |
@@ -111,6 +113,14 @@ Completed run은 `200 OK`를 반환합니다. Simulated writer crash는 `409 Con
 반환합니다. Malformed JSON, invalid `run_id`, invalid `crash_after_new_writes`,
 oversized body, missing report, idle cancel request는 stable error code를 반환합니다.
 
+## Architecture
+
+네 개 layer는 HTTP boundary, operational run lifecycle, batch policy,
+process-local state의 소유권을 분리합니다. 실선 화살표는 소유한 호출 또는 state
+dependency이고, 점선 경로는 leader가 보호하는 scheduled admission 경로입니다.
+
+![Customer migration batch integration architecture](../../docs/images/readme-diagrams/customer-migration-batch-integration-architecture.png)
+
 ## Operations Contract
 
 Gin은 routing, bounded JSON body decoding, HTTP status mapping을 담당합니다. Batch
@@ -124,6 +134,14 @@ tick으로 loop를 구동해 예제가 deterministic하게 유지되도록 합�
 
 HTTP response는 customer ID와 count만 공개합니다. Fixture email 값은 internal
 sink 안에만 있고 public status, report, error response에는 나오지 않습니다.
+
+## Crash 및 Restart Sequence
+
+Manual run은 injected writer crash 전에 `cust-1003`을 write하지만 checkpoint는
+`NextIndex=2`로 rollback합니다. Leader를 보유한 scheduled run은 그 checkpoint를
+restore하고 replay를 duplicate no-op으로 흡수한 뒤 `NextIndex=5`에서 완료됩니다.
+
+![Customer migration crash and leader-held restart sequence](../../docs/images/readme-diagrams/customer-migration-batch-integration-sequence.png)
 
 ## Runbook Notes
 
