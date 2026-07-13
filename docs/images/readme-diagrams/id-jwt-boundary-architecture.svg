@@ -54,7 +54,7 @@
   <text class="region-title-small" x="70" y="160">Caller / demo boundary</text>
 
   <rect class="region-http" x="280" y="130" width="245" height="670" rx="18"/>
-  <text class="region-title" x="300" y="160">Gin HTTP boundary</text>
+  <text class="region-title" x="300" y="160">HTTP runtime boundary</text>
 
   <rect class="region-app" x="545" y="130" width="350" height="670" rx="18"/>
   <text class="region-title" x="565" y="160">Application trust boundary</text>
@@ -79,26 +79,28 @@
 
   <!-- Gin-owned runtime and adapter responsibilities -->
   <rect class="card-blue" x="300" y="182" width="205" height="68" rx="11"/>
-  <text class="card-title" x="318" y="210">Loopback HTTP server</text>
-  <text class="card-sub" x="318" y="233">owned read / write timeouts</text>
+  <text class="card-title" x="318" y="205">main + net/http</text>
+  <text class="card-sub" x="318" y="226">loopback binding</text>
+  <text class="tiny" x="318" y="242">http.Server timeouts</text>
 
-  <rect class="card-blue" x="300" y="266" width="205" height="62" rx="11"/>
-  <text class="card-title" x="318" y="292">Recovery</text>
-  <text class="card-sub" x="318" y="314">no trusted proxies</text>
+  <rect class="card-blue" x="300" y="266" width="205" height="68" rx="11"/>
+  <text class="card-title" x="318" y="289">Gin Router</text>
+  <text class="card-sub" x="318" y="309">Recovery</text>
+  <text class="tiny" x="318" y="324">trusted proxies disabled</text>
 
   <rect class="card-blue" x="300" y="340" width="205" height="82" rx="11"/>
   <text class="card-title" x="318" y="368">POST /tokens adapter</text>
   <text class="card-sub" x="318" y="392">8 KiB body limit</text>
-  <text class="tiny" x="318" y="410">bounded JSON bind</text>
+  <text class="tiny" x="318" y="410">JSON bind + status serialize</text>
 
   <rect class="card-blue" x="300" y="500" width="205" height="86" rx="11"/>
   <text class="card-title" x="318" y="528">POST /orders adapter</text>
   <text class="card-sub" x="318" y="552">8 KiB body limit</text>
-  <text class="tiny" x="318" y="571">bounded JSON bind</text>
+  <text class="tiny" x="318" y="571">JSON bind + status serialize</text>
 
   <rect class="card-red" x="300" y="664" width="205" height="66" rx="11"/>
-  <text class="card-title" x="318" y="692">JSON / status mapping</text>
-  <text class="card-sub" x="318" y="714">stable response shape</text>
+  <text class="card-title" x="318" y="692">Route response map</text>
+  <text class="card-sub" x="318" y="714">allowlisted JSON + status</text>
 
   <!-- Shared Service ownership, with token/order duties kept separate -->
   <rect class="card-blue" x="570" y="330" width="300" height="102" rx="12"/>
@@ -124,19 +126,22 @@
 
   <!-- Provider responsibilities -->
   <rect class="card-violet" x="935" y="340" width="200" height="246" rx="13"/>
-  <text class="card-title" x="953" y="370">jwt.FixedHMACProvider</text>
-  <text class="card-sub" x="953" y="399">compose signed claims</text>
-  <line x1="953" y1="426" x2="1117" y2="426" stroke="#c4b5fd" stroke-width="1.5"/>
-  <text class="card-sub" x="953" y="458">parse signed claims</text>
-  <text class="tiny" x="953" y="482">signature + issuer</text>
-  <text class="tiny" x="953" y="500">audience + expiration</text>
+  <text class="card-title" x="953" y="366">jwt.Provider</text>
+  <text class="tiny" x="953" y="387">NewFixedHMACProvider</text>
+  <text class="tiny" x="953" y="403">(HS256, ...)</text>
+  <text class="card-sub" x="953" y="427">Compose signed claims</text>
+  <line x1="953" y1="447" x2="1117" y2="447" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text class="card-sub" x="953" y="475">Parse signed claims</text>
+  <text class="tiny" x="953" y="496">signature + issuer</text>
+  <text class="tiny" x="953" y="514">audience + expiration</text>
   <rect x="953" y="526" width="164" height="38" rx="9" fill="#ffffff" stroke="#d8b4fe" stroke-width="1.5"/>
   <text class="tiny" x="969" y="550">integrity, not encryption</text>
 
-  <rect class="card-olive" x="935" y="620" width="200" height="80" rx="12"/>
-  <text class="card-title" x="953" y="649">id.UUIDV7Generator</text>
-  <text class="card-sub" x="953" y="674">order_id + request_id</text>
-  <text class="tiny" x="953" y="690">only after authorization</text>
+  <rect class="card-olive" x="935" y="610" width="200" height="96" rx="12"/>
+  <text class="card-title" x="953" y="638">id.StringGenerator</text>
+  <text class="tiny" x="953" y="658">NewUUIDV7Generator()</text>
+  <text class="card-sub" x="953" y="678">order_id + request_id</text>
+  <text class="tiny" x="953" y="696">only after authorization</text>
 
   <!-- Public outcome cards -->
   <rect class="card-violet" x="1195" y="345" width="135" height="72" rx="11"/>
