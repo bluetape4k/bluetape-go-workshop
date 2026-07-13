@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-labelledby="title desc">
+  <title id="title">Customer Migration Crash and Restart Scenario</title>
+  <desc id="desc">A five-stage customer migration scenario showing a committed first chunk, an injected writer crash, checkpoint rollback, a leader-held restart with duplicate replay, and completed migration with one dead letter.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-18%" width="120%" height="145%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#203040" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#4f83bf"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#b85f68"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#755bc6"/>
+    </marker>
+    <marker id="arrow-olive" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#6f8b45"/>
+    </marker>
+    <style>
+      .canvas { fill: #f6f9fc; }
+      .frame { fill: #ffffff; stroke: #c7d7e7; stroke-width: 2; }
+      .title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 34px; fill: #22344a; }
+      .subtitle, .mono, .legend, .footer { font-family: "Comic Mono", monospace; fill: #536476; }
+      .subtitle { font-size: 14px; }
+      .card-title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 20px; fill: #22344a; }
+      .mono { font-size: 12px; }
+      .step { font-family: "Comic Mono", monospace; font-size: 14px; font-weight: 700; fill: #ffffff; }
+      .card { stroke-width: 2; filter: url(#shadow); }
+      .main-blue { fill: none; stroke: #4f83bf; stroke-width: 2.6; stroke-linecap: round; marker-end: url(#arrow-blue); }
+      .main-red { fill: none; stroke: #b85f68; stroke-width: 2.6; stroke-linecap: round; marker-end: url(#arrow-red); }
+      .main-violet { fill: none; stroke: #755bc6; stroke-width: 2.6; stroke-linecap: round; marker-end: url(#arrow-violet); }
+      .main-olive { fill: none; stroke: #6f8b45; stroke-width: 2.6; stroke-linecap: round; marker-end: url(#arrow-olive); }
+      .band-title { font-family: "Comic Mono", monospace; font-size: 12px; font-weight: 700; fill: #475569; }
+      .outcome-title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 18px; fill: #22344a; }
+      .legend, .footer { font-size: 11px; }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1200" height="600"/>
+  <rect class="frame" x="24" y="22" width="1152" height="556" rx="22"/>
+  <text class="title" x="54" y="68">Customer Migration: Crash, Replay, Complete</text>
+  <text class="subtitle" x="56" y="96">The checkpoint advances only after a safe chunk; the restart absorbs the written boundary record as a duplicate no-op.</text>
+
+  <g id="stage-1" transform="translate(44,126)">
+    <circle cx="22" cy="22" r="19" fill="#4f83bf"/>
+    <text class="step" x="22" y="27" text-anchor="middle">1</text>
+    <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#e8f3ff" stroke="#4f83bf"/>
+    <text class="card-title" x="98" y="84" text-anchor="middle">Manual Start</text>
+    <text class="mono" x="98" y="112" text-anchor="middle">POST /batch/start</text>
+    <text class="mono" x="98" y="136" text-anchor="middle">crash_after_new_writes=3</text>
+  </g>
+
+  <g id="stage-2" transform="translate(276,126)">
+    <circle cx="22" cy="22" r="19" fill="#3e9868"/>
+    <text class="step" x="22" y="27" text-anchor="middle">2</text>
+    <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="card-title" x="98" y="84" text-anchor="middle">Commit Chunk 1</text>
+    <text class="mono" x="98" y="112" text-anchor="middle">cust-1001 + cust-1002</text>
+    <text class="mono" x="98" y="136" text-anchor="middle">checkpoint = 2</text>
+  </g>
+
+  <g id="stage-3" transform="translate(508,126)">
+    <circle cx="22" cy="22" r="19" fill="#b85f68"/>
+    <text class="step" x="22" y="27" text-anchor="middle">3</text>
+    <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#fdeced" stroke="#b85f68"/>
+    <text class="card-title" x="98" y="84" text-anchor="middle">Writer Crash</text>
+    <text class="mono" x="98" y="112" text-anchor="middle">cust-1003 is written</text>
+    <text class="mono" x="98" y="136" text-anchor="middle">checkpoint rolls back to 2</text>
+  </g>
+
+  <g id="stage-4" transform="translate(740,126)">
+    <circle cx="22" cy="22" r="19" fill="#755bc6"/>
+    <text class="step" x="22" y="27" text-anchor="middle">4</text>
+    <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#f1ecff" stroke="#755bc6"/>
+    <text class="card-title" x="98" y="84" text-anchor="middle">Leader-held Restart</text>
+    <text class="mono" x="98" y="112" text-anchor="middle">restore index 2</text>
+    <text class="mono" x="98" y="136" text-anchor="middle">cust-1003 duplicate no-op</text>
+  </g>
+
+  <g id="stage-5" transform="translate(972,126)">
+    <circle cx="22" cy="22" r="19" fill="#6f8b45"/>
+    <text class="step" x="22" y="27" text-anchor="middle">5</text>
+    <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#f0f5e8" stroke="#6f8b45"/>
+    <text class="card-title" x="98" y="84" text-anchor="middle">Finish Migration</text>
+    <text class="mono" x="98" y="108" text-anchor="middle">cust-1004 dead letter</text>
+    <text class="mono" x="98" y="130" text-anchor="middle">cust-1005 written</text>
+    <text class="mono" x="98" y="152" text-anchor="middle">checkpoint = 5</text>
+  </g>
+
+  <path class="main-blue" data-connector="manual-to-chunk" d="M 240 233 L 274 233"/>
+  <path class="main-red" data-connector="chunk-to-crash" d="M 472 233 L 506 233"/>
+  <path class="main-violet" data-connector="crash-to-restart" d="M 704 233 L 738 233"/>
+  <path class="main-olive" data-connector="restart-to-finish" d="M 936 233 L 970 233"/>
+
+  <rect x="44" y="344" width="1124" height="126" rx="18" fill="#f8fafc" stroke="#d6e3ef" stroke-width="1.6"/>
+  <text class="band-title" x="68" y="374">VISIBLE OUTCOME</text>
+
+  <g id="outcome-migrated">
+    <rect class="card" x="68" y="392" width="444" height="56" rx="12" fill="#eaf7ef" stroke="#3e9868"/>
+    <text class="outcome-title" x="290" y="416" text-anchor="middle">Migrated Customers</text>
+    <text class="mono" x="290" y="438" text-anchor="middle">cust-1001 / 1002 / 1003 / 1005</text>
+  </g>
+  <g id="outcome-dead-letter">
+    <rect class="card" x="540" y="392" width="274" height="56" rx="12" fill="#fff3d9" stroke="#b9851b"/>
+    <text class="outcome-title" x="677" y="416" text-anchor="middle">Dead Letter</text>
+    <text class="mono" x="677" y="438" text-anchor="middle">cust-1004</text>
+  </g>
+  <g id="outcome-status">
+    <rect class="card" x="842" y="392" width="302" height="56" rx="12" fill="#f0f5e8" stroke="#6f8b45"/>
+    <text class="outcome-title" x="993" y="416" text-anchor="middle">Final Status</text>
+    <text class="mono" x="993" y="438" text-anchor="middle">completed / next_index=5</text>
+  </g>
+
+  <g id="legend">
+    <line x1="68" y1="512" x2="110" y2="512" stroke="#4f83bf" stroke-width="2.6" marker-end="url(#arrow-blue)"/>
+    <text class="legend" x="124" y="516">committed progress</text>
+    <line x1="270" y1="512" x2="312" y2="512" stroke="#b85f68" stroke-width="2.6" marker-end="url(#arrow-red)"/>
+    <text class="legend" x="326" y="516">injected failure</text>
+    <line x1="466" y1="512" x2="508" y2="512" stroke="#755bc6" stroke-width="2.6" marker-end="url(#arrow-violet)"/>
+    <text class="legend" x="522" y="516">restart / replay</text>
+    <line x1="674" y1="512" x2="716" y2="512" stroke="#6f8b45" stroke-width="2.6" marker-end="url(#arrow-olive)"/>
+    <text class="legend" x="730" y="516">completed state</text>
+    <text class="footer" x="600" y="552" text-anchor="middle">The scheduler is leader-guarded, not a durable queue.</text>
+  </g>
+</svg>
