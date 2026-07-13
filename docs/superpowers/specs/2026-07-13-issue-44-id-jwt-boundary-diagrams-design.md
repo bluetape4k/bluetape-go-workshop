@@ -54,9 +54,11 @@ Source-backed invariants:
 - missing, expired, unverifiable, forbidden, invalid-request, and internal
   failures map to allowlisted public responses without raw token, secret, or
   parser diagnostics;
-- Gin owns routing, recovery, body limits, and HTTP serialization; `Service`
-  owns the local policy boundary; `jwt.Provider` owns signed claim
-  composition/parsing; the UUID v7 generator owns internal identifier creation;
+- `main` + `net/http` own the loopback server and timeouts; Gin Router owns
+  routing, recovery, and trusted-proxy configuration; route adapters own the
+  8 KiB body limit and JSON/status mapping; `Service` owns the local policy
+  boundary; `jwt.Provider` owns signed claim composition/parsing; the UUID v7
+  generator owns internal identifier creation;
 - the fixed HMAC key and `/tokens` endpoint are deterministic local-demo
   conveniences, not a production identity provider or secret-management model.
 
