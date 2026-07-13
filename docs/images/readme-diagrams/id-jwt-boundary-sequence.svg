@@ -55,37 +55,37 @@
     <rect class="participant card" x="52" y="140" width="216" height="74" rx="7" stroke="#4f7ead"/>
     <text class="participant participantTitle" x="160" y="173" text-anchor="middle">Caller</text>
     <text class="role" x="160" y="194" text-anchor="middle">trusted upstream</text>
-    <line class="lifeline" x1="160" y1="214" x2="160" y2="1172"/>
+    <line class="lifeline" x1="160" y1="214" x2="160" y2="1240"/>
   </g>
   <g id="participant-gin">
     <rect class="participant card" x="350" y="140" width="230" height="74" rx="7" stroke="#4f7ead"/>
     <text class="participant participantTitle" x="465" y="173" text-anchor="middle">Gin Router</text>
     <text class="role" x="465" y="194" text-anchor="middle">HTTP boundary</text>
-    <line class="lifeline" x1="465" y1="214" x2="465" y2="1172"/>
+    <line class="lifeline" x1="465" y1="214" x2="465" y2="1240"/>
   </g>
   <g id="participant-service">
     <rect class="participant card" x="675" y="140" width="250" height="74" rx="7" stroke="#3f8984"/>
     <text class="participant participantTitle" x="800" y="173" text-anchor="middle">Boundary Service</text>
     <text class="role" x="800" y="194" text-anchor="middle">trust + order policy</text>
-    <line class="lifeline" x1="800" y1="214" x2="800" y2="1172"/>
+    <line class="lifeline" x1="800" y1="214" x2="800" y2="1240"/>
   </g>
   <g id="participant-jwt">
     <rect class="participant card" x="1005" y="140" width="230" height="74" rx="7" stroke="#7563a8"/>
     <text class="participant participantTitle" x="1120" y="173" text-anchor="middle">JWT Provider</text>
     <text class="role" x="1120" y="194" text-anchor="middle">signature + claims</text>
-    <line class="lifeline" x1="1120" y1="214" x2="1120" y2="1172"/>
+    <line class="lifeline" x1="1120" y1="214" x2="1120" y2="1240"/>
   </g>
   <g id="participant-uuid">
     <rect class="participant card" x="1315" y="140" width="240" height="74" rx="7" stroke="#758548"/>
     <text class="participant participantTitle" x="1435" y="173" text-anchor="middle">UUID v7 Generator</text>
     <text class="role" x="1435" y="194" text-anchor="middle">internal identifiers</text>
-    <line class="lifeline" x1="1435" y1="214" x2="1435" y2="1172"/>
+    <line class="lifeline" x1="1435" y1="214" x2="1435" y2="1240"/>
   </g>
 
-  <rect class="activation" x="457" y="246" width="16" height="910" rx="4"/>
-  <rect class="activation" x="792" y="334" width="16" height="778" rx="4"/>
-  <rect class="activation" x="1112" y="500" width="16" height="70" rx="4"/>
-  <rect class="activation" x="1427" y="956" width="16" height="70" rx="4"/>
+  <rect class="activation" x="457" y="246" width="16" height="992" rx="4"/>
+  <rect class="activation" x="792" y="386" width="16" height="812" rx="4"/>
+  <rect class="activation" x="1112" y="540" width="16" height="94" rx="4"/>
+  <rect class="activation" x="1427" y="956" width="16" height="142" rx="4"/>
 
   <g id="message-1">
     <rect class="labelPill" x="194" y="229" width="238" height="24" rx="12" stroke="#4f7ead"/>
@@ -95,15 +95,30 @@
     <path class="seq" data-connector="message-1" d="M 160 260 L 457 260" stroke="#4f7ead" marker-end="url(#arrow-blue)"/>
   </g>
 
-  <g id="message-2">
-    <rect class="labelPill" x="264" y="273" width="222" height="24" rx="12" stroke="#4f7ead"/>
-    <circle class="badge" cx="280" cy="285" r="10" fill="#edf4fa" stroke="#4f7ead"/>
-    <text class="detail" x="280" y="286" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">2</text>
-    <text class="detail" x="388" y="286" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">parse bounded order JSON</text>
-    <path class="seq" data-connector="message-2" d="M 300 304 L 457 304" stroke="#4f7ead" marker-end="url(#arrow-blue)"/>
+  <g id="json-bind-alternative">
+    <rect class="branchFrame altBox" x="64" y="271" width="1468" height="122" rx="15"/>
+    <rect class="labelPill" x="82" y="271" width="202" height="24" rx="12" stroke="#8298a6"/>
+    <text class="branch" x="183" y="286" text-anchor="middle">alt bounded JSON binds</text>
+    <g id="message-2">
+      <rect class="labelPill" x="286" y="273" width="222" height="24" rx="12" stroke="#4f7ead"/>
+      <circle class="badge" cx="302" cy="285" r="10" fill="#edf4fa" stroke="#4f7ead"/>
+      <text class="detail" x="302" y="286" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">2</text>
+      <text class="detail" x="410" y="286" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">parse bounded order JSON</text>
+      <path class="seq" data-connector="message-2" d="M 457 304 L 407 304 Q 395 304 395 316 L 395 322 Q 395 334 407 334 L 457 334" stroke="#4f7ead" marker-end="url(#arrow-blue)"/>
+    </g>
+    <line class="branchDivider" x1="64" y1="342" x2="1532" y2="342"/>
+    <rect class="labelPill" x="82" y="331" width="252" height="22" rx="11" stroke="#8298a6"/>
+    <text class="branch" x="208" y="345" text-anchor="middle">else malformed / oversized JSON</text>
+    <g id="message-2a">
+      <rect class="labelPill" x="205" y="354" width="210" height="24" rx="12" stroke="#ad6666"/>
+      <circle class="badge" cx="223" cy="366" r="10" fill="#fff1f1" stroke="#ad6666"/>
+      <text class="detail" x="223" y="367" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">2a</text>
+      <text class="detail" x="321" y="367" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">400 invalid_request</text>
+      <path class="seqReturn" data-connector="message-2a" d="M 457 385 L 160 385" stroke="#ad6666" marker-end="url(#arrow-red)"/>
+    </g>
   </g>
 
-  <g id="message-3">
+  <g id="message-3" transform="translate(0 80)">
     <rect class="labelPill" x="455" y="317" width="324" height="24" rx="12" stroke="#4f7ead"/>
     <circle class="badge" cx="473" cy="329" r="10" fill="#edf4fa" stroke="#4f7ead"/>
     <text class="detail" x="473" y="330" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">3</text>
@@ -111,8 +126,8 @@
     <path class="seq" data-connector="message-3" d="M 473 348 L 792 348" stroke="#4f7ead" marker-end="url(#arrow-blue)"/>
   </g>
 
-  <g id="bearer-alternative">
-    <rect class="branchFrame altBox" x="64" y="364" width="1468" height="108" rx="15"/>
+  <g id="bearer-alternative" transform="translate(0 68)">
+    <rect class="branchFrame altBox" x="64" y="364" width="1468" height="112" rx="15"/>
     <rect class="labelPill" x="82" y="364" width="194" height="24" rx="12" stroke="#8298a6"/>
     <text class="branch" x="179" y="379" text-anchor="middle">alt Bearer token present</text>
     <g id="message-4">
@@ -120,21 +135,21 @@
       <circle class="badge" cx="670" cy="390" r="10" fill="#edf4fa" stroke="#4f7ead"/>
       <text class="detail" x="670" y="391" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">4</text>
       <text class="detail" x="780" y="391" text-anchor="middle" dominant-baseline="middle" fill="#4f7ead">extract Bearer token</text>
-      <path class="seq" data-connector="message-4" d="M 650 409 L 792 409" stroke="#4f7ead" marker-end="url(#arrow-blue)"/>
+      <path class="seq" data-connector="message-4" d="M 792 409 L 748 409 Q 740 409 740 417 L 740 419 Q 740 427 748 427 L 792 427" stroke="#4f7ead" marker-end="url(#arrow-blue)"/>
     </g>
-    <line class="branchDivider" x1="64" y1="421" x2="1532" y2="421"/>
-    <rect class="labelPill" x="82" y="410" width="182" height="22" rx="11" stroke="#8298a6"/>
-    <text class="branch" x="173" y="424" text-anchor="middle">else missing / blank</text>
+    <line class="branchDivider" x1="64" y1="438" x2="1532" y2="438"/>
+    <rect class="labelPill" x="82" y="427" width="160" height="22" rx="11" stroke="#8298a6"/>
+    <text class="branch" x="162" y="441" text-anchor="middle">else missing / blank</text>
     <g id="message-4a">
-      <rect class="labelPill" x="205" y="431" width="210" height="24" rx="12" stroke="#ad6666"/>
-      <circle class="badge" cx="223" cy="443" r="10" fill="#fff1f1" stroke="#ad6666"/>
-      <text class="detail" x="223" y="444" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">4a</text>
-      <text class="detail" x="321" y="444" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">401 missing_token</text>
-      <path class="seqReturn" data-connector="message-4a" d="M 457 462 L 160 462" stroke="#ad6666" marker-end="url(#arrow-red)"/>
+      <rect class="labelPill" x="244" y="439" width="205" height="24" rx="12" stroke="#ad6666"/>
+      <circle class="badge" cx="262" cy="451" r="10" fill="#fff1f1" stroke="#ad6666"/>
+      <text class="detail" x="262" y="452" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">4a</text>
+      <text class="detail" x="358" y="452" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">401 missing_token</text>
+      <path class="seqReturn" data-connector="message-4a" d="M 457 469 L 160 469" stroke="#ad6666" marker-end="url(#arrow-red)"/>
     </g>
   </g>
 
-  <g id="parse-alternative">
+  <g id="parse-alternative" transform="translate(0 68)">
     <rect class="branchFrame altBox" x="64" y="478" width="1468" height="198" rx="15"/>
     <rect class="labelPill" x="82" y="478" width="206" height="24" rx="12" stroke="#8298a6"/>
     <text class="branch" x="185" y="493" text-anchor="middle">alt token verifies</text>
@@ -174,8 +189,8 @@
     </g>
   </g>
 
-  <g id="authorization-alternative">
-    <rect class="branchFrame altBox" x="64" y="686" width="1468" height="112" rx="15"/>
+  <g id="authorization-alternative" transform="translate(0 68)">
+    <rect class="branchFrame altBox" x="64" y="686" width="1468" height="122" rx="15"/>
     <rect class="labelPill" x="82" y="686" width="246" height="24" rx="12" stroke="#8298a6"/>
     <text class="branch" x="205" y="701" text-anchor="middle">alt required claims present</text>
     <g id="message-7">
@@ -183,22 +198,22 @@
       <circle class="badge" cx="658" cy="703" r="10" fill="#f2f5e9" stroke="#758548"/>
       <text class="detail" x="658" y="704" text-anchor="middle" dominant-baseline="middle" fill="#758548">7</text>
       <text class="detail" x="778" y="704" text-anchor="middle" dominant-baseline="middle" fill="#758548">require customer + orders:create</text>
-      <path class="seq" data-connector="message-7" d="M 625 722 L 792 722" stroke="#758548" marker-end="url(#arrow-olive)"/>
+      <path class="seq" data-connector="message-7" d="M 792 722 L 748 722 Q 740 722 740 730 L 740 738 Q 740 746 748 746 L 792 746" stroke="#758548" marker-end="url(#arrow-olive)"/>
     </g>
-    <line class="branchDivider" x1="64" y1="738" x2="1532" y2="738"/>
-    <rect class="labelPill" x="82" y="727" width="216" height="22" rx="11" stroke="#8298a6"/>
-    <text class="branch" x="190" y="741" text-anchor="middle">else wrong role / scope</text>
+    <line class="branchDivider" x1="64" y1="756" x2="1532" y2="756"/>
+    <rect class="labelPill" x="82" y="745" width="216" height="22" rx="11" stroke="#8298a6"/>
+    <text class="branch" x="190" y="759" text-anchor="middle">else wrong role / scope</text>
     <g id="message-7a">
-      <rect class="labelPill" x="216" y="751" width="188" height="24" rx="12" stroke="#ad6666"/>
-      <circle class="badge" cx="234" cy="763" r="10" fill="#fff1f1" stroke="#ad6666"/>
-      <text class="detail" x="234" y="764" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">7a</text>
-      <text class="detail" x="326" y="764" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">403 forbidden</text>
-      <path class="seqReturn" data-connector="message-7a" d="M 457 784 L 160 784" stroke="#ad6666" marker-end="url(#arrow-red)"/>
+      <rect class="labelPill" x="216" y="768" width="188" height="24" rx="12" stroke="#ad6666"/>
+      <circle class="badge" cx="234" cy="780" r="10" fill="#fff1f1" stroke="#ad6666"/>
+      <text class="detail" x="234" y="781" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">7a</text>
+      <text class="detail" x="326" y="781" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">403 forbidden</text>
+      <path class="seqReturn" data-connector="message-7a" d="M 457 799 L 160 799" stroke="#ad6666" marker-end="url(#arrow-red)"/>
     </g>
   </g>
 
-  <g id="request-alternative">
-    <rect class="branchFrame altBox" x="64" y="810" width="1468" height="112" rx="15"/>
+  <g id="request-alternative" transform="translate(0 68)">
+    <rect class="branchFrame altBox" x="64" y="810" width="1468" height="122" rx="15"/>
     <rect class="labelPill" x="82" y="810" width="196" height="24" rx="12" stroke="#8298a6"/>
     <text class="branch" x="180" y="825" text-anchor="middle">alt valid order fields</text>
     <g id="message-8">
@@ -206,21 +221,21 @@
       <circle class="badge" cx="676" cy="827" r="10" fill="#f2f5e9" stroke="#758548"/>
       <text class="detail" x="676" y="828" text-anchor="middle" dominant-baseline="middle" fill="#758548">8</text>
       <text class="detail" x="782" y="828" text-anchor="middle" dominant-baseline="middle" fill="#758548">validate SKU + quantity</text>
-      <path class="seq" data-connector="message-8" d="M 650 846 L 792 846" stroke="#758548" marker-end="url(#arrow-olive)"/>
+      <path class="seq" data-connector="message-8" d="M 792 846 L 748 846 Q 740 846 740 854 L 740 862 Q 740 870 748 870 L 792 870" stroke="#758548" marker-end="url(#arrow-olive)"/>
     </g>
-    <line class="branchDivider" x1="64" y1="862" x2="1532" y2="862"/>
-    <rect class="labelPill" x="82" y="851" width="176" height="22" rx="11" stroke="#8298a6"/>
-    <text class="branch" x="170" y="865" text-anchor="middle">else invalid order</text>
+    <line class="branchDivider" x1="64" y1="880" x2="1532" y2="880"/>
+    <rect class="labelPill" x="82" y="869" width="176" height="22" rx="11" stroke="#8298a6"/>
+    <text class="branch" x="170" y="883" text-anchor="middle">else invalid order</text>
     <g id="message-8a">
-      <rect class="labelPill" x="205" y="875" width="210" height="24" rx="12" stroke="#ad6666"/>
-      <circle class="badge" cx="223" cy="887" r="10" fill="#fff1f1" stroke="#ad6666"/>
-      <text class="detail" x="223" y="888" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">8a</text>
-      <text class="detail" x="321" y="888" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">400 invalid_request</text>
-      <path class="seqReturn" data-connector="message-8a" d="M 457 910 L 160 910" stroke="#ad6666" marker-end="url(#arrow-red)"/>
+      <rect class="labelPill" x="205" y="892" width="210" height="24" rx="12" stroke="#ad6666"/>
+      <circle class="badge" cx="223" cy="904" r="10" fill="#fff1f1" stroke="#ad6666"/>
+      <text class="detail" x="223" y="905" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">8a</text>
+      <text class="detail" x="321" y="905" text-anchor="middle" dominant-baseline="middle" fill="#ad6666">400 invalid_request</text>
+      <path class="seqReturn" data-connector="message-8a" d="M 457 923 L 160 923" stroke="#ad6666" marker-end="url(#arrow-red)"/>
     </g>
   </g>
 
-  <g id="id-alternative">
+  <g id="id-alternative" transform="translate(0 68)">
     <rect class="branchFrame altBox" x="64" y="934" width="1468" height="144" rx="15"/>
     <rect class="labelPill" x="82" y="934" width="218" height="24" rx="12" stroke="#8298a6"/>
     <text class="branch" x="191" y="949" text-anchor="middle">alt both IDs generated</text>
@@ -250,7 +265,7 @@
     </g>
   </g>
 
-  <g id="message-11">
+  <g id="message-11" transform="translate(0 68)">
     <rect class="labelPill" x="514" y="1086" width="248" height="24" rx="12" stroke="#3f8984"/>
     <circle class="badge" cx="534" cy="1098" r="10" fill="#edf7f5" stroke="#3f8984"/>
     <text class="detail" x="534" y="1099" text-anchor="middle" dominant-baseline="middle" fill="#3f8984">11</text>
@@ -258,7 +273,7 @@
     <path class="seqReturn" data-connector="message-11" d="M 792 1117 L 473 1117" stroke="#3f8984" marker-end="url(#arrow-teal)"/>
   </g>
 
-  <g id="message-12">
+  <g id="message-12" transform="translate(0 68)">
     <rect class="labelPill" x="245" y="1128" width="166" height="24" rx="12" stroke="#758548"/>
     <circle class="badge" cx="265" cy="1140" r="10" fill="#f2f5e9" stroke="#758548"/>
     <text class="detail" x="265" y="1141" text-anchor="middle" dominant-baseline="middle" fill="#758548">12</text>
@@ -267,16 +282,16 @@
   </g>
 
   <g id="legend">
-    <rect x="92" y="1202" width="1416" height="48" rx="14" fill="#ffffff" stroke="#d3e0e8" stroke-width="1.5"/>
-    <line x1="124" y1="1226" x2="174" y2="1226" stroke="#4f7ead" stroke-width="3"/>
-    <text class="legend" x="188" y="1230">boundary call</text>
-    <line x1="350" y1="1226" x2="400" y2="1226" stroke="#7563a8" stroke-width="3"/>
-    <text class="legend" x="414" y="1230">JWT verification</text>
-    <line x1="624" y1="1226" x2="674" y2="1226" stroke="#758548" stroke-width="3"/>
-    <text class="legend" x="688" y="1230">authorized / success</text>
-    <line x1="934" y1="1226" x2="984" y2="1226" stroke="#3f8984" stroke-width="2.6" stroke-dasharray="8 6"/>
-    <text class="legend" x="998" y="1230">normal return</text>
-    <line x1="1210" y1="1226" x2="1260" y2="1226" stroke="#ad6666" stroke-width="2.6" stroke-dasharray="8 6"/>
-    <text class="legend" x="1274" y="1230">public failure; branch stops</text>
+    <rect x="92" y="1242" width="1416" height="26" rx="11" fill="#ffffff" stroke="#d3e0e8" stroke-width="1.5"/>
+    <line x1="124" y1="1255" x2="174" y2="1255" stroke="#4f7ead" stroke-width="3"/>
+    <text class="legend" x="188" y="1259">boundary call</text>
+    <line x1="350" y1="1255" x2="400" y2="1255" stroke="#7563a8" stroke-width="3"/>
+    <text class="legend" x="414" y="1259">JWT verification</text>
+    <line x1="624" y1="1255" x2="674" y2="1255" stroke="#758548" stroke-width="3"/>
+    <text class="legend" x="688" y="1259">authorized / success</text>
+    <line x1="934" y1="1255" x2="984" y2="1255" stroke="#3f8984" stroke-width="2.6" stroke-dasharray="8 6"/>
+    <text class="legend" x="998" y="1259">normal return</text>
+    <line x1="1210" y1="1255" x2="1260" y2="1255" stroke="#ad6666" stroke-width="2.6" stroke-dasharray="8 6"/>
+    <text class="legend" x="1274" y="1259">public failure; branch stops</text>
   </g>
 </svg>
