@@ -125,16 +125,16 @@
   <text class="relation" x="527" y="282">delegates</text>
   <path class="ownership" data-connector="service-to-lifecycle" d="M 640 359 L 716 359"/>
   <text class="relation" x="678" y="351" text-anchor="middle">owns</text>
-  <path class="admission" data-connector="service-to-leader-gate" d="M 515 321 L 515 298 Q 515 288 525 288 L 1169 288 Q 1179 288 1179 298 L 1179 319"/>
-  <text class="relation" x="847" y="280" text-anchor="middle">scheduled admission</text>
+  <path class="admission dependency" data-connector="service-to-leader-gate" d="M 640 339 L 660 339 Q 670 339 670 329 L 670 298 Q 670 288 680 288 L 1169 288 Q 1179 288 1179 298 L 1179 319"/>
+  <text class="relation" x="920" y="280" text-anchor="middle">scheduled admission</text>
 
-  <path class="ownership" data-connector="service-to-job" d="M 390 359 L 370 359 Q 360 359 360 369 L 360 460 Q 360 470 350 470 L 212 470 Q 202 470 202 480 L 202 484"/>
+  <path class="ownership dependency" data-connector="service-to-job" d="M 390 359 L 370 359 Q 360 359 360 369 L 360 446 Q 360 456 350 456 L 212 456 Q 202 456 202 466 L 202 484"/>
   <text class="relation" x="350" y="430" text-anchor="end">runs</text>
   <path class="ownership" data-connector="job-to-reader" d="M 312 526 L 388 526"/>
   <path class="ownership" data-connector="reader-to-processor" d="M 610 526 L 686 526"/>
   <path class="ownership" data-connector="processor-to-writer" d="M 938 526 L 1014 526"/>
 
-  <path class="ownership" data-connector="job-to-checkpoint" d="M 202 566 L 202 644 Q 202 654 212 654 L 217 654"/>
+  <path class="ownership" data-connector="job-to-checkpoint" d="M 202 566 L 202 654"/>
   <path class="ownership" data-connector="processor-to-dead-letter" d="M 813 566 L 813 654"/>
   <path class="ownership" data-connector="writer-to-sink" d="M 1162 566 L 1162 654"/>
 
