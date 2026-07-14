@@ -57,7 +57,7 @@ the compare-and-swap loop termination explicit. The final lint run reported
 | Asset | Automated evidence | Render and eye inspection |
 | --- | --- | --- |
 | Architecture | 5 markers, 10 connectors, 11 cards, 0 intrusions, 0 crossings, 0 geometry failures; endpoint and mixed-corner PASS with 10 quadratic bends | 3200x2000 PNG; SHA-256 `91331f16a2efab3b0ab6ed6ee6e2b2cc94a3a1ec7743978fe71cb5d069c510a2`; deterministic rerender PASS; full source-size preview and four original-pixel quadrant inspections PASS |
-| Sequence | 6 markers, 22 connectors, 6 cards, 0 intrusions, 0 crossings, 0 geometry failures; endpoint, mixed-corner, and sequence-style PASS | 3200x3080 PNG; SHA-256 `3f4ba3ba7bc2cc2868d40c3f2fa91008a1f12ccd1962282c5508e1dfbb7b7fed`; deterministic rerender PASS; full source-size preview and four original-pixel quadrant inspections PASS |
+| Sequence | 6 markers, 22 connectors, 22 numbered pills and circular badges, 6 cards, 0 intrusions, 0 crossings, 0 geometry failures; endpoint, mixed-corner, and sequence-style PASS | 3200x3650 PNG; SHA-256 `e2f1dc14ddcc60c6222d24e06ce715d3759c565245dbb5cb53018087c3f91d08`; deterministic rerender PASS; full source-size preview and four original-pixel quadrant inspections PASS |
 
 The rendered PNG inspection explicitly checked every arrowhead after SVG to
 PNG conversion, terminal straight clearance relative to marker size, rounded
@@ -65,7 +65,10 @@ bend placement, receiver direction, label/card overlap, route merging,
 clipping, and whitespace. The sequence diagram initially had a phase-title and
 pill overlap that automated geometry checks did not report. Moving the first
 message rows and activation bars fixed it; the final render and pixel crops were
-then inspected again.
+then inspected again. A later best-practices comparison also found that the
+plain inline call numbers used an older label style. All 22 labels now use the
+approved 34-pixel pill with a semantic-color 13-pixel circular number badge,
+10-pixel label-to-line clearance, and at least 6 pixels between adjacent rows.
 
 ## Fresh Validation
 

@@ -74,14 +74,24 @@ required: it caught a phase-title and pill overlap that the geometry scripts did
 not flag. After moving the first message rows and activation bars, both the full
 preview and all original-resolution crops were inspected again.
 
+Sequence style must be compared visually with the current best-practices
+reference, not inferred from an older nearby repository diagram. The first
+version used a rounded pill but left the call number as plain inline text. The
+approved baseline separates the number into a semantic-color circular badge
+inside a 34-pixel pill. Applying that pattern to all 22 messages also required
+larger row, phase, activation, lifeline, frame, and canvas coordinates so the
+badge did not force labels onto message lines.
+
 For future diagrams, retain this order:
 
 1. audit connector counts, endpoints, crossings, card intrusions, and bend
    geometry in the SVG;
 2. render PNG deterministically and compare hashes on a second render;
 3. inspect every arrowhead direction and marker clearance in the PNG;
-4. inspect original-pixel crops for text, pill, activation, and card overlap;
-5. rerun every audit and eye inspection after any coordinate change.
+4. compare numbered pill and badge styling with the current best-practices
+   sequence PNG, including one- and two-digit numbers;
+5. inspect original-pixel crops for text, pill, activation, and card overlap;
+6. rerun every audit and eye inspection after any coordinate change.
 
 ## Future Guard
 
