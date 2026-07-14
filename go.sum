@@ -203,6 +203,8 @@ github.com/nats-io/nkeys v0.4.15 h1:JACV5jRVO9V856KOapQ7x+EY8Jo3qw1vJt/9Jpwzkk4=
 github.com/nats-io/nkeys v0.4.15/go.mod h1:CpMchTXC9fxA5zrMo4KpySxNjiDVvr8ANOSZdiNfUrs=
 github.com/nats-io/nuid v1.0.1 h1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=
 github.com/nats-io/nuid v1.0.1/go.mod h1:19wcPz3Ph3q0Jbyiqsd0kePYG7A95tJPxeL+1OSON2c=
+github.com/neo4j/neo4j-go-driver/v6 v6.1.0 h1:kx/h9lHV9XJEWTzAV0/23/bzvdl8qcq3rLhHN3Z118M=
+github.com/neo4j/neo4j-go-driver/v6 v6.1.0/go.mod h1:hzSTfNfM31p1uRSzL1F/BAYOgaiTarE6OAQBajfsm+I=
 github.com/oklog/ulid/v2 v2.1.1 h1:suPZ4ARWLOJLegGFiZZ1dFAkqzhMjL3J1TzI+5wHz8s=
 github.com/oklog/ulid/v2 v2.1.1/go.mod h1:rcEKHmBBKfef9DhnvX7y1HZBYxjXb0cP5ExxNsTT1QQ=
 github.com/onsi/gomega v1.41.0 h1:OwKp4pXNgVxf6sCplzYo794OFNuoL2q2SBMU5NSWOjA=
@@ -260,6 +262,8 @@ github.com/testcontainers/testcontainers-go/modules/mongodb v0.42.0 h1:jX10Aprgf
 github.com/testcontainers/testcontainers-go/modules/mongodb v0.42.0/go.mod h1:Ph+xH0hAC6djPFTjPgLa3VmSfE4h82kzVIKxTj3n2o4=
 github.com/testcontainers/testcontainers-go/modules/nats v0.42.0 h1:WQR0+1r4GkM5QgOBoLxlP41empovt5PxtaiDpC0G7ow=
 github.com/testcontainers/testcontainers-go/modules/nats v0.42.0/go.mod h1:ZAI9iisjDNJmcRcycQFKSLpiBN9u2g1v9AJRq1afriE=
+github.com/testcontainers/testcontainers-go/modules/neo4j v0.42.0 h1:F0AwRqPoxGVIHBG4sP/JOpRd47vM3wcxZABPtiQNnFk=
+github.com/testcontainers/testcontainers-go/modules/neo4j v0.42.0/go.mod h1:/hhq15EFU9OdNRXe7y3dQa/FrqFANyJxqBXDfwEGaVY=
 github.com/testcontainers/testcontainers-go/modules/postgres v0.42.0 h1:GCbb1ndrF7OTDiIvxXyItaDab4qkzTFJ48LKFdM7EIo=
 github.com/testcontainers/testcontainers-go/modules/postgres v0.42.0/go.mod h1:IRPBaI8jXdrNfD0e4Zm7Fbcgaz5shKxOQv4axiL09xs=
 github.com/testcontainers/testcontainers-go/modules/redis v0.42.0 h1:id/6LH8ZeDrtAUVSuNvZUAJ1kVpb82y1pr9yweAWsRg=

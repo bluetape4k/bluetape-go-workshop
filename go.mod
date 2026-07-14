@@ -12,7 +12,9 @@ require (
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/nats-io/nats.go v1.52.0
+	github.com/neo4j/neo4j-go-driver/v6 v6.1.0
 	github.com/redis/go-redis/v9 v9.20.0
+	github.com/testcontainers/testcontainers-go/modules/neo4j v0.42.0
 )
 
 require (
