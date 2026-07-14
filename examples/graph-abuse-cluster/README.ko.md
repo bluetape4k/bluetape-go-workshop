@@ -57,7 +57,7 @@ opaque ID 순으로 정렬합니다.
 
 ### Terminal 1: Neo4j 실행
 
-아래 foreground command는 인증을 끄고 Bolt port를 IPv4 loopback에만 공개합니다.
+아래 포그라운드 명령은 인증을 끄고 Bolt 포트를 IPv4 루프백에만 공개합니다.
 컨테이너를 실행한 terminal은 그대로 둡니다.
 
 ```bash
@@ -81,9 +81,9 @@ go test -count=1 ./examples/graph-abuse-cluster/...
 go test -p 1 -race -count=1 ./examples/graph-abuse-cluster/...
 ```
 
-Neo4j Testcontainers integration test는 `neo4j:5.26.0`을 시작하고 실제
-connectivity, 두 번의 idempotent replace, 취소, namespace cleanup을 검증합니다.
-Docker resource를 공유하므로 race command도 `-p 1`로 직렬 실행합니다.
+Neo4j Testcontainers 통합 테스트는 `neo4j:5.26.0`을 시작하고 실제 연결, 두 번의
+멱등 교체, 취소, namespace 정리를 검증합니다. Docker 리소스를 공유하므로 race
+command도 `-p 1`로 직렬 실행합니다.
 
 ## 예상 JSON
 
