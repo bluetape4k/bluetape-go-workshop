@@ -22,3 +22,25 @@ type Fixture struct {
 	Vertices []graph.Vertex
 	Edges    []graph.Edge
 }
+
+// Evidence describes one shared identifier contributing to cluster risk.
+type Evidence struct {
+	Kind      IdentifierKind `json:"kind"`
+	OpaqueID  string         `json:"opaque_id"`
+	UserCount int            `json:"user_count"`
+	Weight    int            `json:"weight"`
+}
+
+// Cluster groups transitively linked users and their shared evidence.
+type Cluster struct {
+	ClusterID string     `json:"cluster_id"`
+	Users     []string   `json:"users"`
+	Evidence  []Evidence `json:"evidence"`
+	RiskScore int        `json:"risk_score"`
+}
+
+// Report contains deterministically ordered clusters and isolated users.
+type Report struct {
+	Clusters      []Cluster `json:"clusters"`
+	IsolatedUsers []string  `json:"isolated_users"`
+}
