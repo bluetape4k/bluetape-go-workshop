@@ -161,6 +161,46 @@ func TestRuntimeLifecycleExpectedCancellationAndUnexpectedRelayExit(t *testing.T
 			t.Fatal("relay remains marked running")
 		}
 	})
+
+	t.Run("relay that ignores cancellation cannot exceed shutdown deadline", func(t *testing.T) {
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		db, err := sql.Open("pgx", "postgres://unused")
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = db.Close() })
+		health := mustRuntimeHealth(t)
+		release := make(chan struct{})
+		t.Cleanup(func() { close(release) })
+		runner := relayRunnerFunc(func(context.Context, sqlkit.Session) error {
+			<-release
+			return errors.New("provider-secret-marker")
+		})
+		server := NewHTTPServer(listener.Addr().String(), http.NotFoundHandler())
+		ctx, cancel := context.WithCancel(context.Background())
+		done := make(chan error, 1)
+		go func() { done <- RunLifecycle(ctx, server, listener, runner, db, health, 100*time.Millisecond) }()
+		waitForHTTPServer(t, listener.Addr().String())
+		started := time.Now()
+		cancel()
+		select {
+		case err := <-done:
+			if err == nil || !strings.Contains(err.Error(), "relay_shutdown") || strings.Contains(err.Error(), "provider-secret-marker") {
+				t.Fatalf("RunLifecycle() error = %v", err)
+			}
+			if elapsed := time.Since(started); elapsed > 500*time.Millisecond {
+				t.Fatalf("shutdown elapsed = %v", elapsed)
+			}
+		case <-time.After(500 * time.Millisecond):
+			t.Fatal("relay join exceeded shutdown deadline")
+		}
+		if health.RelayRunning() {
+			t.Fatal("relay remains marked running after deadline")
+		}
+	})
 }
 
 type stubDeliveryReader struct {

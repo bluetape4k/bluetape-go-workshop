@@ -184,10 +184,11 @@ func RunLifecycle(
 	serverDone := make(chan error, 1)
 	go func() { serverDone <- server.Serve(listener) }()
 
-	shutdownHTTP := func() error {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownLimit)
+	shutdownHTTP := func(deadline time.Time) error {
+		shutdownCtx, cancel := context.WithDeadline(context.Background(), deadline)
 		defer cancel()
 		if err := server.Shutdown(shutdownCtx); err != nil {
+			_ = server.Close()
 			return safeStageError("http_shutdown", "failed")
 		}
 		return nil
@@ -199,35 +200,47 @@ func RunLifecycle(
 		}
 		return nil
 	}
-	waitRelay := func(expected bool) error {
-		err := <-relayDone
-		if expected && errors.Is(err, context.Canceled) {
-			return nil
+	waitRelay := func(expected bool, deadline time.Time) error {
+		remaining := time.Until(deadline)
+		if remaining <= 0 {
+			health.SetRelayRunning(false)
+			return safeStageError("relay_shutdown", "timeout")
 		}
-		if err == nil && expected {
-			return nil
+		timer := time.NewTimer(remaining)
+		defer timer.Stop()
+		select {
+		case err := <-relayDone:
+			if expected && (err == nil || errors.Is(err, context.Canceled)) {
+				return nil
+			}
+			return safeStageError("relay", "stopped")
+		case <-timer.C:
+			health.SetRelayRunning(false)
+			return safeStageError("relay_shutdown", "timeout")
 		}
-		return safeStageError("relay", "stopped")
 	}
 
 	select {
 	case <-ctx.Done():
-		httpErr := shutdownHTTP()
+		deadline := time.Now().Add(shutdownLimit)
+		httpErr := shutdownHTTP(deadline)
 		serverErr := waitServer()
 		cancelRelay()
-		relayErr := waitRelay(true)
+		relayErr := waitRelay(true, deadline)
 		return errors.Join(httpErr, serverErr, relayErr)
 	case err := <-relayDone:
 		health.SetRelayRunning(false)
-		httpErr := shutdownHTTP()
+		deadline := time.Now().Add(shutdownLimit)
+		httpErr := shutdownHTTP(deadline)
 		serverErr := waitServer()
 		if ctx.Err() != nil && errors.Is(err, context.Canceled) {
 			return errors.Join(httpErr, serverErr)
 		}
 		return errors.Join(safeStageError("relay", "stopped"), httpErr, serverErr)
 	case err := <-serverDone:
+		deadline := time.Now().Add(shutdownLimit)
 		cancelRelay()
-		relayErr := waitRelay(true)
+		relayErr := waitRelay(true, deadline)
 		if errors.Is(err, http.ErrServerClosed) && ctx.Err() != nil {
 			return relayErr
 		}
