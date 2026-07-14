@@ -235,24 +235,53 @@ The exact checked-in fixture output is:
   "clusters": [
     {
       "cluster_id": "cluster:usr-001",
-      "users": ["usr-001", "usr-002", "usr-003"],
+      "users": [
+        "usr-001",
+        "usr-002",
+        "usr-003"
+      ],
       "evidence": [
-        {"kind": "device", "opaque_id": "dev-001", "user_count": 2, "weight": 3},
-        {"kind": "ip", "opaque_id": "ip-001", "user_count": 2, "weight": 1}
+        {
+          "kind": "device",
+          "opaque_id": "dev-001",
+          "user_count": 2,
+          "weight": 3
+        },
+        {
+          "kind": "ip",
+          "opaque_id": "ip-001",
+          "user_count": 2,
+          "weight": 1
+        }
       ],
       "risk_score": 4
     },
     {
       "cluster_id": "cluster:usr-004",
-      "users": ["usr-004", "usr-005"],
+      "users": [
+        "usr-004",
+        "usr-005"
+      ],
       "evidence": [
-        {"kind": "device", "opaque_id": "dev-002", "user_count": 2, "weight": 3},
-        {"kind": "ip", "opaque_id": "ip-002", "user_count": 2, "weight": 1}
+        {
+          "kind": "device",
+          "opaque_id": "dev-002",
+          "user_count": 2,
+          "weight": 3
+        },
+        {
+          "kind": "ip",
+          "opaque_id": "ip-002",
+          "user_count": 2,
+          "weight": 1
+        }
       ],
       "risk_score": 4
     }
   ],
-  "isolated_users": ["usr-006"]
+  "isolated_users": [
+    "usr-006"
+  ]
 }
 ```
 
