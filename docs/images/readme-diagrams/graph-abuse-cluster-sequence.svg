@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1920" viewBox="0 0 1600 1920" role="img" aria-labelledby="title desc">
   <title id="title">Graph abuse cluster lifecycle sequence</title>
-  <desc id="desc">The CLI validates an opaque fixture, verifies Neo4j connectivity, atomically seeds and reads a bounded graph through graph/neo4j, analyzes clusters in Go, closes resources, and only then writes buffered JSON.</desc>
+  <desc id="desc">The CLI creates a caller-owned Neo4j driver and client, validates an opaque fixture, verifies connectivity, atomically seeds and reads a bounded graph through graph/neo4j, analyzes clusters in Go, closes resources, and only then writes buffered JSON.</desc>
   <defs>
     <style>
-      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
-      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
       .frame { fill: #fbfaf6; stroke: #78909c; stroke-width: 2.5; }
       .phase { fill: none; stroke: #a9bcc7; stroke-width: 2; stroke-dasharray: 9 7; }
       .error-frame { fill: #fff1f1; fill-opacity: .13; stroke: #cf7a7a; stroke-width: 2.5; stroke-dasharray: 9 7; }
@@ -110,38 +108,38 @@
   <line class="lifeline" x1="1460" y1="202" x2="1460" y2="1860"/>
 
   <rect class="phase" x="42" y="225" width="1516" height="175" rx="16"/>
-  <text class="phase-title" x="62" y="249">CONFIGURE AND VALIDATE LOCALLY</text>
+  <text class="phase-title" x="62" y="249">OPEN THE LOCAL APPLICATION</text>
   <rect class="phase" x="42" y="415" width="1516" height="695" rx="16"/>
-  <text class="phase-title" x="1535" y="439" text-anchor="end">NEO4J: VERIFY, ATOMIC SEED, TWO BOUNDED READS</text>
+  <text class="phase-title" x="1535" y="439" text-anchor="end">VALIDATE, VERIFY, ATOMIC SEED, TWO BOUNDED READS</text>
   <rect class="phase" x="42" y="1125" width="1516" height="445" rx="16"/>
   <text class="phase-title" x="62" y="1149">APPLICATION POLICY, CLEANUP, THEN OUTPUT</text>
   <rect class="error-frame alt" x="42" y="1585" width="1516" height="265" rx="16"/>
   <text class="phase-title" x="62" y="1609">alt backend failure or cancellation: redact, clean up, emit no partial JSON</text>
 
   <rect class="activation" x="114" y="275" width="12" height="1270" rx="5"/>
-  <rect class="activation" x="354" y="295" width="12" height="70" rx="5"/>
-  <rect class="activation" x="614" y="455" width="12" height="1010" rx="5"/>
+  <rect class="activation" x="354" y="455" width="12" height="20" rx="5"/>
+  <rect class="activation" x="614" y="295" width="12" height="1170" rx="5"/>
   <rect class="activation" x="894" y="505" width="12" height="560" rx="5"/>
   <rect class="activation" x="1174" y="1175" width="12" height="90" rx="5"/>
   <rect class="activation" x="1454" y="1275" width="12" height="240" rx="5"/>
   <rect class="activation" x="614" y="1635" width="12" height="140" rx="5"/>
   <rect class="activation" x="1454" y="1770" width="12" height="70" rx="5"/>
 
-  <path class="callBlue connector" data-message="validate-fixture" d="M126 305 H354"/>
-  <rect class="pill blue" x="142" y="261" width="196" height="34" rx="17"/>
-  <circle class="badge blue" cx="161" cy="278" r="13"/>
-  <text class="num blue" x="161" y="278" text-anchor="middle" dominant-baseline="middle">1</text><text class="detail" x="184" y="278" dominant-baseline="middle">build + validate fixture</text>
+  <path class="callBlue connector" data-message="create-client" d="M126 305 H614"/>
+  <rect class="pill blue" x="254" y="261" width="232" height="34" rx="17"/>
+  <circle class="badge blue" cx="273" cy="278" r="13"/>
+  <text class="num blue" x="273" y="278" text-anchor="middle" dominant-baseline="middle">1</text><text class="detail" x="296" y="278" dominant-baseline="middle">create driver + client</text>
 
-  <path class="callBlue connector" data-message="fixture-ok" d="M354 355 H126"/>
-  <rect class="pill blue" x="144" y="311" width="192" height="34" rx="17"/>
-  <circle class="badge blue" cx="163" cy="328" r="13"/>
-  <text class="num blue" x="163" y="328" text-anchor="middle" dominant-baseline="middle">2</text><text class="detail" x="186" y="328" dominant-baseline="middle">12 vertices / 10 edges</text>
+  <path class="callBlue connector" data-message="client-ready" d="M614 355 H126"/>
+  <rect class="pill blue" x="286" y="311" width="148" height="34" rx="17"/>
+  <circle class="badge blue" cx="305" cy="328" r="13"/>
+  <text class="num blue" x="305" y="328" text-anchor="middle" dominant-baseline="middle">2</text><text class="detail" x="328" y="328" dominant-baseline="middle">client ready</text>
   <text class="note" x="800" y="384" text-anchor="middle">The CLI rejects non-loopback Bolt URIs before it creates the caller-owned driver.</text>
 
-  <path class="callBlue connector" data-message="create-client" d="M126 465 H614"/>
-  <rect class="pill blue" x="382" y="421" width="220" height="34" rx="17"/>
-  <circle class="badge blue" cx="401" cy="438" r="13"/>
-  <text class="num blue" x="401" y="438" text-anchor="middle" dominant-baseline="middle">3</text><text class="detail" x="424" y="438" dominant-baseline="middle">create client + verify</text>
+  <path class="callBlue connector" data-message="validate-fixture" d="M126 465 H354"/>
+  <rect class="pill blue" x="142" y="421" width="196" height="34" rx="17"/>
+  <circle class="badge blue" cx="161" cy="438" r="13"/>
+  <text class="num blue" x="161" y="438" text-anchor="middle" dominant-baseline="middle">3</text><text class="detail" x="184" y="438" dominant-baseline="middle">build + validate fixture</text>
 
   <path class="callGreen connector" data-message="verify-connectivity" d="M626 515 H894"/>
   <rect class="pill green" x="650" y="471" width="220" height="34" rx="17"/>
