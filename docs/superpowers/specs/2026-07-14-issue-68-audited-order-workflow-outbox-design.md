@@ -3,8 +3,8 @@
 ## Status
 
 The high-level design was approved by the user on 2026-07-14. The detailed Type
-A specification review converged at P0=0/P1=0 on 2026-07-14; final user review
-is pending. It targets the current workshop dependency, bluetape-go v0.18.0.
+A specification review converged at P0=0/P1=0 and final user review was approved
+on 2026-07-14. It targets the current workshop dependency, bluetape-go v0.18.0.
 
 ## Goal
 
@@ -442,15 +442,17 @@ Database failure or a stopped relay returns 503. Outbox emptiness is not a
 readiness condition.
 
 `/statusz` exposes only bounded delivery diagnostics: Redis status, relay state,
-pending/claimed/dead-letter counts, and oldest-pending age rounded to seconds.
+pending/retrying/claimed/published/dead-letter counts, and oldest-pending age
+rounded to seconds.
 It never returns entry identity, payload, metadata, endpoints, or provider
 errors. A read-only status query uses the fixed official table and its status
 index under a 250-millisecond deadline; timeout returns a degraded status rather
-than blocking readiness. Each non-empty relay batch emits one structured summary
-containing only claimed, published, failed, and dead-letter counts; delivery
-degradation and lifecycle transitions are also logged once per transition to
-avoid idle-loop noise. The relay goroutine reports its terminal result to the
-lifecycle owner.
+than blocking readiness. The official v0.18.0 `Relay.Run` exposes only its
+terminal error, not per-batch results, so the application does not replace it
+with a custom polling loop merely to log batch counts. Delivery degradation and
+lifecycle transitions are logged once per transition to avoid idle-loop noise;
+current counts remain available through `/statusz`. The relay goroutine reports
+its terminal result to the lifecycle owner.
 An unexpected `Relay.Run` error first makes readiness false, then initiates the
 same bounded server shutdown and causes process failure. `context.Canceled` is
 successful only after the lifecycle owner requested shutdown; an early
@@ -584,7 +586,7 @@ are conservative teaching values validated by this test, not benchmark-derived
 production tuning. A lifecycle test proves that an unexpected relay exit makes
 readiness false and terminates serving. Observability tests prove readiness
 transitions across Redis outage and recovery, accurate bounded status counts and
-oldest-pending age, batch/lifecycle summaries, idle-loop log suppression, and
+oldest-pending age, lifecycle summaries, idle-loop log suppression, and
 the absence of payloads, metadata, endpoints, credentials, and provider errors.
 
 Validation runs targeted package tests, race tests, sequential container-backed
