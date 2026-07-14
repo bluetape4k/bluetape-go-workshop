@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1540" viewBox="0 0 1600 1540" role="img" aria-labelledby="title desc">
+  <title id="title">Audited order workflow commit, delivery, replay, and history sequence</title>
+  <desc id="desc">A strict JSON order command writes the order, immutable audit history, and SQL outbox in one transaction. A supervised relay publishes to Redis after commit. Repeated commands return the original projection without new writes, and history queries read PostgreSQL without Redis.</desc>
+  <defs>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .frame { fill: #fbfaf6; stroke: #78909c; stroke-width: 2.5; }
+      .phase { fill: none; stroke: #a9bcc7; stroke-width: 2; stroke-dasharray: 9 7; }
+      .replay { fill: #f4ecf7; fill-opacity: .13; stroke: #8a5ca8; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .history { fill: #e7f7f5; fill-opacity: .14; stroke: #2f8f89; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .title { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 36px; fill: #203240; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .participant { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 20px; fill: #203240; }
+      .role { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #536d7d; }
+      .phase-title { font-family: 'Comic Mono', monospace; font-size: 13px; font-weight: 700; fill: #47616f; }
+      .detail, .num { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #344b59; }
+      .num { font-weight: 700; }
+      .note { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #5d4a68; }
+      .card { fill: #ffffff; stroke: #607d8d; stroke-width: 2; }
+      .card.http-card { fill: #eef5fb; stroke: #4d75a3; }
+      .card.service-card { fill: #eef2ff; stroke: #6579b8; }
+      .card.sql-card { fill: #edf7ea; stroke: #6f9b62; }
+      .card.relay-card { fill: #fff7e3; stroke: #b98b2f; }
+      .card.redis-card { fill: #fff1f1; stroke: #c76a6a; }
+      .lifeline { stroke: #9aadb8; stroke-width: 2; stroke-dasharray: 8 8; }
+      .activation { fill: #fffaf0; stroke: #aa8d5a; stroke-width: 1.5; }
+      .pill { fill: #fffefd; stroke-width: 1.3; }
+      .pill.blue { stroke: #78a7c0; }
+      .pill.green { stroke: #83aa78; }
+      .pill.amber { stroke: #c59a5a; }
+      .pill.red { stroke: #cf7a7a; }
+      .pill.purple { stroke: #aa83bb; }
+      .pill.teal { stroke: #63aaa4; }
+      .http, .sql, .sqlReturn, .relay, .redis, .redisReturn, .replayCall, .historyCall, .historyReturn { fill: none; stroke-width: 3.5; stroke-linecap: round; }
+      .http { stroke: #3e7b9f; marker-end: url(#seq-blue); }
+      .sql { stroke: #4f8b63; marker-end: url(#seq-green); }
+      .sqlReturn { stroke: #4f8b63; stroke-dasharray: 7 6; marker-end: url(#seq-green); }
+      .relay { stroke: #b07a35; marker-end: url(#seq-amber); }
+      .redis { stroke: #bd4b4b; marker-end: url(#seq-red); }
+      .redisReturn { stroke: #bd4b4b; stroke-dasharray: 7 6; marker-end: url(#seq-red); }
+      .replayCall { stroke: #8a5ca8; marker-end: url(#seq-purple); }
+      .historyCall { stroke: #2f8f89; marker-end: url(#seq-teal); }
+      .historyReturn { stroke: #2f8f89; stroke-dasharray: 7 6; marker-end: url(#seq-teal); }
+    </style>
+    <marker id="seq-blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3e7b9f" stroke="#3e7b9f" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-green" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#4f8b63" stroke="#4f8b63" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-amber" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b07a35" stroke="#b07a35" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-red" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#bd4b4b" stroke="#bd4b4b" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-purple" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#8a5ca8" stroke="#8a5ca8" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-teal" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2f8f89" stroke="#2f8f89" stroke-dasharray="none"/>
+    </marker>
+  </defs>
+
+  <rect class="frame" x="20" y="20" width="1560" height="1500" rx="22"/>
+  <text class="title" x="800" y="62" text-anchor="middle">Commit audit facts first; deliver the event after</text>
+  <text class="subtitle" x="800" y="92" text-anchor="middle">Time flows downward. Replay is read-only; history never depends on Redis.</text>
+
+  <rect class="card" x="25" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="120" y="153" text-anchor="middle">HTTP Client</text>
+  <text class="role" x="120" y="178" text-anchor="middle">curl / requests.http</text>
+
+  <rect class="card http-card" x="265" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="360" y="153" text-anchor="middle">Gin HTTP</text>
+  <text class="role" x="360" y="178" text-anchor="middle">strict JSON + deadline</text>
+
+  <rect class="card service-card" x="525" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="620" y="153" text-anchor="middle">Order Service</text>
+  <text class="role" x="620" y="178" text-anchor="middle">workflow + replay</text>
+
+  <rect class="card sql-card" x="805" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="900" y="153" text-anchor="middle">PostgreSQL</text>
+  <text class="role" x="900" y="178" text-anchor="middle">order + history + outbox</text>
+
+  <rect class="card relay-card" x="1085" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="1180" y="153" text-anchor="middle">sqloutbox.Relay</text>
+  <text class="role" x="1180" y="178" text-anchor="middle">supervised worker</text>
+
+  <rect class="card redis-card" x="1365" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="1460" y="153" text-anchor="middle">Redis Stream</text>
+  <text class="role" x="1460" y="178" text-anchor="middle">at-least-once transport</text>
+
+  <line class="lifeline" x1="120" y1="202" x2="120" y2="1490"/>
+  <line class="lifeline" x1="360" y1="202" x2="360" y2="1490"/>
+  <line class="lifeline" x1="620" y1="202" x2="620" y2="1490"/>
+  <line class="lifeline" x1="900" y1="202" x2="900" y2="1490"/>
+  <line class="lifeline" x1="1180" y1="202" x2="1180" y2="1490"/>
+  <line class="lifeline" x1="1460" y1="202" x2="1460" y2="1490"/>
+
+  <rect class="phase" x="42" y="225" width="1516" height="425" rx="16"/>
+  <text class="phase-title" x="62" y="249">COMMAND: ONE SQL TRANSACTION</text>
+  <rect class="phase" x="42" y="665" width="1516" height="315" rx="16"/>
+  <text class="phase-title" x="62" y="689">AFTER COMMIT: SUPERVISED DELIVERY</text>
+  <rect class="replay alt" x="42" y="995" width="1516" height="225" rx="16"/>
+  <text class="phase-title" x="62" y="1019">alt same command identity: canonical replay, no new SQL writes</text>
+  <rect class="history" x="42" y="1235" width="1516" height="255" rx="16"/>
+  <text class="phase-title" x="62" y="1259">AUDIT QUERY: POSTGRESQL ONLY</text>
+
+  <rect class="activation" x="354" y="280" width="12" height="340" rx="5"/>
+  <rect class="activation" x="614" y="320" width="12" height="265" rx="5"/>
+  <rect class="activation" x="894" y="360" width="12" height="185" rx="5"/>
+  <rect class="activation" x="1174" y="705" width="12" height="210" rx="5"/>
+  <rect class="activation" x="894" y="725" width="12" height="190" rx="5"/>
+  <rect class="activation" x="1454" y="805" width="12" height="60" rx="5"/>
+  <rect class="activation" x="354" y="1050" width="12" height="145" rx="5"/>
+  <rect class="activation" x="614" y="1090" width="12" height="65" rx="5"/>
+  <rect class="activation" x="354" y="1295" width="12" height="175" rx="5"/>
+  <rect class="activation" x="894" y="1335" width="12" height="85" rx="5"/>
+
+  <path class="http connector" data-message="post-order" d="M120 290 H354"/>
+  <rect class="pill blue" x="142" y="260" width="190" height="25" rx="12"/>
+  <text class="num" x="154" y="278">1</text><text class="detail" x="174" y="278">POST /orders JSON</text>
+
+  <path class="http connector" data-message="validate" d="M366 330 H614"/>
+  <rect class="pill blue" x="382" y="300" width="216" height="25" rx="12"/>
+  <text class="num" x="394" y="318">2</text><text class="detail" x="414" y="318">validate + 2s deadline</text>
+
+  <path class="sql connector" data-message="begin-lock" d="M626 370 H894"/>
+  <rect class="pill green" x="644" y="340" width="232" height="25" rx="12"/>
+  <text class="num" x="656" y="358">3</text><text class="detail" x="676" y="358">BEGIN + lock projection</text>
+
+  <path class="sql connector" data-message="write-order" d="M626 410 H894"/>
+  <rect class="pill green" x="656" y="380" width="208" height="25" rx="12"/>
+  <text class="num" x="668" y="398">4</text><text class="detail" x="688" y="398">write order revision</text>
+
+  <path class="sql connector" data-message="write-history" d="M626 450 H894"/>
+  <rect class="pill green" x="646" y="420" width="228" height="25" rx="12"/>
+  <text class="num" x="658" y="438">5</text><text class="detail" x="678" y="438">insert immutable history</text>
+
+  <path class="sql connector" data-message="enqueue-outbox" d="M626 490 H894"/>
+  <rect class="pill green" x="658" y="460" width="204" height="25" rx="12"/>
+  <text class="num" x="670" y="478">6</text><text class="detail" x="690" y="478">enqueue SQL outbox</text>
+
+  <path class="sqlReturn connector" data-message="commit" d="M894 530 H626"/>
+  <rect class="pill green" x="676" y="500" width="168" height="25" rx="12"/>
+  <text class="num" x="688" y="518">7</text><text class="detail" x="708" y="518">COMMIT all three</text>
+
+  <path class="http connector" data-message="projection" d="M614 570 H366"/>
+  <rect class="pill blue" x="394" y="540" width="192" height="25" rx="12"/>
+  <text class="num" x="406" y="558">8</text><text class="detail" x="426" y="558">created projection</text>
+
+  <path class="http connector" data-message="created-response" d="M354 610 H120"/>
+  <rect class="pill blue" x="154" y="580" width="166" height="25" rx="12"/>
+  <text class="num" x="166" y="598">9</text><text class="detail" x="186" y="598">201 Created</text>
+  <text class="note" x="800" y="640" text-anchor="middle">The HTTP response does not wait for Redis; rollback removes order, history, and outbox together.</text>
+
+  <path class="relay connector" data-message="claim" d="M1174 735 H906"/>
+  <rect class="pill amber" x="938" y="705" width="204" height="25" rx="12"/>
+  <text class="num" x="950" y="723">10</text><text class="detail" x="976" y="723">claim pending entry</text>
+
+  <path class="sqlReturn connector" data-message="claimed-entry" d="M906 775 H1174"/>
+  <rect class="pill green" x="940" y="745" width="200" height="25" rx="12"/>
+  <text class="num" x="952" y="763">11</text><text class="detail" x="978" y="763">leased outbox row</text>
+
+  <path class="redis connector" data-message="xadd" d="M1186 815 H1454"/>
+  <rect class="pill red" x="1214" y="785" width="212" height="25" rx="12"/>
+  <text class="num" x="1226" y="803">12</text><text class="detail" x="1252" y="803">XADD stable event_id</text>
+
+  <path class="redisReturn connector" data-message="xadd-success" d="M1454 855 H1186"/>
+  <rect class="pill red" x="1234" y="825" width="172" height="25" rx="12"/>
+  <text class="num" x="1246" y="843">13</text><text class="detail" x="1272" y="843">XADD success</text>
+
+  <path class="relay connector" data-message="mark-published" d="M1174 895 H906"/>
+  <rect class="pill amber" x="938" y="865" width="204" height="25" rx="12"/>
+  <text class="num" x="950" y="883">14</text><text class="detail" x="976" y="883">mark published in SQL</text>
+  <text class="note" x="800" y="952" text-anchor="middle">Delivery is at-least-once; consumers deduplicate with event_id and idempotency_key.</text>
+
+  <path class="replayCall connector" data-message="repeat-command" d="M120 1060 H354"/>
+  <rect class="pill purple" x="140" y="1030" width="194" height="25" rx="12"/>
+  <text class="num" x="152" y="1048">15</text><text class="detail" x="178" y="1048">same command identity</text>
+
+  <path class="replayCall connector" data-message="canonical-replay" d="M366 1100 H614"/>
+  <rect class="pill purple" x="390" y="1070" width="200" height="25" rx="12"/>
+  <text class="num" x="402" y="1088">16</text><text class="detail" x="428" y="1088">canonical replay lookup</text>
+
+  <path class="replayCall connector" data-message="original-projection" d="M614 1140 H366"/>
+  <rect class="pill purple" x="390" y="1110" width="200" height="25" rx="12"/>
+  <text class="num" x="402" y="1128">17</text><text class="detail" x="428" y="1128">original projection</text>
+
+  <path class="replayCall connector" data-message="replay-response" d="M354 1180 H120"/>
+  <rect class="pill purple" x="146" y="1150" width="182" height="25" rx="12"/>
+  <text class="num" x="158" y="1168">18</text><text class="detail" x="184" y="1168">200 replayed=true</text>
+  <text class="note" x="800" y="1203" text-anchor="middle">No order revision, history row, outbox entry, or Redis event is added.</text>
+
+  <path class="historyCall connector" data-message="history-search" d="M120 1305 H354"/>
+  <rect class="pill teal" x="138" y="1275" width="198" height="25" rx="12"/>
+  <text class="num" x="150" y="1293">19</text><text class="detail" x="176" y="1293">POST /history/search</text>
+
+  <path class="historyCall connector" data-message="history-reader" d="M366 1345 H894"/>
+  <rect class="pill teal" x="516" y="1315" width="228" height="25" rx="12"/>
+  <text class="num" x="528" y="1333">20</text><text class="detail" x="554" y="1333">HistoryReader query SQL</text>
+
+  <path class="historyReturn connector" data-message="history-page" d="M894 1385 H366"/>
+  <rect class="pill teal" x="526" y="1355" width="208" height="25" rx="12"/>
+  <text class="num" x="538" y="1373">21</text><text class="detail" x="564" y="1373">entries + next cursor</text>
+
+  <path class="historyCall connector" data-message="history-response" d="M354 1425 H120"/>
+  <rect class="pill teal" x="150" y="1395" width="174" height="25" rx="12"/>
+  <text class="num" x="162" y="1413">22</text><text class="detail" x="188" y="1413">200 history page</text>
+  <text class="note" x="800" y="1460" text-anchor="middle">Redis can be unavailable while durable audit history remains queryable from PostgreSQL.</text>
+
+  <text class="subtitle" x="800" y="1505" text-anchor="middle">POST JSON supports metadata without URL length limits; SQL remains the audit source of truth.</text>
+</svg>
