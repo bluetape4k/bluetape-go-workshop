@@ -1,0 +1,260 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1920" viewBox="0 0 1600 1920" role="img" aria-labelledby="title desc">
+  <title id="title">Graph abuse cluster lifecycle sequence</title>
+  <desc id="desc">The CLI validates an opaque fixture, verifies Neo4j connectivity, atomically seeds and reads a bounded graph through graph/neo4j, analyzes clusters in Go, closes resources, and only then writes buffered JSON.</desc>
+  <defs>
+    <style>
+      @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
+      @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }
+      .frame { fill: #fbfaf6; stroke: #78909c; stroke-width: 2.5; }
+      .phase { fill: none; stroke: #a9bcc7; stroke-width: 2; stroke-dasharray: 9 7; }
+      .error-frame { fill: #fff1f1; fill-opacity: .13; stroke: #cf7a7a; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .title { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 36px; fill: #203240; }
+      .subtitle { font-family: 'Comic Mono', monospace; font-size: 15px; fill: #536d7d; }
+      .participant { font-family: 'Architects Daughter', 'Comic Sans MS', sans-serif; font-size: 20px; fill: #203240; }
+      .role { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #536d7d; }
+      .phase-title { font-family: 'Comic Mono', monospace; font-size: 13px; font-weight: 700; fill: #47616f; }
+      .detail, .num { font-family: 'Comic Mono', monospace; font-size: 12px; fill: #344b59; }
+      .num { font-weight: 700; }
+      .note { font-family: 'Comic Mono', monospace; font-size: 13px; fill: #5d4a68; }
+      .card { fill: #ffffff; stroke: #607d8d; stroke-width: 2; }
+      .card.cli-card { fill: #fff7e3; stroke: #b98b2f; }
+      .card.validation-card { fill: #eef5fb; stroke: #4d75a3; }
+      .card.client-card { fill: #eef2ff; stroke: #6579b8; }
+      .card.neo4j-card { fill: #edf7ea; stroke: #6f9b62; }
+      .card.analyzer-card { fill: #e7f7f5; stroke: #2f8f89; }
+      .card.output-card { fill: #f4ecf7; stroke: #8a5ca8; }
+      .lifeline { stroke: #9aadb8; stroke-width: 2; stroke-dasharray: 8 8; }
+      .activation { fill: #fffaf0; stroke: #aa8d5a; stroke-width: 1.5; }
+      .pill { fill: #fffefd; stroke-width: 1.3; }
+      .pill.blue { stroke: #78a7c0; }
+      .pill.green { stroke: #83aa78; }
+      .pill.teal { stroke: #63aaa4; }
+      .pill.purple { stroke: #aa83bb; }
+      .pill.amber { stroke: #c59a5a; }
+      .pill.red { stroke: #cf7a7a; }
+      .badge { stroke-width: 1.3; }
+      .badge.blue { fill: #eef6fa; stroke: #78a7c0; }
+      .badge.green { fill: #eef7f0; stroke: #83aa78; }
+      .badge.teal { fill: #e7f7f5; stroke: #63aaa4; }
+      .badge.purple { fill: #f4ecf7; stroke: #aa83bb; }
+      .badge.amber { fill: #fff7e8; stroke: #c59a5a; }
+      .badge.red { fill: #fff1f1; stroke: #cf7a7a; }
+      .num.blue { fill: #3e7b9f; }
+      .num.green { fill: #4f8b63; }
+      .num.teal { fill: #2f8f89; }
+      .num.purple { fill: #8a5ca8; }
+      .num.amber { fill: #b07a35; }
+      .num.red { fill: #bd4b4b; }
+      .callBlue, .callGreen, .return, .work, .async, .amber, .error { fill: none; stroke-width: 3.5; stroke-linecap: round; }
+      .callBlue { stroke: #3e7b9f; marker-end: url(#seq-blue); }
+      .callGreen { stroke: #4f8b63; marker-end: url(#seq-green); }
+      .return { stroke: #4f8b63; stroke-dasharray: 7 6; marker-end: url(#seq-green); }
+      .work { stroke: #2f8f89; marker-end: url(#seq-teal); }
+      .async { stroke: #8a5ca8; marker-end: url(#seq-purple); }
+      .amber { stroke: #b07a35; marker-end: url(#seq-amber); }
+      .error { stroke: #bd4b4b; stroke-dasharray: 7 6; marker-end: url(#seq-red); }
+    </style>
+    <marker id="seq-blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3e7b9f" stroke="#3e7b9f" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-green" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#4f8b63" stroke="#4f8b63" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-teal" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2f8f89" stroke="#2f8f89" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-purple" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#8a5ca8" stroke="#8a5ca8" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-amber" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b07a35" stroke="#b07a35" stroke-dasharray="none"/>
+    </marker>
+    <marker id="seq-red" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#bd4b4b" stroke="#bd4b4b" stroke-dasharray="none"/>
+    </marker>
+  </defs>
+
+  <rect class="frame" x="20" y="20" width="1560" height="1880" rx="22"/>
+  <text class="title" x="800" y="62" text-anchor="middle">Validate, persist, analyze, then reveal</text>
+  <text class="subtitle" x="800" y="92" text-anchor="middle">Time flows downward. One atomic seed and two bounded reads precede cleanup and stdout.</text>
+
+  <rect class="card cli-card" data-card="cli" x="25" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="120" y="153" text-anchor="middle">CLI</text>
+  <text class="role" x="120" y="178" text-anchor="middle">loopback + deadlines</text>
+
+  <rect class="card validation-card" data-card="fixture-validator" x="265" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="360" y="153" text-anchor="middle">Fixture Validator</text>
+  <text class="role" x="360" y="178" text-anchor="middle">opaque graph invariants</text>
+
+  <rect class="card client-card" data-card="graph-neo4j" x="525" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="620" y="153" text-anchor="middle">graph/neo4j</text>
+  <text class="role" x="620" y="178" text-anchor="middle">released client boundary</text>
+
+  <rect class="card neo4j-card" data-card="neo4j" x="805" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="900" y="153" text-anchor="middle">Neo4j</text>
+  <text class="role" x="900" y="178" text-anchor="middle">fixture namespace</text>
+
+  <rect class="card analyzer-card" data-card="go-analyzer" x="1085" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="1180" y="153" text-anchor="middle">Go Analyzer</text>
+  <text class="role" x="1180" y="178" text-anchor="middle">components + policy</text>
+
+  <rect class="card output-card" data-card="json-output" x="1365" y="120" width="190" height="82" rx="12"/>
+  <text class="participant" x="1460" y="153" text-anchor="middle">JSON Output</text>
+  <text class="role" x="1460" y="178" text-anchor="middle">buffered stdout / errors</text>
+
+  <line class="lifeline" x1="120" y1="202" x2="120" y2="1860"/>
+  <line class="lifeline" x1="360" y1="202" x2="360" y2="1860"/>
+  <line class="lifeline" x1="620" y1="202" x2="620" y2="1860"/>
+  <line class="lifeline" x1="900" y1="202" x2="900" y2="1860"/>
+  <line class="lifeline" x1="1180" y1="202" x2="1180" y2="1860"/>
+  <line class="lifeline" x1="1460" y1="202" x2="1460" y2="1860"/>
+
+  <rect class="phase" x="42" y="225" width="1516" height="175" rx="16"/>
+  <text class="phase-title" x="62" y="249">CONFIGURE AND VALIDATE LOCALLY</text>
+  <rect class="phase" x="42" y="415" width="1516" height="695" rx="16"/>
+  <text class="phase-title" x="62" y="439">NEO4J: VERIFY, ATOMIC SEED, TWO BOUNDED READS</text>
+  <rect class="phase" x="42" y="1125" width="1516" height="445" rx="16"/>
+  <text class="phase-title" x="62" y="1149">APPLICATION POLICY, CLEANUP, THEN OUTPUT</text>
+  <rect class="error-frame alt" x="42" y="1585" width="1516" height="265" rx="16"/>
+  <text class="phase-title" x="62" y="1609">alt backend failure or cancellation: redact, clean up, emit no partial JSON</text>
+
+  <rect class="activation" x="114" y="275" width="12" height="1270" rx="5"/>
+  <rect class="activation" x="354" y="295" width="12" height="70" rx="5"/>
+  <rect class="activation" x="614" y="455" width="12" height="1010" rx="5"/>
+  <rect class="activation" x="894" y="505" width="12" height="560" rx="5"/>
+  <rect class="activation" x="1174" y="1175" width="12" height="90" rx="5"/>
+  <rect class="activation" x="1454" y="1275" width="12" height="240" rx="5"/>
+  <rect class="activation" x="614" y="1635" width="12" height="140" rx="5"/>
+  <rect class="activation" x="1454" y="1770" width="12" height="70" rx="5"/>
+
+  <path class="callBlue connector" data-message="validate-fixture" d="M126 305 H354"/>
+  <rect class="pill blue" x="142" y="261" width="196" height="34" rx="17"/>
+  <circle class="badge blue" cx="161" cy="278" r="13"/>
+  <text class="num blue" x="161" y="278" text-anchor="middle" dominant-baseline="middle">1</text><text class="detail" x="184" y="278" dominant-baseline="middle">build + validate fixture</text>
+
+  <path class="callBlue connector" data-message="fixture-ok" d="M354 355 H126"/>
+  <rect class="pill blue" x="144" y="311" width="192" height="34" rx="17"/>
+  <circle class="badge blue" cx="163" cy="328" r="13"/>
+  <text class="num blue" x="163" y="328" text-anchor="middle" dominant-baseline="middle">2</text><text class="detail" x="186" y="328" dominant-baseline="middle">12 vertices / 10 edges</text>
+  <text class="note" x="800" y="384" text-anchor="middle">The CLI rejects non-loopback Bolt URIs before it creates the caller-owned driver.</text>
+
+  <path class="callBlue connector" data-message="create-client" d="M126 465 H614"/>
+  <rect class="pill blue" x="382" y="421" width="220" height="34" rx="17"/>
+  <circle class="badge blue" cx="401" cy="438" r="13"/>
+  <text class="num blue" x="401" y="438" text-anchor="middle" dominant-baseline="middle">3</text><text class="detail" x="424" y="438" dominant-baseline="middle">create client + verify</text>
+
+  <path class="callGreen connector" data-message="verify-connectivity" d="M626 515 H894"/>
+  <rect class="pill green" x="650" y="471" width="220" height="34" rx="17"/>
+  <circle class="badge green" cx="669" cy="488" r="13"/>
+  <text class="num green" x="669" y="488" text-anchor="middle" dominant-baseline="middle">4</text><text class="detail" x="692" y="488" dominant-baseline="middle">verify connectivity</text>
+
+  <path class="return connector" data-message="connectivity-ok" d="M894 565 H626"/>
+  <rect class="pill green" x="666" y="521" width="188" height="34" rx="17"/>
+  <circle class="badge green" cx="685" cy="538" r="13"/>
+  <text class="num green" x="685" y="538" text-anchor="middle" dominant-baseline="middle">5</text><text class="detail" x="708" y="538" dominant-baseline="middle">connectivity OK</text>
+
+  <path class="callBlue connector" data-message="request-seed" d="M126 615 H614"/>
+  <rect class="pill blue" x="258" y="571" width="224" height="34" rx="17"/>
+  <circle class="badge blue" cx="277" cy="588" r="13"/>
+  <text class="num blue" x="277" y="588" text-anchor="middle" dominant-baseline="middle">6</text><text class="detail" x="300" y="588" dominant-baseline="middle">atomic reset + seed</text>
+
+  <path class="callGreen connector" data-message="execute-write" d="M626 665 H894"/>
+  <rect class="pill green" x="642" y="621" width="236" height="34" rx="17"/>
+  <circle class="badge green" cx="661" cy="638" r="13"/>
+  <text class="num green" x="661" y="638" text-anchor="middle" dominant-baseline="middle">7</text><text class="detail" x="684" y="638" dominant-baseline="middle">ExecuteWrite reset + seed</text>
+
+  <path class="return connector" data-message="seed-commit" d="M894 715 H626"/>
+  <rect class="pill green" x="680" y="671" width="160" height="34" rx="17"/>
+  <circle class="badge green" cx="699" cy="688" r="13"/>
+  <text class="num green" x="699" y="688" text-anchor="middle" dominant-baseline="middle">8</text><text class="detail" x="722" y="688" dominant-baseline="middle">commit all</text>
+
+  <path class="callBlue connector" data-message="request-vertices" d="M126 765 H614"/>
+  <rect class="pill blue" x="250" y="721" width="240" height="34" rx="17"/>
+  <circle class="badge blue" cx="269" cy="738" r="13"/>
+  <text class="num blue" x="269" y="738" text-anchor="middle" dominant-baseline="middle">9</text><text class="detail" x="292" y="738" dominant-baseline="middle">read vertices LIMIT 257</text>
+
+  <path class="callGreen connector" data-message="read-vertices" d="M626 815 H894"/>
+  <rect class="pill green" x="662" y="771" width="196" height="34" rx="17"/>
+  <circle class="badge green" cx="681" cy="788" r="13"/>
+  <text class="num green" x="681" y="788" text-anchor="middle" dominant-baseline="middle">10</text><text class="detail" x="708" y="788" dominant-baseline="middle">ReadVertices</text>
+
+  <path class="return connector" data-message="vertices-return" d="M894 865 H626"/>
+  <rect class="pill green" x="656" y="821" width="208" height="34" rx="17"/>
+  <circle class="badge green" cx="675" cy="838" r="13"/>
+  <text class="num green" x="675" y="838" text-anchor="middle" dominant-baseline="middle">11</text><text class="detail" x="702" y="838" dominant-baseline="middle">at most 256 vertices</text>
+
+  <path class="callBlue connector" data-message="request-edges" d="M126 915 H614"/>
+  <rect class="pill blue" x="246" y="871" width="248" height="34" rx="17"/>
+  <circle class="badge blue" cx="265" cy="888" r="13"/>
+  <text class="num blue" x="265" y="888" text-anchor="middle" dominant-baseline="middle">12</text><text class="detail" x="292" y="888" dominant-baseline="middle">read edges LIMIT 1025</text>
+
+  <path class="callGreen connector" data-message="read-edges" d="M626 965 H894"/>
+  <rect class="pill green" x="666" y="921" width="188" height="34" rx="17"/>
+  <circle class="badge green" cx="685" cy="938" r="13"/>
+  <text class="num green" x="685" y="938" text-anchor="middle" dominant-baseline="middle">13</text><text class="detail" x="712" y="938" dominant-baseline="middle">ReadEdges</text>
+
+  <path class="return connector" data-message="edges-return" d="M894 1015 H626"/>
+  <rect class="pill green" x="654" y="971" width="212" height="34" rx="17"/>
+  <circle class="badge green" cx="673" cy="988" r="13"/>
+  <text class="num green" x="673" y="988" text-anchor="middle" dominant-baseline="middle">14</text><text class="detail" x="700" y="988" dominant-baseline="middle">at most 1024 edges</text>
+
+  <path class="callBlue connector" data-message="bounded-values" d="M614 1065 H126"/>
+  <rect class="pill blue" x="252" y="1021" width="236" height="34" rx="17"/>
+  <circle class="badge blue" cx="271" cy="1038" r="13"/>
+  <text class="num blue" x="271" y="1038" text-anchor="middle" dominant-baseline="middle">15</text><text class="detail" x="298" y="1038" dominant-baseline="middle">bounded graph values</text>
+  <text class="note" x="800" y="1094" text-anchor="middle">The max+1 reads turn oversize data into a typed error instead of silent truncation.</text>
+
+  <path class="work connector" data-message="analyze" d="M126 1185 H1174"/>
+  <rect class="pill teal" x="526" y="1141" width="248" height="34" rx="17"/>
+  <circle class="badge teal" cx="545" cy="1158" r="13"/>
+  <text class="num teal" x="545" y="1158" text-anchor="middle" dominant-baseline="middle">16</text><text class="detail" x="572" y="1158" dominant-baseline="middle">Analyze components 5/3/1</text>
+
+  <path class="work connector" data-message="analysis-return" d="M1174 1235 H126"/>
+  <rect class="pill teal" x="522" y="1191" width="256" height="34" rx="17"/>
+  <circle class="badge teal" cx="541" cy="1208" r="13"/>
+  <text class="num teal" x="541" y="1208" text-anchor="middle" dominant-baseline="middle">17</text><text class="detail" x="568" y="1208" dominant-baseline="middle">ranked clusters + isolated</text>
+
+  <path class="async connector" data-message="encode-json" d="M126 1285 H1454"/>
+  <rect class="pill purple" x="666" y="1241" width="268" height="34" rx="17"/>
+  <circle class="badge purple" cx="685" cy="1258" r="13"/>
+  <text class="num purple" x="685" y="1258" text-anchor="middle" dominant-baseline="middle">18</text><text class="detail" x="712" y="1258" dominant-baseline="middle">encode JSON in memory</text>
+
+  <path class="async connector" data-message="buffered-report" d="M1454 1335 H126"/>
+  <rect class="pill purple" x="674" y="1291" width="252" height="34" rx="17"/>
+  <circle class="badge purple" cx="693" cy="1308" r="13"/>
+  <text class="num purple" x="693" y="1308" text-anchor="middle" dominant-baseline="middle">19</text><text class="detail" x="720" y="1308" dominant-baseline="middle">complete buffered report</text>
+
+  <path class="amber connector" data-message="close-client" d="M126 1385 H614"/>
+  <rect class="pill amber" x="246" y="1341" width="248" height="34" rx="17"/>
+  <circle class="badge amber" cx="265" cy="1358" r="13"/>
+  <text class="num amber" x="265" y="1358" text-anchor="middle" dominant-baseline="middle">20</text><text class="detail" x="292" y="1358" dominant-baseline="middle">close with fresh 3s context</text>
+
+  <path class="amber connector" data-message="cleanup-complete" d="M614 1435 H126"/>
+  <rect class="pill amber" x="272" y="1391" width="196" height="34" rx="17"/>
+  <circle class="badge amber" cx="291" cy="1408" r="13"/>
+  <text class="num amber" x="291" y="1408" text-anchor="middle" dominant-baseline="middle">21</text><text class="detail" x="318" y="1408" dominant-baseline="middle">cleanup complete</text>
+
+  <path class="async connector" data-message="stdout" d="M126 1485 H1454"/>
+  <rect class="pill purple" x="664" y="1441" width="272" height="34" rx="17"/>
+  <circle class="badge purple" cx="683" cy="1458" r="13"/>
+  <text class="num purple" x="683" y="1458" text-anchor="middle" dominant-baseline="middle">22</text><text class="detail" x="710" y="1458" dominant-baseline="middle">write complete stdout JSON</text>
+  <text class="note" x="800" y="1540" text-anchor="middle">No report bytes reach stdout until client and driver cleanup succeeds.</text>
+
+  <path class="error connector" data-message="stable-failure" d="M614 1665 H126"/>
+  <rect class="pill red" x="252" y="1621" width="236" height="34" rx="17"/>
+  <circle class="badge red" cx="271" cy="1638" r="13"/>
+  <text class="num red" x="271" y="1638" text-anchor="middle" dominant-baseline="middle">23</text><text class="detail" x="298" y="1638" dominant-baseline="middle">stable backend / cancel</text>
+
+  <path class="error connector" data-message="failure-cleanup" d="M126 1725 H614"/>
+  <rect class="pill red" x="258" y="1681" width="224" height="34" rx="17"/>
+  <circle class="badge red" cx="277" cy="1698" r="13"/>
+  <text class="num red" x="277" y="1698" text-anchor="middle" dominant-baseline="middle">24</text><text class="detail" x="304" y="1698" dominant-baseline="middle">fresh bounded close</text>
+
+  <path class="error connector" data-message="stable-stderr" d="M126 1785 H1454"/>
+  <rect class="pill red" x="644" y="1741" width="312" height="34" rx="17"/>
+  <circle class="badge red" cx="663" cy="1758" r="13"/>
+  <text class="num red" x="663" y="1758" text-anchor="middle" dominant-baseline="middle">25</text><text class="detail" x="690" y="1758" dominant-baseline="middle">stderr class; no partial stdout</text>
+  <text class="note" x="800" y="1828" text-anchor="middle">Opaque identifiers and provider details never appear in terminal errors.</text>
+
+  <text class="subtitle" x="800" y="1885" text-anchor="middle">Neo4j supplies storage; graph/neo4j supplies adapter I/O; the example owns every cluster decision.</text>
+</svg>
