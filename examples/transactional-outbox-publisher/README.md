@@ -1,6 +1,6 @@
 # Transactional Outbox Publisher Example
 
-[English](README.md) | [한국어](README.ko.md)
+English | [한국어](README.ko.md)
 
 This example closes the gap left by the SQL transaction boundary lesson: an
 order row and its audit event commit in the same PostgreSQL transaction, then a

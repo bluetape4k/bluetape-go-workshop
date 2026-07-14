@@ -1,0 +1,68 @@
+@baseURL = http://127.0.0.1:8080
+
+### Create order
+# @expect-status 201
+POST {{baseURL}}/orders
+Content-Type: application/json
+
+{"order_id":"order-1001","command_id":"cmd-create-1001","metadata":{"channel":"workshop"}}
+
+### Confirm order
+# @expect-status 200
+POST {{baseURL}}/orders/transitions
+Content-Type: application/json
+
+{"order_id":"order-1001","command_id":"cmd-confirm-1001","action":"confirm","metadata":{"operator":"demo"}}
+
+### Replay identical confirmation
+# @expect-status 200
+# @expect-replayed true
+POST {{baseURL}}/orders/transitions
+Content-Type: application/json
+
+{"order_id":"order-1001","command_id":"cmd-confirm-1001","action":"confirm","metadata":{"operator":"demo"}}
+
+### Search history page one
+# @expect-status 200
+# @expect-next-from-revision 2
+POST {{baseURL}}/audit/history/search
+Content-Type: application/json
+
+{"aggregate":{"type":"order","id":"order-1001"},"from_revision":1,"to_revision":null,"from_recorded_at":null,"to_recorded_at":null,"limit":1}
+
+### Search history page two
+# @expect-status 200
+# @expect-next-from-revision null
+POST {{baseURL}}/audit/history/search
+Content-Type: application/json
+
+{"aggregate":{"type":"order","id":"order-1001"},"from_revision":2,"to_revision":null,"from_recorded_at":null,"to_recorded_at":null,"limit":1}
+
+### Load revision two
+# @expect-status 200
+POST {{baseURL}}/audit/history/detail
+Content-Type: application/json
+
+{"aggregate":{"type":"order","id":"order-1001"},"revision":2}
+
+### Create second order
+# @expect-status 201
+POST {{baseURL}}/orders
+Content-Type: application/json
+
+{"order_id":"order-2001","command_id":"cmd-create-2001","metadata":{"channel":"workshop"}}
+
+### Cancel second order
+# @expect-status 200
+POST {{baseURL}}/orders/transitions
+Content-Type: application/json
+
+{"order_id":"order-2001","command_id":"cmd-cancel-2001","action":"cancel","reason":"customer request","metadata":{"operator":"demo"}}
+
+### Reject transition after cancellation
+# @expect-status 409
+# @expect-error-code invalid_transition
+POST {{baseURL}}/orders/transitions
+Content-Type: application/json
+
+{"order_id":"order-2001","command_id":"cmd-confirm-2001","action":"confirm","metadata":{"operator":"demo"}}

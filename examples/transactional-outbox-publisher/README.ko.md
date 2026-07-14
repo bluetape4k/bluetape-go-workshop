@@ -1,6 +1,6 @@
 # Transactional Outbox Publisher 예제
 
-[English](README.md) | [한국어](README.ko.md)
+[English](README.md) | 한국어
 
 이 예제는 SQL transaction boundary 다음 단계를 다룹니다. 주문 row와 audit event를
 하나의 PostgreSQL transaction으로 commit한 뒤, 릴리스된 `bluetape-go` relay가
