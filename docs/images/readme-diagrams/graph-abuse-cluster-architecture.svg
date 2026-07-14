@@ -11,8 +11,8 @@
     <marker id="arrow-green" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
       <path d="M 0 1 L 12 7 L 0 13 Z" fill="#4f8a5b"/>
     </marker>
-    <marker id="arrow-teal" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
-      <path d="M 0 1 L 12 7 L 0 13 Z" fill="#2f8f89"/>
+    <marker id="arrow-purple" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
+      <path d="M 0 1 L 12 7 L 0 13 Z" fill="#7c3aed"/>
     </marker>
     <marker id="arrow-amber" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
       <path d="M 0 1 L 12 7 L 0 13 Z" fill="#b7791f"/>
@@ -128,11 +128,11 @@
   <path d="M 1055 315 H 1118 Q 1138 315 1138 335 V 420 Q 1138 440 1158 440 H 1170" stroke="#4f8a5b" marker-end="url(#arrow-green)" class="connector" data-connector="bolt-io"/>
   <text x="1137" y="299" text-anchor="middle" class="label" fill="#4f8a5b">Bolt</text>
 
-  <path d="M 400 575 H 385 Q 365 575 365 595 V 655 Q 365 675 345 675 H 235 Q 215 675 215 695 V 720" stroke="#2f8f89" marker-end="url(#arrow-teal)" class="connector" data-connector="bounded-graph"/>
-  <text x="281" y="657" text-anchor="middle" class="label" fill="#2f8f89">bounded graph values</text>
+  <path d="M 400 575 H 385 Q 365 575 365 595 V 655 Q 365 675 345 675 H 235 Q 215 675 215 695 V 720" stroke="#7c3aed" marker-end="url(#arrow-purple)" class="connector" data-connector="bounded-graph"/>
+  <text x="281" y="657" text-anchor="middle" class="label" fill="#7c3aed">bounded graph values</text>
 
-  <path d="M 340 795 H 400" stroke="#2f8f89" marker-end="url(#arrow-teal)" class="connector" data-connector="deterministic-report"/>
-  <text x="370" y="777" text-anchor="middle" class="label" fill="#2f8f89">report</text>
+  <path d="M 340 795 H 400" stroke="#7c3aed" marker-end="url(#arrow-purple)" class="connector" data-connector="deterministic-report"/>
+  <text x="370" y="777" text-anchor="middle" class="label" fill="#7c3aed">report</text>
 
   <g class="legend">
     <line x1="95" y1="960" x2="135" y2="960" stroke="#3b6f9f" stroke-width="4" marker-end="url(#arrow-blue)"/>
@@ -141,7 +141,7 @@
     <text x="393" y="966" font-size="15">runtime ownership</text>
     <line x1="585" y1="960" x2="625" y2="960" stroke="#4f8a5b" stroke-width="4" marker-end="url(#arrow-green)"/>
     <text x="638" y="966" font-size="15">persistence boundary</text>
-    <line x1="870" y1="960" x2="910" y2="960" stroke="#2f8f89" stroke-width="4" marker-end="url(#arrow-teal)"/>
+    <line x1="870" y1="960" x2="910" y2="960" stroke="#7c3aed" stroke-width="4" marker-end="url(#arrow-purple)"/>
     <text x="923" y="966" font-size="15">application analysis</text>
   </g>
 </svg>
