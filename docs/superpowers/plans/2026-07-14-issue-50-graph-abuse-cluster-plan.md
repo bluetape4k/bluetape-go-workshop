@@ -418,8 +418,9 @@ Plan the exact function:
 func EncodeReport(Report) ([]byte, error)
 ```
 
-`output_test.go` compares the bytes to the exact indented JSON in the spec,
-requires one trailing newline, and requires deterministic repetition. Add the
+`output_test.go` compares the bytes to the exact standard-library
+`json.MarshalIndent` representation shown in the spec, requires one trailing
+newline, and requires deterministic repetition. Add the
 small package-private seam below solely to inject a marshaler error and prove
 that an encoding failure returns no bytes:
 
