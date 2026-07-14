@@ -129,11 +129,11 @@ func ValidateFixture(fixture Fixture) error {
 	vertexLabels := make(map[string]string, len(fixture.Vertices))
 	for index, vertex := range fixture.Vertices {
 		if err := vertex.Validate(); err != nil {
-			return graphValidationError("vertex", index, "invalid value")
+			return fixtureValidationError("vertex", index, "invalid value")
 		}
 		id := vertex.ID().String()
 		if _, exists := vertexLabels[id]; exists {
-			return graphValidationError("vertex", index, "duplicate id")
+			return fixtureValidationError("vertex", index, "duplicate id")
 		}
 
 		properties := vertex.Properties()
@@ -142,7 +142,7 @@ func ValidateFixture(fixture Fixture) error {
 			if len(properties) != 2 ||
 				!matchingStringProperty(properties, propertyOpaqueID, id) ||
 				!matchingStringProperty(properties, propertyFixtureID, fixture.ID) {
-				return graphValidationError("vertex", index, "invalid properties")
+				return fixtureValidationError("vertex", index, "invalid properties")
 			}
 		case labelIdentifier:
 			kind, ok := properties[propertyKind].(string)
@@ -150,10 +150,10 @@ func ValidateFixture(fixture Fixture) error {
 				!matchingStringProperty(properties, propertyOpaqueID, id) ||
 				!matchingStringProperty(properties, propertyFixtureID, fixture.ID) ||
 				!ok || !validIdentifierKind(IdentifierKind(kind)) {
-				return graphValidationError("vertex", index, "invalid properties")
+				return fixtureValidationError("vertex", index, "invalid properties")
 			}
 		default:
-			return graphValidationError("vertex", index, "invalid label")
+			return fixtureValidationError("vertex", index, "invalid label")
 		}
 		vertexLabels[id] = vertex.Label().String()
 	}
@@ -167,21 +167,21 @@ func ValidateFixture(fixture Fixture) error {
 	logicalEdges := make(map[logicalEdge]struct{}, len(fixture.Edges))
 	for index, edge := range fixture.Edges {
 		if err := edge.Validate(); err != nil {
-			return graphValidationError("edge", index, "invalid value")
+			return fixtureValidationError("edge", index, "invalid value")
 		}
 		id := edge.ID().String()
 		if _, exists := edgeIDs[id]; exists {
-			return graphValidationError("edge", index, "duplicate id")
+			return fixtureValidationError("edge", index, "duplicate id")
 		}
 		edgeIDs[id] = struct{}{}
 		if edge.Label().String() != labelUsesIdentifier {
-			return graphValidationError("edge", index, "invalid label")
+			return fixtureValidationError("edge", index, "invalid label")
 		}
 		properties := edge.Properties()
 		if len(properties) != 2 ||
 			!matchingStringProperty(properties, propertyOpaqueID, id) ||
 			!matchingStringProperty(properties, propertyFixtureID, fixture.ID) {
-			return graphValidationError("edge", index, "invalid properties")
+			return fixtureValidationError("edge", index, "invalid properties")
 		}
 
 		start := edge.StartID().String()
@@ -189,14 +189,14 @@ func ValidateFixture(fixture Fixture) error {
 		startLabel, startExists := vertexLabels[start]
 		endLabel, endExists := vertexLabels[end]
 		if !startExists || !endExists {
-			return graphValidationError("edge", index, "missing endpoint")
+			return fixtureValidationError("edge", index, "missing endpoint")
 		}
 		if startLabel != labelUser || endLabel != labelIdentifier {
-			return graphValidationError("edge", index, "invalid endpoints")
+			return fixtureValidationError("edge", index, "invalid endpoints")
 		}
 		key := logicalEdge{start: start, end: end, label: edge.Label().String()}
 		if _, exists := logicalEdges[key]; exists {
-			return graphValidationError("edge", index, "duplicate logical edge")
+			return fixtureValidationError("edge", index, "duplicate logical edge")
 		}
 		logicalEdges[key] = struct{}{}
 	}
@@ -207,8 +207,8 @@ func fixtureBuildError(element string, index int) error {
 	return fmt.Errorf("%w: %s %d", ErrInvalidFixture, element, index)
 }
 
-func graphValidationError(element string, index int, reason string) error {
-	return fmt.Errorf("%w: %s %d: %s", ErrInvalidGraph, element, index, reason)
+func fixtureValidationError(element string, index int, reason string) error {
+	return fmt.Errorf("%w: %s %d: %s", ErrInvalidFixture, element, index, reason)
 }
 
 func matchingStringProperty(properties graph.Properties, key, want string) bool {
