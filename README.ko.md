@@ -254,7 +254,7 @@ Terminal 1에서 loopback-only Neo4j container를 시작한 뒤 Terminal 2에서
 NEO4J_URI=bolt://127.0.0.1:7687 go run ./examples/graph-abuse-cluster
 ```
 
-[예제 README](examples/graph-abuse-cluster/README.ko.md)에서 정확한 foreground
+[예제 README](examples/graph-abuse-cluster/README.ko.md)에서 정확한 포그라운드
 Docker 명령, 항상 같은 JSON report, graph schema, 점수 가중치, local-only
 신뢰 경계를 확인할 수 있습니다.
 
