@@ -5,6 +5,7 @@ import "github.com/bluetape4k/bluetape-go/graph"
 // IdentifierKind classifies an opaque identifier shared by users.
 type IdentifierKind string
 
+// IdentifierDevice and the related constants define the bounded fixture contract.
 const (
 	IdentifierDevice       IdentifierKind = "device"
 	IdentifierIP           IdentifierKind = "ip"
