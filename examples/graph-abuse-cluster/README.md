@@ -15,9 +15,9 @@ code owns schema validation, clustering, scoring, and ordering.
 | Component | Responsibility |
 | --- | --- |
 | Fixture builder | Build 12 vertices and 10 edges with synthetic opaque IDs, then validate schema, endpoints, and duplicates before persistence. |
-| `abusecluster.Store` | Reset and seed one fixture namespace with one fixed parameterized Cypher statement, then read at most 256 vertices and 1024 edges. |
+| `abusecluster.Store` | Reset and seed one fixture namespace with one fixed parameterized Cypher statement. Reads request limit+1 to enforce accepted limits of 256 vertices and 1024 edges. |
 | `graph/neo4j` | Use the caller-owned Neo4j driver for a managed write and `graph.Vertex`/`graph.Edge` adaptation. |
-| Go analyzer | Walk User and Identifier components, then calculate shared-identifier evidence, risk scores, and deterministic order. |
+| Go analyzer | Walk User and Identifier components, calculate shared-identifier evidence and risk scores, then sort the report deterministically. |
 | CLI | Own strict loopback URI validation, a 15-second operation deadline, three-second cleanup, JSON buffering, and stdout after cleanup. |
 
 ![Graph abuse cluster sequence](../../docs/images/readme-diagrams/graph-abuse-cluster-sequence.png)
