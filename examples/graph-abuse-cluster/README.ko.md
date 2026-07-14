@@ -15,9 +15,9 @@
 | 구성 요소 | 책임 |
 | --- | --- |
 | Fixture builder | 합성 opaque ID로 12개 vertex와 10개 edge를 만들고 저장 전에 schema, endpoint, 중복을 검증합니다. |
-| `abusecluster.Store` | 고정된 parameterized Cypher 하나로 fixture namespace를 reset/seed하고, vertex 최대 256개와 edge 최대 1024개를 제한해서 읽습니다. |
+| `abusecluster.Store` | 고정된 parameterized Cypher 하나로 fixture namespace를 reset/seed합니다. 초과를 탐지하려고 limit+1까지 조회하며 vertex 256개와 edge 1024개까지만 허용합니다. |
 | `graph/neo4j` | Caller-owned Neo4j driver를 사용해 managed write와 `graph.Vertex`/`graph.Edge` 변환을 수행합니다. |
-| Go analyzer | User와 Identifier의 연결 요소를 순회하고 공유 식별자 evidence, risk score, deterministic order를 계산합니다. |
+| Go analyzer | User와 Identifier의 연결 요소를 순회해 공유 식별자 근거와 위험 점수를 계산하고 결과를 결정적으로 정렬합니다. |
 | CLI | Strict loopback URI 검증, 15초 작업 deadline, 3초 cleanup, JSON buffering, cleanup 이후 stdout 출력을 맡습니다. |
 
 ![Graph abuse cluster sequence](../../docs/images/readme-diagrams/graph-abuse-cluster-sequence.png)
@@ -48,8 +48,8 @@
 | `device` | 3 |
 | `ip` | 1 |
 
-이 risk score는 graph traversal과 deterministic projection을 설명하기 위한 값일
-뿐, 실제 사기 판정 기준이 아닙니다. Cluster는 risk score 내림차순, 사용자 수
+이 위험 점수는 graph traversal과 결정적 projection을 설명하기 위한 값일
+뿐, 실제 사기 판정 기준이 아닙니다. Cluster는 위험 점수 내림차순, 사용자 수
 내림차순, 가장 작은 사용자 ID 오름차순으로 정렬합니다. Evidence는 kind와
 opaque ID 순으로 정렬합니다.
 
@@ -70,8 +70,8 @@ docker run --rm --name graph-abuse-cluster-neo4j \
 ### Terminal 2: CLI와 test 실행
 
 CLI는 `bolt://` URI만 받고 host가 `localhost`, `127.0.0.0/8`, `::1`인 경우만
-허용합니다. Numeric port가 반드시 있어야 하며 credential, path, query,
-fragment, remote host는 driver를 만들기 전에 거부합니다.
+허용합니다. `port`는 숫자로 지정해야 합니다. 자격 증명, path, query, fragment,
+remote host는 driver를 만들기 전에 거부합니다.
 
 ```bash
 NEO4J_URI=bolt://127.0.0.1:7687 \
@@ -149,7 +149,7 @@ Docker resource를 공유하므로 race command도 `-p 1`로 직렬 실행합니
 `ReplaceFixture`는 `graph-abuse-cluster-v1` namespace의 기존 node를 지우고 새
 fixture를 만드는 고정 Cypher를 하나의 Neo4j managed write transaction에서
 실행합니다. Reset과 seed는 함께 commit되거나 함께 rollback됩니다. CLI는 이
-고정 namespace를 한 번 처리하고 종료하는 학습용 process입니다. 같은 namespace를
+고정 namespace를 한 번 처리하고 종료하는 학습용 프로세스입니다. 같은 namespace를
 대상으로 여러 CLI를 동시에 실행하는 방식은 지원하지 않습니다.
 
 이 atomic reset/seed는 message delivery나 distributed transaction을 보장하지

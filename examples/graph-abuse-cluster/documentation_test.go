@@ -64,6 +64,27 @@ func TestDocumentationParity(t *testing.T) {
 		}
 	}
 
+	localeConcurrencyMarkers := map[string]struct {
+		document string
+		markers  []string
+	}{
+		"en": {document: english, markers: []string{
+			"fixed namespace once",
+			"Concurrent CLI runs against the same namespace are unsupported.",
+		}},
+		"ko": {document: korean, markers: []string{
+			"고정 namespace를 한 번 처리",
+			"여러 CLI를 동시에 실행하는 방식은 지원하지 않습니다.",
+		}},
+	}
+	for locale, contract := range localeConcurrencyMarkers {
+		for _, marker := range contract.markers {
+			if got := strings.Count(contract.document, marker); got != 1 {
+				t.Errorf("%s concurrency marker %q count = %d, want 1", locale, marker, got)
+			}
+		}
+	}
+
 	fixture, err := abusecluster.DefaultFixture()
 	if err != nil {
 		t.Fatalf("build documented fixture: %v", err)
