@@ -15,10 +15,12 @@ import (
 
 const maxEntryBytes = 1 << 20
 
+// HistoryStore persists immutable audit entries and implements audit.HistoryReader.
 type HistoryStore struct {
 	db *sql.DB
 }
 
+// DeliveryStatus summarizes outbox state without exposing event contents.
 type DeliveryStatus struct {
 	Pending              int64 `json:"pending"`
 	Retrying             int64 `json:"retrying"`
@@ -30,6 +32,7 @@ type DeliveryStatus struct {
 
 var _ audit.HistoryReader = (*HistoryStore)(nil)
 
+// NewHistoryStore binds durable history reads to db.
 func NewHistoryStore(db *sql.DB) (*HistoryStore, error) {
 	if db == nil {
 		return nil, ErrInvalidConfig
@@ -37,6 +40,7 @@ func NewHistoryStore(db *sql.DB) (*HistoryStore, error) {
 	return &HistoryStore{db: db}, nil
 }
 
+// Insert writes entry through the caller-owned transaction or session.
 func (s *HistoryStore) Insert(ctx context.Context, db sqlkit.Execer, entry audit.Entry) error {
 	if s == nil || s.db == nil || db == nil {
 		return ErrInvalidConfig
@@ -70,6 +74,7 @@ insert into audited_order_workflow_audit_entries (
 	return nil
 }
 
+// Find returns entries in stable revision or global position order.
 func (s *HistoryStore) Find(ctx context.Context, query audit.Query) ([]audit.Entry, error) {
 	if s == nil || s.db == nil {
 		return nil, ErrInvalidConfig
@@ -99,6 +104,7 @@ func (s *HistoryStore) Find(ctx context.Context, query audit.Query) ([]audit.Ent
 	return entries, nil
 }
 
+// FindByCommandID resolves a canonical event or idempotency identity.
 func (s *HistoryStore) FindByCommandID(ctx context.Context, db sqlkit.QueryRower, commandID string) (audit.Entry, bool, error) {
 	if s == nil || s.db == nil || db == nil {
 		return audit.Entry{}, false, ErrInvalidConfig
@@ -124,6 +130,7 @@ limit 1`, commandID)
 	return entry, true, nil
 }
 
+// DeliveryStatus returns bounded aggregate outbox diagnostics under a short timeout.
 func (s *HistoryStore) DeliveryStatus(ctx context.Context, now time.Time) (DeliveryStatus, error) {
 	if s == nil || s.db == nil {
 		return DeliveryStatus{}, ErrInvalidConfig
@@ -152,6 +159,7 @@ from audited_order_workflow_outbox_records`, normalizeTimestamp(now)).Scan(
 	return status, nil
 }
 
+// LoadHistory reconstructs validated history for aggregate.
 func (s *HistoryStore) LoadHistory(ctx context.Context, aggregate audit.AggregateID) (audit.History, bool, error) {
 	if err := aggregate.Validate(); err != nil {
 		return audit.History{}, false, fmt.Errorf("%w: aggregate: %w", audit.ErrInvalidQuery, err)
@@ -170,6 +178,7 @@ func (s *HistoryStore) LoadHistory(ctx context.Context, aggregate audit.Aggregat
 	return history, true, nil
 }
 
+// Latest returns the highest durable revision for aggregate.
 func (s *HistoryStore) Latest(ctx context.Context, aggregate audit.AggregateID) (audit.Entry, bool, error) {
 	if err := aggregate.Validate(); err != nil {
 		return audit.Entry{}, false, fmt.Errorf("%w: aggregate: %w", audit.ErrInvalidQuery, err)
@@ -184,10 +193,12 @@ func (s *HistoryStore) Latest(ctx context.Context, aggregate audit.AggregateID) 
 	return entries[0], true, nil
 }
 
+// LatestSnapshot returns the newest snapshot entry when one exists.
 func (s *HistoryStore) LatestSnapshot(ctx context.Context, aggregate audit.AggregateID) (audit.Entry, bool, error) {
 	return s.findSnapshot(ctx, aggregate, 0)
 }
 
+// PreviousSnapshot returns the newest snapshot before the exclusive revision bound.
 func (s *HistoryStore) PreviousSnapshot(ctx context.Context, aggregate audit.AggregateID, before audit.Revision) (audit.Entry, bool, error) {
 	if err := before.Validate(); err != nil {
 		return audit.Entry{}, false, fmt.Errorf("%w: before: %w", audit.ErrInvalidQuery, err)
@@ -255,7 +266,7 @@ func buildHistoryFindQuery(query audit.Query) (string, []any) {
 		statement.WriteString(" desc")
 	}
 	if query.Limit > 0 {
-		statement.WriteString(fmt.Sprintf(" limit %d", query.Limit))
+		fmt.Fprintf(&statement, " limit %d", query.Limit)
 	}
 	return statement.String(), args
 }

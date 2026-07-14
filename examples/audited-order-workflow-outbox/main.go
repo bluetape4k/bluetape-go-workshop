@@ -151,7 +151,8 @@ func run(ctx context.Context, config appConfig, logger *slog.Logger) (result err
 	if err != nil {
 		return stageError("http", "invalid")
 	}
-	listener, err := net.Listen("tcp", config.httpAddress)
+	listenConfig := net.ListenConfig{}
+	listener, err := listenConfig.Listen(ctx, "tcp", config.httpAddress)
 	if err != nil {
 		return stageError("http_listen", "unavailable")
 	}

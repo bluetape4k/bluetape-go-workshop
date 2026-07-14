@@ -93,7 +93,8 @@ func TestRuntimeHealthSeparatesRedisDegradation(t *testing.T) {
 
 func TestRuntimeLifecycleExpectedCancellationAndUnexpectedRelayExit(t *testing.T) {
 	t.Run("expected cancellation joins", func(t *testing.T) {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		listenConfig := net.ListenConfig{}
+		listener, err := listenConfig.Listen(context.Background(), "tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -127,7 +128,8 @@ func TestRuntimeLifecycleExpectedCancellationAndUnexpectedRelayExit(t *testing.T
 	})
 
 	t.Run("unexpected relay exit shuts down HTTP with redacted error", func(t *testing.T) {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		listenConfig := net.ListenConfig{}
+		listener, err := listenConfig.Listen(context.Background(), "tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -163,7 +165,8 @@ func TestRuntimeLifecycleExpectedCancellationAndUnexpectedRelayExit(t *testing.T
 	})
 
 	t.Run("relay that ignores cancellation cannot exceed shutdown deadline", func(t *testing.T) {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		listenConfig := net.ListenConfig{}
+		listener, err := listenConfig.Listen(context.Background(), "tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -230,7 +233,11 @@ func waitForHTTPServer(t *testing.T, address string) {
 	client := &http.Client{Timeout: 100 * time.Millisecond}
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
-		response, err := client.Get("http://" + address)
+		request, requestErr := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://"+address, nil)
+		if requestErr != nil {
+			t.Fatal(requestErr)
+		}
+		response, err := client.Do(request)
 		if err == nil {
 			_ = response.Body.Close()
 			return

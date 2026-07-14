@@ -29,38 +29,45 @@ var (
 	requestSequence               atomic.Uint64
 )
 
+// HTTPConfig bounds request size, duration, and in-flight concurrency.
 type HTTPConfig struct {
 	MaximumBodyBytes  int64
 	OperationTimeout  time.Duration
 	MaximumConcurrent int
 }
 
+// DefaultHTTPConfig returns conservative settings for the loopback workshop server.
 func DefaultHTTPConfig() HTTPConfig {
 	return HTTPConfig{MaximumBodyBytes: 32 << 10, OperationTimeout: 2 * time.Second, MaximumConcurrent: 32}
 }
 
+// CommandService applies validated order commands and reports canonical replay.
 type CommandService interface {
 	Create(context.Context, CreateCommand) (Order, bool, error)
 	Transition(context.Context, TransitionCommand) (Order, bool, error)
 }
 
+// Readiness separates durable command availability from Redis delivery health.
 type Readiness struct {
 	DatabaseReady bool
 	RelayRunning  bool
 	RedisReady    bool
 }
 
+// DeliverySnapshot contains bounded operational delivery counters and states.
 type DeliverySnapshot struct {
 	RedisState string
 	RelayState string
 	Delivery   DeliveryStatus
 }
 
+// HealthReader supplies readiness and redacted delivery diagnostics.
 type HealthReader interface {
 	Readiness(context.Context) (Readiness, error)
 	Status(context.Context) (DeliverySnapshot, error)
 }
 
+// NewEngine constructs the strict JSON command, audit, and health routes.
 func NewEngine(service CommandService, reader audit.HistoryReader, health HealthReader, config HTTPConfig, logger *slog.Logger) (*gin.Engine, error) {
 	if service == nil || isNilInterface(service) || reader == nil || isNilInterface(reader) ||
 		health == nil || isNilInterface(health) || logger == nil || config.MaximumBodyBytes <= 0 ||
@@ -187,7 +194,7 @@ func (a *httpAdapter) createOrder(c *gin.Context) {
 		a.respondDecodeError(c, err)
 		return
 	}
-	command, err := (CreateCommand{OrderID: request.OrderID, CommandID: request.CommandID, Metadata: request.Metadata}).validate()
+	command, err := CreateCommand(request).validate()
 	if err != nil {
 		a.respondServiceError(c, err)
 		return
@@ -219,10 +226,7 @@ func (a *httpAdapter) transitionOrder(c *gin.Context) {
 		a.respondDecodeError(c, err)
 		return
 	}
-	command, err := (TransitionCommand{
-		OrderID: request.OrderID, CommandID: request.CommandID, Action: request.Action,
-		Reason: request.Reason, Metadata: request.Metadata,
-	}).validate()
+	command, err := TransitionCommand(request).validate()
 	if err != nil {
 		a.respondServiceError(c, err)
 		return

@@ -3,6 +3,7 @@ package orderworkflow
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/bluetape4k/bluetape-go/audit/sqloutbox"
@@ -42,6 +43,7 @@ create index if not exists audited_order_workflow_audit_entries_aggregate_time_i
 on audited_order_workflow_audit_entries
 (aggregate_type, aggregate_id, recorded_at, revision)`
 
+// CreateSchema bootstraps the fixed workshop schema and rejects incompatible tables.
 func CreateSchema(ctx context.Context, db sqlkit.Session, outbox *sqloutbox.Store) error {
 	if db == nil || outbox == nil {
 		return ErrInvalidConfig
@@ -166,7 +168,7 @@ func verifySchemaCompatibility(ctx context.Context, db sqlkit.Queryer) error {
 	return nil
 }
 
-func verifyTableColumns(ctx context.Context, db sqlkit.Queryer, table string, expected map[string]expectedColumn) error {
+func verifyTableColumns(ctx context.Context, db sqlkit.Queryer, table string, expected map[string]expectedColumn) (result error) {
 	rows, err := db.QueryContext(ctx, `
 select column_name, data_type, is_nullable, character_maximum_length
 from information_schema.columns
@@ -174,7 +176,7 @@ where table_schema = 'public' and table_name = $1`, table)
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { result = errors.Join(result, rows.Close()) }()
 	actual := make(map[string]expectedColumn, len(expected))
 	for rows.Next() {
 		var name, dataType, nullable string
@@ -199,7 +201,7 @@ where table_schema = 'public' and table_name = $1`, table)
 	return nil
 }
 
-func verifyTableConstraints(ctx context.Context, db sqlkit.Queryer, table string, expected map[string]string) error {
+func verifyTableConstraints(ctx context.Context, db sqlkit.Queryer, table string, expected map[string]string) (result error) {
 	rows, err := db.QueryContext(ctx, `
 select constraint_name, constraint_type
 from information_schema.table_constraints
@@ -207,7 +209,7 @@ where table_schema = 'public' and table_name = $1`, table)
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { result = errors.Join(result, rows.Close()) }()
 	actual := make(map[string]string, len(expected))
 	for rows.Next() {
 		var name, constraintType string

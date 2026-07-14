@@ -17,6 +17,7 @@ import (
 
 const maxAuthorRunes = 128
 
+// Config supplies durable audit authorship and an injectable transaction clock.
 type Config struct {
 	Author string
 	Now    func() time.Time
@@ -24,6 +25,7 @@ type Config struct {
 
 type transactionRunner func(context.Context, sqlkit.Beginner, *sql.TxOptions, sqlkit.TxFunc) error
 
+// Service owns command validation and the atomic order, history, and outbox transaction.
 type Service struct {
 	db      *sql.DB
 	history *HistoryStore
@@ -33,6 +35,7 @@ type Service struct {
 	runTx   transactionRunner
 }
 
+// NewService constructs an audited order command service over existing stores.
 func NewService(db *sql.DB, history *HistoryStore, outbox *sqloutbox.Store, config Config) (*Service, error) {
 	author := strings.TrimSpace(config.Author)
 	if db == nil || history == nil || outbox == nil || author == "" ||
@@ -49,6 +52,7 @@ func NewService(db *sql.DB, history *HistoryStore, outbox *sqloutbox.Store, conf
 	}, nil
 }
 
+// Create persists a pending order or returns its canonical replay projection.
 func (s *Service) Create(ctx context.Context, command CreateCommand) (Order, bool, error) {
 	if err := s.validate(); err != nil {
 		return Order{}, false, err
@@ -111,9 +115,10 @@ values ($1, $2, $3, $4)`, result.OrderID, result.Status, result.Revision, result
 	if found {
 		return resolved, true, nil
 	}
-	return Order{}, false, fmt.Errorf("%w: create order or command already exists: %v", ErrConflict, err)
+	return Order{}, false, fmt.Errorf("%w: create order or command already exists: %w", ErrConflict, err)
 }
 
+// Transition applies one valid state change or returns its canonical replay projection.
 func (s *Service) Transition(ctx context.Context, command TransitionCommand) (Order, bool, error) {
 	if err := s.validate(); err != nil {
 		return Order{}, false, err
@@ -165,7 +170,7 @@ func (s *Service) Transition(ctx context.Context, command TransitionCommand) (Or
 		}
 		nextRevision, revisionErr := current.Revision.Next()
 		if revisionErr != nil {
-			return fmt.Errorf("%w: next revision: %v", ErrConflict, revisionErr)
+			return fmt.Errorf("%w: next revision: %w", ErrConflict, revisionErr)
 		}
 		now := normalizeTimestamp(s.now())
 		result = Order{OrderID: current.OrderID, Status: nextStatus, Revision: nextRevision, UpdatedAt: now}
@@ -208,7 +213,7 @@ where order_id = $4 and revision = $5`, result.Status, result.Revision, result.U
 	if found {
 		return resolved, true, nil
 	}
-	return Order{}, false, fmt.Errorf("%w: transition command already exists: %v", ErrConflict, err)
+	return Order{}, false, fmt.Errorf("%w: transition command already exists: %w", ErrConflict, err)
 }
 
 func (s *Service) validate() error {

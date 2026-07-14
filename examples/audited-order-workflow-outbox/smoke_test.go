@@ -72,7 +72,7 @@ func TestRequestsHTTPSmoke(t *testing.T) {
 	runCtx, stop := context.WithCancel(ctx)
 	done := make(chan error, 1)
 	go func() { done <- run(runCtx, config, slog.New(slog.NewTextHandler(io.Discard, nil))) }()
-	waitForReady(t, ctx, "http://"+httpAddress+"/readyz")
+	waitForReady(ctx, t, "http://"+httpAddress+"/readyz")
 
 	requests, err := os.ReadFile(filepath.Join(exampleDirectory(t), "requests.http"))
 	if err != nil {
@@ -186,7 +186,8 @@ func assertScenarioResponse(t *testing.T, scenario httpScenario, body []byte) {
 
 func unusedLoopbackAddress(t *testing.T) string {
 	t.Helper()
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	listenConfig := net.ListenConfig{}
+	listener, err := listenConfig.Listen(context.Background(), "tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +198,7 @@ func unusedLoopbackAddress(t *testing.T) string {
 	return address
 }
 
-func waitForReady(t *testing.T, ctx context.Context, url string) {
+func waitForReady(ctx context.Context, t *testing.T, url string) {
 	t.Helper()
 	client := &http.Client{Timeout: 200 * time.Millisecond}
 	deadline := time.Now().Add(10 * time.Second)

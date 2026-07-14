@@ -22,30 +22,43 @@ const (
 )
 
 var (
-	ErrInvalidConfig  = errors.New("orderworkflow: invalid config")
+	// ErrInvalidConfig reports a missing or unsafe runtime dependency or option.
+	ErrInvalidConfig = errors.New("orderworkflow: invalid config")
+	// ErrInvalidCommand reports a command that fails the public input contract.
 	ErrInvalidCommand = errors.New("orderworkflow: invalid command")
-	ErrInvalidEntry   = errors.New("orderworkflow: invalid entry")
-	ErrNotFound       = errors.New("orderworkflow: not found")
-	ErrConflict       = errors.New("orderworkflow: conflict")
+	// ErrInvalidEntry reports corrupt or inconsistent durable audit data.
+	ErrInvalidEntry = errors.New("orderworkflow: invalid entry")
+	// ErrNotFound reports an order or audit record that does not exist.
+	ErrNotFound = errors.New("orderworkflow: not found")
+	// ErrConflict reports command reuse or an invalid state transition.
+	ErrConflict = errors.New("orderworkflow: conflict")
 
 	identifierPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)
 )
 
+// Status is the durable state of an order projection.
 type Status string
 
 const (
-	StatusPending   Status = "pending"
+	// StatusPending accepts confirmation or cancellation.
+	StatusPending Status = "pending"
+	// StatusConfirmed accepts cancellation but not another confirmation.
 	StatusConfirmed Status = "confirmed"
+	// StatusCancelled is terminal.
 	StatusCancelled Status = "cancelled"
 )
 
+// Action names a supported order state transition.
 type Action string
 
 const (
+	// ActionConfirm moves a pending order to confirmed.
 	ActionConfirm Action = "confirm"
-	ActionCancel  Action = "cancel"
+	// ActionCancel moves a pending or confirmed order to cancelled.
+	ActionCancel Action = "cancel"
 )
 
+// Order is the current durable projection returned to HTTP callers.
 type Order struct {
 	OrderID   string         `json:"order_id"`
 	Status    Status         `json:"status"`
@@ -53,12 +66,14 @@ type Order struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 }
 
+// CreateCommand carries the canonical identity and metadata for order creation.
 type CreateCommand struct {
 	OrderID   string
 	CommandID string
 	Metadata  audit.Metadata
 }
 
+// TransitionCommand carries one canonical order state transition intent.
 type TransitionCommand struct {
 	OrderID   string
 	CommandID string

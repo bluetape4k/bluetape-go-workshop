@@ -28,12 +28,15 @@ const (
 
 var errDependencyUnavailable = errors.New("orderworkflow: dependency unavailable")
 
+// Probe checks one runtime dependency without exposing its endpoint or error.
 type Probe func(context.Context) error
 
+// DeliveryStatusReader supplies the redacted SQL outbox status snapshot.
 type DeliveryStatusReader interface {
 	DeliveryStatus(context.Context, time.Time) (DeliveryStatus, error)
 }
 
+// RuntimeHealth tracks relay ownership and separates Redis degradation from SQL readiness.
 type RuntimeHealth struct {
 	databaseProbe Probe
 	redisProbe    Probe
@@ -42,6 +45,7 @@ type RuntimeHealth struct {
 	relayRunning  atomic.Bool
 }
 
+// NewRuntimeHealth constructs the application health model from bounded probes.
 func NewRuntimeHealth(databaseProbe Probe, redisProbe Probe, delivery DeliveryStatusReader, now func() time.Time) (*RuntimeHealth, error) {
 	if databaseProbe == nil || redisProbe == nil || delivery == nil || isNilInterface(delivery) || now == nil {
 		return nil, ErrInvalidConfig
@@ -49,16 +53,19 @@ func NewRuntimeHealth(databaseProbe Probe, redisProbe Probe, delivery DeliverySt
 	return &RuntimeHealth{databaseProbe: databaseProbe, redisProbe: redisProbe, delivery: delivery, now: now}, nil
 }
 
+// SetRelayRunning records the supervised relay lifecycle state.
 func (h *RuntimeHealth) SetRelayRunning(running bool) {
 	if h != nil {
 		h.relayRunning.Store(running)
 	}
 }
 
+// RelayRunning reports whether the supervised relay is expected to serve work.
 func (h *RuntimeHealth) RelayRunning() bool {
 	return h != nil && h.relayRunning.Load()
 }
 
+// Readiness reports SQL and relay readiness while treating Redis as degradable.
 func (h *RuntimeHealth) Readiness(ctx context.Context) (Readiness, error) {
 	if h == nil || h.databaseProbe == nil || h.redisProbe == nil {
 		return Readiness{}, ErrInvalidConfig
@@ -73,6 +80,7 @@ func (h *RuntimeHealth) Readiness(ctx context.Context) (Readiness, error) {
 	return readiness, nil
 }
 
+// Status returns redacted Redis, relay, and aggregate delivery state.
 func (h *RuntimeHealth) Status(ctx context.Context) (DeliverySnapshot, error) {
 	if h == nil || h.redisProbe == nil || h.delivery == nil || h.now == nil {
 		return DeliverySnapshot{}, ErrInvalidConfig
@@ -93,6 +101,7 @@ func (h *RuntimeHealth) Status(ctx context.Context) (DeliverySnapshot, error) {
 	return DeliverySnapshot{RedisState: redisState, RelayState: relayState, Delivery: status}, nil
 }
 
+// ConfigureDatabase applies the workshop's bounded PostgreSQL pool settings.
 func ConfigureDatabase(db *sql.DB) {
 	if db == nil {
 		return
@@ -103,6 +112,7 @@ func ConfigureDatabase(db *sql.DB) {
 	db.SetConnMaxLifetime(30 * time.Minute)
 }
 
+// NewRedisOptions returns bounded Redis client settings for address.
 func NewRedisOptions(address string) *redis.Options {
 	return &redis.Options{
 		Addr: address, PoolSize: redisPoolSize, MinIdleConns: 1,
@@ -110,6 +120,7 @@ func NewRedisOptions(address string) *redis.Options {
 	}
 }
 
+// NewHTTPServer constructs a server with bounded headers, I/O, and idle time.
 func NewHTTPServer(address string, handler http.Handler) *http.Server {
 	return &http.Server{
 		Addr: address, Handler: handler,
@@ -121,6 +132,7 @@ func NewHTTPServer(address string, handler http.Handler) *http.Server {
 	}
 }
 
+// DefaultRelayOptions returns conservative teaching values for continuous delivery.
 func DefaultRelayOptions() sqloutbox.RelayOptions {
 	return sqloutbox.RelayOptions{
 		ClaimLimit: 16, MaxAttempts: 3,
@@ -128,6 +140,7 @@ func DefaultRelayOptions() sqloutbox.RelayOptions {
 	}
 }
 
+// ValidateLoopbackAddress accepts only an IP-literal loopback host and valid port.
 func ValidateLoopbackAddress(address string) error {
 	host, port, err := net.SplitHostPort(strings.TrimSpace(address))
 	if err != nil || host == "" || port == "" || strings.Contains(host, "%") {
@@ -144,6 +157,7 @@ func ValidateLoopbackAddress(address string) error {
 	return nil
 }
 
+// ValidateRedisStream normalizes a bounded Redis stream name or returns the default.
 func ValidateRedisStream(raw string) (string, error) {
 	if raw == "" {
 		return defaultRedisStream, nil
@@ -155,10 +169,12 @@ func ValidateRedisStream(raw string) (string, error) {
 	return stream, nil
 }
 
+// RelayRunner owns continuous SQL outbox delivery until its context is canceled.
 type RelayRunner interface {
 	Run(context.Context, sqlkit.Session) error
 }
 
+// RunLifecycle supervises HTTP and relay execution under one bounded shutdown budget.
 func RunLifecycle(
 	ctx context.Context,
 	server *http.Server,
@@ -252,6 +268,7 @@ func safeStageError(stage string, class string) error {
 	return fmt.Errorf("%s: %s", stage, class)
 }
 
+// DefaultShutdownLimit returns the shared HTTP drain and relay join deadline.
 func DefaultShutdownLimit() time.Duration {
 	return defaultShutdownLimit
 }

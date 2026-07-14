@@ -3,6 +3,7 @@ package orderworkflow
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"sync"
@@ -137,7 +138,10 @@ func TestIntegrationPostgreSQLThenRedis(t *testing.T) {
 					return
 				case <-ticker.C:
 					inUse := int64(db.Stats().InUse)
-					for current := peak.Load(); inUse > current && !peak.CompareAndSwap(current, inUse); current = peak.Load() {
+					for current := peak.Load(); inUse > current; current = peak.Load() {
+						if peak.CompareAndSwap(current, inUse) {
+							break
+						}
 					}
 				}
 			}
@@ -176,7 +180,7 @@ func TestIntegrationPostgreSQLThenRedis(t *testing.T) {
 			time.Sleep(20 * time.Millisecond)
 		}
 		stopRelay()
-		if err := <-relayDone; err != nil && err != context.Canceled {
+		if err := <-relayDone; err != nil && !errors.Is(err, context.Canceled) {
 			t.Fatalf("Relay.Run() error = %v", err)
 		}
 		close(sampleDone)
