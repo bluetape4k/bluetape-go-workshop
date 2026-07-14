@@ -193,6 +193,59 @@ func TestAnalyzeAcceptsEmptyGraphWithJSONArrays(t *testing.T) {
 	}
 }
 
+func TestAnalyzePreservesGraphValidationCauses(t *testing.T) {
+	tests := []struct {
+		name     string
+		vertices []graph.Vertex
+		edges    []graph.Edge
+		want     error
+	}{
+		{name: "vertex", vertices: []graph.Vertex{{}}, want: graph.ErrInvalidVertex},
+		{name: "edge", edges: []graph.Edge{{}}, want: graph.ErrInvalidEdge},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			_, err := Analyze(test.vertices, test.edges)
+			if !errors.Is(err, ErrInvalidGraph) {
+				t.Fatalf("Analyze() error = %v, want ErrInvalidGraph", err)
+			}
+			if !errors.Is(err, test.want) {
+				t.Fatalf("Analyze() error = %v, want upstream cause %v", err, test.want)
+			}
+			var validationError *graph.ValidationError
+			if !errors.As(err, &validationError) {
+				t.Fatalf("Analyze() error = %v, want *graph.ValidationError", err)
+			}
+		})
+	}
+}
+
+func TestAnalyzeAcceptsExactLimitsAndRejectsOverflow(t *testing.T) {
+	fixture := boundaryFixture(t)
+	if got, want := len(fixture.Vertices), MaxVertices; got != want {
+		t.Fatalf("boundary vertex count = %d, want %d", got, want)
+	}
+	if got, want := len(fixture.Edges), MaxEdges; got != want {
+		t.Fatalf("boundary edge count = %d, want %d", got, want)
+	}
+	if _, err := Analyze(fixture.Vertices, fixture.Edges); err != nil {
+		t.Fatalf("Analyze(boundary) error = %v", err)
+	}
+
+	overVertices := append([]graph.Vertex(nil), fixture.Vertices...)
+	overVertices = append(overVertices, analyzerVertex(t, "overflow-backend-user", labelUser, "overflow-user", fixture.ID, ""))
+	if _, err := Analyze(overVertices, fixture.Edges); !errors.Is(err, ErrGraphTooLarge) {
+		t.Fatalf("Analyze(max vertices + 1) error = %v, want ErrGraphTooLarge", err)
+	}
+
+	overEdges := append([]graph.Edge(nil), fixture.Edges...)
+	overEdges = append(overEdges, analyzerEdge(t, "overflow-backend-edge", "overflow-edge", "user-000", "identifier-008", fixture.ID))
+	if _, err := Analyze(fixture.Vertices, overEdges); !errors.Is(err, ErrGraphTooLarge) {
+		t.Fatalf("Analyze(max edges + 1) error = %v, want ErrGraphTooLarge", err)
+	}
+}
+
 func TestAnalyzeRejectsMalformedBackendGraphs(t *testing.T) {
 	const fixtureID = "safe-fixture"
 	user := analyzerVertex(t, "backend-user", "User", "safe-user", fixtureID, "")
