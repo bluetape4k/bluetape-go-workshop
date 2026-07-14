@@ -248,19 +248,19 @@ func TestValidateFixtureRejectsInvalidGraphs(t *testing.T) {
 	}{
 		{name: "blank fixture ID", fixture: Fixture{}, want: ErrInvalidFixture},
 		{name: "whitespace fixture ID", fixture: Fixture{ID: "  "}, want: ErrInvalidFixture},
-		{name: "duplicate vertex", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), valid.Vertices[0])), want: ErrInvalidGraph},
-		{name: "duplicate logical edge", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), duplicateEdge)), want: ErrInvalidGraph},
-		{name: "missing endpoint", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), missingEndpoint)), want: ErrInvalidGraph},
-		{name: "unknown identifier kind", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), unknownKind)), want: ErrInvalidGraph},
-		{name: "unknown vertex label", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), wrongLabel)), want: ErrInvalidGraph},
-		{name: "missing vertex property", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), missingProperty)), want: ErrInvalidGraph},
-		{name: "wrong vertex property type", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), wrongPropertyType)), want: ErrInvalidGraph},
-		{name: "extra vertex property", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), extraProperty)), want: ErrInvalidGraph},
-		{name: "zero vertex", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), graph.Vertex{})), want: ErrInvalidGraph},
-		{name: "wrong edge label", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), wrongEdgeLabel)), want: ErrInvalidGraph},
-		{name: "reversed edge", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), reversedEdge)), want: ErrInvalidGraph},
-		{name: "wrong edge property type", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), wrongEdgePropertyType)), want: ErrInvalidGraph},
-		{name: "zero edge", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), graph.Edge{})), want: ErrInvalidGraph},
+		{name: "duplicate vertex", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), valid.Vertices[0])), want: ErrInvalidFixture},
+		{name: "duplicate logical edge", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), duplicateEdge)), want: ErrInvalidFixture},
+		{name: "missing endpoint", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), missingEndpoint)), want: ErrInvalidFixture},
+		{name: "unknown identifier kind", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), unknownKind)), want: ErrInvalidFixture},
+		{name: "unknown vertex label", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), wrongLabel)), want: ErrInvalidFixture},
+		{name: "missing vertex property", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), missingProperty)), want: ErrInvalidFixture},
+		{name: "wrong vertex property type", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), wrongPropertyType)), want: ErrInvalidFixture},
+		{name: "extra vertex property", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), extraProperty)), want: ErrInvalidFixture},
+		{name: "zero vertex", fixture: fixtureWithVertices(valid, append(cloneVertices(valid.Vertices), graph.Vertex{})), want: ErrInvalidFixture},
+		{name: "wrong edge label", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), wrongEdgeLabel)), want: ErrInvalidFixture},
+		{name: "reversed edge", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), reversedEdge)), want: ErrInvalidFixture},
+		{name: "wrong edge property type", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), wrongEdgePropertyType)), want: ErrInvalidFixture},
+		{name: "zero edge", fixture: fixtureWithEdges(valid, append(cloneEdges(valid.Edges), graph.Edge{})), want: ErrInvalidFixture},
 	}
 
 	for _, test := range tests {
@@ -297,8 +297,8 @@ func TestValidateFixtureRedactsValuesFromErrors(t *testing.T) {
 		{ID: "safe-fixture", Vertices: []graph.Vertex{endpointVertex}, Edges: []graph.Edge{edge}},
 	} {
 		err := ValidateFixture(fixture)
-		if !errors.Is(err, ErrInvalidGraph) {
-			t.Fatalf("ValidateFixture() error = %v, want ErrInvalidGraph", err)
+		if !errors.Is(err, ErrInvalidFixture) {
+			t.Fatalf("ValidateFixture() error = %v, want ErrInvalidFixture", err)
 		}
 		for _, secret := range []string{secretOpaqueID, secretEndpoint, secretProperty, "secret-edge-value"} {
 			if strings.Contains(err.Error(), secret) {
