@@ -18,9 +18,20 @@ func encodeReport(report Report, marshal marshalIndentFunc) ([]byte, error) {
 	if marshal == nil {
 		return nil, errNilMarshalIndent
 	}
-	encoded, err := marshal(report, "", "  ")
+	normalized := report
+	if normalized.Clusters == nil {
+		normalized.Clusters = []Cluster{}
+	}
+	if normalized.IsolatedUsers == nil {
+		normalized.IsolatedUsers = []string{}
+	}
+
+	encoded, err := marshal(normalized, "", "  ")
 	if err != nil {
 		return nil, err
 	}
-	return append(encoded, '\n'), nil
+	output := make([]byte, len(encoded)+1)
+	copy(output, encoded)
+	output[len(encoded)] = '\n'
+	return output, nil
 }

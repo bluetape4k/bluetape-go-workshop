@@ -82,6 +82,22 @@ func TestEncodeReportMatchesApprovedIndentedJSON(t *testing.T) {
 	}
 }
 
+func TestEncodeReportNormalizesZeroReportToEmptyArrays(t *testing.T) {
+	want := []byte(`{
+  "clusters": [],
+  "isolated_users": []
+}
+`)
+
+	got, err := EncodeReport(Report{})
+	if err != nil {
+		t.Fatalf("EncodeReport(Report{}) error = %v", err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatalf("EncodeReport(Report{}) = %q, want %q", got, want)
+	}
+}
+
 func TestEncodeReportReturnsNoBytesOnMarshalFailure(t *testing.T) {
 	report := mustDefaultWorkflowReport(t)
 	cause := errors.New("injected marshal failure")
@@ -95,6 +111,31 @@ func TestEncodeReportReturnsNoBytesOnMarshalFailure(t *testing.T) {
 	}
 	if !errors.Is(err, cause) {
 		t.Fatalf("encodeReport() error = %v, want injected cause", err)
+	}
+}
+
+func TestEncodeReportDoesNotMutateOrRetainMarshalerBuffer(t *testing.T) {
+	payload := []byte("{}")
+	marshaled := make([]byte, len(payload), len(payload)+1)
+	copy(marshaled, payload)
+	marshal := func(any, string, string) ([]byte, error) {
+		return marshaled, nil
+	}
+
+	got, err := encodeReport(Report{}, marshal)
+	if err != nil {
+		t.Fatalf("encodeReport() error = %v", err)
+	}
+	if want := []byte("{}\n"); !bytes.Equal(got, want) {
+		t.Fatalf("encodeReport() bytes = %q, want %q", got, want)
+	}
+	if got := marshaled[:cap(marshaled)][len(marshaled)]; got != 0 {
+		t.Fatalf("marshaler backing array appended byte = %q, want unchanged zero byte", got)
+	}
+
+	marshaled[0] = '['
+	if got[0] != '{' {
+		t.Fatalf("encoded bytes retained marshaler backing array: got %q", got)
 	}
 }
 
