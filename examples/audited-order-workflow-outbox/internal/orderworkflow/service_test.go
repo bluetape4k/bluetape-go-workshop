@@ -12,6 +12,7 @@ import (
 	"github.com/bluetape4k/bluetape-go/audit"
 	"github.com/bluetape4k/bluetape-go/audit/sqloutbox"
 	"github.com/bluetape4k/bluetape-go/sqlkit"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func TestNormalizeIdentifier(t *testing.T) {
@@ -201,6 +202,30 @@ func TestNewServiceRejectsInvalidConfiguration(t *testing.T) {
 				t.Fatalf("NewService() = (%v, %v)", service, err)
 			}
 		})
+	}
+}
+
+func TestServiceClassifiesOnlyCommandIdentityUniqueViolations(t *testing.T) {
+	allowed := []string{
+		"audited_order_workflow_orders_pkey",
+		"audited_order_workflow_audit_entries_event_id_key",
+		"audited_order_workflow_audit_entries_idempotency_key_key",
+		"audited_order_workflow_outbox_records_event_id_key",
+		"audited_order_workflow_outbox_records_idempotency_key_key",
+	}
+	for _, constraint := range allowed {
+		if !isUniqueViolation(&pgconn.PgError{Code: "23505", ConstraintName: constraint}) {
+			t.Fatalf("constraint %q was not classified", constraint)
+		}
+	}
+	for _, databaseError := range []*pgconn.PgError{
+		{Code: "23505", ConstraintName: "audited_order_workflow_audit_entries_pkey"},
+		{Code: "23505", ConstraintName: "unrelated_unique_key"},
+		{Code: "40001", ConstraintName: "audited_order_workflow_orders_pkey"},
+	} {
+		if isUniqueViolation(databaseError) {
+			t.Fatalf("error %#v was classified", databaseError)
+		}
 	}
 }
 

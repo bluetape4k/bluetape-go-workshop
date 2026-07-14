@@ -290,5 +290,17 @@ func transitionStatus(current Status, action Action) (Status, error) {
 
 func isUniqueViolation(err error) bool {
 	var postgresError *pgconn.PgError
-	return errors.As(err, &postgresError) && postgresError.Code == "23505"
+	if !errors.As(err, &postgresError) || postgresError.Code != "23505" {
+		return false
+	}
+	switch postgresError.ConstraintName {
+	case "audited_order_workflow_orders_pkey",
+		"audited_order_workflow_audit_entries_event_id_key",
+		"audited_order_workflow_audit_entries_idempotency_key_key",
+		"audited_order_workflow_outbox_records_event_id_key",
+		"audited_order_workflow_outbox_records_idempotency_key_key":
+		return true
+	default:
+		return false
+	}
 }
