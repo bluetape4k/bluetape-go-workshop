@@ -111,8 +111,8 @@ logging, CLI framework, Memgraph dependency는 없다.
 
 | Asset | Dimensions | SHA-256 |
 |---|---:|---|
-| `graph-abuse-cluster-architecture.svg` | 1600x1030 source | `fbab7ddc772ec1e685d76f864750d944a3555b72d8f640436329059b0dfbd7a9` |
-| `graph-abuse-cluster-architecture.png` | 3200x2060 | `3600bc219a49f91972bd61aeba487d4517facf99387480662384bd322e9424dc` |
+| `graph-abuse-cluster-architecture.svg` | 1600x1030 source | `3febefaa98c6971e0377e4d685434b3454b59576ef67fd96e0ebcdac2cb83358` |
+| `graph-abuse-cluster-architecture.png` | 3200x2060 | `9949969559ffefe9bcb1be4f60c84054fbc56fd23f26cedd9c14623c51ed685d` |
 | `graph-abuse-cluster-sequence.svg` | 1600x1920 source | `77d1df2e899537ae4b6f1ecbf11aa913aa211c8d45375919c2d4196e82dd6113` |
 | `graph-abuse-cluster-sequence.png` | 3200x3840 | `8744500daf5deea05e059348b19d9e9515d0eac0249f83af57598ac708e3388f` |
 
@@ -135,6 +135,12 @@ style audit도 통과했다. CairoSVG scale-2 재렌더와 canonical PNG의 `cmp
    `path.amber`로 제한했다.
 6. 초기 message를 실제 `driver/client/store -> fixture -> connectivity` 순서로
    맞추고 machine-local `file://` font URL을 제거했다.
+7. architecture의 persistence와 application analysis가 모두 녹색 계열이던
+   문제를 persistence 녹색과 application analysis 보라색으로 분리하되, 같은 수준의
+   관계임을 나타내도록 둘 다 실선으로 유지했다.
+
+최종 눈검사에서는 두 connector 범주가 녹색/보라색으로 명확히 구분되고, 두 범주의
+화살촉이 PNG 변환 뒤에도 올바른 방향·색상·크기로 유지되는지 확인했다.
 
 최종 PNG에서 모든 화살촉의 송신/수신 방향, 꺾임 뒤 marker 여유, card/label
 침범, 1..25 call-number 가독성을 다시 확인했다.

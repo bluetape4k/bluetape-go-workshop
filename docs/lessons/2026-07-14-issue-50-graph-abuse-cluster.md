@@ -83,6 +83,8 @@ test와 함께 repository lint를 실행하면 최종 gate에서의 되돌림을
 - generic CSS class가 text와 path 양쪽에 적용되지 않는지;
 - catalog icon path가 비슷한 모양이 아니라 exact source인지.
 - sequence의 call 순서가 실제 resource 생성/검증 순서와 같은지;
+- 의미가 다른 connector의 색상이 충분히 구분되는지, solid/dashed가 실제 관계의
+  별도 의미와 일치하는지;
 - SVG가 특정 machine의 absolute `file://` font URL에 의존하지 않는지.
 
 이번 sequence에서 path color class `.amber`가 call-number text에도 stroke를 줘
@@ -90,6 +92,11 @@ test와 함께 repository lint를 실행하면 최종 gate에서의 되돌림을
 연속 번호와 style audit만으로는 이 결함을 찾을 수 없었다. 마지막 좌표/CSS 변경
 후 CairoSVG scale-2 렌더, deterministic `cmp`, original-size PNG 검사를 다시
 수행해야 한다.
+
+이번 architecture에서는 persistence green과 application analysis teal의 색상 차가
+작았다. application analysis를 저장소의 기존 purple palette로 바꾸고 두 관계는 같은
+수준이므로 모두 solid로 유지했다. 구분만을 위해 dashed를 쓰면 해당 경로가 예외,
+선택 또는 비동기 관계처럼 특별한 의미를 가진 것으로 오해될 수 있다.
 
 ## roadmap body 변경은 fail closed로 다룬다
 
