@@ -45,13 +45,13 @@
       .num.purple { fill: #8a5ca8; }
       .num.amber { fill: #b07a35; }
       .num.red { fill: #bd4b4b; }
-      .callBlue, .callGreen, .return, .work, .async, .amber, .error { fill: none; stroke-width: 3.5; stroke-linecap: round; }
+      .callBlue, .callGreen, .return, .work, .async, path.amber, .error { fill: none; stroke-width: 3.5; stroke-linecap: round; }
       .callBlue { stroke: #3e7b9f; marker-end: url(#seq-blue); }
       .callGreen { stroke: #4f8b63; marker-end: url(#seq-green); }
       .return { stroke: #4f8b63; stroke-dasharray: 7 6; marker-end: url(#seq-green); }
       .work { stroke: #2f8f89; marker-end: url(#seq-teal); }
       .async { stroke: #8a5ca8; marker-end: url(#seq-purple); }
-      .amber { stroke: #b07a35; marker-end: url(#seq-amber); }
+      path.amber { stroke: #b07a35; marker-end: url(#seq-amber); }
       .error { stroke: #bd4b4b; stroke-dasharray: 7 6; marker-end: url(#seq-red); }
     </style>
     <marker id="seq-blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
@@ -112,7 +112,7 @@
   <rect class="phase" x="42" y="225" width="1516" height="175" rx="16"/>
   <text class="phase-title" x="62" y="249">CONFIGURE AND VALIDATE LOCALLY</text>
   <rect class="phase" x="42" y="415" width="1516" height="695" rx="16"/>
-  <text class="phase-title" x="62" y="439">NEO4J: VERIFY, ATOMIC SEED, TWO BOUNDED READS</text>
+  <text class="phase-title" x="1535" y="439" text-anchor="end">NEO4J: VERIFY, ATOMIC SEED, TWO BOUNDED READS</text>
   <rect class="phase" x="42" y="1125" width="1516" height="445" rx="16"/>
   <text class="phase-title" x="62" y="1149">APPLICATION POLICY, CLEANUP, THEN OUTPUT</text>
   <rect class="error-frame alt" x="42" y="1585" width="1516" height="265" rx="16"/>
