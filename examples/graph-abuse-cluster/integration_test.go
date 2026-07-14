@@ -133,7 +133,7 @@ func TestGraphAbuseClusterWithNeo4j(t *testing.T) {
 		t.Fatalf("first report = %#v, want %#v", report, want)
 	}
 	assertBackendGraphValues(t, vertices, edges)
-	assertNamespaceVertexCount(t, operationCtx, client, sentinelID, 1)
+	assertNamespaceVertexCount(operationCtx, t, client, sentinelID, 1)
 
 	if err := store.ReplaceFixture(operationCtx, fixture); err != nil {
 		t.Fatalf("second ReplaceFixture() error = %v", err)
@@ -155,14 +155,14 @@ func TestGraphAbuseClusterWithNeo4j(t *testing.T) {
 	if want := approvedIntegrationReport(); !reflect.DeepEqual(secondReport, want) {
 		t.Fatalf("second report = %#v, want %#v", secondReport, want)
 	}
-	assertNamespaceVertexCount(t, operationCtx, client, sentinelID, 1)
+	assertNamespaceVertexCount(operationCtx, t, client, sentinelID, 1)
 
 	canceledCtx, cancelCanceled := context.WithCancel(operationCtx)
 	cancelCanceled()
 	if err := store.ReplaceFixture(canceledCtx, canceledFixture); !errors.Is(err, context.Canceled) {
 		t.Fatalf("ReplaceFixture(pre-canceled) error = %v, want context.Canceled", err)
 	}
-	assertNamespaceVertexCount(t, operationCtx, client, canceledID, 0)
+	assertNamespaceVertexCount(operationCtx, t, client, canceledID, 0)
 	timer := time.NewTimer(100 * time.Millisecond)
 	defer timer.Stop()
 	select {
@@ -170,13 +170,13 @@ func TestGraphAbuseClusterWithNeo4j(t *testing.T) {
 		t.Fatalf("waiting for late mutation proof: %v", operationCtx.Err())
 	case <-timer.C:
 	}
-	assertNamespaceVertexCount(t, operationCtx, client, canceledID, 0)
+	assertNamespaceVertexCount(operationCtx, t, client, canceledID, 0)
 
 	if err := deleteFixtureNamespaces(operationCtx, client, []string{fixtureID}); err != nil {
 		t.Fatalf("delete only primary fixture namespace: %v", err)
 	}
-	assertNamespaceVertexCount(t, operationCtx, client, fixtureID, 0)
-	assertNamespaceVertexCount(t, operationCtx, client, sentinelID, 1)
+	assertNamespaceVertexCount(operationCtx, t, client, fixtureID, 0)
+	assertNamespaceVertexCount(operationCtx, t, client, sentinelID, 1)
 }
 
 func approvedIntegrationReport() abusecluster.Report {
@@ -234,7 +234,7 @@ func assertBackendGraphValues(t *testing.T, vertices []graph.Vertex, edges []gra
 	}
 }
 
-func assertNamespaceVertexCount(t *testing.T, ctx context.Context, client *neo4jgraph.Client, fixtureID string, want int) {
+func assertNamespaceVertexCount(ctx context.Context, t *testing.T, client *neo4jgraph.Client, fixtureID string, want int) {
 	t.Helper()
 	vertices, err := client.ReadVertices(ctx,
 		`MATCH (n {fixture_id: $fixture_id}) RETURN n ORDER BY elementId(n)`,

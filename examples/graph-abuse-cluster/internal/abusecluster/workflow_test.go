@@ -82,8 +82,9 @@ func TestExecuteReturnsPreCanceledContextWithoutBackendCalls(t *testing.T) {
 func TestExecuteRejectsNilContextBeforeBackendCalls(t *testing.T) {
 	fixture := mustWorkflowFixture(t, FixtureID)
 	backend := &workflowBackendFake{}
+	var nilContext context.Context
 
-	got, err := Execute(nil, backend, fixture)
+	got, err := Execute(nilContext, backend, fixture)
 	if !reflect.DeepEqual(got, Report{}) {
 		t.Fatalf("Execute(nil context) report = %#v, want zero Report", got)
 	}
