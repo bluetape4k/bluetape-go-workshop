@@ -64,6 +64,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/gin-audit-query-api`](examples/gin-audit-query-api/README.ko.md) | [English](examples/gin-audit-query-api/README.md) \| [한국어](examples/gin-audit-query-api/README.ko.md) | Strict POST JSON audit-history filter, revision pagination, aggregate/revision detail lookup을 제공하는 Gin API입니다. | `gin`, `audit` |
 | [`examples/transactional-outbox-publisher`](examples/transactional-outbox-publisher/README.ko.md) | [English](examples/transactional-outbox-publisher/README.md) \| [한국어](examples/transactional-outbox-publisher/README.ko.md) | PostgreSQL order와 audit event를 함께 commit한 뒤 릴리스된 SQL outbox relay와 Redis Streams adapter로 at-least-once 발행하는 예제입니다. | `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/audited-order-workflow-outbox`](examples/audited-order-workflow-outbox/README.ko.md) | [English](examples/audited-order-workflow-outbox/README.md) \| [한국어](examples/audited-order-workflow-outbox/README.ko.md) | Gin 주문 상태, 불변 PostgreSQL audit history, strict POST JSON 조회, 공식 SQL outbox 기반 Redis Streams 감독형 전송을 합친 예제입니다. | `gin`, `audit`, `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
+| [`examples/graph-abuse-cluster`](examples/graph-abuse-cluster/README.ko.md) | [English](examples/graph-abuse-cluster/README.md) \| [한국어](examples/graph-abuse-cluster/README.ko.md) | Neo4j fixture 저장, 제한된 graph 변환, deterministic connected-component risk projection을 Go에서 보여주는 예제입니다. | `graph`, `graph/neo4j`, Neo4j Testcontainers |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -242,6 +243,24 @@ POST JSON command와 Redis 장애/lease recovery runbook이 있습니다.
 
 ```bash
 go test -count=1 -p 1 ./examples/audited-order-workflow-outbox/...
+```
+
+## Graph Abuse Cluster 예제 실행
+
+Terminal 1에서 loopback-only Neo4j container를 시작한 뒤 Terminal 2에서 CLI를
+실행합니다.
+
+```bash
+NEO4J_URI=bolt://127.0.0.1:7687 go run ./examples/graph-abuse-cluster
+```
+
+[예제 README](examples/graph-abuse-cluster/README.ko.md)에서 정확한 foreground
+Docker command, deterministic JSON report, graph schema, score weight, local-only
+신뢰 경계를 확인할 수 있습니다.
+
+```bash
+go test -count=1 ./examples/graph-abuse-cluster/...
+go test -p 1 -race -count=1 ./examples/graph-abuse-cluster/...
 ```
 
 ## S3 Floci Storage 예제 실행

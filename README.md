@@ -64,6 +64,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/gin-audit-query-api`](examples/gin-audit-query-api) | [English](examples/gin-audit-query-api/README.md) \| [한국어](examples/gin-audit-query-api/README.ko.md) | Gin API for strict POST JSON audit-history filters, revision pagination, and aggregate/revision detail lookup. | `gin`, `audit` |
 | [`examples/transactional-outbox-publisher`](examples/transactional-outbox-publisher) | [English](examples/transactional-outbox-publisher/README.md) \| [한국어](examples/transactional-outbox-publisher/README.ko.md) | PostgreSQL order and audit-event commit followed by at-least-once publication through the released SQL outbox relay and Redis Streams adapter. | `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/audited-order-workflow-outbox`](examples/audited-order-workflow-outbox) | [English](examples/audited-order-workflow-outbox/README.md) \| [한국어](examples/audited-order-workflow-outbox/README.ko.md) | Gin order state, immutable PostgreSQL audit history, strict POST JSON queries, and supervised Redis Streams delivery over the official SQL outbox. | `gin`, `audit`, `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
+| [`examples/graph-abuse-cluster`](examples/graph-abuse-cluster) | [English](examples/graph-abuse-cluster/README.md) \| [한국어](examples/graph-abuse-cluster/README.ko.md) | Neo4j fixture persistence, bounded graph adaptation, and deterministic connected-component risk projection in Go. | `graph`, `graph/neo4j`, Neo4j Testcontainers |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -241,6 +242,24 @@ detail, cancel, and conflict, plus the Redis outage and lease-recovery runbook.
 
 ```bash
 go test -count=1 -p 1 ./examples/audited-order-workflow-outbox/...
+```
+
+## Run the Graph Abuse Cluster Example
+
+Start the loopback-only Neo4j container in Terminal 1, then run the CLI in
+Terminal 2:
+
+```bash
+NEO4J_URI=bolt://127.0.0.1:7687 go run ./examples/graph-abuse-cluster
+```
+
+The [example README](examples/graph-abuse-cluster/README.md) contains the exact
+foreground Docker command, deterministic JSON report, graph schema, score
+weights, and local-only trust boundary.
+
+```bash
+go test -count=1 ./examples/graph-abuse-cluster/...
+go test -p 1 -race -count=1 ./examples/graph-abuse-cluster/...
 ```
 
 ## Run the S3 Floci Storage Example
