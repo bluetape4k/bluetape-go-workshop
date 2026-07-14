@@ -79,6 +79,25 @@ func TestExecuteReturnsPreCanceledContextWithoutBackendCalls(t *testing.T) {
 	}
 }
 
+func TestExecuteRejectsNilContextBeforeBackendCalls(t *testing.T) {
+	fixture := mustWorkflowFixture(t, FixtureID)
+	backend := &workflowBackendFake{}
+
+	got, err := Execute(nil, backend, fixture)
+	if !reflect.DeepEqual(got, Report{}) {
+		t.Fatalf("Execute(nil context) report = %#v, want zero Report", got)
+	}
+	if !errors.Is(err, ErrConfiguration) {
+		t.Fatalf("Execute(nil context) error = %v, want ErrConfiguration", err)
+	}
+	if got, want := err.Error(), ErrConfiguration.Error()+": nil context"; got != want {
+		t.Fatalf("Execute(nil context) error = %q, want stable %q", got, want)
+	}
+	if len(backend.events) != 0 {
+		t.Fatalf("backend events = %v, want none", backend.events)
+	}
+}
+
 func TestExecuteReplacesLoadsAndAnalyzesInOrder(t *testing.T) {
 	fixture := mustWorkflowFixture(t, "exact-fixture-id")
 	want, err := Analyze(fixture.Vertices, fixture.Edges)

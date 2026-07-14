@@ -2,6 +2,7 @@ package abusecluster
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/bluetape4k/bluetape-go/graph"
@@ -56,7 +57,7 @@ func isNilWorkflowBackend(backend WorkflowBackend) bool {
 
 func workflowContextError(ctx context.Context) error {
 	if ctx == nil {
-		return nil
+		return fmt.Errorf("%w: nil context", ErrConfiguration)
 	}
 	return ctx.Err()
 }
