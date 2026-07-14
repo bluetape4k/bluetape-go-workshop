@@ -24,16 +24,21 @@ func TestGraphAbuseClusterWithNeo4j(t *testing.T) {
 	defer cancelTest()
 
 	container, err := tcneo4j.Run(testCtx, "neo4j:5.26.0")
+	if container != nil {
+		t.Cleanup(func() {
+			cleanupCtx, cancelCleanup := context.WithTimeout(context.WithoutCancel(testCtx), integrationCleanupTimeout)
+			defer cancelCleanup()
+			if err := container.Terminate(cleanupCtx); err != nil {
+				t.Errorf("terminate Neo4j container: %v", err)
+			}
+		})
+	}
 	if err != nil {
 		t.Fatalf("start Neo4j container: %v", err)
 	}
-	t.Cleanup(func() {
-		cleanupCtx, cancelCleanup := context.WithTimeout(context.WithoutCancel(testCtx), integrationCleanupTimeout)
-		defer cancelCleanup()
-		if err := container.Terminate(cleanupCtx); err != nil {
-			t.Errorf("terminate Neo4j container: %v", err)
-		}
-	})
+	if container == nil {
+		t.Fatal("start Neo4j container: nil container without error")
+	}
 
 	boltURL, err := container.BoltUrl(testCtx)
 	if err != nil {
