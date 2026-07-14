@@ -46,7 +46,7 @@ func loadVertices(vertices []graph.Vertex) (map[string]analyzedVertex, string, e
 
 	for _, vertex := range vertices {
 		if err := vertex.Validate(); err != nil {
-			return nil, "", invalidGraphError("invalid vertex")
+			return nil, "", invalidGraphCause("invalid vertex", err)
 		}
 		backendID := vertex.ID().String()
 		if _, duplicate := loaded[backendID]; duplicate {
@@ -105,7 +105,7 @@ func loadEdges(edges []graph.Edge, vertices map[string]analyzedVertex, fixtureID
 
 	for _, edge := range edges {
 		if err := edge.Validate(); err != nil {
-			return nil, invalidGraphError("invalid edge")
+			return nil, invalidGraphCause("invalid edge", err)
 		}
 		backendID := edge.ID().String()
 		if _, duplicate := backendIDs[backendID]; duplicate {
@@ -283,4 +283,8 @@ func nonBlankString(properties graph.Properties, key string) (string, bool) {
 
 func invalidGraphError(reason string) error {
 	return fmt.Errorf("%w: %s", ErrInvalidGraph, reason)
+}
+
+func invalidGraphCause(reason string, cause error) error {
+	return fmt.Errorf("%w: %s: %w", ErrInvalidGraph, reason, cause)
 }
