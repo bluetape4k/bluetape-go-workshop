@@ -34,7 +34,8 @@
       .band-title { font-family: "Comic Mono", monospace; font-size: 12px; font-weight: 700; fill: #475569; }
       .outcome-title { font-family: "Architects Daughter", "Comic Sans MS", cursive; font-size: 18px; fill: #22344a; }
       .legend, .footer { font-size: 11px; }
-    </style>
+
+    .syntax-keyword{fill:#7E22CE}.syntax-type{fill:#0F766E}.syntax-function{fill:#1D4ED8}.syntax-string{fill:#B45309}.syntax-number{fill:#C2410C}.syntax-comment{fill:#64748B}.syntax-operator{fill:#BE123C}</style>
   </defs>
 
   <rect class="canvas" width="1200" height="600"/>
@@ -47,8 +48,8 @@
     <text class="step" x="22" y="27" text-anchor="middle">1</text>
     <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#e8f3ff" stroke="#4f83bf"/>
     <text class="card-title" x="98" y="84" text-anchor="middle">Manual Start</text>
-    <text class="mono" x="98" y="112" text-anchor="middle">POST /batch/start</text>
-    <text class="mono" x="98" y="136" text-anchor="middle">crash_after_new_writes=3</text>
+    <text class="mono" x="98" y="112" text-anchor="middle" data-code-snippet="http"><tspan class="syntax-type">POST</tspan> <tspan class="syntax-operator">/</tspan>batch<tspan class="syntax-operator">/</tspan>start</text>
+    <text class="mono" x="98" y="136" text-anchor="middle" data-code-snippet="config">crash_after_new_writes<tspan class="syntax-operator">=</tspan><tspan class="syntax-number">3</tspan></text>
   </g>
 
   <g id="stage-2" transform="translate(276,126)">
@@ -57,7 +58,7 @@
     <rect class="card" x="0" y="50" width="196" height="114" rx="14" fill="#eaf7ef" stroke="#3e9868"/>
     <text class="card-title" x="98" y="84" text-anchor="middle">Commit Chunk 1</text>
     <text class="mono" x="98" y="112" text-anchor="middle">cust-1001 + cust-1002</text>
-    <text class="mono" x="98" y="136" text-anchor="middle">checkpoint = 2</text>
+    <text class="mono" x="98" y="136" text-anchor="middle" data-code-snippet="config">checkpoint <tspan class="syntax-operator">=</tspan> <tspan class="syntax-number">2</tspan></text>
   </g>
 
   <g id="stage-3" transform="translate(508,126)">
@@ -85,7 +86,7 @@
     <text class="card-title" x="98" y="84" text-anchor="middle">Finish Migration</text>
     <text class="mono" x="98" y="108" text-anchor="middle">cust-1004 dead letter</text>
     <text class="mono" x="98" y="130" text-anchor="middle">cust-1005 written</text>
-    <text class="mono" x="98" y="152" text-anchor="middle">checkpoint = 5</text>
+    <text class="mono" x="98" y="152" text-anchor="middle" data-code-snippet="config">checkpoint <tspan class="syntax-operator">=</tspan> <tspan class="syntax-number">5</tspan></text>
   </g>
 
   <path class="main-blue" data-connector="manual-to-chunk" d="M 240 233 L 274 233"/>
@@ -109,7 +110,7 @@
   <g id="outcome-status">
     <rect class="card" x="842" y="392" width="302" height="56" rx="12" fill="#f0f5e8" stroke="#6f8b45"/>
     <text class="outcome-title" x="993" y="416" text-anchor="middle">Final Status</text>
-    <text class="mono" x="993" y="438" text-anchor="middle">completed / next_index=5</text>
+    <text class="mono" x="993" y="438" text-anchor="middle" data-code-snippet="config">completed <tspan class="syntax-operator">/</tspan> next_index<tspan class="syntax-operator">=</tspan><tspan class="syntax-number">5</tspan></text>
   </g>
 
   <g id="legend">
