@@ -1,97 +1,82 @@
-# Issue #68 Audited Order Workflow with SQL Outbox Design
+# Issue #68 SQL Outbox를 사용하는 Audited Order Workflow 설계
 
 ## Status
 
-The high-level design was approved by the user on 2026-07-14. The detailed Type
-A specification review converged at P0=0/P1=0 and final user review was approved
-on 2026-07-14. It targets the current workshop dependency, bluetape-go v0.18.0.
+high-level design은 2026-07-14에 user가 승인했다. detailed Type A specification review는
+P0=0/P1=0으로 수렴했고 final user review도 2026-07-14에 승인되었다. 대상은 현재 workshop
+dependency인 bluetape-go v0.18.0이다.
 
 ## Goal
 
-Add one runnable Gin application that demonstrates a durable order workflow,
-immutable audit history, and asynchronous Redis Streams delivery. Every
-accepted command must commit the order state, one queryable audit entry, and
-one SQL outbox record in the same PostgreSQL transaction. Operators and callers
-must be able to distinguish committed history from asynchronous delivery, and
-the example must not claim exactly-once delivery.
+durable order workflow, immutable audit history, asynchronous Redis Streams delivery를 보여주는 실행
+가능한 Gin application 하나를 추가한다. accepted command마다 order state, query 가능한 audit entry 하나,
+SQL outbox record 하나를 같은 PostgreSQL transaction에서 commit해야 한다. operator와 caller는 committed
+history와 asynchronous delivery를 구분할 수 있어야 하며, 예제는 exactly-once delivery를 주장하면 안 된다.
 
-The application exposes commands and audit queries as POST JSON endpoints so
-large or extensible query criteria do not depend on URL length. Both README
-locales include complete `curl` examples, and a checked-in `requests.http` file
-provides the same runnable scenario with optional metadata.
+application은 command와 audit query를 POST JSON endpoint로 노출해 크거나 확장 가능한 query criteria가 URL
+길이에 의존하지 않게 한다. 두 README locale은 완전한 `curl` example을 포함하고, checked-in
+`requests.http` file은 optional metadata를 포함한 동일 runnable scenario를 제공한다.
 
 ## Context and Current Evidence
 
-Issue #68 is the integration example in milestone track #35. Its completed
-prerequisites are the audit history example (#56), Gin audit query example
-(#58), and transactional outbox publisher example (#57). The workshop resolves
-`github.com/bluetape4k/bluetape-go` v0.18.0, which is also the latest stable
-release observed on 2026-07-14.
+Issue #68은 milestone track #35의 integration example이다. 완료된 prerequisite은 audit history example
+(#56), Gin audit query example (#58), transactional outbox publisher example (#57)이다. workshop은
+`github.com/bluetape4k/bluetape-go` v0.18.0을 resolve하며, 이는 2026-07-14에 관찰된 latest stable
+release이기도 하다.
 
-The released `audit` package defines immutable entries, JSON encoding, history,
-and the `HistoryReader` query contract. Its bundled `MemoryRepository` is not a
-durable application repository. The released `audit/sqloutbox` package provides
-the caller-session `Store`, schema creation, transactional `Enqueue`, claim and
-completion transitions, and a continuous `Relay`. The released
-`audit/sqloutbox/redisstreams` adapter publishes the stable audit envelope to a
-caller-owned Redis client with at-least-once semantics.
+released `audit` package는 immutable entry, JSON encoding, history, `HistoryReader` query contract를
+정의한다. bundled `MemoryRepository`는 durable application repository가 아니다. released
+`audit/sqloutbox` package는 caller-session `Store`, schema creation, transactional `Enqueue`, claim 및
+completion transition, continuous `Relay`를 제공한다. released `audit/sqloutbox/redisstreams` adapter는
+stable audit envelope를 caller-owned Redis client에 at-least-once semantic으로 publish한다.
 
-The SQL outbox is a transport ledger rather than an audit read model. Querying
-its `entry_json` would couple business history retention and pagination to
-delivery cleanup, and the outbox store does not implement `audit.HistoryReader`.
-The application therefore owns a separate immutable PostgreSQL history table
-while using the official SQL outbox unchanged for delivery.
+SQL outbox는 audit read model이 아니라 transport ledger다. 그 `entry_json`을 query하면 business history
+retention 및 pagination이 delivery cleanup에 결합되며, outbox store는 `audit.HistoryReader`를 구현하지
+않는다. 따라서 application은 별도의 immutable PostgreSQL history table을 소유하고, delivery에는 official
+SQL outbox를 변경 없이 사용한다.
 
-The repository baseline full `make ci` run reached the container-backed test
-suite but one existing PostgreSQL fixture timed out while many packages started
-Docker resources in parallel. The same existing package passed alone in 4.477
-seconds, and the immediately preceding change passed the full gate at the same
-base revision. This is treated as host resource contention, not a source
-failure. The new PostgreSQL and Redis integration tests must start containers
-sequentially, and completion still requires a fresh, observed `make ci` exit 0.
+repository baseline full `make ci` run은 container-backed test suite까지 도달했지만, 많은 package가
+Docker resource를 parallel로 시작하는 동안 기존 PostgreSQL fixture 하나가 timeout되었다. 같은 기존
+package는 단독 실행에서 4.477초에 통과했고, 바로 이전 change는 같은 base revision에서 full gate를
+통과했다. 이는 source failure가 아니라 host resource contention으로 취급한다. 새 PostgreSQL 및 Redis
+integration test는 container를 sequentially 시작해야 하며, completion에는 여전히 fresh observed
+`make ci` exit 0이 필요하다.
 
 ## Chosen Approach
 
-Create `examples/audited-order-workflow-outbox` with four application
-boundaries:
+`examples/audited-order-workflow-outbox`를 네 application boundary로 만든다.
 
-1. An order service validates create and transition commands. Inside one
-   `sqlkit.WithTx`, it writes the order row, inserts one immutable audit entry
-   into the application history store, and calls `sqloutbox.Store.Enqueue` with
-   the same `*sql.Tx` and the same validated `audit.Entry` value.
-2. A PostgreSQL history store implements `audit.HistoryReader` independently of
-   outbox delivery state and retention. HTTP audit searches and details use only
-   this store.
-3. A background `sqloutbox.Relay.Run` claims committed outbox records and uses
-   the released Redis Streams publisher. Redis never participates in a command
-   transaction.
-4. A Gin server owns strict POST JSON transport, bounded timeouts, readiness,
-   signal-driven shutdown, and redacted error responses.
+1. order service는 create 및 transition command를 검증한다. 하나의 `sqlkit.WithTx` 안에서 order row를
+   write하고 application history store에 immutable audit entry 하나를 insert하며, 같은 `*sql.Tx`와 같은
+   validated `audit.Entry` value로 `sqloutbox.Store.Enqueue`를 호출한다.
+2. PostgreSQL history store는 outbox delivery state 및 retention과 독립적으로 `audit.HistoryReader`를
+   구현한다. HTTP audit search와 detail은 이 store만 사용한다.
+3. background `sqloutbox.Relay.Run`은 committed outbox record를 claim하고 released Redis Streams
+   publisher를 사용한다. Redis는 command transaction에 절대 참여하지 않는다.
+4. Gin server는 strict POST JSON transport, bounded timeout, readiness, signal-driven shutdown,
+   redacted error response를 소유한다.
 
-The application has no Redis consumer. The runnable scenario demonstrates the
-producer-side contract and shows that committed audit queries remain available
-when delivery is delayed or retried.
+application에는 Redis consumer가 없다. runnable scenario는 producer-side contract를 보여주고, delivery가
+delayed 또는 retried되어도 committed audit query가 계속 available함을 보여준다.
 
 ## Rejected Alternatives
 
 ### Query the SQL outbox as audit history
 
-This would avoid a table but make history disappear when published records are
-cleaned up, expose delivery state through a domain query boundary, and require
-application-specific queries over an internal transport schema. Rejected
-because transport retention is not business history retention.
+table 하나를 피할 수 있지만, published record가 cleanup될 때 history가 사라지고 domain query boundary를
+통해 delivery state가 노출되며 internal transport schema 위에 application-specific query가 필요해진다.
+transport retention은 business history retention이 아니므로 거부한다.
 
 ### Use `audit.MemoryRepository` with a SQL outbox
 
-This would reuse the full reader contract but lose history on restart and allow
-the database transaction to commit while the in-memory insert fails, or vice
-versa. Rejected because the integration lesson is durable atomic state.
+full reader contract를 reuse할 수 있지만 restart 시 history를 잃고 database transaction은 commit됐는데
+in-memory insert가 실패하거나 그 반대가 발생할 수 있다. integration lesson은 durable atomic state이므로
+거부한다.
 
 ### Publish directly to Redis in the order transaction
 
-This would shorten the code path but create a dual-write failure window and
-hold database locks across a network call. Rejected because the official SQL
-outbox is the feature being taught.
+code path는 짧아지지만 dual-write failure window를 만들고 network call 동안 database lock을 잡게 된다.
+official SQL outbox가 가르치려는 feature이므로 거부한다.
 
 ## Package and Files
 
@@ -116,8 +101,7 @@ examples/audited-order-workflow-outbox/
     integration_test.go
 ```
 
-The root README pair links the new example. Diagrams use the canonical generated
-asset paths:
+root README pair는 새 example을 link한다. diagram은 canonical generated asset path를 사용한다.
 
 ```text
 docs/images/readme-diagrams/
@@ -127,12 +111,12 @@ docs/images/readme-diagrams/
   audited-order-workflow-outbox-sequence.png
 ```
 
-No new Go module, third-party dependency, workflow, consumer group, generic
-library abstraction, or bluetape-go API is required.
+새 Go module, third-party dependency, workflow, consumer group, generic library abstraction,
+bluetape-go API는 필요하지 않다.
 
 ## Domain Model
 
-An order contains:
+order는 다음을 포함한다.
 
 ```go
 type Order struct {
@@ -143,32 +127,27 @@ type Order struct {
 }
 ```
 
-Allowed states are `pending`, `confirmed`, and `cancelled`. Create produces
-`pending` at revision 1. Confirm accepts only `pending` and produces
-`confirmed`. Cancel accepts `pending` or `confirmed` and produces `cancelled`.
-No transition leaves `cancelled`, and no transition confirms an already
-confirmed order. Each accepted transition increments revision exactly once.
+allowed state는 `pending`, `confirmed`, `cancelled`이다. Create는 revision 1의 `pending`을 만든다.
+Confirm은 `pending`만 받아 `confirmed`를 만든다. Cancel은 `pending` 또는 `confirmed`를 받아
+`cancelled`를 만든다. 어떤 transition도 `cancelled`를 벗어나지 않으며 이미 confirmed된 order를 다시
+confirm하지 않는다. accepted transition마다 revision은 정확히 한 번 증가한다.
 
-Create commands carry `order_id`, `command_id`, and optional metadata.
-Transition commands carry `order_id`, `command_id`, `action`, optional bounded
-`reason`, and optional metadata. Identifiers are trimmed ASCII and must match
-`[A-Za-z0-9][A-Za-z0-9._:-]{0,127}`. This keeps database keys, response values,
-and structured log attributes free of control characters without normalizing
-case. Reasons are valid UTF-8 and at most 500 runes. Metadata is a JSON object
-with at most 32 keys; keys are 1 to 64 runes, values are JSON strings at most
-512 runes, and the encoded request is still subject to the global body limit.
+Create command는 `order_id`, `command_id`, optional metadata를 가진다. Transition command는
+`order_id`, `command_id`, `action`, optional bounded `reason`, optional metadata를 가진다.
+identifier는 trimmed ASCII이며 `[A-Za-z0-9][A-Za-z0-9._:-]{0,127}`과 일치해야 한다. 이는 case를
+normalize하지 않으면서 database key, response value, structured log attribute에 control character가
+들어가지 않게 한다. reason은 valid UTF-8이며 최대 500 rune이다. metadata는 최대 32 key를 가진 JSON
+object다. key는 1~64 rune이고 value는 최대 512 rune의 JSON string이며, encoded request는 여전히 global
+body limit을 따른다.
 
-The command ID becomes both `EventID` and `IdempotencyKey`. Audit entries use
-aggregate type `order`, the order ID as aggregate ID, the resulting order
-revision, the event types `order.created`, `order.confirmed`, or
-`order.cancelled`, and a UTC timestamp from the application clock. Payloads
-contain the resulting status and only command fields needed to explain the
-transition. Metadata is copied into the entry's structured metadata after
-validation. The configured application author is used for every entry. The
-service normalizes one clock value with `UTC().Truncate(time.Microsecond)`
-before constructing an order and event, then uses that same value in SQL scalar
-columns and `entry_json`. This matches PostgreSQL timestamp precision and makes
-parity checks deterministic.
+command ID는 `EventID`와 `IdempotencyKey`가 모두 된다. audit entry는 aggregate type `order`, aggregate
+ID로 order ID, resulting order revision, event type `order.created`, `order.confirmed`,
+`order.cancelled`, application clock에서 온 UTC timestamp를 사용한다. payload는 resulting status와
+transition 설명에 필요한 command field만 포함한다. metadata는 validation 이후 entry의 structured
+metadata로 복사된다. configured application author는 모든 entry에 사용된다. service는 order와 event를
+구성하기 전에 clock value 하나를 `UTC().Truncate(time.Microsecond)`로 normalize하고, 같은 값을 SQL scalar
+column과 `entry_json`에 사용한다. 이는 PostgreSQL timestamp precision과 맞으며 parity check를
+deterministic하게 만든다.
 
 ## PostgreSQL Schema
 
