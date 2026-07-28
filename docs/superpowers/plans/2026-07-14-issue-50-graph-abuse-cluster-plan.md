@@ -428,32 +428,29 @@ git add examples/graph-abuse-cluster/internal/abusecluster/workflow.go examples/
 git commit -m "feat: run graph abuse cluster workflow"
 ```
 
-## Task 5: Build the Strict Loopback CLI and Lifecycle
+## Task 5: Strict Loopback CLI 및 Lifecycle 작성
 
 **Complexity:** High. **Depends on:** Task 4. **Skills:**
-`test-driven-development`, `bluetape-go-patterns`. **Write scope:** executable
-and executable tests.
+`test-driven-development`, `bluetape-go-patterns`. **Write scope:** executable 및 executable test.
 
-- [ ] **Step 1: Write RED configuration tests**
+- [ ] **Step 1: RED configuration test 작성**
 
-Create `main_test.go` for:
+다음을 위한 `main_test.go`를 만든다.
 
 ```go
 type appConfig struct { neo4jURI string }
 func loadConfig(getenv func(string) string) (appConfig, error)
 ```
 
-Accept `bolt://localhost:7687`, `bolt://127.0.0.1:7687`,
-`bolt://127.9.8.7:7687`, and `bolt://[::1]:7687`. Reject nil getenv, missing
-URI, `neo4j://`, HTTP, DNS host, non-loopback IP, userinfo, path, query,
-fragment, missing/non-numeric/zero/>65535 port, and whitespace-smuggled values.
-Assert errors do not contain the supplied URI.
+`bolt://localhost:7687`, `bolt://127.0.0.1:7687`, `bolt://127.9.8.7:7687`,
+`bolt://[::1]:7687`를 accept한다. nil getenv, missing URI, `neo4j://`, HTTP, DNS host,
+non-loopback IP, userinfo, path, query, fragment, missing/non-numeric/zero/>65535 port,
+whitespace-smuggled value를 reject한다. error에 supplied URI가 포함되지 않는지 assert한다.
 
-- [ ] **Step 2: Write RED lifecycle and output-order tests**
+- [ ] **Step 2: RED lifecycle 및 output-order test 작성**
 
-Use small function seams rather than a global mutable hook. The opened
-application owns the released client/store/fixture composition, so `run` can
-test every stage without trying to recover a store from a close-only owner:
+global mutable hook 대신 small function seam을 사용한다. opened application이 released client/store/fixture composition을 소유하므로,
+`run`은 close-only owner에서 store를 복구하려 하지 않고 모든 stage를 test할 수 있다.
 
 ```go
 type application interface {
@@ -474,20 +471,18 @@ func run(
 ) error
 ```
 
-The fake application records events. Require:
+fake application은 event를 기록한다. 다음을 요구한다.
 
 ```text
 open -> verify -> replace -> load -> analyze -> encode -> close -> stdout
 ```
 
-Cover open/verify/workflow/encode/close/write failures, caller cancellation,
-one 15-second operation deadline, fresh 3-second cleanup context, cleanup
-attempt after every successful open, no stdout before close, and redacted
-errors. Fake failures include a secret URI and opaque ID; neither may appear in
-the returned/logged message. A short writer must return `io.ErrShortWrite` and
-non-zero behavior.
+open/verify/workflow/encode/close/write failure, caller cancellation, 15-second operation deadline 하나,
+fresh 3-second cleanup context, 모든 successful open 뒤 cleanup attempt, close 전 stdout 없음, redacted error를 cover한다.
+fake failure에는 secret URI와 opaque ID가 포함된다. 반환/logged message에는 둘 다 나타나면 안 된다.
+short writer는 `io.ErrShortWrite`와 non-zero behavior를 반환해야 한다.
 
-Test the process boundary through:
+process boundary는 다음으로 테스트한다.
 
 ```go
 func realMain(
@@ -500,22 +495,20 @@ func realMain(
 ) int
 ```
 
-It returns 0 only for a complete run and 1 for every classified failure, so
-`main` is only signal setup plus `os.Exit(realMain(...))`.
+complete run에서만 0을 반환하고 모든 classified failure에서는 1을 반환한다. 따라서 `main`은 signal setup과 `os.Exit(realMain(...))`만 담당한다.
 
-- [ ] **Step 3: Observe RED**
+- [ ] **Step 3: RED 확인**
 
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster -run 'Test(LoadConfig|Run)'
 ```
 
-Expected: FAIL because executable behavior is absent.
+기대값: executable behavior가 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement `main.go`**
+- [ ] **Step 4: `main.go` 구현**
 
-Use `net/url`, `net.ParseIP`, `IP.IsLoopback`, `strconv.Atoi`, and an exact
-case-insensitive `localhost` check. Reject every URI component not allowed by
-the spec. Construct:
+`net/url`, `net.ParseIP`, `IP.IsLoopback`, `strconv.Atoi`, exact case-insensitive `localhost` check를 사용한다.
+spec이 허용하지 않는 모든 URI component를 reject한다. 다음을 구성한다.
 
 ```go
 driver, err := neo4jdriver.NewDriver(cfg.neo4jURI, neo4jdriver.NoAuth())
@@ -523,18 +516,13 @@ client, err := neo4jgraph.NewClient(driver)
 store, err := abusecluster.NewStore(client)
 ```
 
-Wrap those concrete values in a small `neo4jApplication` that implements the
-three-method seam and calls `abusecluster.Execute` with the store and fixture.
-`main` uses `signal.NotifyContext`, derives one 15-second operation context,
-calls `run` with the production opener and encoder, logs only
-`application failed` plus stable `stage`/`class`, and exits 1. `run` encodes to
-memory, explicitly closes with
-`context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)`, then performs
-one checked full write to stdout. Keep a deferred close fallback protected by
-a local `closeAttempted` flag set immediately before the close call so every
-successful open results in exactly one close attempt, including close failure.
+이 concrete value를 three-method seam을 구현하는 작은 `neo4jApplication`으로 감싸고 store와 fixture로 `abusecluster.Execute`를 호출한다.
+`main`은 `signal.NotifyContext`를 사용하고 15-second operation context 하나를 파생하며, production opener와 encoder로 `run`을 호출한다.
+log에는 `application failed`와 stable `stage`/`class`만 남기고 exit 1로 끝난다. `run`은 memory로 encode하고,
+`context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)`로 명시적으로 close한 뒤 stdout에 checked full write를 한 번 수행한다.
+close call 직전에 설정되는 local `closeAttempted` flag로 deferred close fallback을 보호해 close failure를 포함한 모든 successful open이 정확히 한 번의 close attempt를 만들게 한다.
 
-- [ ] **Step 5: Observe GREEN and run static checks**
+- [ ] **Step 5: GREEN 확인 및 static check 실행**
 
 ```bash
 gofmt -w examples/graph-abuse-cluster
@@ -543,79 +531,72 @@ go test -race -count=1 ./examples/graph-abuse-cluster -run 'Test(LoadConfig|Run)
 go vet ./examples/graph-abuse-cluster/...
 ```
 
-Expected: PASS with exact lifecycle ordering and no leaked URI/provider value.
+기대값: exact lifecycle ordering과 leaked URI/provider value 없이 PASS한다.
 
-- [ ] **Step 6: Commit Task 5**
+- [ ] **Step 6: Task 5 commit**
 
 ```bash
 git add examples/graph-abuse-cluster/main.go examples/graph-abuse-cluster/main_test.go
 git commit -m "feat: add graph abuse cluster cli"
 ```
 
-## Task 6: Prove the Real Neo4j Boundary Serially
+## Task 6: Real Neo4j Boundary를 serial하게 증명
 
 **Complexity:** High. **Depends on:** Tasks 1-5. **Skills:**
-`test-driven-development`, `bluetape-go-patterns`. **Write scope:** one
-integration test. **Heavy-command limit:** one Neo4j container at a time.
+`test-driven-development`, `bluetape-go-patterns`. **Write scope:** integration test 하나.
+**Heavy-command limit:** 한 번에 Neo4j container 하나.
 
-- [ ] **Step 1: Write the Testcontainers test**
+- [ ] **Step 1: Testcontainers test 작성**
 
-Create `integration_test.go` with one named test:
+named test 하나를 가진 `integration_test.go`를 만든다.
 
 ```go
 func TestGraphAbuseClusterWithNeo4j(t *testing.T)
 ```
 
-Start `tcneo4j.Run(ctx, "neo4j:5.26.0")`, register termination immediately,
-obtain `BoltUrl`, parse it and replace only its `neo4j` scheme with `bolt`, then
-pass the result through `loadConfig` before creating
-`neo4jdriver.NewDriver(..., NoAuth())`. Construct the released adapter and call
-`VerifyConnectivity` under a bounded context before any assertion. This makes
-the real test exercise the same strict loopback boundary even though the
-Testcontainers helper names its endpoint `neo4j://`.
+`tcneo4j.Run(ctx, "neo4j:5.26.0")`를 시작하고 즉시 termination을 register한다.
+`BoltUrl`을 얻어 parse하고 `neo4j` scheme만 `bolt`로 바꾼 뒤, `neo4jdriver.NewDriver(..., NoAuth())`를 만들기 전에
+결과를 `loadConfig`에 통과시킨다. released adapter를 구성하고 어떤 assertion보다 먼저 bounded context에서 `VerifyConnectivity`를 호출한다.
+Testcontainers helper가 endpoint를 `neo4j://`로 명명하더라도 real test가 같은 strict loopback boundary를 실행하게 한다.
 
-Build a unique test fixture with `NewFixture(t.Name()+uniqueSuffix)`. Assert:
+`NewFixture(t.Name()+uniqueSuffix)`로 unique test fixture를 만든다. 다음을 assert한다.
 
-- unrelated sentinel namespace survives both replacements;
-- first replace/load/analyze equals the exact approved report;
-- second replace produces exactly 12 vertices and 10 edges, not duplicates;
-- adapter read values include backend ElementIDs and correct graph labels;
-- a pre-canceled context returns `context.Canceled` and makes no late mutation;
-- cleanup deletes only the test namespace and closes driver/container under
-  fresh bounded contexts.
+- unrelated sentinel namespace가 두 replacement 뒤에도 남는다.
+- 첫 replace/load/analyze가 exact approved report와 같다.
+- 두 번째 replace는 duplicate가 아니라 정확히 vertex 12개와 edge 10개를 만든다.
+- adapter read value는 backend ElementID와 올바른 graph label을 포함한다.
+- pre-canceled context는 `context.Canceled`를 반환하고 late mutation을 만들지 않는다.
+- cleanup은 test namespace만 삭제하고 fresh bounded context 아래에서 driver/container를 close한다.
 
-- [ ] **Step 2: Observe RED for missing or incorrect real behavior**
+- [ ] **Step 2: missing 또는 incorrect real behavior에 대한 RED 확인**
 
 ```bash
 go test -p 1 -count=1 ./examples/graph-abuse-cluster -run '^TestGraphAbuseClusterWithNeo4j$'
 ```
 
-Expected before repairs: FAIL at the first store/query/lifecycle mismatch, not
-a skipped or log-readiness-only result.
+repair 전 기대값: skipped 또는 log-readiness-only result가 아니라 첫 store/query/lifecycle mismatch에서 FAIL한다.
 
-- [ ] **Step 3: Make the minimum store/CLI corrections and observe GREEN**
+- [ ] **Step 3: minimum store/CLI correction 수행 및 GREEN 확인**
 
-Only edit prior task-owned files when the real backend proves a contract gap.
-Then run:
+real backend가 contract gap을 증명할 때만 이전 task-owned file을 수정한다. 그다음 실행한다.
 
 ```bash
 go test -p 1 -count=1 ./examples/graph-abuse-cluster -run '^TestGraphAbuseClusterWithNeo4j$'
 go test -p 1 -race -count=1 ./examples/graph-abuse-cluster -run '^TestGraphAbuseClusterWithNeo4j$'
 ```
 
-Expected: both PASS from fresh container runs with observed exit 0.
+기대값: fresh container run에서 둘 다 observed exit 0으로 PASS한다.
 
-- [ ] **Step 4: Run the complete focused package gate**
+- [ ] **Step 4: complete focused package gate 실행**
 
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster/...
 go test -race -count=1 ./examples/graph-abuse-cluster/...
 ```
 
-Expected: pure and real-service tests PASS; no parallel second container is
-started.
+기대값: pure 및 real-service test가 PASS한다. parallel second container는 시작되지 않는다.
 
-- [ ] **Step 5: Commit Task 6**
+- [ ] **Step 5: Task 6 commit**
 
 ```bash
 git add examples/graph-abuse-cluster
