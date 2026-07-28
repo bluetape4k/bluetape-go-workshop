@@ -745,7 +745,7 @@ normal command와 race command를 모두 Lore body에 기록한다.
 
 ## Task 3: Deterministic CLI and Preload Flag
 
-**Complexity:** Medium. This task owns only process/flag/output behavior.
+**Complexity:** Medium. 이 작업은 process/flag/output 동작만 소유한다.
 
 **Required skills:** `test-driven-development`, `bluetape-go-patterns`.
 
@@ -754,9 +754,9 @@ normal command와 race command를 모두 Lore body에 기록한다.
 - Create: `examples/multilingual-language-routing/main.go`
 - Create: `examples/multilingual-language-routing/main_test.go`
 
-- [x] **Step 1: Write failing CLI tests**
+- [x] **Step 1: 실패하는 CLI 테스트 작성**
 
-Test `run(args, stdout, stderr)` directly:
+`run(args, stdout, stderr)`를 직접 테스트한다.
 
 ```go
 func TestRunIsDeterministic(t *testing.T) {
@@ -806,13 +806,13 @@ func TestRunQuotesUnexpectedArgument(t *testing.T) {
 }
 ```
 
-- [x] **Step 2: Run CLI tests and observe RED**
+- [x] **Step 2: CLI 테스트 실행 및 RED 확인**
 
-Expected: compile failure because `run` and `main.go` do not exist.
+기대값: `run`과 `main.go`가 아직 없으므로 compile failure가 발생한다.
 
-- [x] **Step 3: Implement the CLI seam**
+- [x] **Step 3: CLI seam 구현**
 
-Create `main.go`:
+`main.go`를 생성한다.
 
 ```go
 package main
@@ -857,7 +857,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 }
 ```
 
-- [x] **Step 4: Run CLI and package proof**
+- [x] **Step 4: CLI 및 package proof 실행**
 
 ```bash
 go test -count=1 ./examples/multilingual-language-routing/...
@@ -866,10 +866,10 @@ go run ./examples/multilingual-language-routing
 go run ./examples/multilingual-language-routing --preload
 ```
 
-Expected: tests PASS; both commands exit 0 with valid indented JSON; decoded
-decisions are equal and model-loading/config metadata reflects the mode.
+기대값: test가 PASS한다. 두 command는 exit 0으로 끝나고 유효한 indented JSON을 출력한다.
+decode된 decision은 서로 같으며, model-loading/config metadata는 mode를 반영한다.
 
-- [x] **Step 5: Commit Task 3**
+- [x] **Step 5: Task 3 commit**
 
 ```bash
 git add examples/multilingual-language-routing/main.go \
