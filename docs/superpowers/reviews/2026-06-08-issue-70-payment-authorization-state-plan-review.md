@@ -1,31 +1,30 @@
-# Issue #70 Plan Review
+# Issue #70 계획 리뷰
 
-## Verdict
+## 판정
 
 - Gate: PASS
 - P0: 0
 - P1: 0
-- Reviewer stance: Step 3-R plan review before implementation.
+- reviewer stance: implementation 전 Step 3-R plan review.
 
-## Findings
+## finding
 
-No P0/P1 blockers found.
+P0/P1 blocker는 발견되지 않았다.
 
-## Perspective Checks
+## 관점별 점검
 
-| Perspective | Result | Notes |
+| 관점 | 결과 | 메모 |
 |---|---|---|
-| Product fit | PASS | #70 follows the focused v0.4.0 sequence after #38/#39/#40 and before compensation/integration examples. |
-| Architecture | PASS | State transitions and idempotency are separated; external infrastructure is excluded. |
-| Testing | PASS | Plan includes transition, guard, idempotency, final-state, concurrency, race, and invalid input checks. |
-| Documentation | PASS | README and diagram deliverables include scenario, architecture, sequence, and production gaps. |
-| Rollout risk | PASS | New example is isolated and root navigation updates are straightforward. |
+| Product fit | PASS | #70은 #38/#39/#40 뒤, compensation/integration example 전에 위치한 focused v0.4.0 sequence를 따른다. |
+| Architecture | PASS | state transition과 idempotency가 분리되어 있고 external infrastructure는 제외된다. |
+| Testing | PASS | plan은 transition, guard, idempotency, final-state, concurrency, race, invalid input check를 포함한다. |
+| Documentation | PASS | README와 diagram deliverable은 scenario, architecture, sequence, production gap을 포함한다. |
+| Rollout risk | PASS | 새 example은 격리되어 있고 root navigation update는 straightforward하다. |
 
-## Required Guardrails During Implementation
+## 구현 중 필수 guardrail
 
-- Keep idempotency app-layer and in-memory; do not imply `state.Machine` provides
-  idempotency.
-- Do not store failed transitions as successful replay responses.
-- Serialize idempotency writes with transition execution to avoid replay/state
-  drift.
-- Keep README.md and README.ko.md structurally synchronized.
+- idempotency를 app-layer와 in-memory로 유지하고, `state.Machine`이 idempotency를 제공한다고
+  암시하지 않는다.
+- failed transition을 successful replay response로 저장하지 않는다.
+- replay/state drift를 피하려면 transition execution과 idempotency write를 serialize한다.
+- `README.md`와 `README.ko.md`의 구조를 동기화해 유지한다.
