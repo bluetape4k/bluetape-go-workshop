@@ -1,34 +1,31 @@
-# DynamoDB batch write materializer example
+# DynamoDB batch write materializer 예제
 
 Issue: #116
 
-## Decision
+## 결정
 
-Use a local document-index materializer to teach the `dynamodb/batchwrite`
-boundary before larger AWS Floci workflow examples. The example maps domain
-events to AWS SDK v2 `types.WriteRequest` values, then delegates chunking and
-`UnprocessedItems` retry to `batchwrite.WriteAll`.
+더 큰 AWS Floci workflow example 전에 local document-index materializer로
+`dynamodb/batchwrite` boundary를 설명한다. 예제는 domain event를 AWS SDK v2
+`types.WriteRequest` 값으로 mapping한 뒤 chunking과 `UnprocessedItems` retry를
+`batchwrite.WriteAll`에 위임한다.
 
-## Why
+## 이유
 
-DynamoDB batch writes have a small but important protocol: at most 25 requests
-per call, partial success via `UnprocessedItems`, and different handling for
-retry exhaustion, typed service errors, and caller cancellation. Keeping that
-protocol in every worker would make examples noisy and error-prone.
+DynamoDB batch write에는 작지만 중요한 protocol이 있다. call당 최대 25개 request,
+`UnprocessedItems`를 통한 partial success, retry exhaustion/typed service error/caller
+cancellation의 서로 다른 handling이다. 이 protocol을 모든 worker에 넣으면 예제가 장황하고
+오류에 취약해진다.
 
-The example therefore keeps item-shape ownership in the application while using
-bluetape-go for the DynamoDB batch mechanics. That makes the domain keys,
-attribute names, retry budget, and production handoff policy reviewable without
-reimplementing the helper.
+따라서 예제는 item-shape ownership을 application에 두고 DynamoDB batch mechanics에는
+bluetape-go를 사용한다. helper를 다시 구현하지 않고도 domain key, attribute name, retry
+budget, production handoff policy를 reviewable하게 만든다.
 
-## Verification shape
+## 검증 형태
 
-- Deterministic fake-client tests assert 30 events become `25 + 5` DynamoDB
-  calls.
-- Retry tests assert only returned `UnprocessedItems` are submitted again.
-- Exhaustion tests assert `ErrRetryExhausted` while preserving
-  `batchwrite.UnprocessedItemsError`.
-- Cancellation and typed AWS service error tests assert the caller can still
-  distinguish ownership and infrastructure failures.
-- README diagrams explain architecture ownership separately from retry
-  sequencing.
+- deterministic fake-client test는 event 30개가 `25 + 5` DynamoDB call이 됨을 assert한다.
+- retry test는 반환된 `UnprocessedItems`만 다시 submit됨을 assert한다.
+- exhaustion test는 `batchwrite.UnprocessedItemsError`를 보존하면서 `ErrRetryExhausted`를
+  assert한다.
+- cancellation 및 typed AWS service error test는 caller가 ownership failure와
+  infrastructure failure를 계속 구분할 수 있음을 assert한다.
+- README diagram은 architecture ownership과 retry sequencing을 분리해 설명한다.

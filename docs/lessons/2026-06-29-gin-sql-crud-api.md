@@ -1,34 +1,32 @@
-# Gin SQL CRUD API example
+# Gin SQL CRUD API 예제
 
-## Decision
+## 결정
 
-Add `examples/gin-sql-crud-api` after the focused SQL repository and
-transaction examples. The example teaches where public HTTP concerns meet a
-reusable `sqlkit` repository without turning the repository into a Gin package.
+focused SQL repository와 transaction example 뒤에 `examples/gin-sql-crud-api`를 추가한다.
+이 예제는 repository를 Gin package로 바꾸지 않으면서 public HTTP concern이 reusable
+`sqlkit` repository와 만나는 지점을 설명한다.
 
-## Rationale
+## 근거
 
-The API exposes create, read, list, status update, and delete endpoints for a
-small order resource. Gin handlers own JSON binding, path/query parsing,
-request-scoped timeouts, HTTP status codes, and public error codes. The
-repository owns SQL statement construction, row scanning, and not-found mapping
-through `sqlkit` plus `database/sql`.
+API는 작은 order resource에 대한 create, read, list, status update, delete endpoint를
+노출한다. Gin handler는 JSON binding, path/query parsing, request-scoped timeout, HTTP status
+code, public error code를 소유한다. repository는 `sqlkit`과 `database/sql`을 통해 SQL statement
+construction, row scanning, not-found mapping을 소유한다.
 
-Tests use PostgreSQL Testcontainers so handler response shapes and repository
-behavior are proven against real rows. The repository is also tested directly so
-the Gin boundary does not become a hidden dependency of the SQL lesson.
+test는 PostgreSQL Testcontainers를 사용하므로 handler response shape와 repository behavior가
+real row에 대해 증명된다. repository도 직접 test하므로 Gin boundary가 SQL lesson의 hidden
+dependency가 되지 않는다.
 
-## Rejected
+## 기각한 선택
 
-- Importing `examples/sql-order-repository/internal/orderrepo`. The `internal`
-  boundary correctly prevents sibling examples from depending on it.
-- A full order-service integration. That belongs to #65, where repository,
-  transaction, and HTTP service behavior can be composed.
-- Auth, pagination tokens, optimistic versioning, and production migration
-  orchestration. README documents these as production follow-ups because #64 is
-  about the HTTP/SQL boundary.
+- `examples/sql-order-repository/internal/orderrepo`를 import하는 방식. `internal` boundary는
+  sibling example이 여기에 의존하지 못하게 하는 것이 맞다.
+- full order-service integration. repository, transaction, HTTP service behavior를
+  조합하는 #65에 속한다.
+- auth, pagination token, optimistic versioning, production migration orchestration.
+  #64는 HTTP/SQL boundary가 주제이므로 README가 이를 production follow-up으로 문서화한다.
 
-## Verification
+## 검증
 
 - `go run ./examples/gin-sql-crud-api`
 - `go test -count=1 ./examples/gin-sql-crud-api/...`

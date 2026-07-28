@@ -1,38 +1,36 @@
-# S3 Floci Storage Example Lesson
+# S3 Floci Storage 예제 Lesson
 
-## Context
+## 맥락
 
-Issue #59 adds the first S3-shaped storage example for the v0.7.0 workshop
-track. The goal is not to wrap the whole AWS SDK. The useful lesson is the
-small application boundary around receipt objects: safe key construction,
-metadata ownership, body close responsibility, typed missing-object mapping,
-tenant prefix listing, and caller-owned presigned GET URLs.
+Issue #59는 v0.7.0 workshop track에 첫 S3-shaped storage example을 추가한다. 목표는 전체
+AWS SDK를 감싸는 것이 아니다. 유용한 lesson은 receipt object 주변의 작은 application
+boundary다. 여기에는 safe key construction, metadata ownership, body close responsibility,
+typed missing-object mapping, tenant prefix listing, caller-owned presigned GET URL이
+포함된다.
 
-## Decision
+## 결정
 
-The example keeps the storage API narrow and passes caller-owned AWS SDK v2
-clients into each operation. Local smoke coverage uses `testcontainers/floci`
-with path-style addressing and endpoint override, while the README explains
-that real AWS uses the same request shapes with normal credentials, IAM,
-networking, encryption, and observability controls supplied outside the example.
+예제는 storage API를 좁게 유지하고 각 operation에 caller-owned AWS SDK v2 client를 전달한다.
+local smoke coverage는 path-style addressing과 endpoint override를 사용하는
+`testcontainers/floci`를 쓴다. README는 real AWS도 같은 request shape를 사용하지만 normal
+credential, IAM, networking, encryption, observability control은 예제 밖에서 제공된다고
+설명한다.
 
-## Rejected
+## 기각한 선택
 
-- A broad repository wrapper over every S3 feature. It would hide the AWS SDK
-  contract the reader needs to understand.
-- Real AWS integration tests in the workshop gate. They would require cloud
-  credentials and produce non-deterministic cost and account-state concerns.
-- Mixing S3 storage with SQS or DynamoDB in the same example. S3 object storage
-  is the prerequisite lesson and should stay readable before event or index
-  projections are introduced.
+- 모든 S3 feature를 덮는 broad repository wrapper. reader가 이해해야 하는 AWS SDK contract를
+  숨긴다.
+- workshop gate의 real AWS integration test. cloud credential이 필요하고 cost/account-state
+  concern이 non-deterministic해진다.
+- 같은 예제에서 S3 storage를 SQS 또는 DynamoDB와 섞는 방식. S3 object storage는 prerequisite
+  lesson이므로 event나 index projection을 도입하기 전에 readable해야 한다.
 
-## Verification Shape
+## 검증 형태
 
-- Fake-client tests prove request shape, metadata, safe-key validation,
-  `NoSuchKey` mapping, nil body defense, body closing, delete, list, and
-  presign TTL behavior without Docker.
-- The opt-in Floci smoke test proves AWS SDK v2 path-style S3 calls against a
-  local emulator when Docker is available.
-- README diagrams split static ownership boundaries from the operation
-  sequence so readers can understand both local Floci and real AWS deployment
-  differences.
+- fake-client test는 Docker 없이 request shape, metadata, safe-key validation,
+  `NoSuchKey` mapping, nil body defense, body closing, delete, list, presign TTL
+  behavior를 증명한다.
+- opt-in Floci smoke test는 Docker가 있을 때 local emulator에 대한 AWS SDK v2 path-style
+  S3 call을 증명한다.
+- README diagram은 static ownership boundary와 operation sequence를 나눠 reader가 local
+  Floci와 real AWS deployment 차이를 모두 이해할 수 있게 한다.

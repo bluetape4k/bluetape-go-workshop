@@ -1,34 +1,31 @@
 # S3-SQS-DynamoDB Document Workflow Lesson
 
-Issue #66 is the AWS/Floci integration example that composes the earlier S3,
-SQS, and DynamoDB lessons. Keep it application-shaped: the workflow owns object
-key conventions, event shape, idempotency state, and ack/retry decisions, while
-AWS SDK clients, Floci endpoints, credentials, IAM, encryption, and DLQ policy
-remain caller-owned.
+Issue #66은 앞선 S3, SQS, DynamoDB lesson을 조합하는 AWS/Floci integration example이다.
+application-shaped로 유지한다. workflow는 object key convention, event shape, idempotency
+state, ack/retry decision을 소유하고, AWS SDK client, Floci endpoint, credential, IAM,
+encryption, DLQ policy는 caller-owned로 남는다.
 
-The reader contract is easier to follow when the example has two diagrams:
+예제에 diagram이 두 개 있으면 reader contract를 더 쉽게 따라갈 수 있다.
 
-- An architecture view that separates the application boundary,
-  workflow-owned contracts, and caller-owned AWS/Floci resources.
-- A sequence view that shows submit, success, duplicate, and transient retry
-  outcomes in time order.
+- application boundary, workflow-owned contract, caller-owned AWS/Floci resource를
+  분리하는 architecture view.
+- submit, success, duplicate, transient retry outcome을 시간 순서로 보여주는 sequence view.
 
-Tests should prove more than the happy path. For this workflow, the minimum
-deterministic suite covers S3 put before SQS send, S3 body close on processing,
-DynamoDB conditional write shape, duplicate ack, transient retry visibility,
-context cancellation, unsafe key rejection, and forged SQS event consistency.
+test는 happy path보다 더 많은 것을 증명해야 한다. 이 workflow의 minimum deterministic suite는
+SQS send 전 S3 put, processing 시 S3 body close, DynamoDB conditional write shape, duplicate
+ack, transient retry visibility, context cancellation, unsafe key rejection, forged SQS event
+consistency를 다룬다.
 
-The opt-in Floci smoke test should start one local AWS-compatible container with
-S3, SQS, and DynamoDB enabled, then run serially. It proves SDK request
-compatibility without requiring real AWS credentials or account state.
+opt-in Floci smoke test는 S3, SQS, DynamoDB가 활성화된 local AWS-compatible container 하나를
+시작한 뒤 serial로 실행해야 한다. 이는 real AWS credential이나 account state 없이 SDK request
+compatibility를 증명한다.
 
-Diagram QA lesson: inspect full-size PNGs after CairoSVG render, not only SVG.
-The first architecture pass had a connector crossing the retry-visible note and
-AWS card labels with tight margins; both were visible only in the rendered PNG.
+Diagram QA lesson: SVG만 보지 말고 CairoSVG render 뒤 full-size PNG를 inspect한다. 첫
+architecture pass에는 retry-visible note를 가로지르는 connector와 margin이 좁은 AWS card
+label이 있었다. 둘 다 rendered PNG에서만 보였다.
 
-Follow-up diagram QA lesson: a sequence-named asset must visually match the
-local best-practices sequence family, not merely contain lifelines and arrows.
-Use participant headers, activation bars, pill labels, dashed `alt`/`else`
-regions, and enough row height before accepting the PNG. For architecture
-connectors, keep each operation in its own corridor; do not let a state-write
-line share a tight corridor with an object-store line or hug a layer border.
+Follow-up diagram QA lesson: sequence-named asset은 lifeline과 arrow만 포함하면 되는 것이
+아니라 local best-practices sequence family와 시각적으로 맞아야 한다. PNG를 승인하기 전에
+participant header, activation bar, pill label, dashed `alt`/`else` region, 충분한 row height를
+사용한다. architecture connector는 각 operation을 고유 corridor에 둔다. state-write line이
+object-store line과 좁은 corridor를 공유하거나 layer border에 붙지 않게 한다.

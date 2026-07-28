@@ -1,28 +1,25 @@
-# Provider-backed exchange-rate pricing example
+# Provider-backed exchange-rate pricing 예제
 
 Issue: #112
 
-## Decision
+## 결정
 
-Use `money.CurrencyByLocale` and `money.ConvertWithProvider` directly in a
-runnable Gin display-pricing example, with a deterministic demo provider and
-deterministic provider doubles in tests.
+실행 가능한 Gin display-pricing 예제에서 `money.CurrencyByLocale`과
+`money.ConvertWithProvider`를 직접 사용한다. demo provider와 test provider double은
+deterministic하게 둔다.
 
-## Why
+## 이유
 
-The lesson is the boundary between application pricing and provider-backed
-exchange-rate conversion. The app owns subtotal validation, locale selection,
-provider I/O deadlines, and stale quote policy. `bluetape-go/money` owns
-currency parsing, locale currency defaults, conversion validation, and quote
-metadata.
+lesson은 application pricing과 provider-backed exchange-rate conversion 사이의 boundary다.
+app은 subtotal validation, locale selection, provider I/O deadline, stale quote policy를
+소유한다. `bluetape-go/money`는 currency parsing, locale currency default, conversion
+validation, quote metadata를 소유한다.
 
-## Verification shape
+## 검증 형태
 
-- Service tests assert fresh conversion, stale opt-in, stale rejection, provider
-  failure mapping, unsupported locale handling, and currency mismatch before
-  provider I/O.
-- Router tests assert public error codes and that provider details do not leak
-  into HTTP failure responses.
-- README diagrams show architecture, request sequence, and freshness/failure
-  policy separately so readers can follow the conversion boundary without
-  reading tests first.
+- service test는 fresh conversion, stale opt-in, stale rejection, provider failure
+  mapping, unsupported locale handling, provider I/O 전 currency mismatch를 assert한다.
+- router test는 public error code와 provider detail이 HTTP failure response로 누출되지
+  않음을 assert한다.
+- README diagram은 architecture, request sequence, freshness/failure policy를 분리해
+  reader가 test를 먼저 읽지 않아도 conversion boundary를 따라갈 수 있게 한다.
