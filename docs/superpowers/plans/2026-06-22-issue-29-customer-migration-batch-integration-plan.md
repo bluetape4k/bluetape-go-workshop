@@ -1,26 +1,26 @@
-# Customer Migration Batch Integration Implementation Plan
+# Customer Migration Batch Integration 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** 필수 sub-skill: 이 계획은 task-by-task 구현을 위해 superpowers:subagent-driven-development(권장) 또는 superpowers:executing-plans를 사용한다. 단계 추적에는 checkbox(`- [ ]`) 문법을 사용한다.
 
-**Goal:** Add `examples/customer-migration-batch-integration`, a runnable v0.5.0 workshop example that composes checkpoint restart, retry/dead-letter behavior, a Gin operations API, a cancel operation, and a leader-guarded scheduled tick/loop so PR text can close #42, #43, #75, and umbrella #29.
+**목표:** `examples/customer-migration-batch-integration`을 runnable v0.5.0 workshop 예제로 추가한다. 이 예제는 checkpoint restart, retry/dead-letter behavior, Gin operations API, cancel operation, leader-guarded scheduled tick/loop를 조합하며 PR text는 #42, #43, #75, umbrella #29를 닫을 수 있어야 한다.
 
-**Architecture:** Keep one example-local `internal/customermigration` package. The batch engine owns source records, checkpoint replay, retry/skip policy, idempotent sink writes, fixed chunk size `2`, and report projection. The service owns run lifecycle behind `sync.Mutex`, active-run guarding, defensive public snapshots, cancelation, leader gating, scheduler loop orchestration, and Gin handlers. Checkpoint/sink/dead-letter stores own their own locks and expose snapshot APIs for race-safe active-run reads. `main.go` only wires local loopback server configuration, demo leader mode, timeouts, signal handling, and graceful shutdown.
+**Architecture:** example-local `internal/customermigration` package 하나만 유지한다. batch engine은 source record, checkpoint replay, retry/skip policy, idempotent sink write, fixed chunk size `2`, report projection을 소유한다. service는 `sync.Mutex` 뒤의 run lifecycle, active-run guarding, defensive public snapshot, cancelation, leader gating, scheduler loop orchestration, Gin handler를 소유한다. checkpoint/sink/dead-letter store는 각자 lock을 소유하고 race-safe active-run read를 위한 snapshot API를 노출한다. `main.go`는 local loopback server configuration, demo leader mode, timeout, signal handling, graceful shutdown만 연결한다.
 
-**Tech Stack:** Go, `github.com/bluetape4k/bluetape-go/batch`, `github.com/bluetape4k/bluetape-go/leader`, Gin, standard-library `context`, `errors`, `net/http`, `sync`, `time`, `os/signal`, and existing repo Make targets. No new dependencies.
+**Tech Stack:** Go, `github.com/bluetape4k/bluetape-go/batch`, `github.com/bluetape4k/bluetape-go/leader`, Gin, standard-library `context`, `errors`, `net/http`, `sync`, `time`, `os/signal`, existing repo Make target. 새 dependency는 없다.
 
 ---
 
-## Constraints
+## 제약
 
-- Apply `$bluetape-go-patterns` to every Go code task: context-first APIs, sentinel error wrapping, race-safe shared state, table-driven tests, `gofmt`, and no package-level mutable state.
-- Preserve example-local boundaries. Do not import sibling example `internal` packages.
-- Write tests before implementation for each behavioral surface.
-- Keep HTTP DTOs ID/count based. `/batch/status` and `/batch/report` must not expose fixture email values.
-- Keep server local-only by default: `127.0.0.1:8095`. `HTTP_ADDR` may override only to a loopback bind; reject non-loopback binds by default. Do not trust forwarded headers for security decisions.
-- Keep docs bilingual where the repo already does: add example README pair and update root `README.md` / `README.ko.md`.
-- No diagrams, infrastructure services, queues, databases, Redis, NATS, new scheduler framework, or new dependencies in this pass.
+- 모든 Go code task에는 `$bluetape-go-patterns`를 적용한다: context-first API, sentinel error wrapping, race-safe shared state, table-driven test, `gofmt`, package-level mutable state 금지.
+- example-local boundary를 보존한다. sibling example `internal` package를 import하지 않는다.
+- 각 behavioral surface마다 implementation 전에 test를 작성한다.
+- HTTP DTO는 ID/count 기반으로 유지한다. `/batch/status`와 `/batch/report`는 fixture email value를 노출하면 안 된다.
+- server는 기본적으로 local-only다: `127.0.0.1:8095`. `HTTP_ADDR` override는 loopback bind만 허용하고, 기본적으로 non-loopback bind는 거부한다. security decision에 forwarded header를 신뢰하지 않는다.
+- repo가 이미 사용하는 bilingual 방식에 맞춰 example README pair를 추가하고 root `README.md` / `README.ko.md`를 갱신한다.
+- 이번 pass에서는 diagram, infrastructure service, queue, database, Redis, NATS, 새 scheduler framework, 새 dependency를 추가하지 않는다.
 
-## Planned Files
+## 계획 파일
 
 - `examples/customer-migration-batch-integration/main.go`
 - `examples/customer-migration-batch-integration/main_test.go`
@@ -37,97 +37,97 @@
 - `docs/lessons/2026-06-22-customer-migration-batch-integration.md`
 - `docs/review/2026-06-22-issue-29-batch-integration-code-review.md`
 
-## Implementation Tasks
+## 구현 작업
 
-- [ ] **A. Engine TDD red tests [complexity: medium]**
-  - Create `engine_test.go` with tests for:
-    - manual run with `CrashAfterNewWrites: 3` fails with `ErrWriterCrash`;
-    - failure leaves checkpoint at `NextIndex: 2`;
-    - the default engine uses fixed `ChunkSize: 2`;
-    - partial second chunk writes `cust-1003`;
-    - restart run resumes from checkpoint, accepts replayed `cust-1003` as duplicate no-op, writes `cust-1005`, dead-letters `cust-1004`, and completes at `NextIndex: 5`;
-    - transient `cust-1003` increments retry count and succeeds;
-    - permanent `cust-1004` records exactly one dead letter and increments skip count;
-    - invalid checkpoint and caller cancellation return stable sentinel/diagnostic behavior;
-    - report projection has no timestamps and no email values.
-  - Run `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration` and keep the expected compile/fail output as TDD evidence.
+- [ ] **A. Engine TDD red test [complexity: medium]**
+  - 다음을 다루는 `engine_test.go`를 만든다.
+    - `CrashAfterNewWrites: 3`을 사용한 manual run이 `ErrWriterCrash`로 실패한다.
+    - failure가 checkpoint를 `NextIndex: 2`에 남긴다.
+    - default engine이 fixed `ChunkSize: 2`를 사용한다.
+    - partial second chunk가 `cust-1003`을 write한다.
+    - restart run이 checkpoint에서 재개되고 replay된 `cust-1003`을 duplicate no-op으로 받아들이며, `cust-1005`를 write하고 `cust-1004`를 dead-letter 처리한 뒤 `NextIndex: 5`에서 완료된다.
+    - transient `cust-1003`은 retry count를 증가시키고 성공한다.
+    - permanent `cust-1004`는 정확히 하나의 dead letter를 기록하고 skip count를 증가시킨다.
+    - invalid checkpoint와 caller cancellation은 stable sentinel/diagnostic behavior를 반환한다.
+    - report projection에는 timestamp와 email value가 없다.
+  - `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`를 실행하고 예상 compile/fail output을 TDD evidence로 보존한다.
 
 - [ ] **B. Engine implementation [complexity: medium]**
-  - Implement default records, `FailureScenario`, sentinel errors, `RunOptions`, `RunResponse`, `Summary`, report DTOs, in-memory checkpoint store, sink, dead-letter store, reader, processor, writer, and `RunBatch`.
-  - Give checkpoint store, sink, and dead-letter store their own locks plus defensive snapshot APIs. Status/report may read immutable latest projections under `Service.mu`; if they need live store state while active they must use these locked snapshot APIs.
-  - Use `batch.Step` with `ChunkSize: 2`, `batch.Job`, `batch.CheckpointReader`, `batch.RetryErrors(3, ...)`, and `batch.SkipErrors(2, ...)`.
-  - Make writer idempotent by customer ID. Track `accepted_ids`, `new_written_ids`, `migrated_ids`, and `duplicate_skip_count` separately from upstream report `WriteCount`.
-  - Propagate `context.Context`; do not retry caller cancellation/deadline.
-  - Run `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`.
+  - default record, `FailureScenario`, sentinel error, `RunOptions`, `RunResponse`, `Summary`, report DTO, in-memory checkpoint store, sink, dead-letter store, reader, processor, writer, `RunBatch`를 구현한다.
+  - checkpoint store, sink, dead-letter store는 각자 lock과 defensive snapshot API를 가진다. status/report는 `Service.mu` 아래 immutable latest projection을 읽을 수 있고, active 중 live store state가 필요하면 locked snapshot API를 사용해야 한다.
+  - `batch.Step` with `ChunkSize: 2`, `batch.Job`, `batch.CheckpointReader`, `batch.RetryErrors(3, ...)`, `batch.SkipErrors(2, ...)`를 사용한다.
+  - writer는 customer ID 기준 idempotent로 만든다. `accepted_ids`, `new_written_ids`, `migrated_ids`, `duplicate_skip_count`를 upstream report `WriteCount`와 별도로 추적한다.
+  - `context.Context`를 전파한다. caller cancellation/deadline을 retry하지 않는다.
+  - `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`를 실행한다.
 
-- [ ] **C. Service and HTTP TDD red tests [complexity: high]**
-  - Create `service_test.go` with tests for:
-    - `GET /healthz`;
-    - `POST /batch/start` crash response, stable status code, and latest status snapshot;
-    - `POST /batch/schedule/tick` under held leadership restarts and completes;
-    - missing leadership returns `not_leader` without mutating checkpoint, sink, or dead letters;
-    - status/report expose stable latest-run projections and omit emails;
-    - every public response body across success, crash, not-leader, malformed JSON, cancellation, no-active cancel, and report-not-found paths omits fixture email strings and uses allowlisted public error messages;
-    - malformed JSON, blank/invalid run IDs, invalid crash counters, and oversized bodies on both POST endpoints return stable error codes;
-    - no latest report returns `report_not_found`;
-    - `POST /batch/cancel` cancels active work, returns `202 Accepted` with `status="cancel_requested"` and no `error_code`, clears active state after the run observes cancellation, and returns `no_active_run` when repeated with no active run;
-    - request cancellation maps to `request_cancelled`;
-    - cancellation releases the active-run guard;
-    - deterministic concurrent manual start, scheduled tick, cancel, status, and report requests allow at most one active run and return defensive snapshots;
-    - bounded mixed-access stress uses at least 8 goroutines and 25 iterations per goroutine, asserts at most one active run, and repeats the exact handler-visible checkpoint/sink/dead-letter snapshot paths under normal and race tests;
-    - deterministic leader cases cover held, missing, `leader.ErrAlreadyLeader`, campaign cancellation before acquisition, request cancellation after acquisition, resign timeout, and resign failure diagnostics. Campaign cancellation must preserve `context.Canceled`/`context.DeadlineExceeded`, map HTTP to `request_cancelled`, avoid `not_leader`, and avoid batch mutation.
-  - Use a latchable runner hook so tests overlap active work without sleeping.
-  - Run `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`.
+- [ ] **C. Service and HTTP TDD red test [complexity: high]**
+  - 다음을 다루는 `service_test.go`를 만든다.
+    - `GET /healthz`.
+    - `POST /batch/start` crash response, stable status code, latest status snapshot.
+    - held leadership 아래 `POST /batch/schedule/tick`이 restart 후 완료한다.
+    - missing leadership은 checkpoint, sink, dead letter를 mutate하지 않고 `not_leader`를 반환한다.
+    - status/report가 stable latest-run projection을 노출하고 email을 생략한다.
+    - success, crash, not-leader, malformed JSON, cancellation, no-active cancel, report-not-found path의 모든 public response body가 fixture email string을 생략하고 allowlisted public error message를 사용한다.
+    - 두 POST endpoint에서 malformed JSON, blank/invalid run ID, invalid crash counter, oversized body가 stable error code를 반환한다.
+    - latest report가 없으면 `report_not_found`를 반환한다.
+    - `POST /batch/cancel`은 active work를 cancel하고 `status=\"cancel_requested\"`, `error_code` 없음으로 `202 Accepted`를 반환하며, run이 cancellation을 관찰한 뒤 active state를 정리하고, active run이 없을 때 반복 호출하면 `no_active_run`을 반환한다.
+    - request cancellation은 `request_cancelled`로 매핑된다.
+    - cancellation은 active-run guard를 해제한다.
+    - concurrent manual start, scheduled tick, cancel, status, report request는 active run을 최대 하나만 허용하고 defensive snapshot을 반환한다.
+    - bounded mixed-access stress는 최소 8 goroutine과 goroutine당 25 iteration을 사용하고, active run이 최대 하나인지 assert하며, handler-visible checkpoint/sink/dead-letter snapshot path를 normal 및 race test에서 반복한다.
+    - deterministic leader case는 held, missing, `leader.ErrAlreadyLeader`, acquisition 전 campaign cancellation, acquisition 뒤 request cancellation, resign timeout, resign failure diagnostic을 다룬다. campaign cancellation은 `context.Canceled`/`context.DeadlineExceeded`를 보존하고, HTTP를 `request_cancelled`로 매핑하며, `not_leader` 및 batch mutation을 피해야 한다.
+  - test가 active work를 sleep 없이 overlap하도록 latchable runner hook을 사용한다.
+  - `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`를 실행한다.
 
-- [ ] **D. Service, leader gate, and Gin implementation [complexity: high]**
-  - Implement `Service` with `mu`, `active`, active-run cancel function, shared locked checkpoint store, locked sink, locked dead-letter store, latest response, latest report, `last_rejection_code`, and deterministic test hooks.
-  - Implement `StartManual`, `RunScheduledTick`, `CancelActiveRun`, `Status`, `Report`, validation helpers, defensive-copy helpers, allowlisted public error messages, and stable error mapping.
-  - Implement `LeaderGate` with `RunIfLeader` and `LeaderHeld`; include deterministic in-memory gate for tests and a production-shaped adapter around `leader.Elector`.
-  - Treat `leader.ErrAlreadyLeader` as held leadership without taking ownership of a newly acquired lease. Resign only when this call acquired leadership.
-  - Use a fixed resign cleanup timeout over `context.WithoutCancel(ctx)` or equivalent bounded cleanup context so cleanup is attempted even after caller cancellation and cannot hang indefinitely.
-  - Implement `NewRouter` with `gin.New`, recovery middleware, no trusted forwarded headers, capped 8 KiB JSON body decoding, shared error response writer, and routes:
+- [ ] **D. Service, leader gate, Gin implementation [complexity: high]**
+  - `mu`, `active`, active-run cancel function, shared locked checkpoint store, locked sink, locked dead-letter store, latest response, latest report, `last_rejection_code`, deterministic test hook을 가진 `Service`를 구현한다.
+  - `StartManual`, `RunScheduledTick`, `CancelActiveRun`, `Status`, `Report`, validation helper, defensive-copy helper, allowlisted public error message, stable error mapping을 구현한다.
+  - `RunIfLeader`와 `LeaderHeld`를 가진 `LeaderGate`를 구현한다. test용 deterministic in-memory gate와 `leader.Elector` 주변의 production-shaped adapter를 포함한다.
+  - `leader.ErrAlreadyLeader`는 newly acquired lease ownership 없이 held leadership으로 취급한다. 이 call이 leadership을 acquire한 경우에만 resign한다.
+  - `context.WithoutCancel(ctx)` 또는 동등한 bounded cleanup context 위의 fixed resign cleanup timeout을 사용해 caller cancellation 뒤에도 cleanup을 시도하고 무한 대기하지 않게 한다.
+  - `gin.New`, recovery middleware, trusted forwarded header 없음, capped 8 KiB JSON body decoding, shared error response writer, 다음 route를 가진 `NewRouter`를 구현한다.
     - `GET /healthz`
     - `POST /batch/start`
     - `POST /batch/schedule/tick`
     - `POST /batch/cancel`
     - `GET /batch/status`
     - `GET /batch/report`
-  - Call and check `router.SetTrustedProxies(nil)`. Add a forwarded-header spoofing regression test if any handler surfaces client IP.
-  - Run `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`.
+  - `router.SetTrustedProxies(nil)`를 호출하고 확인한다. handler가 client IP를 노출하면 forwarded-header spoofing regression test를 추가한다.
+  - `go test -count=1 ./examples/customer-migration-batch-integration/internal/customermigration`를 실행한다.
 
 - [ ] **E. Scheduler and main entrypoint TDD/implementation [complexity: medium]**
-  - Create `scheduler_test.go` proving an injectable ticker loop triggers leader-guarded runs, stops on context cancellation, and uses manual test ticks without sleeps.
-  - Implement the tiny scheduler loop around `Service.RunScheduledTick`; keep durable queue semantics out of scope.
-  - Create `main_test.go` that verifies `newHTTPServer` sets `Addr`, handler, `ReadHeaderTimeout`, `ReadTimeout`, `WriteTimeout`, and `IdleTimeout`.
-  - Add bind parsing tests for default `127.0.0.1:8095`, loopback `HTTP_ADDR`, invalid `HTTP_ADDR`, and rejected non-loopback `HTTP_ADDR`.
-  - Implement `main.go` with default bind `127.0.0.1:8095`, loopback-only `HTTP_ADDR`, `LEADER_MODE=held|missing`, `http.Server`, SIGINT/SIGTERM handling, and bounded graceful shutdown.
-  - Run `go test -count=1 ./examples/customer-migration-batch-integration/...`.
+  - injectable ticker loop가 leader-guarded run을 trigger하고 context cancellation에서 멈추며 sleep 없는 manual test tick을 사용하는지 증명하는 `scheduler_test.go`를 만든다.
+  - `Service.RunScheduledTick` 주변의 작은 scheduler loop를 구현한다. durable queue semantic은 범위 밖으로 유지한다.
+  - `newHTTPServer`가 `Addr`, handler, `ReadHeaderTimeout`, `ReadTimeout`, `WriteTimeout`, `IdleTimeout`를 설정하는지 검증하는 `main_test.go`를 만든다.
+  - default `127.0.0.1:8095`, loopback `HTTP_ADDR`, invalid `HTTP_ADDR`, rejected non-loopback `HTTP_ADDR`용 bind parsing test를 추가한다.
+  - default bind `127.0.0.1:8095`, loopback-only `HTTP_ADDR`, `LEADER_MODE=held|missing`, `http.Server`, SIGINT/SIGTERM handling, bounded graceful shutdown이 있는 `main.go`를 구현한다.
+  - `go test -count=1 ./examples/customer-migration-batch-integration/...`를 실행한다.
 
 - [ ] **F. Documentation [complexity: medium]**
-  - Add English and Korean example READMEs with scenario, run command, curl commands for manual crash, status, report, leader-held scheduled restart, active-run cancel, not-leader rejection, malformed JSON, blank run ID, and oversized body.
-  - Document checkpoint key, chunk size, endpoint table, `/healthz` as process liveness only, `/batch/status` as operator diagnosis/readiness, leader-guarded tick and tiny scheduler loop, retry/dead-letter policy, restart duplicate boundary behavior, relation to focused #41/#73/#74 examples, Ctrl-C shutdown, port collision, loopback-only `HTTP_ADDR`, `LEADER_MODE=held|missing`, process restart reset, and production hardening.
-  - Update root `README.md` and `README.ko.md` example tables and v0.5.0 run section.
+  - English/Korean example README를 추가하고 scenario, run command, manual crash/status/report/leader-held scheduled restart/active-run cancel/not-leader rejection/malformed JSON/blank run ID/oversized body용 curl command를 포함한다.
+  - checkpoint key, chunk size, endpoint table, process liveness only인 `/healthz`, operator diagnosis/readiness인 `/batch/status`, leader-guarded tick 및 tiny scheduler loop, retry/dead-letter policy, restart duplicate boundary behavior, focused #41/#73/#74 example과의 관계, Ctrl-C shutdown, port collision, loopback-only `HTTP_ADDR`, `LEADER_MODE=held|missing`, process restart reset, production hardening을 문서화한다.
+  - root `README.md`와 `README.ko.md` example table 및 v0.5.0 run section을 갱신한다.
 
 - [ ] **G. Focused verification [complexity: medium]**
-  - Run:
+  - 다음을 실행한다.
     - `go test -count=1 ./examples/customer-migration-batch-integration/...`
     - `go test -race -count=1 ./examples/customer-migration-batch-integration/...`
-    - `go run ./examples/customer-migration-batch-integration`, then run the README curl smoke flow for `/healthz`, manual crash, `/batch/status`, `/batch/report`, `/batch/schedule/tick`, `/batch/cancel`, not-leader with `LEADER_MODE=missing`, malformed JSON, blank run ID, and oversized body. Record expected HTTP status and `error_code` where applicable.
-    - Terminate the running process with SIGTERM/SIGINT, wait within the configured shutdown timeout plus a small margin, assert the process exits, and record whether any active run was canceled or allowed to finish.
-  - Fix failures before broader verification.
+    - `go run ./examples/customer-migration-batch-integration`, 이후 `/healthz`, manual crash, `/batch/status`, `/batch/report`, `/batch/schedule/tick`, `/batch/cancel`, `LEADER_MODE=missing` not-leader, malformed JSON, blank run ID, oversized body에 대한 README curl smoke flow를 실행한다. 적용 가능한 곳에는 expected HTTP status와 `error_code`를 기록한다.
+    - 실행 중인 process를 SIGTERM/SIGINT로 종료하고 configured shutdown timeout plus small margin 안에 exit하는지 대기하며, active run이 cancel되었는지 finish되었는지 기록한다.
+  - broader verification 전에 실패를 수정한다.
 
 - [ ] **H. Cleanup pass [complexity: medium]**
-  - Because the implementation will touch more than three files, write a short cleanup checklist in the working notes before editing cleanup.
-  - Prefer deletion and consolidation over new abstractions. Keep example code readable for workshop users.
-  - Rerun the focused tests after cleanup.
+  - implementation이 세 파일 넘게 건드릴 것이므로 cleanup 편집 전에 working note에 짧은 cleanup checklist를 쓴다.
+  - 새 abstraction보다 deletion 및 consolidation을 선호한다. workshop user가 읽기 쉬운 example code를 유지한다.
+  - cleanup 뒤 focused test를 다시 실행한다.
 
 - [ ] **I. Performance/stability scan [complexity: medium]**
-  - Confirm no long sleeps, unbounded goroutines, unbounded body reads, leaked contexts, lock-held batch execution, or caller-canceled resign cleanup.
-  - Confirm concurrency/stress tests exercise status/report snapshots during active runs.
-  - Run the package race test again if cleanup changed service state.
+  - long sleep, unbounded goroutine, unbounded body read, leaked context, lock-held batch execution, caller-canceled resign cleanup이 없는지 확인한다.
+  - concurrency/stress test가 active run 중 status/report snapshot을 exercise하는지 확인한다.
+  - cleanup이 service state를 바꾸면 package race test를 다시 실행한다.
 
 - [ ] **J. Full repository verification [complexity: high]**
-  - Run:
+  - 다음을 실행한다.
     - `go test -p 1 ./...`
     - `make fmt-check`
     - `make tidy-check`
@@ -135,41 +135,41 @@
     - `make lint`
     - `GOFLAGS=-p=1 make ci`
     - `git diff --check`
-  - Record failures exactly and fix in scope.
+  - 실패를 정확히 기록하고 범위 안에서 수정한다.
 
 - [ ] **K. Step 6-R code review and fixes [complexity: high]**
-  - Run six-lane code review plus integration review per `bluetape4k-full-feature`.
-  - Save `docs/review/2026-06-22-issue-29-batch-integration-code-review.md`.
-  - Fix all P0/P1 findings and rerun affected review lanes plus relevant tests.
+  - `bluetape4k-full-feature` 기준 six-lane code review plus integration review를 실행한다.
+  - `docs/review/2026-06-22-issue-29-batch-integration-code-review.md`를 저장한다.
+  - 모든 P0/P1 finding을 수정하고 affected review lane 및 relevant test를 다시 실행한다.
 
-- [ ] **L. Lessons, commit, and PR [complexity: medium]**
-  - Add `docs/lessons/2026-06-22-customer-migration-batch-integration.md` with pitfalls, commands, review findings, and follow-up risks.
-  - Commit using Lore protocol.
-  - Push branch and create a PR with `Closes #29`, `Closes #42`, `Closes #43`, and `Closes #75`.
-  - Match PR assignee, milestone `0.5.0`, and labels from the linked issue set when GitHub permits it.
-  - End PR body with the required `## DoD Status` section.
+- [ ] **L. Lesson, commit, PR [complexity: medium]**
+  - pitfall, command, review finding, follow-up risk가 있는 `docs/lessons/2026-06-22-customer-migration-batch-integration.md`를 추가한다.
+  - Lore protocol로 commit한다.
+  - branch를 push하고 `Closes #29`, `Closes #42`, `Closes #43`, `Closes #75`가 있는 PR을 만든다.
+  - GitHub가 허용하면 linked issue set과 맞춰 PR assignee, milestone `0.5.0`, label을 설정한다.
+  - PR body는 required `## DoD Status` section으로 끝낸다.
 
-## Acceptance Criteria Mapping
+## 인수 조건 매핑
 
 | Spec requirement | Plan coverage |
 |---|---|
-| Checkpoint crash/restart and duplicate replay | A, B, C, D, G |
+| checkpoint crash/restart 및 duplicate replay | A, B, C, D, G |
 | Gin operations API | C, D, F, G |
-| Active-run cancel operation | C, D, F, G |
-| Leader-guarded scheduled tick and scheduler loop | C, D, E, F |
-| Retry/dead-letter policy | A, B, F |
-| Shared state race safety | C, D, G, I, J |
-| Local HTTP trust boundary and timeouts | D, E, F, G |
-| Error code stability | C, D, F |
-| No email exposure in all public HTTP responses | A, C, D, F |
-| Bilingual docs and root README updates | F |
-| No new dependencies | B, D, J |
-| Full verification and review | G, H, I, J, K |
+| active-run cancel operation | C, D, F, G |
+| leader-guarded scheduled tick 및 scheduler loop | C, D, E, F |
+| retry/dead-letter policy | A, B, F |
+| shared state race safety | C, D, G, I, J |
+| local HTTP trust boundary 및 timeout | D, E, F, G |
+| error code stability | C, D, F |
+| 모든 public HTTP response에서 email 노출 없음 | A, C, D, F |
+| bilingual docs 및 root README update | F |
+| 새 dependency 없음 | B, D, J |
+| full verification 및 review | G, H, I, J, K |
 
-## Risk Assumptions
+## 위험 가정
 
-- The example is process-local and in-memory; process restart resets checkpoint, migrated sink, and dead letters by design.
-- The leader adapter is production-shaped but tests use deterministic fakes because the workshop example does not start a distributed coordinator.
-- `GOFLAGS=-p=1 make ci` may take longer than focused package checks because the repository includes Testcontainers examples; run it after targeted checks pass.
-- Non-loopback HTTP binds are rejected by default because the operations API is unauthenticated; production exposure requires a separate auth/trusted-network design.
-- PR merge is out of scope unless the user explicitly requests merge after review/CI.
+- 예제는 process-local 및 in-memory다. process restart는 checkpoint, migrated sink, dead letter를 설계상 reset한다.
+- leader adapter는 production-shaped이지만 workshop example은 distributed coordinator를 시작하지 않으므로 test는 deterministic fake를 사용한다.
+- repository에는 Testcontainers example이 포함되어 있으므로 `GOFLAGS=-p=1 make ci`는 focused package check보다 오래 걸릴 수 있다. targeted check가 통과한 뒤 실행한다.
+- operations API는 unauthenticated이므로 non-loopback HTTP bind는 기본적으로 거부한다. production exposure에는 별도의 auth/trusted-network design이 필요하다.
+- 사용자가 review/CI 뒤 merge를 명시적으로 요청하지 않는 한 PR merge는 범위 밖이다.
