@@ -1,6 +1,6 @@
-# Step 6-R Code Review: Issue #74 Retry Dead-Letter Batch Worker
+# Step 6-R 코드 리뷰: Issue #74 Retry Dead-Letter Batch Worker
 
-Review scope:
+검토 범위:
 
 - `examples/retry-dead-letter-batch-worker/**`
 - Root `README.md` and `README.ko.md` navigation updates
@@ -8,25 +8,25 @@ Review scope:
 - `docs/images/readme-diagrams/workshop-example-map.*`
 - `scripts/generate-retry-dead-letter-batch-worker-diagrams.sh`
 
-Reviewer stance:
+reviewer stance:
 
 - `bluetape4k-full-feature` Step 6-R implementation review.
 - `bluetape-go-patterns` Go P0/P1 gate.
 - `bluetape4k-diagram` README diagram gate.
 
-## Findings
+## finding
 
-No P0/P1 blockers found.
+P0/P1 blocker는 발견되지 않았다.
 
-| Tier | Area | P0 | P1 | P2 | P3 | Evidence |
+| Tier | 영역 | P0 | P1 | P2 | P3 | 근거 |
 |---|---|---:|---:|---:|---:|---|
-| 1 | Security | 0 | 0 | 0 | 0 | The example has no auth, secret, shell, external network, unsafe deserialization, or path boundary. |
-| 2 | Ops/SRE reliability | 0 | 0 | 0 | 0 | Retry and skip budgets are explicit; cancellation is not retried or dead-lettered; production durability caveats are documented. |
-| 3 | Structural impact | 0 | 0 | 0 | 0 | New isolated example plus README/map assets only; no shared bluetape-go API or module dependency changed. |
-| 4 | Go code quality | 0 | 0 | 0 | 0 | Uses `batch.RetryPolicy`, `batch.SkipPolicy`, `context.Context`, sentinel errors with `errors.Is`, and mutex-protected in-memory stores. |
-| 5 | Tests/types/silent failure | 0 | 0 | 0 | 0 | Tests cover transient retry success, permanent DLT, skip exhaustion, writer failure, cancellation, bounded stress, race, and stable report projection. |
-| 6 | Performance/stability | 0 | 0 | 0 | 0 | Fixture is bounded, retry attempts are bounded, concurrent run/store stress is bounded, no goroutines/timers/external IO are introduced, and race test passes. |
-| 7 | Docs/evidence | 0 | 0 | 0 | 0 | EN/KO README include scenario, Architecture, Sequence Diagram, policy table, related examples, and production hardening. |
+| 1 | Security | 0 | 0 | 0 | 0 | example에는 auth, secret, shell, external network, unsafe deserialization, path boundary가 없다. |
+| 2 | Ops/SRE reliability | 0 | 0 | 0 | 0 | retry와 skip budget이 명시적이다. cancellation은 retry되거나 dead-lettered되지 않는다. production durability caveat이 문서화되어 있다. |
+| 3 | Structural impact | 0 | 0 | 0 | 0 | 새 isolated example과 README/map asset만 포함한다. shared bluetape-go API나 module dependency는 변경되지 않았다. |
+| 4 | Go code quality | 0 | 0 | 0 | 0 | `batch.RetryPolicy`, `batch.SkipPolicy`, `context.Context`, `errors.Is`와 함께 쓰는 sentinel error, mutex-protected in-memory store를 사용한다. |
+| 5 | Tests/types/silent failure | 0 | 0 | 0 | 0 | test는 transient retry success, permanent DLT, skip exhaustion, writer failure, cancellation, bounded stress, race, stable report projection을 다룬다. |
+| 6 | Performance/stability | 0 | 0 | 0 | 0 | fixture, retry attempt, concurrent run/store stress가 bounded하다. goroutine/timer/external IO는 도입되지 않았고 race test가 통과한다. |
+| 7 | Docs/evidence | 0 | 0 | 0 | 0 | EN/KO README는 scenario, Architecture, Sequence Diagram, policy table, related example, production hardening을 포함한다. |
 
 ## Diagram Gate
 
@@ -38,34 +38,35 @@ No P0/P1 blockers found.
 
 PNG visual inspection:
 
-- `retry-dead-letter-batch-worker-scenario.png`: decorator frame present, balanced margins, labels do not overlap routes.
-- `retry-dead-letter-batch-worker-architecture.png`: decorator frame present, layer bands are readable, semantic line colors are distinct.
-- `retry-dead-letter-batch-worker-sequence.png`: decorator frame present, top/bottom/left/right margins are balanced, sequence labels remain legible.
-- `workshop-example-map.png`: new example node appears under the batch lane and remains readable in the existing map style.
+- `retry-dead-letter-batch-worker-scenario.png`: decorator frame이 있고 margin이 balanced하며 label이 route와 overlap되지 않는다.
+- `retry-dead-letter-batch-worker-architecture.png`: decorator frame이 있고 layer band를 읽을 수 있으며 semantic line color가 구분된다.
+- `retry-dead-letter-batch-worker-sequence.png`: decorator frame이 있고 top/bottom/left/right margin이 balanced하며 sequence label이 읽을 수 있게 남아 있다.
+- `workshop-example-map.png`: 새 example node가 batch lane 아래에 나타나며 existing map style에서 계속 읽을 수 있다.
 
 ## Static Scan
 
 `rg -n "context\\.TODO\\(|time\\.Tick\\(|go func|panic\\(|http\\.ListenAndServe\\(|RealIP|X-Forwarded-For" examples/retry-dead-letter-batch-worker || true`
 
-Result: no matches.
+결과: match 없음.
 
-CodeGraph was not initialized for this worktree. The gap was mitigated by direct review of the new package, local module source for `batch`, and repository-local example patterns.
+CodeGraph는 이 worktree에서 initialized되지 않았다. 이 gap은 새 package direct review, `batch`의 local
+module source, repository-local example pattern으로 완화했다.
 
-## Validation Evidence
+## 검증 근거
 
-Already run before this review:
+이 review 전에 이미 실행한 항목:
 
 - `go test -count=1 ./examples/retry-dead-letter-batch-worker/...` PASS
 - `go test -count=1 -run 'Stress|Concurrent' ./examples/retry-dead-letter-batch-worker/internal/ticketworker` PASS
 - `go test -race -count=1 ./examples/retry-dead-letter-batch-worker/...` PASS
 - `go test -race -count=1 -run 'Stress|Concurrent' ./examples/retry-dead-letter-batch-worker/internal/ticketworker` PASS
-- `go run ./examples/retry-dead-letter-batch-worker` PASS; output reports `read=4 write=3 retry=1 skip=1` and one DLT entry for `ticket-1003`.
+- `go run ./examples/retry-dead-letter-batch-worker` PASS. output은 `read=4 write=3 retry=1 skip=1`과 `ticket-1003`에 대한 DLT entry 하나를 보고한다.
 - `go test -run '^$' ./examples/retry-dead-letter-batch-worker` PASS
 - `go vet ./examples/retry-dead-letter-batch-worker/...` PASS
 - `golangci-lint run ./examples/retry-dead-letter-batch-worker/...` PASS, `0 issues`
 
-Final validation is recorded in the verifier checklist after this review file is added.
+final validation은 이 review file을 추가한 뒤 verifier checklist에 기록된다.
 
-## Verdict
+## 판정
 
-P0=0 P1=0. Step 6-R passes.
+P0=0 P1=0. Step 6-R이 통과했다.
