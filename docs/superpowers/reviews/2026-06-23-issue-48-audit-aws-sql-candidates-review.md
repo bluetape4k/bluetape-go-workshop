@@ -1,33 +1,32 @@
-# Issue #48 Review: Audit, AWS, and SQL Candidate Research
+# Issue #48 리뷰: Audit, AWS, and SQL Candidate Research
 
-## Scope
+## 범위
 
-- Reviewed artifact:
+- 검토 artifact:
   `docs/superpowers/research/2026-06-23-issue-48-audit-aws-sql-candidates-research.md`
 - Issue: #48
 - Milestone: `0.7.0`
-- Review type: documentation / research acceptance review
+- review type: documentation / research acceptance review
 
-## Checks
+## 점검
 
-- Source-path evidence is present for bluetape-go research, Kotlin workshop
-  examples, and upstream package references.
-- Follow-up issue links are present:
+- bluetape-go research, Kotlin workshop example, upstream package reference에 대한 source-path
+  evidence가 있다.
+- follow-up issue link가 있다.
   - SQL: #62, #63, #64, #65
   - AWS: #59, #60, #61, #66
   - Audit/outbox: #56, #57, #58, #68
-- Docker/Testcontainers cost is called out for every accepted candidate.
-- Rejected and deferred candidates include rationale.
-- Stale upstream issue numbering is reconciled against the current #31 / #32 /
-  #33 / #35 mapping.
-- No implementation, dependency, README navigation, generated artifact, or
-  workflow changes are included in this research-only PR.
+- accepted candidate마다 Docker/Testcontainers cost가 명시되어 있다.
+- rejected/deferred candidate는 rationale을 포함한다.
+- stale upstream issue numbering은 현재 #31 / #32 / #33 / #35 mapping과 reconcile됐다.
+- 이 research-only PR에는 implementation, dependency, README navigation, generated artifact,
+  workflow change가 포함되지 않는다.
 
-## Findings
+## finding
 
-No P0/P1 findings.
+P0/P1 finding은 없다.
 
-## Verification
+## 검증
 
 ```bash
 rg -n "#5[6-9]|#6[0-8]|Docker/Testcontainers cost|Sources Checked|Accepted|Rejected|Deferred|0\\.8\\.0|0\\.9\\.0|0\\.11\\.0" docs/superpowers/research/2026-06-23-issue-48-audit-aws-sql-candidates-research.md
