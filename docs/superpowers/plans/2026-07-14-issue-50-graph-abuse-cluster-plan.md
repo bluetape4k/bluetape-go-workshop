@@ -265,38 +265,36 @@ git add examples/graph-abuse-cluster/internal/abusecluster/model.go examples/gra
 git commit -m "feat: analyze graph abuse clusters"
 ```
 
-## Task 3: Add the Atomic Bounded Neo4j Store
+## Task 3: Atomic Bounded Neo4j Store 추가
 
 **Complexity:** High. **Depends on:** Tasks 1-2. **Skills:**
-`test-driven-development`, `bluetape-go-patterns`. **Write scope:** store and
-pure store validation tests; the real container test remains Task 6.
+`test-driven-development`, `bluetape-go-patterns`. **Write scope:** store와 pure store validation test를 포함한다.
+real container test는 Task 6에 남긴다.
 
-- [ ] **Step 1: Write RED tests for parameter conversion and read bounds**
+- [ ] **Step 1: parameter conversion 및 read bound에 대한 RED test 작성**
 
-Create `store_test.go` in the same package. Test pure helpers behind the public
-store methods:
+같은 package에 `store_test.go`를 만든다. public store method 뒤의 pure helper를 테스트한다.
 
 ```go
 func fixtureParameters(Fixture) (map[string]any, error)
 func validateLoadedGraph([]graph.Vertex, []graph.Edge) error
 ```
 
-Require parameter maps to contain only `fixture_id`, `users`, `identifiers`,
-and `edges`; no raw Cypher or provider error retains opaque values. Require
-257 vertices and 1025 edges to return `ErrGraphTooLarge`, while exact limits
-pass. Require an invalid loaded edge to return `ErrInvalidGraph`.
+parameter map에는 `fixture_id`, `users`, `identifiers`, `edges`만 포함되어야 한다.
+raw Cypher나 provider error가 opaque value를 보존하면 안 된다. vertex 257개와 edge 1025개는 `ErrGraphTooLarge`를 반환해야 하며,
+exact limit은 pass해야 한다. invalid loaded edge는 `ErrInvalidGraph`를 반환해야 한다.
 
-- [ ] **Step 2: Observe RED**
+- [ ] **Step 2: RED 확인**
 
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'Test(FixtureParameters|ValidateLoadedGraph|StoreRejectsNil)'
 ```
 
-Expected: FAIL because `Store` and helper functions do not exist.
+기대값: `Store`와 helper function이 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement Store and fixed Cypher constants**
+- [ ] **Step 3: Store 및 fixed Cypher constant 구현**
 
-Create `store.go` with:
+`store.go`를 다음과 함께 만든다.
 
 ```go
 type Store struct { client *neo4jgraph.Client }
@@ -306,10 +304,8 @@ func (s *Store) ReplaceFixture(ctx context.Context, fixture Fixture) error
 func (s *Store) LoadFixture(ctx context.Context, fixtureID string) ([]graph.Vertex, []graph.Edge, error)
 ```
 
-`ReplaceFixture` validates before I/O and executes one fixed statement through
-the released adapter's `ExecuteWrite`, whose managed transaction covers the
-entire reset and seed. Use this shape so an empty namespace still produces one
-row and reaches the create clauses:
+`ReplaceFixture`는 I/O 전에 validate하고 released adapter의 `ExecuteWrite`를 통해 fixed statement 하나를 실행한다.
+managed transaction은 reset과 seed 전체를 감싼다. empty namespace도 row 하나를 만들고 create clause에 도달하도록 다음 shape를 사용한다.
 
 ```cypher
 OPTIONAL MATCH (stale {fixture_id: $fixture_id})
@@ -334,7 +330,7 @@ CREATE (user)-[:USES_IDENTIFIER {
 }]->(identifier)
 ```
 
-The two reads are fixed, parameterized, ordered, and request limit+1:
+두 read는 fixed, parameterized, ordered이며 limit+1을 요청한다.
 
 ```cypher
 MATCH (n {fixture_id: $fixture_id})
@@ -347,12 +343,11 @@ MATCH ()-[r:USES_IDENTIFIER {fixture_id: $fixture_id}]->()
 RETURN r ORDER BY elementId(r) LIMIT $limit
 ```
 
-Use `ReadVertices(..., "n")` and `ReadEdges(..., "r")`; preserve
-`context.Canceled`/`DeadlineExceeded` through `%w`, map other provider failures
-to `ErrBackend`, and never include query text, parameters, URI, or opaque IDs in
-the rendered operation error.
+`ReadVertices(..., "n")`와 `ReadEdges(..., "r")`를 사용한다.
+`context.Canceled`/`DeadlineExceeded`는 `%w`로 보존하고, 다른 provider failure는 `ErrBackend`로 map한다.
+rendered operation error에는 query text, parameter, URI, opaque ID를 절대 포함하지 않는다.
 
-- [ ] **Step 4: Observe GREEN**
+- [ ] **Step 4: GREEN 확인**
 
 ```bash
 gofmt -w examples/graph-abuse-cluster/internal/abusecluster
@@ -360,24 +355,23 @@ go test -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'Test
 go vet ./examples/graph-abuse-cluster/internal/abusecluster
 ```
 
-Expected: PASS and limit+1 is rejected before analysis.
+기대값: PASS하고 limit+1은 analysis 전에 reject된다.
 
-- [ ] **Step 5: Commit Task 3**
+- [ ] **Step 5: Task 3 commit**
 
 ```bash
 git add examples/graph-abuse-cluster/internal/abusecluster/store.go examples/graph-abuse-cluster/internal/abusecluster/store_test.go
 git commit -m "feat: persist graph abuse fixture in neo4j"
 ```
 
-## Task 4: Compose the Workflow and Buffered Output
+## Task 4: Workflow 및 Buffered Output 구성
 
 **Complexity:** Medium. **Depends on:** Tasks 2-3. **Skills:**
-`test-driven-development`, `bluetape-go-patterns`. **Write scope:** workflow,
-output and their tests.
+`test-driven-development`, `bluetape-go-patterns`. **Write scope:** workflow, output 및 해당 test.
 
-- [ ] **Step 1: Write RED workflow tests with a narrow unexported seam**
+- [ ] **Step 1: narrow unexported seam으로 RED workflow test 작성**
 
-Define the test seam in `workflow.go`:
+`workflow.go`에 test seam을 정의한다.
 
 ```go
 type WorkflowBackend interface {
@@ -388,25 +382,20 @@ type WorkflowBackend interface {
 func Execute(ctx context.Context, backend WorkflowBackend, fixture Fixture) (Report, error)
 ```
 
-`workflow_test.go` must prove replace -> load -> analyze order, exact report,
-no load after replace failure, no analysis after load failure, and preservation
-of caller cancellation without retry or late store calls. Keep this two-method
-interface inside the example's `internal` package; it is a use-case test seam,
-not a reusable graph repository abstraction.
+`workflow_test.go`는 replace -> load -> analyze 순서, exact report, replace failure 뒤 load 없음,
+load failure 뒤 analysis 없음, retry나 late store call 없이 caller cancellation 보존을 증명해야 한다.
+이 two-method interface는 example의 `internal` package 안에 둔다. reusable graph repository abstraction이 아니라 use-case test seam이다.
 
-- [ ] **Step 2: Write RED buffered-output tests**
+- [ ] **Step 2: RED buffered-output test 작성**
 
-Plan the exact function:
+exact function은 다음과 같다.
 
 ```go
 func EncodeReport(Report) ([]byte, error)
 ```
 
-`output_test.go` compares the bytes to the exact standard-library
-`json.MarshalIndent` representation shown in the spec, requires one trailing
-newline, and requires deterministic repetition. Add the
-small package-private seam below solely to inject a marshaler error and prove
-that an encoding failure returns no bytes:
+`output_test.go`는 byte를 spec에 표시된 exact standard-library `json.MarshalIndent` representation과 비교하고,
+trailing newline 하나와 deterministic repetition을 요구한다. marshaler error를 inject하고 encoding failure가 byte를 반환하지 않음을 증명하기 위한 작은 package-private seam을 추가한다.
 
 ```go
 type marshalIndentFunc func(any, string, string) ([]byte, error)
@@ -414,25 +403,23 @@ type marshalIndentFunc func(any, string, string) ([]byte, error)
 func encodeReport(report Report, marshal marshalIndentFunc) ([]byte, error)
 ```
 
-`EncodeReport` delegates to `encodeReport(report, json.MarshalIndent)`; neither
-function writes to an `io.Writer`.
+`EncodeReport`는 `encodeReport(report, json.MarshalIndent)`에 delegate한다. 두 function 모두 `io.Writer`에 쓰지 않는다.
 
-- [ ] **Step 3: Observe RED**
+- [ ] **Step 3: RED 확인**
 
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'Test(Execute|EncodeReport)'
 ```
 
-Expected: FAIL because workflow and output functions do not exist.
+기대값: workflow 및 output function이 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement the minimal workflow and encoder**
+- [ ] **Step 4: minimal workflow 및 encoder 구현**
 
-Normalize nil context to `context.Background` only at the top-level CLI; the
-internal workflow rejects nil store/invalid fixture and otherwise passes the
-caller context unchanged. Use `json.MarshalIndent`, append exactly one newline,
-and return bytes only after complete encoding.
+nil context는 top-level CLI에서만 `context.Background`로 normalize한다. internal workflow는 nil store/invalid fixture를 reject하고,
+그 외에는 caller context를 변경하지 않고 전달한다. `json.MarshalIndent`를 사용하고 정확히 newline 하나를 append하며,
+complete encoding 이후에만 byte를 반환한다.
 
-- [ ] **Step 5: Observe GREEN and commit**
+- [ ] **Step 5: GREEN 확인 및 commit**
 
 ```bash
 gofmt -w examples/graph-abuse-cluster/internal/abusecluster
