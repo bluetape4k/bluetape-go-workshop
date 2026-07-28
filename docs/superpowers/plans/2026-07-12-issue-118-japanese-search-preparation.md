@@ -1,52 +1,52 @@
-# Japanese Search Preparation Implementation Plan
+# Japanese Search Preparation 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **에이전트 작업자 참고:** 필수 하위 스킬: `superpowers:subagent-driven-development`(권장) 또는 `superpowers:executing-plans`를 사용해 이 계획을 작업 단위로 구현한다. 단계 추적에는 체크박스(`- [ ]`) 문법을 사용한다.
 
-**Goal:** Build the Issue #118 Japanese product-search preparation command with inspectable Kagome search-mode tokens, source byte spans, deterministic matching, support-text masking, and shared-service race proof.
+**목표:** Inspectable Kagome search-mode token, source byte span, deterministic matching, support-text masking, shared-service race proof를 포함한 Issue #118 Japanese product-search preparation command를 만든다.
 
-**Architecture:** A constructor-only `catalogprep.Service` owns one Kagome IPA tokenizer, one immutable blockword dictionary, and one prepared catalog. Product preparation preserves field-local source spans, excludes masked support tokens from a space-delimited index, and search compiles a call-local `textsearch.Matcher` from prepared query terms.
+**아키텍처:** Constructor-only `catalogprep.Service`가 Kagome IPA tokenizer 하나, immutable blockword dictionary 하나, prepared catalog 하나를 소유한다. Product preparation은 field-local source span을 보존하고, masked support token을 space-delimited index에서 제외하며, search는 prepared query term으로 call-local `textsearch.Matcher`를 compile한다.
 
-**Tech Stack:** Go 1.26, bluetape-go v0.18.0 `textsearch`, `textsearch/japanese`, and `testing/concurrency`; standard-library JSON CLI and table-driven tests.
+**기술 스택:** Go 1.26, bluetape-go v0.18.0 `textsearch`, `textsearch/japanese`, `testing/concurrency`, 표준 라이브러리 JSON CLI와 table-driven test.
 
 ---
 
-## Scope and File Map
+## 범위와 파일 지도
 
-- Create `examples/japanese-search-preparation/internal/catalogprep/service.go`: service contract, validation, preparation, masking, matching, preview, and deep-copy helpers.
-- Create `examples/japanese-search-preparation/internal/catalogprep/service_test.go`: success, failure, normalization/span, masking, matching, preview, and concurrency tests.
-- Create `examples/japanese-search-preparation/main.go`: deterministic JSON command.
-- Create `examples/japanese-search-preparation/README.md`: English lesson, commands, expected output, lifecycle, and boundaries.
-- Create `examples/japanese-search-preparation/README.ko.md`: Korean locale parity.
-- Modify `README.md`: root navigation row and run section.
-- Modify `README.ko.md`: localized root navigation row and run section.
-- Update GitHub Issue #34 only at delivery time: mark already-merged child #55 complete; leave #118 open until its PR merges.
+- `examples/japanese-search-preparation/internal/catalogprep/service.go` 생성: service contract, validation, preparation, masking, matching, preview, deep-copy helper.
+- `examples/japanese-search-preparation/internal/catalogprep/service_test.go` 생성: success, failure, normalization/span, masking, matching, preview, concurrency test.
+- `examples/japanese-search-preparation/main.go` 생성: deterministic JSON 명령.
+- `examples/japanese-search-preparation/README.md` 생성: English lesson, command, expected output, lifecycle, boundary.
+- `examples/japanese-search-preparation/README.ko.md` 생성: Korean locale parity.
+- `README.md` 수정: root navigation row와 run section.
+- `README.ko.md` 수정: localized root navigation row와 run section.
+- Delivery 시점에만 GitHub Issue #34를 갱신한다. 이미 merge된 child #55를 complete로 표시하고, #118은 PR이 merge될 때까지 open으로 둔다.
 
-No `go.mod`, workflow, module registration, diagram, Docker fixture, or public library package changes are planned. If any becomes necessary, stop and reopen the spec instead of expanding this plan.
+`go.mod`, workflow, module registration, diagram, Docker fixture, public library package 변경은 계획하지 않는다. 필요해지면 이 계획을 확장하지 말고 중단한 뒤 spec을 다시 연다.
 
-## Predicted Risks and Repair Points
+## 예상 위험과 수리 지점
 
 | Risk | Signal | Mitigation | Repair/rerun point |
 |---|---|---|---|
-| Normalized/index positions are mistaken for original spans | source slicing differs from token text | expose only field-local source spans and test every selected token | stop Task 2; repair projection and rerun all Task 2 tests |
-| Masked support terms leak into the search index | `偽物` appears in `IndexTerms` or query hits | compute mask matches first and exclude every overlapping token | stop before Task 3; rerun masking and search tests |
-| Shared catalog slices or metadata mutate across searches | deep-copy or race test fails | immutable service state, call-local results, recursive copy helpers | return to Task 1/4 and rerun focused normal/race tests |
-| Matcher boundary semantics produce substring hits | a query term matches inside another prepared term | space-delimited index plus Unicode-boundary negative tests | reopen the index encoding in spec, then rerun Tasks 2-4 |
-| Kagome lifecycle dominates repeated operations | constructor appears inside `Search` or stress task | construct one search-mode tokenizer in `NewService` only | performance/stability scan blocks delivery until removed |
+| Normalized/index position을 original span으로 착각 | source slicing이 token text와 다름 | field-local source span만 노출하고 모든 selected token을 테스트한다. | Task 2를 중단하고 projection을 고친 뒤 모든 Task 2 test를 다시 실행한다. |
+| Masked support term이 search index로 누출 | `偽物`가 `IndexTerms` 또는 query hit에 나타남 | mask match를 먼저 계산하고 겹치는 모든 token을 제외한다. | Task 3 전 중단하고 masking/search test를 다시 실행한다. |
+| Shared catalog slice 또는 metadata가 search 사이에서 mutation됨 | deep-copy 또는 race test 실패 | immutable service state, call-local result, recursive copy helper | Task 1/4로 돌아가 focused normal/race test를 다시 실행한다. |
+| Matcher boundary semantic이 substring hit를 만듦 | query term이 다른 prepared term 내부에서 match됨 | space-delimited index와 Unicode-boundary negative test | spec에서 index encoding을 다시 열고 Task 2-4를 다시 실행한다. |
+| Kagome lifecycle이 반복 작업을 지배 | constructor가 `Search` 또는 stress task 안에 나타남 | `NewService`에서 search-mode tokenizer 하나만 만든다. | 제거될 때까지 performance/stability scan이 delivery를 막는다. |
 
 ## Acceptance Traceability
 
 | Spec requirement | Plan task | Proof |
 |---|---|---|
-| Constructor-only service, validation, deep copies | Task 1 | focused error and mutation-isolation tests |
-| Search-mode tokenization, POS/base form, normalization, byte spans | Task 2 | source-slicing and metadata tests |
-| Masking plus index exclusion | Task 2 | exact masked text/match span/index-term assertions |
-| Actual all-term matching and deterministic ordering | Task 3 | exact query/hit/no-hit tests |
-| Shared reuse and race safety | Task 4 | bounded exact totals under normal and race runs |
-| Runnable deterministic JSON | Task 4 | preview test and `go run` JSON parse |
-| Bilingual lesson and root navigation | Task 5 | locale/link/content checks |
-| Repository quality and P0/P1 convergence | Task 6 | `make ci`, diff review, CodeGraph/self-review |
+| Constructor-only service, validation, deep copy | Task 1 | focused error 및 mutation-isolation test |
+| Search-mode tokenization, POS/base form, normalization, byte span | Task 2 | source-slicing 및 metadata test |
+| Masking과 index exclusion | Task 2 | 정확한 masked text/match span/index-term assertion |
+| 실제 all-term matching과 deterministic ordering | Task 3 | 정확한 query/hit/no-hit test |
+| Shared reuse와 race safety | Task 4 | normal/race run에서 bounded exact total |
+| Runnable deterministic JSON | Task 4 | preview test와 `go run` JSON parse |
+| Bilingual lesson과 root navigation | Task 5 | locale/link/content check |
+| Repository quality와 P0/P1 convergence | Task 6 | `make ci`, diff review, CodeGraph/self-review |
 
-### Task 1: Lock the Service Contract and Failure Semantics
+### Task 1: Service Contract와 Failure Semantics 고정
 
 **Complexity:** Medium
 **Depends on:** approved design spec
@@ -55,9 +55,9 @@ No `go.mod`, workflow, module registration, diagram, Docker fixture, or public l
 - Create: `examples/japanese-search-preparation/internal/catalogprep/service_test.go`
 - Create: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 
-- [x] **Step 1: Write failing constructor, zero-value, validation, and deep-copy tests**
+- [x] **Step 1: 실패하는 constructor, zero-value, validation, deep-copy test 작성**
 
-Add tests with these concrete contracts:
+다음 concrete contract를 가진 test를 추가한다.
 
 ```go
 func TestNewServiceRejectsInvalidProducts(t *testing.T) {
@@ -104,9 +104,9 @@ func TestProductsReturnsDeepCopy(t *testing.T) {
 }
 ```
 
-Define `newTestService` in the test file using `DefaultProducts()` and `DefaultMaskPolicy()`.
+Test file에서 `DefaultProducts()`와 `DefaultMaskPolicy()`를 사용해 `newTestService`를 정의한다.
 
-- [x] **Step 2: Run the focused test and capture RED**
+- [x] **Step 2: Focused test 실행 및 RED 기록**
 
 Run:
 
@@ -114,11 +114,11 @@ Run:
 go test -count=1 ./examples/japanese-search-preparation/internal/catalogprep
 ```
 
-Expected: FAIL because the package contract does not exist. Record the undefined symbols or missing package error; a setup/dependency error is not valid RED.
+기대값: package contract가 없어서 FAIL한다. Undefined symbol 또는 missing package error를 기록한다. Setup/dependency error는 유효한 RED가 아니다.
 
-- [x] **Step 3: Implement the minimal constructor-owned contract**
+- [x] **Step 3: 최소 constructor-owned contract 구현**
 
-Create `service.go` with the exact public shape from the spec:
+Spec의 정확한 public shape로 `service.go`를 만든다.
 
 ```go
 package catalogprep
@@ -231,7 +231,7 @@ func NewService(products []ProductInput, policy MaskPolicy) (*Service, error) {
 }
 ```
 
-`Products` returns `nil` for a nil/invalid receiver and otherwise deep-copies every slice and metadata map. Add this temporary preparation boundary; Task 2 replaces its empty projections with real tokens and masking:
+`Products`는 nil/invalid receiver에 대해 `nil`을 반환하고, 그 외에는 모든 slice와 metadata map을 deep-copy한다. 이 임시 preparation boundary를 추가한다. Task 2는 비어 있는 projection을 실제 token과 masking으로 교체한다.
 
 ```go
 func (s *Service) Products() []PreparedProduct {
@@ -265,9 +265,9 @@ func (s *Service) prepareProduct(input ProductInput) (PreparedProduct, error) {
 }
 ```
 
-- [x] **Step 4: Run the focused tests and capture GREEN**
+- [x] **Step 4: Focused test 실행 및 GREEN 기록**
 
-Run the same focused command. Expected: PASS for Task 1 tests. Temporary minimal preparation may return an empty-but-owned projection only until Task 2; it must still validate upstream request limits rather than bypassing them.
+같은 focused command를 실행한다. 기대값은 Task 1 test PASS다. Temporary minimal preparation은 Task 2 전까지만 empty-but-owned projection을 반환할 수 있다. 그래도 upstream request limit을 우회하지 말고 검증해야 한다.
 
 - [x] **Step 5: Commit Task 1**
 
@@ -276,7 +276,7 @@ git add examples/japanese-search-preparation/internal/catalogprep/service.go exa
 git commit -m "feat: define Japanese catalog preparation contract"
 ```
 
-**Rollback/rerun point:** If the constructor requires another dependency, stop and revert this task; the approved dependency boundary forbids it.
+**Rollback/rerun point:** Constructor가 다른 dependency를 요구하면 중단하고 이 task를 revert한다. 승인된 dependency boundary가 이를 금지한다.
 
 ### Task 2: Prepare Tokens, Preserve Spans, and Exclude Masked Terms
 
