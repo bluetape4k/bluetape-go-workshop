@@ -256,94 +256,91 @@ fresh lazy router를 exercise한다. 같은 gate는 scheduler parallelism에 의
 
 ## Command Output
 
-Both commands print deterministic indented JSON:
+두 command는 deterministic indented JSON을 출력한다.
 
 ```bash
 go run ./examples/multilingual-language-routing
 go run ./examples/multilingual-language-routing --preload
 ```
 
-Default-policy fixtures cover confident English, Korean, Japanese with Kana,
-Chinese/Han-only, mixed English/Japanese, short text, and numeric unknown text.
-A separately labeled low-confidence policy check uses threshold `1.0` and the
-fixed multilingual-script fixture `support 문의 订单 delivery`. Tests lock only
-that the pinned v0.18.0 result is detected below the configured threshold and
-produces `low-confidence`; its `Unknown` section does not independently create
-`mixed-language`. Documentation does not publish the numeric confidence as a
-universal detector guarantee.
+Default-policy fixture는 confident English, Korean, Kana가 있는 Japanese,
+Chinese/Han-only, mixed English/Japanese, short text, numeric unknown text를 다룬다.
+별도 label이 붙은 low-confidence policy check는 threshold `1.0`과 fixed
+multilingual-script fixture `support 문의 订单 delivery`를 사용한다. 테스트는 pin된
+v0.18.0 result가 configured threshold 아래로 detect되고 `low-confidence`를 만든다는
+점만 lock한다. 해당 `Unknown` section은 독립적으로 `mixed-language`를 만들지 않는다.
+문서는 numeric confidence를 universal detector guarantee로 publish하지 않는다.
 
-Within one mode, repeated output is byte-identical. Lazy and preloaded outputs
-have identical request decisions; only explicit lifecycle/configuration
-metadata differs.
+한 mode 안에서 repeated output은 byte-identical이다. Lazy output과 preloaded output은
+동일한 request decision을 갖고, 명시적인 lifecycle/configuration metadata만 다르다.
 
-The three public evidence views per request are intentional because this lesson
-exposes single-language, confidence-list, and mixed-section evidence together.
-Those APIs can repeat detector computation and allocate result projections. The
-README must state that production callers should request only the evidence their
-policy needs; this example is not a hot-path throughput template.
+Request마다 세 개의 public evidence view를 노출하는 것은 의도적이다. 이 lesson은
+single-language, confidence-list, mixed-section evidence를 함께 보여준다. 해당 API는
+detector computation을 반복하고 result projection을 allocate할 수 있다. README는
+production caller가 자신의 policy에 필요한 evidence만 요청해야 하며, 이 예제가
+hot-path throughput template이 아니라고 설명해야 한다.
 
-The command accepts only fixed, non-sensitive fixtures. `Decision` retains the
-original request text to prove section spans, so callers embedding the package
-shape remain responsible for redaction, access control, and avoiding sensitive
-text in logs or telemetry.
+Command는 fixed non-sensitive fixture만 받는다. `Decision`은 section span을 증명하기
+위해 original request text를 보존하므로, package shape를 embedding하는 caller는
+redaction, access control, log 또는 telemetry의 sensitive text 회피 책임을 계속
+가진다.
 
-## Failure Modes and Guards
+## Failure Mode 및 Guard
 
-1. **Han-only text is sent to a Japanese tokenizer.** Require a Kana hint for
-   the Japanese route and send Han-only Japanese/Chinese evidence to manual
-   review with an explicit reason.
-2. **Uncertainty is hidden as an internal error.** Model short, unknown,
-   low-confidence, mixed, ambiguous, and unsupported input as valid decisions;
-   reserve errors for invalid requests/configuration or detector failures.
-3. **Lazy and preloaded routers drift in behavior.** Construct both from one
-   policy path and compare every decision while allowing only lifecycle
-   metadata to differ.
-4. **Mixed sections expose invalid offsets.** Preserve upstream byte offsets
-   and test that every `text[start:end]` equals the returned section text,
-   including multibyte Japanese input.
-5. **Shared detector reuse mutates caller-visible slices.** Allocate all result
-   projections per call and prove exact results under bounded normal/race tests.
-6. **Routing is mistaken for authorization or compliance.** State in both
-   README locales and preview boundaries that language detection is heuristic
-   evidence and cannot gate authentication, authorization, sanctions, or
-   compliance decisions.
-7. **A configured low-confidence case changes silently after dependency
-   upgrades.** Keep the default threshold at `0.70`, isolate a threshold `1.0`
-   policy check, and lock only `detected && confidence < threshold` plus ordered
-   reasons. A future detector change must force an intentional fixture/policy
-   review rather than weakening the assertion.
+1. **Han-only text가 Japanese tokenizer로 전송된다.** Japanese route에는 Kana hint를
+   요구하고 Han-only Japanese/Chinese evidence는 명시적인 reason과 함께 manual
+   review로 보낸다.
+2. **Uncertainty가 internal error로 숨겨진다.** Short, unknown, low-confidence,
+   mixed, ambiguous, unsupported input은 valid decision으로 model한다. Error는
+   invalid request/configuration 또는 detector failure에만 둔다.
+3. **Lazy router와 preloaded router의 behavior가 drift된다.** 둘 다 하나의 policy
+   path에서 construct하고, lifecycle metadata만 달라도 되도록 허용하면서 모든
+   decision을 비교한다.
+4. **Mixed section이 invalid offset을 노출한다.** Upstream byte offset을 보존하고
+   multibyte Japanese input을 포함해 모든 `text[start:end]`가 반환된 section text와
+   같은지 테스트한다.
+5. **Shared detector reuse가 caller-visible slice를 변경한다.** 모든 result
+   projection은 call마다 allocate하고 bounded normal/race test 아래 exact result를
+   증명한다.
+6. **Routing을 authorization 또는 compliance로 오해한다.** 두 README locale과
+   preview boundary에서 language detection은 heuristic evidence이며 authentication,
+   authorization, sanctions, compliance decision을 gate할 수 없다고 설명한다.
+7. **설정된 low-confidence case가 dependency upgrade 이후 조용히 바뀐다.** Default
+   threshold는 `0.70`으로 유지하고 threshold `1.0` policy check를 분리하며,
+   `detected && confidence < threshold`와 ordered reason만 lock한다. Future detector
+   change는 assertion을 약화하는 대신 의도적인 fixture/policy review를 강제해야 한다.
 
-## Testing
+## 테스트
 
-Tests are written before implementation and cover:
+테스트는 구현 전에 작성하며 다음을 다룬다.
 
-1. default and invalid configuration, selected four-language subset, and nil
-   router behavior;
-2. confident English and Korean sharing the `moderation` route while retaining
-   distinct language/ISO metadata;
-3. confident Japanese with Kana selecting `japanese-tokenization`;
-4. Chinese and Han-only ambiguity selecting manual review with the correct
-   reason;
-5. blank ID, blank text, and oversized text with `errors.Is` preservation;
-6. short, numeric unknown, and mixed default fixtures plus the separate
-   threshold `1.0` low-confidence check with exact ordered reasons;
-7. four descending confidence entries and stable ISO codes;
-8. distinct-language section mixing and exact UTF-8 byte-span slicing;
-9. deterministic, non-nil caller-owned slices;
-10. lazy/preloaded decision equality and intentional lifecycle metadata
-    difference, scoped to option wiring and behavioral equivalence rather than
-    in-process startup or memory measurement;
-11. bounded shared-router reuse with six-participant release gates, exact
-    completion/results, cross-round determinism, and race proof;
-12. CLI flag parsing, repeated deterministic JSON, and route equality across
-    both model-loading modes.
+1. Default 및 invalid configuration, selected four-language subset, nil router
+   behavior.
+2. Confident English와 Korean이 distinct language/ISO metadata를 유지하면서
+   `moderation` route를 공유하는지.
+3. Kana가 있는 confident Japanese가 `japanese-tokenization`을 선택하는지.
+4. Chinese 및 Han-only ambiguity가 올바른 reason과 함께 manual review를
+   선택하는지.
+5. `errors.Is` 보존을 포함한 blank ID, blank text, oversized text.
+6. Short, numeric unknown, mixed default fixture와 별도 threshold `1.0`
+   low-confidence check가 exact ordered reason을 갖는지.
+7. Four descending confidence entry와 stable ISO code.
+8. Distinct-language section mixing과 exact UTF-8 byte-span slicing.
+9. Deterministic non-nil caller-owned slice.
+10. Lazy/preloaded decision equality 및 intentional lifecycle metadata 차이.
+    이는 in-process startup 또는 memory measurement가 아니라 option wiring과
+    behavioral equivalence 범위다.
+11. Six-participant release gate, exact completion/result, cross-round
+    determinism, race proof를 가진 bounded shared-router reuse.
+12. CLI flag parsing, repeated deterministic JSON, 두 model-loading mode 사이의
+    route equality.
 
-CLI tests use an injected argument slice and output/error writers. Unknown
-flags return a non-zero result with a deterministic error, while `--help`
-returns the standard successful usage path. Preview construction failures are
-written to stderr and return non-zero without partial JSON on stdout.
+CLI test는 injected argument slice와 output/error writer를 사용한다. Unknown flag는
+deterministic error와 함께 non-zero result를 반환하고, `--help`는 표준 successful
+usage path를 반환한다. Preview construction failure는 stderr에 쓰고 stdout에 partial
+JSON 없이 non-zero를 반환한다.
 
-Focused validation is:
+Focused validation:
 
 ```bash
 go test -count=1 ./examples/multilingual-language-routing/...
@@ -352,7 +349,7 @@ go run ./examples/multilingual-language-routing
 go run ./examples/multilingual-language-routing --preload
 ```
 
-Repository validation remains:
+저장소 validation:
 
 ```bash
 make fmt-check
@@ -364,100 +361,98 @@ make race
 make ci
 ```
 
-No container-backed test is added. Existing repository-wide heavyweight tests
-remain serialized through the authoritative `make ci` gate.
+Container-backed test는 추가하지 않는다. 기존 repository-wide heavyweight test는
+authoritative `make ci` gate를 통해 계속 serialized 상태로 실행된다.
 
-## Compatibility and Migration
+## Compatibility 및 Migration
 
-This is a new standalone example and changes no bluetape-go API, existing
-workshop API, persisted data, wire contract, dependency, or caller behavior.
-The root README pair gains navigation only. No migration or rollback procedure
-is needed beyond removing the example and navigation entries before merge.
+이는 새 standalone example이며 bluetape-go API, 기존 workshop API, persisted data,
+wire contract, dependency, caller behavior를 변경하지 않는다. Root README pair에는
+navigation만 추가된다. Merge 전에 example과 navigation entry를 제거하는 것 외에는
+migration 또는 rollback procedure가 필요하지 않다.
 
-Future examples may copy the policy shape, but they must import bluetape-go
-directly rather than treating this `internal` package or preview JSON as a
-stable public API.
+Future example은 policy shape를 복사할 수 있지만, 이 `internal` package 또는 preview
+JSON을 stable public API로 취급하지 말고 bluetape-go를 직접 import해야 한다.
 
-## Documentation
+## 문서
 
-The example README pair will include:
+예제 README pair는 다음을 포함한다.
 
-- package lesson, routing matrix, and data flow;
-- run and focused test commands;
-- representative route and manual-review output;
-- confidence, mixed-section, script-hint, and UTF-8 byte-span semantics;
-- lazy versus preloaded lifecycle tradeoff without benchmark claims;
-- the deliberate cost of collecting all three public evidence views and the
-  production guidance to request only what a policy uses;
-- supported and unsupported routes;
-- the heuristic, security, and compliance boundary.
+- package lesson, routing matrix, data flow
+- run 및 focused test command
+- representative route 및 manual-review output
+- confidence, mixed-section, script-hint, UTF-8 byte-span semantics
+- benchmark claim 없는 lazy versus preloaded lifecycle tradeoff
+- 세 public evidence view를 모두 수집하는 deliberate cost와 policy가 사용하는
+  evidence만 요청하라는 production guidance
+- supported 및 unsupported route
+- heuristic, security, compliance boundary
 
-The README pair also warns that decisions retain original text for span
-inspection and therefore must not be copied into logs or telemetry without the
-caller's redaction and access-control policy.
+README pair는 decision이 span inspection을 위해 original text를 보존하므로 caller의
+redaction 및 access-control policy 없이 log나 telemetry로 복사하면 안 된다고
+경고한다.
 
-`README.md` remains English and `README.ko.md` remains source-equivalent natural
-Korean. The root README pair adds one navigation row and compact run command.
-A diagram is N/A: the three-stage linear flow and six-row routing table are
-clearer and more inspectable as text for this small example.
+`README.md`는 English로 유지하고 `README.ko.md`는 source-equivalent natural Korean으로
+유지한다. Root README pair는 navigation row 하나와 compact run command를 추가한다.
+Diagram은 N/A다. 이 작은 예제에서는 three-stage linear flow와 six-row routing table이
+text로 더 명확하고 inspect하기 쉽다.
 
-## Non-goals
+## 비목표
 
-- No HTTP/Gin endpoint; Issue #67 owns integrated web routing.
-- No moderator, tokenizer, queue, persistence, database, cache, or container.
-- No new detector dependency or copied detector/script algorithm.
-- No automatic fallback from unsupported Chinese to Japanese processing.
-- No ranking, translation, locale negotiation, or multilingual content merge.
-- No detector accuracy, startup latency, or memory benchmark claim.
-- No use of detected language for authentication, authorization, sanctions,
-  compliance, or other security decisions.
+- HTTP/Gin endpoint 없음. Issue #67이 integrated web routing을 소유한다.
+- Moderator, tokenizer, queue, persistence, database, cache, container 없음.
+- 새 detector dependency 또는 복사한 detector/script algorithm 없음.
+- Unsupported Chinese에서 Japanese processing으로의 automatic fallback 없음.
+- Ranking, translation, locale negotiation, multilingual content merge 없음.
+- Detector accuracy, startup latency, memory benchmark claim 없음.
+- Authentication, authorization, sanctions, compliance 또는 다른 security
+  decision에 detected language를 사용하지 않음.
 
 ## Acceptance Mapping
 
 | Issue requirement | Design evidence |
 |---|---|
-| Small language subset | One reusable English/Korean/Japanese/Chinese detector. |
-| Confidence lists and explicit low-confidence fallback | Four descending confidence entries plus a separate threshold `1.0` check that preserves the default `0.70` policy. |
-| Mixed sections and script hints | Detector sections with exact byte slices; Latin/Hangul/Kana/Han hints. |
-| Deterministic routing policy | Ordered reasons and one explicit route matrix. |
-| Lazy/preloaded lifecycle comparison | One constructor path, `--preload`, equal decisions, qualitative metadata only. |
-| Shared detector race proof | Bounded 6-worker/6-task/3-round test under normal and race commands. |
-| English, Korean, Japanese/CJK, short/unknown/mixed coverage | Fixed fixture set and exact route/reason assertions. |
-| Bilingual example docs and root navigation | README locale pair plus root navigation pair. |
-| Heuristic/security boundary | Preview notes and both README locales explicitly reject security/compliance use. |
-| Repository quality | Focused commands followed by the authoritative `make ci` gate. |
+| Small language subset | Reusable English/Korean/Japanese/Chinese detector 하나. |
+| Confidence lists and explicit low-confidence fallback | Default `0.70` policy를 보존하는 four descending confidence entry와 별도 threshold `1.0` check. |
+| Mixed sections and script hints | Exact byte slice를 가진 detector section, Latin/Hangul/Kana/Han hint. |
+| Deterministic routing policy | Ordered reason과 명시적인 route matrix 하나. |
+| Lazy/preloaded lifecycle comparison | Constructor path 하나, `--preload`, equal decision, qualitative metadata만. |
+| Shared detector race proof | Normal 및 race command 아래 bounded 6-worker/6-task/3-round test. |
+| English, Korean, Japanese/CJK, short/unknown/mixed coverage | Fixed fixture set 및 exact route/reason assertion. |
+| Bilingual example docs and root navigation | README locale pair와 root navigation pair. |
+| Heuristic/security boundary | Preview note와 두 README locale이 security/compliance 사용을 명시적으로 거부. |
+| Repository quality | Focused command 이후 authoritative `make ci` gate. |
 
 ## Spec Review
 
-The required native review lanes were dispatched with read-only scopes for
-performance, stability, and user/caller perspectives. They did not respond
-after repeated bounded waits and an immediate-return request, so the main
-session applied the workflow's timeout fallback and completed all six lenses
-against this exact artifact.
+필수 native review lane은 performance, stability, user/caller 관점의 read-only
+scope로 dispatch되었다. Repeated bounded wait와 immediate-return request 이후에도
+응답하지 않았으므로, main session은 workflow의 timeout fallback을 적용하고 이 exact
+artifact에 대해 여섯 lens를 모두 완료했다.
 
 | Priority | Lens | Evidence | Resolution |
 |---|---|---|---|
-| P1 | Stability | The original concurrency wording could mean 108 calls while requiring 18. | Defined six requests per round across a pool of up to six workers, for exactly 18 calls over three rounds. |
-| P1 | Developer/API | Japanese without Kana and without an explicit fallback could leave the route matrix incomplete. | Any detected Japanese result without Kana now receives `ambiguous-cjk-script`. |
-| P1 | Security | `Decision` retains original text but the caller's logging/privacy duty was unstated. | Limited the CLI to fixed fixtures and added explicit redaction, access-control, and telemetry guidance. |
-| P2 | Performance | Three detector queries per request could be mistaken for a production hot-path template. | Documented the teaching cost and production guidance to gather only required evidence. |
-| P2 | Operator/Ops | CLI error/help behavior and partial-output boundary were not explicit. | Added injected CLI seams, non-zero error behavior, standard help, stderr, and no partial JSON. |
-| P2 | User/caller | Canonical ID behavior and lazy/preloaded comparison fields were ambiguous. | Specified trimmed IDs, byte-exact text, equal decisions, and the two explicit lifecycle/config fields. |
-| P1 | Evidence integrity | Planning-time v0.18.0 execution disproved the original claim that `문의 注文 support` was below the default `0.70` threshold. | With user approval, preserved default `0.70` and isolated a threshold `1.0` check using stable fixture `support 문의 订单 delivery`; tests assert the relation, not a universal numeric claim. |
-| P1 | Performance/stability | The original `maxActive` gate measured waiting goroutines and could not prove overlap inside the detector. | Removed the internal-overlap claim; require a fresh lazy target, six ready participants, exact outcomes, cross-round determinism, and race proof. |
+| P1 | Stability | 원래 concurrency wording은 18 calls를 요구하면서 108 calls로 읽힐 수 있었다. | 최대 six worker pool에서 round마다 six request로 정의해 three round 동안 정확히 18 calls가 되게 했다. |
+| P1 | Developer/API | Kana 없는 Japanese와 명시적 fallback 부재는 route matrix를 불완전하게 만들 수 있었다. | Kana 없는 모든 detected Japanese result가 이제 `ambiguous-cjk-script`를 받는다. |
+| P1 | Security | `Decision`은 original text를 보존하지만 caller의 logging/privacy duty가 명시되지 않았다. | CLI를 fixed fixture로 제한하고 redaction, access-control, telemetry guidance를 명시적으로 추가했다. |
+| P2 | Performance | Request마다 세 detector query를 수행하는 것이 production hot-path template으로 오해될 수 있었다. | Teaching cost와 필요한 evidence만 수집하라는 production guidance를 문서화했다. |
+| P2 | Operator/Ops | CLI error/help behavior와 partial-output boundary가 명시적이지 않았다. | Injected CLI seam, non-zero error behavior, standard help, stderr, partial JSON 없음 조건을 추가했다. |
+| P2 | User/caller | Canonical ID behavior와 lazy/preloaded comparison field가 모호했다. | Trimmed ID, byte-exact text, equal decision, 두 explicit lifecycle/config field를 명시했다. |
+| P1 | Evidence integrity | Planning-time v0.18.0 execution은 `문의 注文 support`가 default `0.70` threshold 아래라는 원래 claim을 반증했다. | 사용자 승인으로 default `0.70`을 보존하고 stable fixture `support 문의 订单 delivery`를 사용하는 threshold `1.0` check를 분리했다. 테스트는 universal numeric claim이 아니라 relation을 assert한다. |
+| P1 | Performance/stability | 원래 `maxActive` gate는 waiting goroutine을 측정했고 detector 내부 overlap을 증명할 수 없었다. | Internal-overlap claim을 제거했다. Fresh lazy target, six ready participants, exact outcome, cross-round determinism, race proof를 요구한다. |
 
-Integration review found no remaining contradiction, unsupported assumption,
-or open material user decision. Latest convergence: P0=0, P1=0. The listed P2
-items are resolved in this artifact and require no follow-up issue.
+Integration review는 남은 contradiction, unsupported assumption, open material user
+decision을 찾지 못했다. 최신 convergence: P0=0, P1=0. 나열된 P2 item은 이 artifact
+안에서 해결되었으며 follow-up issue가 필요하지 않다.
 
 ## Definition of Done
 
-- The command prints deterministic evidence for every route and review state.
-- English and Korean share `moderation` while preserving language metadata.
-- Japanese processing is selected only with confident, non-mixed Kana evidence.
-- Chinese/Han-only and all uncertain inputs fail closed to manual review.
-- Lazy and preloaded routers produce identical decisions.
-- Focused normal/race tests and `make ci` pass from fresh executions.
-- Both example and root README locale pairs match actual command behavior.
-- Type A spec, plan, verifier, six-lane reviews, lesson, PR metadata, CI, and
-  final review gates are complete before the explicit merge boundary.
+- Command는 모든 route와 review state에 대한 deterministic evidence를 출력한다.
+- English와 Korean은 language metadata를 보존하면서 `moderation`을 공유한다.
+- Japanese processing은 confident non-mixed Kana evidence가 있을 때만 선택한다.
+- Chinese/Han-only 및 모든 uncertain input은 manual review로 fail closed한다.
+- Lazy router와 preloaded router는 동일한 decision을 생성한다.
+- Fresh execution에서 focused normal/race test와 `make ci`가 통과한다.
+- Example 및 root README locale pair는 실제 command behavior와 일치한다.
+- 명시적인 merge boundary 전에 Type A spec, plan, verifier, six-lane review,
+  lesson, PR metadata, CI, final review gate가 완료된다.
