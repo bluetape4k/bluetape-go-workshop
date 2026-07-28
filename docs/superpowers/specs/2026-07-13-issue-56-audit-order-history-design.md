@@ -1,67 +1,64 @@
-# Issue #56 Audit Order History Design
+# Issue #56 Audit Order History 설계
 
 ## Status
 
-User-approved design for Issue #56, implemented against bluetape-go v0.18.0.
-The Type A specification review converged at P0=0/P1=0 on 2026-07-13.
+Issue #56에 대한 user-approved design이며 bluetape-go v0.18.0 기준으로 구현되었다.
+Type A specification review는 2026-07-13에 P0=0/P1=0으로 수렴했다.
 
 ## Goal
 
-Add a runnable, application-shaped order service that contrasts a mutable
-current-state view with immutable audit history. The example demonstrates order
-creation and status transitions, append-before-state consistency, duplicate
-command detection, aggregate history, filtered queries, and deterministic JSON.
+mutable current-state view와 immutable audit history를 대비하는 실행 가능한
+application-shaped order service를 추가한다. 이 예제는 order creation과 status transition,
+append-before-state consistency, duplicate command detection, aggregate history, filtered
+query, deterministic JSON을 보여준다.
 
 ## Context and Current Evidence
 
-Issue #56 is the first dependency in milestone track #35, before the Gin query
-API (#58), SQL outbox publisher (#57), and Redis Streams integration (#68).
-The current stable dependency is bluetape-go v0.18.0.
+Issue #56은 milestone track #35의 첫 dependency이며 Gin query API (#58), SQL outbox
+publisher (#57), Redis Streams integration (#68)보다 앞선다. 현재 stable dependency는
+bluetape-go v0.18.0이다.
 
-The released `audit` package provides `NewAggregateID`, `NewDomainEvent`,
-`NewEntry`, `Repository.Append`, `LoadHistory`, `Find`, and the goroutine-safe
-`MemoryRepository`. The repository validates contiguous revisions and rejects
-globally duplicated event IDs and idempotency keys. It returns defensive copies
-and preserves context cancellation. It is intentionally non-durable.
+released `audit` package는 `NewAggregateID`, `NewDomainEvent`, `NewEntry`,
+`Repository.Append`, `LoadHistory`, `Find`, goroutine-safe `MemoryRepository`를 제공한다.
+repository는 연속 revision을 검증하고 전역 중복 event ID와 idempotency key를 거부한다. 또한
+defensive copy를 반환하고 context cancellation을 보존한다. 이 repository는 의도적으로
+non-durable이다.
 
-The library-local `examples/audit` already demonstrates create, add-item,
-complete, and outbox replay. This workshop adopts its append-before-mutation
-boundary but does not copy its scenario. The workshop focuses on status history,
-current-state contrast, and query windows. Outbox replay is rejected here because
-issues #57 and #68 own that lesson.
+library-local `examples/audit`는 이미 create, add-item, complete, outbox replay를 보여준다.
+이 workshop은 해당 예제의 append-before-mutation boundary를 채택하지만 scenario를 복사하지
+않는다. workshop은 status history, current-state contrast, query window에 집중한다. outbox
+replay는 issue #57과 #68이 소유하는 lesson이므로 여기서는 제외한다.
 
 ## Chosen Approach
 
-Use a small `orderhistory.Service` with an injected `audit.Repository`, UTC
-clock, mutex, and in-memory current-state map. Explicit `Create`, `Confirm`,
-`Ship`, and `Cancel` methods make the state machine and its failure modes easy to
-read. Every command validates and builds one fixed-size domain event, appends it,
-and only then updates current state while holding the same service lock.
+주입된 `audit.Repository`, UTC clock, mutex, in-memory current-state map을 가진 작은
+`orderhistory.Service`를 사용한다. 명시적인 `Create`, `Confirm`, `Ship`, `Cancel` method는
+state machine과 failure mode를 읽기 쉽게 만든다. 모든 command는 하나의 fixed-size domain
+event를 검증하고 생성한 뒤 append하고, 그 이후에야 같은 service lock을 잡은 상태에서 current
+state를 update한다.
 
-The runnable preview executes a fixed order lifecycle and prints deterministic
-indented JSON containing the current snapshot, full aggregate history, and a
-filtered history window. Repository values remain the audit source of truth;
-the mutable map is only the teaching projection.
+실행 가능한 preview는 고정 order lifecycle을 수행하고 current snapshot, full aggregate
+history, filtered history window를 담은 deterministic indented JSON을 출력한다. repository
+value는 audit source of truth로 남는다. mutable map은 교육용 projection일 뿐이다.
 
 ## Alternatives
 
 ### Direct repository fixture
 
-A `main` function could append hand-built entries and print queries. This is
-smaller, but it cannot teach where validation, revisions, idempotency, and state
-mutation belong in an application boundary. Rejected as too thin.
+`main` function이 hand-built entry를 append하고 query를 출력할 수도 있다. 더 작지만
+validation, revision, idempotency, state mutation이 application boundary의 어디에 속하는지
+가르칠 수 없다. 너무 얇아서 거부한다.
 
 ### Durable SQL current state and outbox
 
-A SQL transaction could update the order row and enqueue an audit message.
-This is production-shaped, but it conflates the first audit lesson with
-persistence and delivery. Deferred to issues #57 and #68.
+SQL transaction으로 order row를 update하고 audit message를 enqueue할 수 있다. production-shaped
+접근이지만 첫 audit lesson을 persistence와 delivery에 섞어 버린다. issue #57과 #68로 미룬다.
 
 ### Event-sourced aggregate
 
-Current state could be reconstructed exclusively by replaying audit events.
-Rejected because the package explicitly models audit history, not an event
-store. The README must state that history replay is not the recovery model.
+current state를 audit event replay만으로 재구성할 수도 있다. package가 event store가 아니라
+audit history를 명시적으로 model하므로 거부한다. README는 history replay가 recovery model이
+아니라고 밝혀야 한다.
 
 ## Package and Files
 
@@ -79,13 +76,12 @@ examples/audit-order-history/
     preview_test.go
 ```
 
-Root `README.md` and `README.ko.md` will link the example. No dependency,
-module, workflow, container, database, public library API, or diagram changes
-are required.
+root `README.md`와 `README.ko.md`는 example을 link한다. dependency, module, workflow,
+container, database, public library API, diagram 변경은 필요하지 않다.
 
 ## Service API Contract
 
-The internal package exposes this compact teaching API:
+internal package는 다음 compact teaching API를 노출한다.
 
 ```go
 type Options struct {
@@ -107,24 +103,24 @@ func (s *Service) History(context.Context, string) (audit.History, bool, error)
 func (s *Service) Find(context.Context, audit.Query) ([]audit.Entry, error)
 ```
 
-`NewService` rejects a nil repository and invalid author with
-`ErrInvalidConfig`; a nil clock defaults to `time.Now().UTC`. Nil contexts are
-normalized to `context.Background`, matching the audit package. `Service{}` is
-not a usable configuration: every method detects missing dependencies and
-returns `ErrInvalidConfig` (or `false` for `Current`) instead of panicking.
+`NewService`는 nil repository와 유효하지 않은 author를 `ErrInvalidConfig`로 거부한다. nil
+clock은 `time.Now().UTC`를 기본값으로 사용한다. nil context는 audit package와 맞게
+`context.Background`로 정규화한다. `Service{}`는 사용할 수 있는 configuration이 아니다. 모든
+method는 missing dependency를 감지하고 panic 대신 `ErrInvalidConfig`를 반환하거나 `Current`의
+경우 `false`를 반환한다.
 
-Stable service sentinels are `ErrInvalidConfig`, `ErrInvalidCommand`,
-`ErrOrderExists`, `ErrOrderNotFound`, and `ErrInvalidTransition`. Construction,
-ID, reason, and state-machine errors wrap the matching sentinel for
-`errors.Is`. A `Find` limit above 100 or incompatible aggregate type wraps
-`audit.ErrInvalidQuery`. Repository errors are never translated away.
+stable service sentinel은 `ErrInvalidConfig`, `ErrInvalidCommand`, `ErrOrderExists`,
+`ErrOrderNotFound`, `ErrInvalidTransition`이다. construction, ID, reason, state-machine error는
+`errors.Is`를 위해 대응 sentinel을 wrap한다. 100을 초과하는 `Find` limit 또는 incompatible
+aggregate type은 `audit.ErrInvalidQuery`를 wrap한다. repository error는 다른 error로 번역해
+없애지 않는다.
 
 ## Domain Model and State Machine
 
-`Order` contains a canonical order ID, status, revision, and UTC update time.
-The supported statuses are `pending`, `confirmed`, `shipped`, and `cancelled`.
+`Order`는 canonical order ID, status, revision, UTC update time을 포함한다. 지원 status는
+`pending`, `confirmed`, `shipped`, `cancelled`이다.
 
-Allowed transitions are:
+허용 transition은 다음과 같다.
 
 | Command | From | To |
 |---|---|---|
@@ -133,72 +129,61 @@ Allowed transitions are:
 | Ship | confirmed | shipped |
 | Cancel | pending or confirmed | cancelled |
 
-`shipped` and `cancelled` are terminal. Creating an existing order, acting on a
-missing order, or requesting any other transition returns a stable sentinel
-error without writing audit history or current state.
+`shipped`와 `cancelled`는 terminal이다. 기존 order를 생성하거나, 없는 order에 작업하거나, 그
+밖의 transition을 요청하면 audit history 또는 current state를 쓰지 않고 stable sentinel
+error를 반환한다.
 
-Order IDs and command IDs are trimmed and must match
-`[A-Za-z0-9][A-Za-z0-9._-]{0,127}`. This prevents ambiguous canonicalization and
-keeps repository keys bounded. The caller supplies a unique command ID. That
-same canonical value is used as both `EventID` and `IdempotencyKey`; it is never
-derived by lossy concatenation. This is duplicate detection, not successful
-idempotent replay: resubmitting a committed command fails and preserves
-`errors.Is(err, audit.ErrRevisionConflict)`.
+order ID와 command ID는 trim되며 `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`과 일치해야 한다. 이는
+모호한 canonicalization을 막고 repository key를 bounded로 유지한다. caller는 고유 command ID를
+제공한다. 같은 canonical value는 `EventID`와 `IdempotencyKey`에 모두 사용되며 lossy
+concatenation으로 파생하지 않는다. 이것은 duplicate detection이지 성공적인 idempotent replay가
+아니다. 이미 commit된 command를 다시 제출하면 실패하며 `errors.Is(err,
+audit.ErrRevisionConflict)`를 보존한다.
 
-Each event uses aggregate type `order` and an `audit.AggregateID` for the order.
-Event types are `order.created`, `order.confirmed`, `order.shipped`, and
-`order.cancelled`. Revision is the prior current-state revision plus one.
-Changes are fixed application-owned fields: `status` before/after and an
-optional cancellation reason that must be valid UTF-8 and no longer than 256
-runes. No arbitrary caller JSON is accepted. The author is fixed by service
-configuration, trimmed, required, and limited to 128 runes.
+각 event는 aggregate type `order`와 order용 `audit.AggregateID`를 사용한다. event type은
+`order.created`, `order.confirmed`, `order.shipped`, `order.cancelled`이다. revision은 이전
+current-state revision에 1을 더한 값이다. change는 application이 소유하는 고정 field인
+`status` before/after와 optional cancellation reason이다. cancellation reason은 valid UTF-8이어야
+하며 256 rune을 넘을 수 없다. 임의 caller JSON은 받지 않는다. author는 service configuration으로
+고정되고, trim되며, 필수이고, 128 rune으로 제한된다.
 
 ## Consistency and Concurrency
 
-Each command checks context, validates input, acquires the service mutex,
-rechecks context, validates current state, constructs the event and entry, and
-calls `Repository.Append` while still holding the mutex. Only a successful
-append mutates the map. This serializes revision selection and prevents two
-concurrent commands for one order from racing. The example intentionally favors
-a simple, visible invariant over per-aggregate lock machinery.
+각 command는 context를 확인하고, input을 검증하고, service mutex를 획득하고, context를 다시
+확인하고, current state를 검증하고, event와 entry를 만든 뒤 mutex를 계속 잡은 상태에서
+`Repository.Append`를 호출한다. append 성공만 map을 mutate한다. 이 순서는 revision selection을
+직렬화하고 한 order에 대한 두 concurrent command가 race하지 못하게 한다. 예제는 per-aggregate
+lock 장치보다 단순하고 눈에 보이는 invariant를 의도적으로 선호한다.
 
-Append success is the commit point. Cancellation before or during append causes
-the repository to return an error and neither side changes. Once append succeeds,
-the in-memory state update is infallible and completes under the lock even if
-cancellation arrives immediately afterward. Checking cancellation between those
-two operations would create an audit/current-state split and is forbidden.
+append success가 commit point다. append 전이나 중에 cancellation이 발생하면 repository가 error를
+반환하고 어느 쪽도 변경되지 않는다. append가 성공한 뒤에는 바로 cancellation이 도착하더라도
+in-memory state update가 실패 없이 lock 아래에서 완료된다. 이 두 operation 사이에서 cancellation을
+확인하면 audit/current-state split이 생기므로 금지한다.
 
-Repository errors are wrapped with operation context while preserving
-`errors.Is`. Duplicate event and idempotency-key conflicts both preserve
-`audit.ErrRevisionConflict`; callers may use `errors.As` to inspect the
-`audit.ValidationError.Field` when they need to distinguish them. Returned
-orders, preview slices, and repository history are copied; callers cannot mutate
-stored state.
+repository error는 operation context로 wrap하되 `errors.Is`를 보존한다. duplicate event와
+idempotency-key conflict는 모두 `audit.ErrRevisionConflict`를 보존한다. caller가 구분해야 할 때는
+`errors.As`로 `audit.ValidationError.Field`를 검사할 수 있다. 반환된 order, preview slice,
+repository history는 복사된다. caller는 stored state를 mutate할 수 없다.
 
-Holding the lock across a repository call is acceptable only because this
-example uses the bounded in-memory repository and has no network or database
-I/O. It is a demo-scale service that intentionally serializes unrelated orders
-and makes no throughput or horizontal-scaling claim. The README states that a
-durable application must use a caller-owned SQL transaction/outbox boundary
-rather than hold a process mutex across I/O, and should use per-aggregate or
-database-owned concurrency instead of this service-wide lock.
+repository call 동안 lock을 유지하는 것은 이 예제가 bounded in-memory repository를 사용하고 network
+또는 database I/O가 없기 때문에만 허용된다. 이 demo-scale service는 의도적으로 unrelated order까지
+직렬화하며 throughput 또는 horizontal-scaling claim을 하지 않는다. README는 durable application이
+process mutex를 I/O 동안 잡는 대신 caller-owned SQL transaction/outbox boundary를 사용해야 하며,
+이 service-wide lock 대신 per-aggregate 또는 database-owned concurrency를 사용해야 한다고 설명한다.
 
 ## Query and Preview Contract
 
-`Service.History` delegates to `LoadHistory` for one aggregate. It is an
-aggregate-demo-only full read, not a production pagination contract.
-`Service.Find` accepts an `audit.Query`, preserves inclusive revision/time
-filters and newest-first ordering, forces or validates aggregate type `order`,
-replaces an omitted limit with 20, and rejects limits above 100. This prevents a
-shared repository from turning the workshop service into a cross-domain query
-surface. Both methods check context. An absent aggregate returns
-`(audit.History{}, false, nil)` from `History`; `Find` returns a non-nil empty
-`[]audit.Entry` when no entries match. The README warns that production history
-APIs need storage-backed pagination and retention rather than unbounded full
-copies.
+`Service.History`는 한 aggregate에 대해 `LoadHistory`에 위임한다. 이는 aggregate-demo-only full
+read이지 production pagination contract가 아니다. `Service.Find`는 `audit.Query`를 받고 inclusive
+revision/time filter와 newest-first ordering을 보존하며, aggregate type `order`를 강제하거나
+검증하고, 생략된 limit을 20으로 대체하며, 100을 넘는 limit을 거부한다. 이를 통해 shared repository가
+workshop service를 cross-domain query surface로 바꾸지 못하게 한다. 두 method 모두 context를
+확인한다. 없는 aggregate는 `History`에서 `(audit.History{}, false, nil)`을 반환한다. `Find`는 일치
+entry가 없으면 nil이 아닌 빈 `[]audit.Entry`를 반환한다. README는 production history API가 unbounded
+full copy가 아니라 storage-backed pagination과 retention을 필요로 한다고 경고한다.
 
-`BuildPreview` creates one order and runs create, confirm, and ship with fixed
-command IDs and injected timestamps. It returns:
+`BuildPreview`는 하나의 order를 만들고 고정 command ID와 주입 timestamp로 create, confirm, ship을
+실행한다. 반환 형태는 다음과 같다.
 
 ```json
 {
@@ -208,87 +193,80 @@ command IDs and injected timestamps. It returns:
 }
 ```
 
-The actual history arrays contain stable event identity, type, revision,
-occurred-at time, author, and status changes. `recent_history` demonstrates a
-revision range and newest-first limit. `main.go` uses a deterministic UTC clock,
-marshals with indentation, and writes only the JSON document to stdout.
+실제 history array는 stable event identity, type, revision, occurred-at time, author, status
+change를 포함한다. `recent_history`는 revision range와 newest-first limit을 보여준다. `main.go`는
+deterministic UTC clock을 사용하고, indentation으로 marshal하며, JSON document만 stdout에 쓴다.
 
 ## Failure Modes
 
-1. Invalid or duplicate commands fail before current-state mutation. If the
-   repository detects a reused global event/idempotency identity, the command
-   returns the repository error and leaves the projection unchanged.
-2. A repository failure or cancellation during append leaves both history and
-   current state unchanged.
-3. Concurrent commands are serialized. Exactly one valid transition may win;
-   later commands observe the resulting state and either continue validly or
-   fail with an invalid transition. No revision gap or race is allowed.
-4. Mutation of a returned order or preview value cannot alter stored state or
-   later query results.
+1. 유효하지 않거나 중복된 command는 current-state mutation 전에 실패한다. repository가 재사용된
+   global event/idempotency identity를 감지하면 command는 repository error를 반환하고 projection을
+   변경하지 않는다.
+2. append 중 repository failure 또는 cancellation은 history와 current state를 모두 변경하지 않는다.
+3. concurrent command는 직렬화된다. 정확히 하나의 valid transition만 이길 수 있다. 이후 command는
+   결과 state를 관찰하고 계속 유효하게 진행하거나 invalid transition으로 실패한다. revision gap 또는
+   race는 허용하지 않는다.
+4. 반환된 order 또는 preview value를 mutate해도 stored state나 이후 query result를 변경할 수 없다.
 
 ## Security and Operations Boundaries
 
-The example has no HTTP server, authentication, secret, external process, or
-durable store. Cancellation reasons are bounded to 256 UTF-8 runes and are
-demonstration metadata, not a place for PII or credentials. Event payloads and
-logs must be classified and redacted by the real application.
+예제에는 HTTP server, authentication, secret, external process, durable store가 없다.
+cancellation reason은 256 UTF-8 rune으로 제한되며 demonstration metadata이지 PII 또는 credential을
+담는 곳이 아니다. 실제 application은 event payload와 log를 classify하고 redact해야 한다.
 
-`MemoryRepository` loses all data on process exit. Production owners must
-choose retention, deletion, archival, access control, schema versioning and
-migration, payload-size limits, encryption, and PII/redaction policy. This
-example provides neither disaster recovery nor exactly-once delivery.
+`MemoryRepository`는 process exit 시 모든 data를 잃는다. production owner는 retention, deletion,
+archival, access control, schema versioning과 migration, payload-size limit, encryption,
+PII/redaction policy를 선택해야 한다. 이 예제는 disaster recovery나 exactly-once delivery를 제공하지
+않는다.
 
 ## Testing
 
-Focused tests will prove:
+focused test는 다음을 증명한다.
 
-- create-confirm-ship ordering, revisions, event metadata, history, and queries;
-- cancel from pending and confirmed, plus terminal/invalid transitions;
-- missing/duplicate orders and duplicate command/event identities;
-- repository failure and context cancellation with no projection mutation;
-- successful append as commit point despite cancellation immediately afterward;
-- invalid IDs and bounded cancellation reason;
-- defensive copies, absent-history `false`, and non-nil empty query results;
-- deterministic preview JSON; and
-- bounded concurrent reuse under `go test -race` without sleeps.
+- create-confirm-ship ordering, revision, event metadata, history, query
+- pending 및 confirmed에서의 cancel과 terminal/invalid transition
+- missing/duplicate order와 duplicate command/event identity
+- projection mutation 없는 repository failure 및 context cancellation
+- append 직후 cancellation에도 successful append가 commit point임
+- invalid ID와 bounded cancellation reason
+- defensive copy, absent-history `false`, nil이 아닌 empty query result
+- deterministic preview JSON
+- sleep 없는 `go test -race` 아래의 bounded concurrent reuse
 
-Validation order is focused package tests, focused race tests, runnable preview,
-`git diff --check`, and repository-wide `make ci`.
+validation order는 focused package test, focused race test, runnable preview,
+`git diff --check`, repository-wide `make ci`다.
 
 ## Compatibility, Migration, and Rollback
 
-The example adds only new workshop files and uses the existing v0.18.0 module
-dependency. It does not change public APIs. Rollback is deletion of the example,
-its root navigation links, and its documentation artifacts. A future durable
-implementation must not treat `MemoryRepository` data as migratable production
-state; it should introduce an explicit persistence and outbox design in the
-follow-up issues.
+예제는 새 workshop file만 추가하고 기존 v0.18.0 module dependency를 사용한다. public API를 변경하지
+않는다. rollback은 example, root navigation link, documentation artifact를 삭제하는 것이다. 미래의
+durable implementation은 `MemoryRepository` data를 migratable production state로 취급하면 안 된다.
+후속 issue에서 명시적인 persistence와 outbox design을 도입해야 한다.
 
 ## Acceptance Criteria and DoD
 
-- The application-shaped service implements all defined transitions and the
-  append-before-mutation consistency contract.
-- The preview deterministically contrasts current state, full immutable history,
-  and a filtered query.
-- Focused success, failure, edge, cancellation, defensive-copy, and concurrent
-  reuse tests pass, including race detection.
-- English and Korean README files explain the lesson, run command, expected
-  behavior, audit-versus-event-sourcing boundary, and operational gaps.
-- Root English and Korean navigation links the runnable example.
-- Type A spec, plan, verifier, review, lessons, PR, CI, merge, sync, and cleanup
-  gates complete with P0=0/P1=0.
+- application-shaped service는 정의된 모든 transition과 append-before-mutation consistency contract를
+  구현한다.
+- preview는 current state, full immutable history, filtered query를 deterministic하게 대비한다.
+- focused success, failure, edge, cancellation, defensive-copy, concurrent reuse test가 race
+  detection을 포함해 통과한다.
+- English 및 Korean README file은 lesson, run command, expected behavior,
+  audit-versus-event-sourcing boundary, operational gap을 설명한다.
+- root English 및 Korean navigation은 runnable example을 link한다.
+- Type A spec, plan, verifier, review, lesson, PR, CI, merge, sync, cleanup gate가
+  P0=0/P1=0으로 완료된다.
 
 ## Specification Review Record
 
 | Lens | Result | Resolution |
 |---|---|---|
-| Performance | P0=0, P1=0, P2=2 | Documented demo-scale global serialization and bounded `Find`; full history is explicitly demo-only. |
-| Stability | P0=0, P1=0 | Commit-point cancellation, failure atomicity, and bounded race proof are explicit. |
-| Security | P0=0, P1=0 | IDs, author, reason, query domain, metadata, UTF-8, and PII boundaries are bounded. |
-| Operator/Ops | P0=0, P1=0 | Durability, retention, migration, rollback, recovery, and diagnostics boundaries are explicit. |
-| Developer/API | P0=0, P1=0 after repair | Added exact API, zero-value/config/error semantics, duplicate retry behavior, and absent-history contract. |
-| User/caller | P0=0, P1=0 | Preview, README lesson, unsupported behavior, and production misuse warnings are explicit. |
-| Main integration | P0=0, P1=0 | No unresolved contradiction, scope expansion, dependency, or repository hazard remains. |
+| Performance | P0=0, P1=0, P2=2 | demo-scale global serialization과 bounded `Find`를 문서화했다. full history는 명시적으로 demo-only다. |
+| Stability | P0=0, P1=0 | commit-point cancellation, failure atomicity, bounded race proof를 명시했다. |
+| Security | P0=0, P1=0 | ID, author, reason, query domain, metadata, UTF-8, PII boundary를 제한했다. |
+| Operator/Ops | P0=0, P1=0 | durability, retention, migration, rollback, recovery, diagnostics boundary를 명시했다. |
+| Developer/API | P0=0, P1=0 after repair | exact API, zero-value/config/error semantic, duplicate retry behavior, absent-history contract를 추가했다. |
+| User/caller | P0=0, P1=0 | preview, README lesson, unsupported behavior, production misuse warning을 명시했다. |
+| Main integration | P0=0, P1=0 | unresolved contradiction, scope expansion, dependency, repository hazard가 남지 않았다. |
 
-The stability, security, operator, and user lanes timed out after bounded waits;
-the required fallback reviews were completed independently in the main session.
+stability, security, operator, user lane은 bounded wait 이후 timeout되었다. 필요한 fallback
+review는 main session에서 독립적으로 완료했다.
