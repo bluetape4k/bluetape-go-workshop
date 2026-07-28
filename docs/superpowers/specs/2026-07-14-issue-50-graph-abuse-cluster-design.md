@@ -331,30 +331,27 @@ clearance를 포함한다.
 
 ### Pure tests
 
-- valid fixture construction and graph-value validation;
-- duplicate vertex, duplicate edge, missing endpoint, and unknown kind;
-- direct and transitive shared-identifier clusters;
-- isolated users and unique identifiers;
-- evidence deduplication and weight calculation;
-- cluster and evidence tie-breaking under reversed/shuffled input;
-- vertex and edge limit-plus-one rejection;
-- loopback URI acceptance plus remote, credential-bearing, malformed, and
-  missing-port rejection before driver creation;
-- canceled context propagation;
-- deterministic JSON projection, encode-before-cleanup ordering, cleanup-error
-  suppression of success output, and stdout write failure.
+- valid fixture construction과 graph-value validation
+- duplicate vertex, duplicate edge, missing endpoint, unknown kind
+- direct 및 transitive shared-identifier cluster
+- isolated user와 unique identifier
+- evidence deduplication과 weight calculation
+- reversed/shuffled input 아래의 cluster 및 evidence tie-breaking
+- vertex 및 edge limit-plus-one rejection
+- loopback URI acceptance와 driver 생성 전 remote, credential-bearing, malformed, missing-port rejection
+- canceled context propagation
+- deterministic JSON projection, encode-before-cleanup ordering, cleanup-error가 success output을 억제하는
+  동작, stdout write failure
 
 ### Neo4j integration test
 
-One serial test starts `neo4j:5.26.0`, registers cleanup immediately, obtains a
-Bolt URL, constructs the official driver and released adapter, verifies actual
-connectivity, writes a unique fixture namespace, reads through both adapter
-methods, analyzes the result, checks the exact report, proves cancellation, and
-deletes only its namespace. It repeats the atomic reset/seed to prove idempotent
-counts and verifies that unrelated fixture namespaces remain untouched.
+하나의 serial test는 `neo4j:5.26.0`을 시작하고 cleanup을 즉시 등록하며 Bolt URL을 얻는다. 그런 뒤
+official driver와 released adapter를 구성하고 actual connectivity를 검증하며, unique fixture namespace를
+write하고 두 adapter method로 read한다. 이어서 result를 analyze하고 exact report를 확인하며,
+cancellation을 증명하고 자기 namespace만 삭제한다. 또한 atomic reset/seed를 반복해 idempotent count를
+증명하고 unrelated fixture namespace가 건드려지지 않았음을 검증한다.
 
-Memgraph is not started. Real-service tests do not run in parallel with other
-container suites.
+Memgraph는 시작하지 않는다. real-service test는 다른 container suite와 parallel로 실행하지 않는다.
 
 ### Repository gates
 
@@ -377,72 +374,66 @@ git diff --check origin/develop
 
 | Failure | Required response |
 |---|---|
-| Neo4j is unreachable or becomes unavailable | Preserve context/provider cause internally, render one redacted backend category, close the driver, and return non-zero. |
-| Fixture reset is accidentally broad or seeding fails partway | One scoped reset/seed statement runs in one managed transaction; review and integration evidence reject unscoped deletion and half-seeded state. |
-| A query returns more records than the lesson bounds | Detect `maximum + 1`, return the typed oversized-graph error, and emit no partial cluster report. |
-| Neo4j record order changes | Sort users, evidence, clusters, and isolated users according to the deterministic contract. |
-| A transitive component contains malformed data | Fail the whole analysis with a typed invalid-graph error; never silently drop a record. |
-| Cancellation occurs during query or cleanup | Return caller cancellation for the operation; use a separate bounded context for cleanup. |
-| Two CLI processes use the fixed fixture namespace | This focused lesson does not support concurrent runs; document the boundary and use unique namespaces in tests. |
-| A diagram renders with reversed or colliding arrowheads | Adjust endpoints and bends, rerender, rerun audits, and repeat original-size PNG inspection. |
+| Neo4j is unreachable or becomes unavailable | context/provider cause를 내부적으로 보존하고, redacted backend category 하나를 render하며, driver를 닫고 non-zero를 반환한다. |
+| Fixture reset is accidentally broad or seeding fails partway | 하나의 scoped reset/seed statement가 하나의 managed transaction에서 실행된다. review 및 integration evidence는 unscoped deletion과 half-seeded state를 거부한다. |
+| A query returns more records than the lesson bounds | `maximum + 1`을 감지하고 typed oversized-graph error를 반환하며 partial cluster report를 내보내지 않는다. |
+| Neo4j record order changes | deterministic contract에 따라 user, evidence, cluster, isolated user를 정렬한다. |
+| A transitive component contains malformed data | typed invalid-graph error로 전체 analysis를 실패시킨다. record를 조용히 drop하지 않는다. |
+| Cancellation occurs during query or cleanup | operation에는 caller cancellation을 반환하고 cleanup에는 별도 bounded context를 사용한다. |
+| Two CLI processes use the fixed fixture namespace | 이 focused lesson은 concurrent run을 지원하지 않는다. boundary를 문서화하고 test에서는 unique namespace를 사용한다. |
+| A diagram renders with reversed or colliding arrowheads | endpoint와 bend를 조정하고, rerender와 audit을 다시 실행하며, original-size PNG inspection을 반복한다. |
 
 ## Compatibility and Migration
 
-The new example compiles against the existing workshop dependency baseline and
-adds no reusable API. Existing examples, workflows, and README behavior remain
-compatible. `go.mod` and `go.sum` change only as required to compile the direct
-Neo4j driver and official Neo4j Testcontainers module.
+새 example은 기존 workshop dependency baseline에 맞춰 compile되며 reusable API를 추가하지 않는다. 기존
+example, workflow, README behavior는 compatible하게 유지된다. `go.mod`와 `go.sum`은 direct Neo4j driver와
+official Neo4j Testcontainers module compile에 필요한 만큼만 변경된다.
 
-The historical milestone remains 0.10.0 while implementation uses the current
-stable `bluetape-go v0.18.0`. A later stable library release requires an issue
-rebaseline before the example adopts new surfaces.
+historical milestone은 0.10.0으로 유지되지만 implementation은 현재 stable `bluetape-go v0.18.0`을
+사용한다. 이후 stable library release의 새 surface를 example이 채택하려면 먼저 issue rebaseline이
+필요하다.
 
 ## Spec Review Convergence
 
-Three delegated review lanes exceeded two bounded waits and an explicit finish
-request, so the required perspectives were completed through the documented
-main-session fallback rather than leaving the workflow stalled.
+세 delegated review lane이 두 번의 bounded wait와 explicit finish request를 초과했다. workflow를
+stalled 상태로 두지 않기 위해 required perspective는 documented main-session fallback으로 완료했다.
 
 | Perspective | Initial result | Resolution | Final result |
 |---|---|---|---|
-| Performance | P0=0, P1=0 | Fixed three-operation database path, result caps, and no-N+1 boundary made explicit. | P0=0, P1=0 |
-| Stability | P0=0, P1=2 | Reset/seed is one managed transaction; JSON is buffered, cleanup precedes output, and concurrent CLI runs are explicitly unsupported. | P0=0, P1=0 |
-| Security | P0=0, P1=1 | No-auth configuration now accepts only strict loopback Bolt URIs and rejects credentials or remote targets before driver creation. | P0=0, P1=0 |
-| Operator/Ops | P0=0, P1=0 | Connectivity, scoped rollback, exit behavior, bounded cleanup, and local-only deployment boundary are owned. | P0=0, P1=0 |
-| Developer/API | P0=0, P1=0 | Exact fixture, adapter calls, typed failure categories, dependency scope, and expected report are implementable. | P0=0, P1=0 |
-| User/caller | P0=0, P1=0 | Deterministic output, illustrative-score caveat, unsupported concurrency, run path, and production non-goals are explicit. | P0=0, P1=0 |
+| Performance | P0=0, P1=0 | fixed three-operation database path, result cap, no-N+1 boundary를 명시했다. | P0=0, P1=0 |
+| Stability | P0=0, P1=2 | reset/seed는 하나의 managed transaction이다. JSON은 buffer에 담고 cleanup은 output보다 앞서며 concurrent CLI run은 명시적으로 unsupported다. | P0=0, P1=0 |
+| Security | P0=0, P1=1 | no-auth configuration은 strict loopback Bolt URI만 허용하고 driver 생성 전에 credential 또는 remote target을 거부한다. | P0=0, P1=0 |
+| Operator/Ops | P0=0, P1=0 | connectivity, scoped rollback, exit behavior, bounded cleanup, local-only deployment boundary를 소유한다. | P0=0, P1=0 |
+| Developer/API | P0=0, P1=0 | exact fixture, adapter call, typed failure category, dependency scope, expected report는 implementable하다. | P0=0, P1=0 |
+| User/caller | P0=0, P1=0 | deterministic output, illustrative-score caveat, unsupported concurrency, run path, production non-goal을 명시했다. | P0=0, P1=0 |
 
-The integrated spec review has no deferred P2/P3 finding and no open user
-decision. The repairs narrow and prove the approved Neo4j-only architecture;
-they do not change its selected approach.
+integrated spec review에는 deferred P2/P3 finding과 open user decision이 없다. repair는 승인된
+Neo4j-only architecture를 좁히고 증명하며 selected approach를 변경하지 않는다.
 
 ## Acceptance Criteria
 
-- The fixture is validated with released graph values before persistence.
-- One atomic scoped Neo4j reset/seed and two bounded reads use the released
-  caller-owned adapter without N+1 queries.
-- Go code produces exact direct and transitive clusters, evidence, scores,
-  tie-breaks, and isolated users.
-- Invalid graph data, limit overflow, backend failure, and cancellation fail
-  closed without partial output or provider leakage.
-- The CLI accepts only a strict loopback Bolt URI, is runnable against a local
-  Neo4j instance, and emits deterministic JSON only after cleanup succeeds.
-- A serial Neo4j Testcontainers test proves connection readiness, adaptation,
-  exact output, cancellation, and cleanup.
-- English and Korean READMEs, root navigation, and paired architecture/sequence
-  diagrams are synchronized and visually verified.
-- Focused, race, serial container, repository, lint, and `make ci` gates pass.
-- Type A verifier and six review lenses converge at P0=0/P1=0 before PR.
-- PR metadata mirrors #50 and CI is green before the merge decision gate.
+- fixture는 persistence 전에 released graph value로 검증된다.
+- 하나의 atomic scoped Neo4j reset/seed와 두 bounded read는 N+1 query 없이 released caller-owned
+  adapter를 사용한다.
+- Go code는 정확한 direct 및 transitive cluster, evidence, score, tie-break, isolated user를 만든다.
+- invalid graph data, limit overflow, backend failure, cancellation은 partial output 또는 provider
+  leakage 없이 fail closed한다.
+- CLI는 strict loopback Bolt URI만 허용하고 local Neo4j instance에 대해 실행 가능하며 cleanup 성공
+  이후에만 deterministic JSON을 내보낸다.
+- serial Neo4j Testcontainers test는 connection readiness, adaptation, exact output, cancellation,
+  cleanup을 증명한다.
+- English 및 Korean README, root navigation, paired architecture/sequence diagram은 synchronized되고
+  visually verified된다.
+- focused, race, serial container, repository, lint, `make ci` gate가 통과한다.
+- Type A verifier와 여섯 review lens는 PR 전에 P0=0/P1=0으로 수렴한다.
+- PR metadata는 #50을 mirror하고 merge decision gate 전에 CI가 green이어야 한다.
 
 ## Definition of Done
 
-- Approved spec and implementation plan are committed before code.
-- The example remains application-shaped and Neo4j-only.
-- No backend-neutral repository, Cypher DSL, generic fraud engine, or raw
-  identifier/provider disclosure is introduced.
-- Every acceptance criterion has fresh test, document, diagram, or live GitHub
-  evidence.
-- Required workflow checks report `Blocked: 0`, with no unresolved P0/P1.
-- Push and PR are allowed only after the local gates converge; merge remains a
-  separate explicit user decision.
+- approved spec과 implementation plan은 code 전에 commit된다.
+- example은 application-shaped 및 Neo4j-only로 남는다.
+- backend-neutral repository, Cypher DSL, generic fraud engine, raw identifier/provider disclosure를
+  도입하지 않는다.
+- 모든 acceptance criterion은 fresh test, document, diagram 또는 live GitHub evidence를 가진다.
+- required workflow check는 unresolved P0/P1 없이 `Blocked: 0`을 report한다.
+- push와 PR은 local gate가 수렴한 뒤에만 허용된다. merge는 별도의 explicit user decision으로 남는다.
