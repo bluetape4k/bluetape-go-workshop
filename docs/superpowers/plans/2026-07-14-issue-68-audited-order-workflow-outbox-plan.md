@@ -1,12 +1,12 @@
 # Issue #68 Audited Order Workflow with SQL Outbox Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Build a runnable Gin order workflow whose order state, immutable PostgreSQL audit history, and official SQL outbox record commit atomically, with POST JSON audit queries and asynchronous Redis Streams delivery.
+**Goal:** order state, immutable PostgreSQL audit history, official SQL outbox record를 atomic하게 commit하는 runnable Gin order workflow를 만든다. POST JSON audit query와 asynchronous Redis Streams delivery를 함께 제공한다.
 
-**Architecture:** `orderworkflow.Service` owns validation and one `sqlkit.WithTx` boundary across the order row, application-owned `HistoryStore`, and released `sqloutbox.Store`. Gin exposes strict POST JSON commands and history queries; a supervised background `sqloutbox.Relay` publishes through the released Redis Streams adapter while readiness preserves the durable PostgreSQL boundary. `main` owns bounded clients, server lifecycle, delivery diagnostics, and shutdown.
+**Architecture:** `orderworkflow.Service`는 validation과 order row, application-owned `HistoryStore`, released `sqloutbox.Store`를 감싸는 `sqlkit.WithTx` boundary 하나를 소유한다. Gin은 strict POST JSON command와 history query를 노출한다. supervised background `sqloutbox.Relay`는 released Redis Streams adapter로 publish하고, readiness는 durable PostgreSQL boundary를 보존한다. `main`은 bounded client, server lifecycle, delivery diagnostic, shutdown을 소유한다.
 
-**Tech Stack:** Go 1.26.3, Gin, `database/sql` with pgx v5, bluetape-go v0.18.0 `audit`, `audit/sqloutbox`, `audit/sqloutbox/sqloutboxtest`, `audit/sqloutbox/redisstreams`, `sqlkit`, go-redis v9, repository PostgreSQL/Redis Testcontainers fixtures, SVG/CairoSVG diagram tooling.
+**Tech Stack:** Go 1.26.3, Gin, pgx v5를 사용하는 `database/sql`, bluetape-go v0.18.0 `audit`, `audit/sqloutbox`, `audit/sqloutbox/sqloutboxtest`, `audit/sqloutbox/redisstreams`, `sqlkit`, go-redis v9, repository PostgreSQL/Redis Testcontainers fixture, SVG/CairoSVG diagram tooling.
 
 ---
 
@@ -14,42 +14,41 @@
 
 | File | Responsibility |
 |---|---|
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/model.go` | Status values, commands, canonical intent, response values, validation, and audit entry construction. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/schema.go` | Fixed order/history DDL and official outbox schema delegation. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store.go` | Transactional history insert, command lookup, full `audit.HistoryReader`, and safe delivery status query. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store_test.go` | Reader semantics, precision/parity, corruption, bounded plans, and status diagnostics. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/service.go` | Create/transition state machine, row locking, atomic writes, and idempotent conflict recovery. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/service_test.go` | Validation, state transitions, rollback, replay, ambiguous commit, and concurrency proof. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler.go` | Strict Gin JSON adapter, error mapping, health/readiness/status, and concurrency cap. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler_test.go` | POST JSON, cursor, overload, redaction, dependency isolation, and timeout proof. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/runtime.go` | Bounded client/server configuration, relay observation, readiness state, and coordinated shutdown. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/relay_test.go` | Retry/dead-letter/duplicate/order-limit, safe signals, cancellation, and unexpected-exit proof. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/integration_test.go` | Sequential PostgreSQL/Redis, real stream envelope, restart, backlog, and pool-limit proof. |
-| `examples/audited-order-workflow-outbox/main.go` | Environment parsing, dependency construction, schema bootstrap, signal lifecycle, and server start. |
-| `examples/audited-order-workflow-outbox/main_test.go` | Loopback/configuration, startup failure, server smoke, and close/join proof. |
-| `examples/audited-order-workflow-outbox/smoke_test.go` | Parses and executes the checked-in HTTP scenario against sequential real backends. |
-| `examples/audited-order-workflow-outbox/requests.http` | Complete create/replay/search/detail/cancel/409 POST JSON scenario. |
-| `examples/audited-order-workflow-outbox/README.md`, `README.ko.md` | Bilingual lesson, curl scenario, delivery semantics, and operator runbook. |
-| `examples/transactional-outbox-publisher/README.md`, `README.ko.md` | Correct current-locale language-switch rendering. |
-| `README.md`, `README.ko.md` | Root example navigation and run commands. |
-| `docs/images/readme-diagrams/audited-order-workflow-outbox-architecture.{svg,png}` | Static transaction, history, relay, and transport ownership. |
-| `docs/images/readme-diagrams/audited-order-workflow-outbox-sequence.{svg,png}` | Commit-before-response, later delivery, replay, and query sequence. |
-| `docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md` | Final spec/plan/checklist and review evidence. |
-| `docs/lessons/2026-07-14-issue-68-audited-order-workflow-outbox.md` | Durable implementation, Docker, relay, and diagram lessons. |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/model.go` | status value, command, canonical intent, response value, validation, audit entry construction |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/schema.go` | fixed order/history DDL 및 official outbox schema delegation |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store.go` | transactional history insert, command lookup, full `audit.HistoryReader`, safe delivery status query |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store_test.go` | reader semantic, precision/parity, corruption, bounded plan, status diagnostic |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/service.go` | create/transition state machine, row locking, atomic write, idempotent conflict recovery |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/service_test.go` | validation, state transition, rollback, replay, ambiguous commit, concurrency proof |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler.go` | strict Gin JSON adapter, error mapping, health/readiness/status, concurrency cap |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler_test.go` | POST JSON, cursor, overload, redaction, dependency isolation, timeout proof |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/runtime.go` | bounded client/server configuration, relay observation, readiness state, coordinated shutdown |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/relay_test.go` | retry/dead-letter/duplicate/order-limit, safe signal, cancellation, unexpected-exit proof |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/integration_test.go` | sequential PostgreSQL/Redis, real stream envelope, restart, backlog, pool-limit proof |
+| `examples/audited-order-workflow-outbox/main.go` | environment parsing, dependency construction, schema bootstrap, signal lifecycle, server start |
+| `examples/audited-order-workflow-outbox/main_test.go` | loopback/configuration, startup failure, server smoke, close/join proof |
+| `examples/audited-order-workflow-outbox/smoke_test.go` | checked-in HTTP scenario를 parse하고 sequential real backend에 실행 |
+| `examples/audited-order-workflow-outbox/requests.http` | complete create/replay/search/detail/cancel/409 POST JSON scenario |
+| `examples/audited-order-workflow-outbox/README.md`, `README.ko.md` | bilingual lesson, curl scenario, delivery semantic, operator runbook |
+| `examples/transactional-outbox-publisher/README.md`, `README.ko.md` | current-locale language-switch rendering 교정 |
+| `README.md`, `README.ko.md` | root example navigation 및 run command |
+| `docs/images/readme-diagrams/audited-order-workflow-outbox-architecture.{svg,png}` | static transaction, history, relay, transport ownership |
+| `docs/images/readme-diagrams/audited-order-workflow-outbox-sequence.{svg,png}` | commit-before-response, later delivery, replay, query sequence |
+| `docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md` | final spec/plan/checklist 및 review evidence |
+| `docs/lessons/2026-07-14-issue-68-audited-order-workflow-outbox.md` | durable implementation, Docker, relay, diagram lesson |
 
-No `go.mod`, `go.sum`, workflow, dependency, public bluetape-go API, changelog,
-or module registration change is planned. Any such diff stops implementation
-for scope review.
+`go.mod`, `go.sum`, workflow, dependency, public bluetape-go API, changelog,
+module registration change는 계획하지 않는다. 이런 diff가 생기면 scope review를 위해 implementation을 중단한다.
 
-## Task 1: Define the domain, validation, and audit projection
+## Task 1: domain, validation, audit projection 정의
 
 **Complexity:** Medium. **Depends on:** approved design spec. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `model.go`, `service_test.go`.
 
-- [ ] **Step 1: Write failing table tests for every domain constraint**
+- [ ] **Step 1: 모든 domain constraint에 대한 failing table test 작성**
 
-Create tests for identifier grammar, actions, state transitions, reason length,
-metadata key/value/count bounds, nil clock, UTC microsecond normalization,
-revision overflow, canonical intent equality, and payload round-trip.
+identifier grammar, action, state transition, reason length, metadata key/value/count bound,
+nil clock, UTC microsecond normalization, revision overflow, canonical intent equality,
+payload round-trip test를 만든다.
 
 ```go
 func TestNormalizeIdentifier(t *testing.T) {
@@ -69,13 +68,13 @@ func TestNormalizeIdentifier(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Normalize|Validate|BuildEntry|CanonicalIntent)'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Normalize|Validate|BuildEntry|CanonicalIntent)'`
 
-Expected: FAIL because the package and domain functions do not exist.
+기대값: package와 domain function이 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement minimal domain values and validation**
+- [ ] **Step 3: minimal domain value 및 validation 구현**
 
 ```go
 type Status string
@@ -104,19 +103,19 @@ type TransitionCommand struct {
 }
 ```
 
-Use `regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)`, validate at
-most 32 metadata entries with 64-rune keys and 512-rune values, and normalize
-one injected clock value with `UTC().Truncate(time.Microsecond)`.
+`regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)`를 사용한다.
+metadata entry는 최대 32개, key는 64 rune, value는 512 rune으로 validate한다.
+injected clock value 하나는 `UTC().Truncate(time.Microsecond)`로 normalize한다.
 
-- [ ] **Step 4: Build one canonical audit entry per accepted command**
+- [ ] **Step 4: accepted command마다 canonical audit entry 하나 생성**
 
-Call `audit.NewAggregateID`, `audit.NewDomainEvent`, and `audit.NewEntry`.
-Use command ID for event and idempotency identity, the resulting revision,
-event type `order.created|confirmed|cancelled`, copied metadata, and a JSON
-payload containing `intent` plus the original resulting `order` projection.
-Decode that same payload for replay comparison; never compare raw request JSON.
+`audit.NewAggregateID`, `audit.NewDomainEvent`, `audit.NewEntry`를 호출한다.
+event 및 idempotency identity에는 command ID를 사용하고, resulting revision,
+event type `order.created|confirmed|cancelled`, copied metadata,
+`intent`와 original resulting `order` projection을 담은 JSON payload를 사용한다.
+replay comparison에는 같은 payload를 decode해서 사용한다. raw request JSON은 절대 compare하지 않는다.
 
-- [ ] **Step 5: Run GREEN, format, and commit**
+- [ ] **Step 5: GREEN, format, commit 실행**
 
 ```bash
 gofmt -w examples/audited-order-workflow-outbox/internal/orderworkflow/*.go
@@ -126,25 +125,22 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: define audited order workflow domain"
 ```
 
-Expected: focused tests PASS, timestamps contain no sub-microsecond remainder,
-and the commit contains domain/test files only.
+기대값: focused test가 PASS하고 timestamp에 sub-microsecond remainder가 없으며,
+commit에는 domain/test file만 포함된다.
 
-## Task 2: Implement the durable SQL history store
+## Task 2: durable SQL history store 구현
 
 **Complexity:** High. **Depends on:** Task 1. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `schema.go`, `history_store.go`, `history_store_test.go`.
 
-- [ ] **Step 1: Write reader-contract and schema tests against one PostgreSQL fixture**
+- [ ] **Step 1: PostgreSQL fixture 하나를 대상으로 reader-contract 및 schema test 작성**
 
-Start `postgrestestcontainer.Start` once under a 90-second context, never use
-`t.Parallel`, and test idempotent DDL, `Insert`, command lookup, zero/all and
-filtered `audit.Query`, `NewestFirst`, inclusive bounds, limit, `LoadHistory`,
-`Latest`, both snapshot methods, absent values, cancellation, nil sessions, and
-1 MiB encoding rejection. Create a deliberately incompatible pre-existing
-orders/history schema and require bootstrap to fail without altering or dropping
-it. Repeat the incompatibility case for the official outbox table, using the
-released v0.18.0 table/index contract as authority. Every mismatch must fail
-startup redacted and non-destructively; retry a deliberately interrupted partial
-bootstrap and require convergence.
+90-second context 아래에서 `postgrestestcontainer.Start`를 한 번만 시작하고 `t.Parallel`은 절대 사용하지 않는다.
+idempotent DDL, `Insert`, command lookup, zero/all 및 filtered `audit.Query`, `NewestFirst`,
+inclusive bound, limit, `LoadHistory`, `Latest`, 두 snapshot method, absent value, cancellation,
+nil session, 1 MiB encoding rejection을 test한다. 일부러 incompatible pre-existing orders/history schema를 만들고,
+alter/drop 없이 bootstrap이 fail해야 한다. official outbox table에도 released v0.18.0 table/index contract를 authority로 삼아
+같은 incompatibility case를 반복한다. 모든 mismatch는 startup에서 redacted/non-destructive 방식으로 fail해야 한다.
+일부러 interrupted partial bootstrap을 retry하고 convergence를 요구한다.
 
 ```go
 var _ audit.HistoryReader = (*HistoryStore)(nil)
@@ -157,27 +153,24 @@ if err != nil || len(entries) != 2 || entries[0].Revision != 1 {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHistoryStore'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHistoryStore'`
 
-Expected: FAIL because `HistoryStore` and schema functions do not exist.
+기대값: `HistoryStore`와 schema function이 없으므로 FAIL한다.
 
-- [ ] **Step 3: Add fixed idempotent DDL and transactional insert**
+- [ ] **Step 3: fixed idempotent DDL 및 transactional insert 추가**
 
-Create `audited_order_workflow_orders`, the identity-position history table,
-the aggregate/time index, and delegate to an official store configured with
-`Table: "audited_order_workflow_outbox_records"`. `Insert` takes
-`sqlkit.Execer`, validates the entry, `json.Marshal`s it, enforces 1 MiB, and
-inserts scalar guards plus `entry_json` without owning a transaction.
+`audited_order_workflow_orders`, identity-position history table, aggregate/time index를 만든다.
+`Table: "audited_order_workflow_outbox_records"`로 configured official store에 delegate한다.
+`Insert`는 `sqlkit.Execer`를 받고 entry를 validate하며 `json.Marshal`을 수행하고 1 MiB를 enforce한 뒤,
+transaction을 소유하지 않고 scalar guard와 `entry_json`을 insert한다.
 
-After idempotent creation, verify required columns, PostgreSQL types,
-nullability, primary/unique constraints, and the aggregate/time index through
-`pg_catalog`. This is a fixed single-version compatibility check, not a migration
-engine; unexpected shape returns a redacted startup error and never issues
-`ALTER` or `DROP`. Verify the official outbox table's required columns, types,
-unique identities, primary key, and claim index through the same read-only
-catalog check after `Store.CreateSchema`.
+idempotent creation 뒤 required column, PostgreSQL type, nullability, primary/unique constraint,
+aggregate/time index를 `pg_catalog`로 verify한다. 이는 migration engine이 아니라 fixed single-version compatibility check다.
+unexpected shape는 redacted startup error를 반환하고 `ALTER` 또는 `DROP`을 절대 실행하지 않는다.
+`Store.CreateSchema` 뒤 같은 read-only catalog check로 official outbox table의 required column, type,
+unique identity, primary key, claim index를 verify한다.
 
 ```go
 func (s *HistoryStore) Insert(ctx context.Context, db sqlkit.Execer, entry audit.Entry) error {
@@ -193,27 +186,22 @@ func (s *HistoryStore) Insert(ctx context.Context, db sqlkit.Execer, entry audit
 }
 ```
 
-- [ ] **Step 4: Implement the exact v0.18.0 reader surface**
+- [ ] **Step 4: exact v0.18.0 reader surface 구현**
 
-Use `sqlkit.Session` internally for rows and row queries. `Find` starts with
-`audit.Query.Validate`, uses placeholders only, orders global queries by
-`position` and exact-aggregate queries consistently with their revision order,
-and decodes via `audit.DecodeEntryJSON`. Verify every scalar field, including
-microsecond timestamp equality, before returning. Construct history with
-`audit.NewHistory`; return `(zero, false, nil)` for missing latest/snapshot.
+row 및 row query에는 내부적으로 `sqlkit.Session`을 사용한다. `Find`는 `audit.Query.Validate`로 시작하고,
+placeholder만 사용하며, global query는 `position` 기준으로 정렬하고 exact-aggregate query는 revision order와 일관되게 정렬한다.
+decode는 `audit.DecodeEntryJSON`으로 수행한다. 반환 전에 microsecond timestamp equality를 포함한 모든 scalar field를 verify한다.
+history는 `audit.NewHistory`로 construct한다. missing latest/snapshot에는 `(zero, false, nil)`을 반환한다.
 
-- [ ] **Step 5: Add corruption, plan, and status diagnostics proof**
+- [ ] **Step 5: corruption, plan, status diagnostic proof 추가**
 
-Insert controlled scalar/JSON mismatch rows with test SQL and require a closed
-error. Commit at least 5,000 entries for the exact hot aggregate plus 5,000
-distractor entries across other aggregates, run `ANALYZE` after seeding, then
-run `EXPLAIN (FORMAT JSON)` for canonical revision and time searches. Assert the
-plan contains the intended primary-key or aggregate/time index and bounded
-`Limit` with no sequential scan or unbounded sort. Add a fixed 250 ms outbox
-status query returning only pending/retrying/claimed/published/dead-letter
-counts and oldest-pending seconds.
+test SQL로 controlled scalar/JSON mismatch row를 insert하고 closed error를 요구한다.
+exact hot aggregate에 최소 5,000 entry, 다른 aggregate에 distractor entry 5,000개를 commit한다.
+seeding 뒤 `ANALYZE`를 실행한 다음 canonical revision 및 time search에 대해 `EXPLAIN (FORMAT JSON)`을 실행한다.
+plan에 intended primary-key 또는 aggregate/time index와 bounded `Limit`가 있고 sequential scan 또는 unbounded sort가 없는지 assert한다.
+pending/retrying/claimed/published/dead-letter count와 oldest-pending seconds만 반환하는 fixed 250 ms outbox status query를 추가한다.
 
-- [ ] **Step 6: Run GREEN and commit**
+- [ ] **Step 6: GREEN 및 commit 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHistoryStore'
@@ -223,7 +211,7 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: add durable audit history store"
 ```
 
-Expected: reader contract, corruption, query-plan, and race assertions PASS.
+기대값: reader contract, corruption, query-plan, race assertion이 PASS한다.
 
 ## Task 3: Commit create and transition state atomically
 
