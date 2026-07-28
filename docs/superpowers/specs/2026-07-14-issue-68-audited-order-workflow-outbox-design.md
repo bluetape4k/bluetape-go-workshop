@@ -151,7 +151,7 @@ deterministic하게 만든다.
 
 ## PostgreSQL Schema
 
-The application owns three tables:
+application은 세 table을 소유한다.
 
 ```text
 audited_order_workflow_orders
@@ -176,56 +176,44 @@ audited_order_workflow_outbox_records
   schema owned by audit/sqloutbox.Store
 ```
 
-The history table has an index on `(aggregate_type, aggregate_id, recorded_at,
-revision)` for bounded time queries. Its generated `position` preserves the
-released query contract's cross-aggregate append order without becoming domain
-identity. Scalar columns are routing and uniqueness guards; `entry_json` is the
-canonical decoded entry. On reads, decoded aggregate identity, revision, event
-ID, idempotency key, event type, and recorded time must match the scalar columns.
-A mismatch is an internal data-integrity error, not a partial response.
+history table은 bounded time query를 위해 `(aggregate_type, aggregate_id, recorded_at, revision)`
+index를 가진다. generated `position`은 domain identity가 되지 않으면서 released query contract의
+cross-aggregate append order를 보존한다. scalar column은 routing 및 uniqueness guard다. `entry_json`은
+canonical decoded entry다. read 시 decoded aggregate identity, revision, event ID, idempotency key,
+event type, recorded time은 scalar column과 일치해야 한다. mismatch는 partial response가 아니라 internal
+data-integrity error다.
 
-Schema creation is idempotent startup work. It creates the order and history
-tables, indexes, and the official outbox schema before the server reports ready.
-DDL never runs in an order command transaction. Startup fails closed if any
-schema step fails.
+schema creation은 idempotent startup work다. server가 ready를 보고하기 전에 order table, history table,
+index, official outbox schema를 만든다. DDL은 order command transaction 안에서 실행되지 않는다. schema
+step이 하나라도 실패하면 startup은 fail closed한다.
 
 ## Atomic Command Contract
 
-Create validates the complete command before opening a transaction. Inside one
-`sqlkit.WithTx`, it checks command identity, then inserts the pending order,
-constructs and validates the revision-1 `audit.Entry`, inserts that entry
-through `HistoryStore.Insert`, and calls `Store.Enqueue(ctx, tx, entry)`. The
-command returns only after the transaction commits. A duplicate order with no
-matching command intent is a conflict.
+Create는 transaction을 열기 전에 complete command를 검증한다. 하나의 `sqlkit.WithTx` 안에서 command
+identity를 확인하고 pending order를 insert한 뒤, revision-1 `audit.Entry`를 구성하고 검증한다. 이어서 그
+entry를 `HistoryStore.Insert`로 insert하고 `Store.Enqueue(ctx, tx, entry)`를 호출한다. command는
+transaction commit 이후에만 반환된다. matching command intent가 없는 duplicate order는 conflict다.
 
-Transition validates transport-independent fields before opening a transaction.
-Inside one `sqlkit.WithTx`, it reads the order with `SELECT ... FOR UPDATE`,
-checks command identity and canonical intent before validating current state,
-then validates the requested state change, computes the next revision,
-constructs one immutable entry, updates the order with the locked prior revision
-as a guard, inserts the history entry, and enqueues the same entry. Any failure
-rolls back all three writes.
+Transition은 transaction을 열기 전에 transport-independent field를 검증한다. 하나의 `sqlkit.WithTx` 안에서
+`SELECT ... FOR UPDATE`로 order를 읽고, current state를 검증하기 전에 command identity와 canonical intent를
+확인한다. 그다음 requested state change를 검증하고 next revision을 계산하며, immutable entry 하나를
+구성하고, locked prior revision을 guard로 삼아 order를 update하고, history entry를 insert하며, 같은 entry를
+enqueue한다. 실패하면 세 write가 모두 rollback된다.
 
-The service never writes Redis. A cancelled or timed-out caller receives an
-error even when commit outcome is ambiguous; the same command ID can be queried
-or retried safely. Database uniqueness on command identity prevents a retry
-from producing a second logical event. Before mutation, the service looks up an
-existing command identity and compares its canonical intent. A transition does
-this while holding the order lock and before state validation. If either command
-later loses a concurrent event-ID or idempotency-key uniqueness race, the entire
-transaction rolls back before the service reloads the winner in a fresh database
-operation. Matching intent returns the original committed order projection from
-the audit payload as an idempotent replay; it does not return a later order
-state. Reuse for a different order, action, reason, or metadata is a conflict.
-The comparison uses the canonical validated command projection stored in the
-audit entry, not raw JSON byte equality. Tests cover ordinary retry,
-ambiguous-commit retry, concurrent identical intent, and concurrent conflicting
-reuse across orders.
+service는 Redis에 쓰지 않는다. commit outcome이 ambiguous해도 cancelled 또는 timed-out caller는 error를
+받는다. 같은 command ID는 안전하게 query하거나 retry할 수 있다. command identity에 대한 database
+uniqueness는 retry가 두 번째 logical event를 만들지 못하게 한다. mutation 전에 service는 기존 command
+identity를 조회하고 그 canonical intent를 비교한다. transition은 order lock을 잡고 state validation 전에
+이를 수행한다. 이후 어떤 command가 concurrent event-ID 또는 idempotency-key uniqueness race에서 지면,
+service가 fresh database operation으로 winner를 reload하기 전에 전체 transaction이 rollback된다. matching
+intent는 idempotent replay로 audit payload의 original committed order projection을 반환한다. later order
+state를 반환하지 않는다. 다른 order, action, reason, metadata에 재사용하면 conflict다. 비교는 raw JSON byte
+equality가 아니라 audit entry에 저장된 canonical validated command projection을 사용한다. test는 ordinary
+retry, ambiguous-commit retry, concurrent identical intent, order 간 concurrent conflicting reuse를 다룬다.
 
 ## History Store Contract
 
-`HistoryStore` exposes an application write boundary plus the released reader
-contract:
+`HistoryStore`는 application write boundary와 released reader contract를 함께 노출한다.
 
 ```go
 func (s *HistoryStore) Insert(context.Context, sqlkit.Execer, audit.Entry) error
@@ -236,24 +224,19 @@ func (s *HistoryStore) LatestSnapshot(context.Context, audit.AggregateID) (audit
 func (s *HistoryStore) PreviousSnapshot(context.Context, audit.AggregateID, audit.Revision) (audit.Entry, bool, error)
 ```
 
-The constructor rejects a nil database and invalid table configuration. The
-store uses placeholders and trusted fixed identifiers; request data never
-becomes SQL syntax. `Insert` accepts the caller's transaction through
-`sqlkit.Execer`, calls `Entry.Validate`, encodes with `encoding/json`, enforces
-the same 1 MiB maximum entry size as the official store, and does not begin,
-commit, or roll back a transaction itself.
+constructor는 nil database와 invalid table configuration을 거부한다. store는 placeholder와 trusted fixed
+identifier를 사용한다. request data는 SQL syntax가 되지 않는다. `Insert`는 caller의 transaction을
+`sqlkit.Execer`로 받고, `Entry.Validate`를 호출하며, `encoding/json`으로 encode하고, official store와 같은
+1 MiB maximum entry size를 강제한다. 그리고 transaction을 직접 begin, commit, rollback하지 않는다.
 
-`Find` calls `audit.Query.Validate` and preserves its semantics: optional exact
-aggregate or aggregate-type filters, inclusive revision and recorded-time
-bounds, stable append order through `position`, `NewestFirst`, and `Limit`.
-Exact-aggregate results are consequently in revision order for this service.
-The HTTP layer always supplies an exact aggregate and requests `limit + 1`
-records, returns at most `limit`, and derives a next-revision cursor without an
-unbounded count. `LoadHistory`, `Latest`, and snapshot queries are bounded by
-aggregate identity. Snapshot queries filter JSON entries that contain a
-non-null snapshot and still validate decoded scalar parity. The order workflow
-does not create snapshots, so snapshot absence is normal and returns
-`found=false` with the released reader semantics.
+`Find`는 `audit.Query.Validate`를 호출하고 그 semantic을 보존한다. 이는 optional exact aggregate 또는
+aggregate-type filter, inclusive revision 및 recorded-time bound, `position`을 통한 stable append order,
+`NewestFirst`, `Limit`이다. 따라서 exact-aggregate result는 이 service에서 revision order가 된다. HTTP
+layer는 항상 exact aggregate를 제공하고 `limit + 1` record를 요청하며, 최대 `limit`까지만 반환하고
+unbounded count 없이 next-revision cursor를 파생한다. `LoadHistory`, `Latest`, snapshot query는 aggregate
+identity로 bounded된다. snapshot query는 non-null snapshot을 포함하는 JSON entry를 filter하면서 decoded
+scalar parity도 계속 검증한다. order workflow는 snapshot을 만들지 않으므로 snapshot absence는 정상이며
+released reader semantic에 따라 `found=false`를 반환한다.
 
 ## HTTP API
 
