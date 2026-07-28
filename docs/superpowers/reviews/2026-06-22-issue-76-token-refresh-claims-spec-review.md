@@ -1,15 +1,15 @@
-# Issue #76 Token Refresh Claims Spec Review
+# Issue #76 Token Refresh Claims 명세 리뷰
 
-## Scope
+## 범위
 
 - Branch: `feat/issue-76-token-refresh`
 - Issue: #76 `[v0.6.0] Add token refresh and claims validation example`
-- Reviewed artifact:
+- 검토 artifact:
   - `docs/superpowers/specs/2026-06-22-issue-76-token-refresh-claims-design.md`
 
-## Six-Lane Review
+## Six-Lane 리뷰
 
-| Lane | P0 | P1 | P2 | P3 | Result |
+| Lane | P0 | P1 | P2 | P3 | 결과 |
 |---|---:|---:|---:|---:|---|
 | Performance | 0 | 0 | 0 | 0 | PASS |
 | Stability | 0 | 0 | 0 | 0 | PASS |
@@ -18,29 +18,28 @@
 | Developer/API | 0 | 0 | 0 | 0 | PASS |
 | User/Caller | 0 | 0 | 0 | 0 | PASS |
 
-## Findings
+## finding
 
-No P0/P1 findings.
+P0/P1 finding은 없다.
 
-## Review Notes
+## 리뷰 note
 
-- Performance: JWT parsing/signing is request-local and no background workers,
-  sleeps, stores, or network services are introduced.
-- Stability: deterministic clock and ID injection make expiration, `jti`, and
-  `session_id` assertions reproducible.
-- Security: the spec separates access-token and refresh-token `aud` plus
-  `token_use`, requires an allowlisted public error contract, and explicitly
-  avoids durable session-store claims.
-- Operator/Ops: `main.go` inherits the #44 loopback-only bind and bounded
-  server timeout pattern, so the unauthenticated demo is not exposed by default.
-- Developer/API: the example uses existing `bluetape-go/jwt` APIs directly and
-  keeps all app policy local to an `internal` package.
-- User/Caller: the route set is small enough for README curl flows while still
-  covering valid access, expired access, invalid claims, and refresh exchange.
+- Performance: JWT parsing/signing은 request-local이며 background worker, sleep, store,
+  network service를 도입하지 않는다.
+- Stability: deterministic clock과 ID injection은 expiration, `jti`, `session_id` assertion을
+  reproducible하게 만든다.
+- Security: spec은 access-token과 refresh-token의 `aud`와 `token_use`를 분리하고,
+  allowlisted public error contract를 요구하며 durable session-store claim을 명시적으로 피한다.
+- Operator/Ops: `main.go`는 #44의 loopback-only bind와 bounded server timeout pattern을
+  상속하므로 unauthenticated demo는 기본적으로 노출되지 않는다.
+- Developer/API: example은 기존 `bluetape-go/jwt` API를 직접 사용하고 모든 app policy를
+  `internal` package에 local로 유지한다.
+- User/Caller: route set은 README curl flow에 충분히 작으면서 valid access, expired access,
+  invalid claim, refresh exchange를 다룬다.
 
-## Acceptance Mapping
+## Acceptance 매핑
 
-| Issue #76 criterion | Spec coverage |
+| Issue #76 criterion | spec coverage |
 |---|---|
 | Runnable example under `examples/` | Goal, HTTP Contract |
 | Valid claims tests | Test Requirements |
@@ -49,6 +48,6 @@ No P0/P1 findings.
 | Refresh behavior tests | HTTP Contract, JWT Contract, Test Requirements |
 | README links #44 base example | Documentation Requirements |
 
-## Convergence
+## 수렴
 
-Spec is implementation-ready.
+spec은 implementation-ready 상태다.
