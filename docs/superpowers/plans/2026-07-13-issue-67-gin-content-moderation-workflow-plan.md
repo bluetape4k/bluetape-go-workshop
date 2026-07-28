@@ -244,28 +244,26 @@ git add examples/gin-content-moderation-workflow/internal/moderationapi
 git commit -m "feat: create multilingual moderation records"
 ```
 
-### Task 3: Implement get, bounded cursor search, and concurrent reuse
+### Task 3: get, bounded cursor search, concurrent reuse 구현
 
 **Complexity:** High
 
-**Dependencies:** Task 2 immutable stored records and shared term projection.
+**Dependencies:** Task 2 immutable stored record 및 shared term projection.
 
-**Write scope:** Get/search and concurrency additions only.
+**Write scope:** Get/search 및 concurrency addition만 포함한다.
 
-**Pattern and hazards:** Snapshot immutable pointers under a short read lock, scan outside it, check context every 32 entries, sort before limit, and return deep copies. No durable or inverted index. Cursor pagination is append-aware but not snapshot-isolated.
+**Pattern and hazards:** 짧은 read lock 안에서 immutable pointer를 snapshot하고 밖에서 scan한다. entry 32개마다 context를 확인하고, limit 전에 sort하며, deep copy를 반환한다. durable index나 inverted index는 없다. cursor pagination은 append-aware이지만 snapshot-isolated는 아니다.
 
 **Files:**
 
 - Modify: `examples/gin-content-moderation-workflow/internal/moderationapi/service.go`
 - Modify: `examples/gin-content-moderation-workflow/internal/moderationapi/service_test.go`
 
-- [ ] **Step 1: Write failing get and search contract tests**
+- [ ] **Step 1: 실패하는 get 및 search contract test 작성**
 
-Cover missing/invalid IDs, original-content by-ID visibility, accepted-only
-search, exact metadata AND filtering, all-distinct-term semantics, Korean and
-English case/NFC parity, Japanese Search-mode queries, stable ID ordering,
-default/custom limits, exclusive cursor continuation, `truncated`, empty
-non-nil results, and copy isolation:
+missing/invalid ID, by-ID original-content visibility, accepted-only search, exact metadata AND filtering,
+all-distinct-term semantic, Korean/English case/NFC parity, Japanese Search-mode query, stable ID ordering,
+default/custom limit, exclusive cursor continuation, `truncated`, empty non-nil result, copy isolation을 cover한다.
 
 ```go
 func TestSearchExcludesManualReviewAndPaginates(t *testing.T) {
@@ -279,47 +277,42 @@ func TestSearchExcludesManualReviewAndPaginates(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run get/search tests and observe RED**
+- [ ] **Step 2: get/search test 실행 및 RED 확인**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'Test(Get|Search)'
 ```
 
-Expected: FAIL because `Get`/`Search` are absent.
+기대값: `Get`/`Search`가 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement Get and Search**
+- [ ] **Step 3: Get 및 Search 구현**
 
-`Get` validates the canonical ID, checks context, copies the stored record, and
-returns `ErrRecordNotFound` when absent. `Search` validates UTF-8, 8,000-rune
-query, metadata, configured limit, and cursor; prepares distinct query terms
-once; snapshots at most `MaximumRecords` immutable pointers; checks context on
-entry zero and every 32 entries; selects only allowed/masked all-term matches
-whose IDs exceed the cursor; sorts; computes the next cursor only when another
-match exists; and returns at most the effective limit without raw content,
-findings, or stored terms.
+`Get`은 canonical ID를 validate하고 context를 확인하며 stored record를 copy하고, 없으면 `ErrRecordNotFound`를 반환한다.
+`Search`는 UTF-8, 8,000-rune query, metadata, configured limit, cursor를 validate한다. distinct query term을 한 번 준비하고,
+최대 `MaximumRecords`개의 immutable pointer를 snapshot한다. entry zero와 entry 32개마다 context를 확인한다.
+cursor를 초과하는 ID 중 allowed/masked all-term match만 선택하고 sort한다. 다른 match가 있을 때만 next cursor를 계산하며,
+raw content, finding, stored term 없이 effective limit 이하만 반환한다.
 
-- [ ] **Step 4: Add deterministic cancellation and concurrency tests**
+- [ ] **Step 4: deterministic cancellation 및 concurrency test 추가**
 
-Use a counting context that begins returning `context.Canceled` at a scan
-checkpoint. Use `testing/concurrency.NewGoroutineStressTester` and a bounded
-ready gate to run creates, gets, and searches against one service. Assert one
-winner for one duplicate ID, exact completion counts, writer progress during
-search, stable outcomes, and mutation isolation. Do not use sleeps.
+scan checkpoint에서 `context.Canceled`를 반환하기 시작하는 counting context를 사용한다.
+`testing/concurrency.NewGoroutineStressTester`와 bounded ready gate를 사용해 한 service에 create/get/search를 실행한다.
+duplicate ID 하나에 대해 winner 하나, 정확한 completion count, search 중 writer progress, stable outcome, mutation isolation을 assert한다.
+sleep은 사용하지 않는다.
 
-Add a table-driven pre-canceled-context test for `Create`, `Get`, and `Search`.
-Every method must preserve `errors.Is(err, context.Canceled)`; `Create` must also
-prove that no record was inserted.
+`Create`, `Get`, `Search`에 대해 table-driven pre-canceled-context test를 추가한다.
+모든 method는 `errors.Is(err, context.Canceled)`를 보존해야 하며, `Create`는 record가 insert되지 않았다는 점도 증명해야 한다.
 
-- [ ] **Step 5: Run focused and race tests**
+- [ ] **Step 5: focused 및 race test 실행**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'Test(Get|Search|Concurrent)'
 go test -race -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi
 ```
 
-Expected: PASS with no race, deadlock, timeout, or leaked worker.
+기대값: race, deadlock, timeout, leaked worker 없이 PASS한다.
 
-- [ ] **Step 6: Format and commit query behavior**
+- [ ] **Step 6: query behavior format 및 commit**
 
 ```bash
 gofmt -w examples/gin-content-moderation-workflow/internal/moderationapi/*.go
@@ -327,44 +320,42 @@ git add examples/gin-content-moderation-workflow/internal/moderationapi
 git commit -m "feat: search accepted moderation records"
 ```
 
-### Task 4: Add the strict Gin HTTP boundary
+### Task 4: strict Gin HTTP boundary 추가
 
 **Complexity:** High
 
 **Dependencies:** Task 3 complete `Workflow` contract.
 
-**Write scope:** `server.go`, `server_test.go`; no service policy changes.
+**Write scope:** `server.go`, `server_test.go`; service policy change는 없다.
 
-**Pattern and hazards:** Gin exists because it is the lesson. Set trusted proxies to nil. Enforce body limits before buffering, reject duplicate keys and unknown fields, close bodies on every path, do not log caller content, and never write after client cancellation.
+**Pattern and hazards:** Gin은 lesson의 핵심이므로 사용한다. trusted proxy는 nil로 설정한다. buffering 전에 body limit을 강제하고, duplicate key와 unknown field를 reject하며, 모든 path에서 body를 close한다. caller content를 log하지 않고 client cancellation 뒤에는 절대 write하지 않는다.
 
 **Files:**
 
 - Create: `examples/gin-content-moderation-workflow/internal/moderationapi/server.go`
 - Create: `examples/gin-content-moderation-workflow/internal/moderationapi/server_test.go`
 
-- [ ] **Step 1: Write failing route and success-response tests**
+- [ ] **Step 1: 실패하는 route 및 success-response test 작성**
 
-Create a narrow fake `Workflow` and test `201` create, `200` by-ID get,
-POST-search pagination JSON, liveness, method misses, original-content presence
-only on create/get, and its absence from search. Verify `engine.SetTrustedProxies(nil)` succeeds and no proxy is trusted.
+narrow fake `Workflow`를 만들고 `201` create, `200` by-ID get, POST-search pagination JSON, liveness,
+method miss, create/get에만 존재하는 original-content, search에서 original-content가 없는 점을 테스트한다.
+`engine.SetTrustedProxies(nil)`이 성공하고 proxy가 trust되지 않는지 확인한다.
 
-- [ ] **Step 2: Run server tests and observe RED**
+- [ ] **Step 2: server test 실행 및 RED 확인**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'TestHTTP'
 ```
 
-Expected: FAIL because `NewEngine` and handlers are absent.
+기대값: `NewEngine`과 handler가 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement strict bounded JSON decoding**
+- [ ] **Step 3: strict bounded JSON decoding 구현**
 
-At handler entry `defer c.Request.Body.Close()`. Parse media type with
-`mime.ParseMediaType`; accept only `application/json` and absent/UTF-8 charset.
-Reject non-identity `Content-Encoding`. Wrap the body with
-`http.MaxBytesReader(c.Writer, body, MaximumBodyBytes)`, read the bounded bytes,
-run a JSON-token duplicate-key validator for the root and metadata object, then
-reject non-UTF-8 body bytes, decode with `DisallowUnknownFields`, and require
-EOF. Map wrapped service errors with `errors.Is`, never direct error equality:
+handler entry에서 `defer c.Request.Body.Close()`를 둔다. `mime.ParseMediaType`로 media type을 parse하고,
+`application/json`과 absent/UTF-8 charset만 허용한다. non-identity `Content-Encoding`은 reject한다.
+`http.MaxBytesReader(c.Writer, body, MaximumBodyBytes)`로 body를 감싸고 bounded byte를 읽는다.
+root와 metadata object에 대해 JSON-token duplicate-key validator를 실행한 뒤 non-UTF-8 body byte를 reject한다.
+`DisallowUnknownFields`로 decode하고 EOF를 요구한다. wrapped service error는 direct error equality가 아니라 `errors.Is`로 map한다.
 
 ```go
 func mapWorkflowError(err error) publicError {
@@ -383,37 +374,33 @@ func mapWorkflowError(err error) publicError {
 }
 ```
 
-Keep `request_too_large`, `request_timeout`, `unsupported_media_type`,
-`unsupported_content_encoding`, and `internal_error` stable and separate.
+`request_too_large`, `request_timeout`, `unsupported_media_type`, `unsupported_content_encoding`, `internal_error`는 stable하고 separate하게 유지한다.
 
-- [ ] **Step 4: Implement deadlines, error mapping, and safe diagnostics**
+- [ ] **Step 4: deadline, error mapping, safe diagnostics 구현**
 
-Derive `context.WithTimeout(c.Request.Context(), RequestTimeout)` for every
-workflow call. Map `context.DeadlineExceeded` to 408. When the parent request is
-canceled, return without attempting another write. Log only route pattern,
-method, status, stable code, and elapsed duration. Never log ID, content,
-display text, metadata, findings, terms, body bytes, or wrapped workflow cause.
+모든 workflow call에 `context.WithTimeout(c.Request.Context(), RequestTimeout)`를 파생한다.
+`context.DeadlineExceeded`는 408로 map한다. parent request가 canceled이면 추가 write를 시도하지 말고 return한다.
+log에는 route pattern, method, status, stable code, elapsed duration만 남긴다.
+ID, content, display text, metadata, finding, term, body byte, wrapped workflow cause는 절대 log하지 않는다.
 
-- [ ] **Step 5: Add negative boundary tests**
+- [ ] **Step 5: negative boundary test 추가**
 
-Cover malformed/trailing/unknown/duplicate-key JSON, duplicate metadata keys,
-invalid UTF-8 JSON strings,
-missing/wrong media type, invalid charset, content encoding, exactly-at-limit
-and over-limit bodies, tracking-body closure on every early return, escaped path
-separators, every stable error mapping, a workflow blocked until its context is
-done, parent cancellation without response rewrite, and logger redaction using
-sentinel secret strings.
+malformed/trailing/unknown/duplicate-key JSON, duplicate metadata key, invalid UTF-8 JSON string,
+missing/wrong media type, invalid charset, content encoding, exactly-at-limit 및 over-limit body,
+모든 early return의 tracking-body closure, escaped path separator, 모든 stable error mapping,
+context가 done될 때까지 block되는 workflow, response rewrite 없는 parent cancellation,
+sentinel secret string을 사용하는 logger redaction을 cover한다.
 
-- [ ] **Step 6: Run HTTP tests and race validation**
+- [ ] **Step 6: HTTP test 및 race validation 실행**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'TestHTTP'
 go test -race -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'TestHTTP'
 ```
 
-Expected: PASS; body-close counters equal one and captured logs contain none of the sentinel secrets.
+기대값: PASS. body-close counter는 1과 같고 captured log에는 sentinel secret이 없어야 한다.
 
-- [ ] **Step 7: Format and commit the Gin adapter**
+- [ ] **Step 7: Gin adapter format 및 commit**
 
 ```bash
 gofmt -w examples/gin-content-moderation-workflow/internal/moderationapi/*.go
