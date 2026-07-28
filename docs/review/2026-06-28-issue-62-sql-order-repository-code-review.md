@@ -1,12 +1,12 @@
 # Code review: issue #62 SQL order repository
 
-## Scope
+## 범위
 
-- New runnable example: `examples/sql-order-repository`
-- New README diagrams for repository ownership and insert/find/filter behavior
-- Root README navigation and run instructions
+- 새 runnable example: `examples/sql-order-repository`
+- repository ownership과 insert/find/filter behavior를 위한 새 README diagram
+- root README navigation과 run instruction
 
-## Findings
+## 발견 사항
 
 P0=0 P1=0
 
@@ -19,21 +19,20 @@ P0=0 P1=0
 - CairoSVG render for:
   - `docs/images/readme-diagrams/sql-order-repository-architecture.png`
   - `docs/images/readme-diagrams/sql-order-repository-sequence.png`
-- PNG inspection for clipping/overlap after render
+- render 이후 clipping/overlap에 대한 PNG inspection
 - README local link/image check: `checked 268 local markdown links/images across 4 files`
 
-## Notes
+## 메모
 
-- The repository keeps transaction ownership outside the example so #63 can
-  teach transaction boundaries without rewriting the repository contract.
-- Query behavior is asserted through PostgreSQL Testcontainers. SQL snapshots
-  exist only as explanatory preview checks, not as the only correctness proof.
-- The diagram skill helper scripts referenced by local guidance were not present
-  at `references/diagram-geometry-audit.py` and
-  `references/diagram-endpoint-audit.py`; SVG XML validation, CairoSVG render,
-  and PNG inspection were used as fallback evidence.
+- repository는 transaction ownership을 예제 밖에 둔다. 그래야 #63이 repository contract를 다시
+  쓰지 않고 transaction boundary를 설명할 수 있다.
+- query behavior는 PostgreSQL Testcontainers로 assert한다. SQL snapshot은 explanatory preview
+  check일 뿐 유일한 correctness proof가 아니다.
+- local guidance가 참조한 diagram skill helper script는 `references/diagram-geometry-audit.py`와
+  `references/diagram-endpoint-audit.py`에 없었다. fallback evidence로 SVG XML validation,
+  CairoSVG render, PNG inspection을 사용했다.
 
-## Residual Risk
+## 잔여 Risk
 
-- Production migration ownership, pagination tokens, optimistic concurrency, and
-  observability policy are documented but intentionally outside #62.
+- production migration ownership, pagination token, optimistic concurrency,
+  observability policy는 문서화되어 있지만 #62 범위 밖이다.

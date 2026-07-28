@@ -1,22 +1,21 @@
 # Issue #60 SQS Floci Worker Code Review
 
-## Scope
+## 범위
 
 - Branch: `feat/issue-60-sqs-floci-worker`
 - Baseline: `origin/develop`
-- Changed area: `examples/sqs-floci-worker`, root README pair, SQS README
-  diagrams, `go.mod`
+- Changed area: `examples/sqs-floci-worker`, root README pair, SQS README diagram,
+  `go.mod`
 
-## Findings
+## 발견 사항
 
 P0=0 P1=0
 
-- No P0 findings: the example requires no real AWS credentials and keeps Floci
-  smoke coverage opt-in behind `BLUETAPE_SQS_FLOCI_WORKER_SMOKE`.
-- No P1 findings: public operations accept caller contexts, success deletes
-  only after handler completion, failure does not delete and instead changes
-  visibility for retry, and the README states SQS at-least-once delivery plus
-  idempotency requirements.
+- P0 finding 없음: 예제는 real AWS credential이 필요 없고 Floci smoke coverage를
+  `BLUETAPE_SQS_FLOCI_WORKER_SMOKE` 뒤에 opt-in으로 둔다.
+- P1 finding 없음: public operation은 caller context를 받고, success delete는 handler completion
+  이후에만 실행되며, failure는 delete하지 않고 retry를 위해 visibility를 변경한다. README는 SQS
+  at-least-once delivery와 idempotency requirement를 설명한다.
 
 ## Evidence
 
@@ -24,15 +23,12 @@ P0=0 P1=0
 - `go test -count=1 ./examples/sqs-floci-worker/...`
 - `go test -race -count=1 ./examples/sqs-floci-worker/...`
 - `xmllint --noout docs/images/readme-diagrams/sqs-floci-worker-architecture.svg docs/images/readme-diagrams/sqs-floci-worker-sequence.svg`
-- `~/.local/bin/cairosvg ... -s 2` for both SVG assets, followed by rendered
-  PNG inspection.
+- both SVG asset에 대해 `~/.local/bin/cairosvg ... -s 2` 실행 후 rendered PNG inspection.
 
-## Residual Risk
+## 잔여 Risk
 
-- The smoke test is opt-in because it requires Docker.
-- Production DLQ redrive policy, idempotency storage, visibility extension for
-  long-running work, concurrency controls, metrics, alarms, and IAM are
-  intentionally outside this focused workshop example.
-- Diagram geometry/endpoint helper scripts referenced by the installed diagram
-  skill are unavailable in the local skill directory, so validation uses XML
-  parse, CairoSVG render, marker/icon scan, and PNG inspection.
+- smoke test는 Docker가 필요하므로 opt-in이다.
+- production DLQ redrive policy, idempotency storage, long-running work를 위한 visibility
+  extension, concurrency control, metric, alarm, IAM은 이 focused workshop example의 범위 밖이다.
+- installed diagram skill이 참조한 diagram geometry/endpoint helper script는 local skill directory에
+  없어서 validation은 XML parse, CairoSVG render, marker/icon scan, PNG inspection을 사용한다.
