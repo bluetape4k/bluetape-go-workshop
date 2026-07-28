@@ -1,4 +1,4 @@
-// Package auditquery implements the Gin audit query API workshop example.
+// Package auditquery 는 Gin audit query API 워크숍 예제를 구현한다.
 package auditquery
 
 import (
@@ -17,7 +17,7 @@ type fixtureTransition struct {
 	reason    string
 }
 
-// SeedRepository appends deterministic order histories to repository.
+// SeedRepository 는 결정적인 order history를 repository에 추가한다.
 func SeedRepository(ctx context.Context, repository audit.Repository) error {
 	if repository == nil || isNilInterface(repository) {
 		return fmt.Errorf("%w: repository is required", ErrInvalidConfig)

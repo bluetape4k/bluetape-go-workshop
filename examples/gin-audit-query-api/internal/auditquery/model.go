@@ -8,32 +8,32 @@ import (
 )
 
 var (
-	// ErrInvalidConfig reports an unusable service or HTTP configuration.
+	// ErrInvalidConfig 는 사용할 수 없는 service 또는 HTTP configuration을 나타낸다.
 	ErrInvalidConfig = errors.New("auditquery: invalid config")
-	// ErrInvalidRequest reports a caller-provided query that cannot be accepted.
+	// ErrInvalidRequest 는 수락할 수 없는 호출자 제공 query를 나타낸다.
 	ErrInvalidRequest = errors.New("auditquery: invalid request")
-	// ErrEntryNotFound reports that an exact aggregate revision does not exist.
+	// ErrEntryNotFound 는 정확한 aggregate revision이 존재하지 않음을 나타낸다.
 	ErrEntryNotFound = errors.New("auditquery: entry not found")
 )
 
-// ServiceConfig controls history page sizes.
+// ServiceConfig 는 history page 크기를 제어한다.
 type ServiceConfig struct {
 	DefaultLimit int
 	MaximumLimit int
 }
 
-// DefaultServiceConfig returns conservative pagination limits for the example.
+// DefaultServiceConfig 는 예제용 보수적인 pagination limit을 반환한다.
 func DefaultServiceConfig() ServiceConfig {
 	return ServiceConfig{DefaultLimit: 20, MaximumLimit: 100}
 }
 
-// AggregateRequest identifies one audited aggregate.
+// AggregateRequest 는 감사 대상 aggregate 하나를 식별한다.
 type AggregateRequest struct {
 	Type string `json:"type"`
 	ID   string `json:"id"`
 }
 
-// SearchRequest describes an aggregate-scoped history query.
+// SearchRequest 는 aggregate 범위의 history query를 설명한다.
 type SearchRequest struct {
 	Aggregate      AggregateRequest `json:"aggregate"`
 	FromRevision   audit.Revision   `json:"from_revision,omitempty"`
@@ -44,20 +44,20 @@ type SearchRequest struct {
 	Limit          int              `json:"limit,omitempty"`
 }
 
-// NextPage contains the exclusive revision boundary for a continuation request.
+// NextPage 는 continuation 요청에 사용할 배타적 revision boundary를 담는다.
 type NextPage struct {
 	FromRevision audit.Revision `json:"from_revision,omitempty"`
 	ToRevision   audit.Revision `json:"to_revision,omitempty"`
 }
 
-// Page describes the current result size and optional continuation boundary.
+// Page 는 현재 결과 크기와 선택적 continuation boundary를 설명한다.
 type Page struct {
 	Limit   int       `json:"limit"`
 	HasMore bool      `json:"has_more"`
 	Next    *NextPage `json:"next,omitempty"`
 }
 
-// SearchResponse returns matching history entries and pagination metadata.
+// SearchResponse 는 일치하는 history entry와 pagination metadata를 반환한다.
 type SearchResponse struct {
 	Entries []audit.Entry `json:"entries"`
 	Page    Page          `json:"page"`

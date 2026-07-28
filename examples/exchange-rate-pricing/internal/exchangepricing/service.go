@@ -1,4 +1,4 @@
-// Package exchangepricing implements the provider-backed exchange-rate pricing example.
+// Package exchangepricing 은 provider-backed exchange-rate pricing 예제를 구현한다.
 package exchangepricing
 
 import (
@@ -20,37 +20,37 @@ const (
 )
 
 var (
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("exchangepricing: invalid request")
-	// ErrInvalidMoney reports invalid currency or decimal money input.
+	// ErrInvalidMoney 는 currency 또는 decimal money 입력이 유효하지 않음을 나타낸다.
 	ErrInvalidMoney = errors.New("exchangepricing: invalid money")
-	// ErrInvalidLocale reports a locale without an explicit supported currency.
+	// ErrInvalidLocale 은 명시적으로 지원되는 currency가 없는 locale을 나타낸다.
 	ErrInvalidLocale = errors.New("exchangepricing: invalid locale")
-	// ErrCurrencyMismatch reports a line currency that differs from the quote base currency.
+	// ErrCurrencyMismatch 는 line currency가 quote base currency와 다름을 나타낸다.
 	ErrCurrencyMismatch = errors.New("exchangepricing: currency mismatch")
-	// ErrProviderUnavailable reports exchange-rate provider failures without exposing raw provider details.
+	// ErrProviderUnavailable 은 원본 provider 세부 정보를 노출하지 않고 exchange-rate provider 실패를 나타낸다.
 	ErrProviderUnavailable = errors.New("exchangepricing: exchange-rate provider unavailable")
-	// ErrStaleQuote reports stale quote metadata when the caller did not opt in.
+	// ErrStaleQuote 는 호출자가 허용하지 않은 stale quote metadata를 나타낸다.
 	ErrStaleQuote = errors.New("exchangepricing: stale quote")
 )
 
-// Service converts base cart totals into locale display totals with a provider-backed rate.
+// Service 는 provider-backed rate로 base cart total을 locale display total로 변환한다.
 type Service struct {
 	provider         money.ExchangeRateProvider
 	operationTimeout time.Duration
 }
 
-// Option configures Service.
+// Option 은 Service를 설정한다.
 type Option func(*Service)
 
-// WithOperationTimeout sets the deadline used around provider I/O.
+// WithOperationTimeout 은 provider I/O 주변에 사용할 deadline을 설정한다.
 func WithOperationTimeout(timeout time.Duration) Option {
 	return func(service *Service) {
 		service.operationTimeout = timeout
 	}
 }
 
-// QuoteRequest is the HTTP and service request for one display-pricing quote.
+// QuoteRequest 는 display-pricing quote 하나에 대한 HTTP 및 service 요청이다.
 type QuoteRequest struct {
 	QuoteID         string            `json:"quote_id"`
 	BaseCurrency    string            `json:"base_currency"`
@@ -59,7 +59,7 @@ type QuoteRequest struct {
 	Items           []LineItemRequest `json:"items"`
 }
 
-// LineItemRequest is one cart line in caller-provided string money form.
+// LineItemRequest 는 호출자가 문자열 money 형식으로 제공하는 cart line 하나다.
 type LineItemRequest struct {
 	SKU       string `json:"sku"`
 	UnitPrice string `json:"unit_price"`
@@ -67,7 +67,7 @@ type LineItemRequest struct {
 	Quantity  int    `json:"quantity"`
 }
 
-// QuoteResponse is the stable public display-pricing projection.
+// QuoteResponse 는 안정적인 공개 display-pricing 프로젝션이다.
 type QuoteResponse struct {
 	QuoteID           string          `json:"quote_id"`
 	BaseCurrency      string          `json:"base_currency"`
@@ -79,7 +79,7 @@ type QuoteResponse struct {
 	ConversionApplied bool            `json:"conversion_applied"`
 }
 
-// LineItemQuote is a priced cart line in the base currency.
+// LineItemQuote 는 base currency로 가격이 계산된 cart line이다.
 type LineItemQuote struct {
 	SKU       string     `json:"sku"`
 	UnitPrice MoneyValue `json:"unit_price"`
@@ -87,7 +87,7 @@ type LineItemQuote struct {
 	LineTotal MoneyValue `json:"line_total"`
 }
 
-// RateMetadata exposes provider source and freshness without leaking provider internals.
+// RateMetadata 는 provider 내부를 누출하지 않고 provider source와 freshness를 노출한다.
 type RateMetadata struct {
 	Source       string  `json:"source"`
 	Rate         string  `json:"rate"`
@@ -98,19 +98,19 @@ type RateMetadata struct {
 	RefreshError *string `json:"refresh_error,omitempty"`
 }
 
-// MoneyValue is the example's stable JSON money shape.
+// MoneyValue 는 예제에서 사용하는 안정적인 JSON money shape다.
 type MoneyValue struct {
 	Amount   string `json:"amount"`
 	Currency string `json:"currency"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적인 공개 오류 형식이다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService creates an exchange-rate pricing service.
+// NewService 는 exchange-rate pricing service를 만든다.
 func NewService(provider money.ExchangeRateProvider, options ...Option) *Service {
 	service := &Service{
 		provider:         provider,
@@ -125,7 +125,7 @@ func NewService(provider money.ExchangeRateProvider, options ...Option) *Service
 	return service
 }
 
-// Quote prices one cart in the base currency and converts the total to the locale currency.
+// Quote 는 cart 하나를 base currency로 가격 계산한 뒤 total을 locale currency로 변환한다.
 func (s *Service) Quote(ctx context.Context, request QuoteRequest) (QuoteResponse, error) {
 	if s == nil {
 		return QuoteResponse{}, fmt.Errorf("%w: service is nil", ErrInvalidRequest)
@@ -251,7 +251,7 @@ func priceLine(baseCurrency money.Currency, item LineItemRequest) (LineItemQuote
 	}, lineTotal, nil
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP router를 만든다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())
