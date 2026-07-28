@@ -358,75 +358,63 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: expose audited workflow HTTP API"
 ```
 
-## Task 5: Supervise the continuous relay and server lifecycle
+## Task 5: continuous relay 및 server lifecycle supervise
 
 **Complexity:** High. **Depends on:** Tasks 3-4. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `runtime.go`, `relay_test.go`, `main.go`, `main_test.go`.
 
-- [ ] **Step 1: Write deterministic relay and signal tests**
+- [ ] **Step 1: deterministic relay 및 signal test 작성**
 
-Use `sqloutboxtest.RecordingPublisher`, a mutable clock, and
-`PublisherFunc` to prove success, one retry after exactly 250 ms, three-attempt
-dead-letter, duplicate physical attempts with stable identity, caller
-cancellation leaving a lease-recoverable claim, and later-revision blocking only
-while an earlier record is pending/claimed. After publish cancellation, verify
-claimed state, advance the shared clock beyond the official 30-second lease,
-start a fresh relay, reclaim the same event/idempotency identity, publish it,
-join lifecycle, and require final published state.
+`sqloutboxtest.RecordingPublisher`, mutable clock, `PublisherFunc`로 success,
+정확히 250 ms 뒤 retry 한 번, three-attempt dead-letter, stable identity를 가진 duplicate physical attempt,
+lease-recoverable claim을 남기는 caller cancellation, earlier record가 pending/claimed인 동안만 later-revision이 block되는지 증명한다.
+publish cancellation 뒤 claimed state를 verify하고 shared clock을 official 30-second lease 뒤로 advance한다.
+fresh relay를 시작해 같은 event/idempotency identity를 reclaim/publish하고 lifecycle을 join한 뒤 final published state를 요구한다.
 
-- [ ] **Step 2: Write lifecycle tests before runtime code**
+- [ ] **Step 2: runtime code 전에 lifecycle test 작성**
 
-Prove expected cancellation joins cleanly; unexpected `Relay.Run` failure
-marks readiness false, logs one redacted lifecycle transition, shuts down HTTP,
-and returns failure. Redis outage keeps readiness HTTP 200 with degraded
-delivery, while database failure or a stopped relay returns 503. Assert idle
-relay loops do not emit logs; official `Relay.Run` intentionally provides no
-per-batch result, so `/statusz` owns current delivery counts. Use a
-real listener with stalled-header and stalled-body clients to prove header/read
-timeouts release connections. With short injected test durations, prove
-oversized headers, write timeout, idle timeout, and graceful-shutdown deadline.
-Exhaust PostgreSQL and Redis pools and require their configured ceilings and
-bounded timeout behavior. Add table tests accepting IPv4/IPv6 loopback literals
-and rejecting IPv4/IPv6 wildcards, `localhost`, hostname-only, non-loopback,
-malformed, missing-port, and zone-scoped addresses. Test Redis stream default,
-blank, invalid UTF-8, and more than 256 bytes. Inject recognizable secret
-markers at config, open, ping, schema, relay, HTTP serve, and close stages;
-require one centralized safe projection with stage and stable class only, and
-assert markers are absent from both logs and top-level returned errors.
+expected cancellation이 clean하게 join되는지 증명한다. unexpected `Relay.Run` failure는 readiness false로 mark하고,
+redacted lifecycle transition 하나를 log하며 HTTP를 shutdown하고 failure를 반환해야 한다.
+Redis outage는 degraded delivery와 함께 readiness HTTP 200을 유지하고, database failure 또는 stopped relay는 503을 반환한다.
+idle relay loop가 log를 emit하지 않는지 assert한다. official `Relay.Run`은 의도적으로 per-batch result를 제공하지 않으므로
+current delivery count는 `/statusz`가 소유한다. stalled-header 및 stalled-body client를 가진 real listener로
+header/read timeout이 connection을 release하는지 증명한다. 짧은 injected test duration으로 oversized header,
+write timeout, idle timeout, graceful-shutdown deadline을 증명한다. PostgreSQL 및 Redis pool을 exhaust하고
+configured ceiling과 bounded timeout behavior를 요구한다. IPv4/IPv6 loopback literal은 accept하고,
+IPv4/IPv6 wildcard, `localhost`, hostname-only, non-loopback, malformed, missing-port, zone-scoped address는 reject하는 table test를 추가한다.
+Redis stream default, blank, invalid UTF-8, 256 byte 초과를 test한다. config, open, ping, schema, relay,
+HTTP serve, close stage에 recognizable secret marker를 inject한다. stage와 stable class만 담은 centralized safe projection 하나를 요구하고,
+log와 top-level returned error 양쪽에서 marker가 없는지 assert한다.
 
-- [ ] **Step 3: Run RED**
+- [ ] **Step 3: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Relay|Lifecycle|Readiness|Status)'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Relay|Lifecycle|Readiness|Status)'`
 
-Expected: FAIL because runtime ownership is absent.
+기대값: runtime ownership이 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement bounded resources and runtime configuration**
+- [ ] **Step 4: bounded resource 및 runtime configuration 구현**
 
-Set PostgreSQL `MaxOpenConns(8)`, `MaxIdleConns(8)`, 5-minute idle and
-30-minute lifetime. Configure Redis pool size 8, minimum idle 1, pool timeout
-2 seconds. Build `http.Server` with 2-second header, 5-second read/write,
-30-second idle, 16 KiB header, and 5-second shutdown limits. Relay options are
-claim 16, attempts 3, retry 250 ms, idle 50 ms.
+PostgreSQL은 `MaxOpenConns(8)`, `MaxIdleConns(8)`, 5-minute idle, 30-minute lifetime으로 설정한다.
+Redis는 pool size 8, minimum idle 1, pool timeout 2 seconds로 configure한다.
+`http.Server`는 2-second header, 5-second read/write, 30-second idle, 16 KiB header,
+5-second shutdown limit로 만든다. Relay option은 claim 16, attempts 3, retry 250 ms, idle 50 ms다.
 
-- [ ] **Step 5: Implement supervision and safe observations**
+- [ ] **Step 5: supervision 및 safe observation 구현**
 
-Own the relay context and result channel in one lifecycle function. Make early
-`context.Canceled` unexpected, mark readiness false before server shutdown, and
-join independent close errors. Call the official `Relay.Run` directly and
-report only delivery-degradation and lifecycle transitions through an injected
-observer; never log records, endpoints, provider errors, or metadata.
+lifecycle function 하나가 relay context와 result channel을 소유한다. early `context.Canceled`는 unexpected로 처리하고,
+server shutdown 전에 readiness false를 mark하며 independent close error를 join한다.
+official `Relay.Run`을 직접 호출하고 injected observer를 통해 delivery-degradation 및 lifecycle transition만 report한다.
+record, endpoint, provider error, metadata는 절대 log하지 않는다.
 
-- [ ] **Step 6: Implement loopback-only configuration and `main`**
+- [ ] **Step 6: loopback-only configuration 및 `main` 구현**
 
-Require `DATABASE_URL` and `REDIS_ADDR`; accept optional `REDIS_STREAM` and an
-IP-literal `HTTP_ADDR`. Parse with `net.SplitHostPort`, then `net.ParseIP`
-without DNS resolution, and reject nil IP, wildcard, zone, or
-`!ip.IsLoopback()`. Centralize public errors in `safeStageError(stage, class)`;
-never return a wrapped provider/configuration value to `main`. Startup order is
-parse, open, bounded ping, schema bootstrap, publisher/relay construction,
-listener, relay, HTTP. Shutdown order is HTTP drain, relay cancel/join, Redis
-close, database close.
+`DATABASE_URL`과 `REDIS_ADDR`는 required다. optional `REDIS_STREAM`과 IP-literal `HTTP_ADDR`를 accept한다.
+DNS resolution 없이 `net.SplitHostPort`, 그다음 `net.ParseIP`로 parse하고 nil IP, wildcard, zone,
+`!ip.IsLoopback()`은 reject한다. public error는 `safeStageError(stage, class)`에 centralize한다.
+wrapped provider/configuration value를 `main`으로 반환하지 않는다. startup order는 parse, open, bounded ping,
+schema bootstrap, publisher/relay construction, listener, relay, HTTP다.
+shutdown order는 HTTP drain, relay cancel/join, Redis close, database close다.
 
-- [ ] **Step 7: Run GREEN, race, and commit**
+- [ ] **Step 7: GREEN, race, commit 실행**
 
 ```bash
 gofmt -w $(rg --files examples/audited-order-workflow-outbox -g '*.go')
@@ -437,56 +425,51 @@ git add examples/audited-order-workflow-outbox
 git commit -m "feat: run supervised audit outbox relay"
 ```
 
-## Task 6: Prove PostgreSQL and Redis integration sequentially
+## Task 6: PostgreSQL 및 Redis integration을 순차 증명
 
 **Complexity:** High. **Depends on:** Task 5. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `integration_test.go` and test helpers only.
 
-- [ ] **Step 1: Add one sequential end-to-end fixture**
+- [ ] **Step 1: sequential end-to-end fixture 하나 추가**
 
-Start PostgreSQL first, complete schema/command/history/restart assertions, then
-start Redis. Do not use `t.Parallel`. Publish created and confirmed events via
-`redisstreams.New` and require the documented 13 fields, exact event and
-idempotency identity, valid `entry_json`, and tolerance of duplicate physical
-stream entries.
+PostgreSQL을 먼저 시작하고 schema/command/history/restart assertion을 완료한 뒤 Redis를 시작한다.
+`t.Parallel`은 사용하지 않는다. created 및 confirmed event를 `redisstreams.New`로 publish하고
+documented 13 field, exact event 및 idempotency identity, valid `entry_json`,
+duplicate physical stream entry에 대한 tolerance를 요구한다.
 
-- [ ] **Step 2: Add restart, outage, lease, and backlog cases**
+- [ ] **Step 2: restart, outage, lease, backlog case 추가**
 
-Recreate service/store/runtime objects over the same databases and prove state,
-history, replay, and pending rows persist. Stop/unavailable Redis must not roll
-back commands. Recover the client, drain multiple 16-record batches while
-writers continue, assert counts/deadline, `db.Stats().MaxOpenConnections == 8`,
-and no later record bypasses an earlier pending/claimed record. Sample
-`db.Stats()` every 10 ms: peak `InUse` must not exceed 8, every writer must
-finish within its 2-second operation deadline, the backlog must drain within the
-fixed test deadline, and total `WaitDuration` must stay below
-`2 seconds * writerCount` so relay monopolization cannot pass silently.
+같은 database 위에서 service/store/runtime object를 recreate하고 state, history, replay, pending row가 persist하는지 증명한다.
+stopped/unavailable Redis는 command를 roll back하면 안 된다. client를 recover하고 writer가 계속되는 동안 multiple 16-record batch를 drain한다.
+count/deadline, `db.Stats().MaxOpenConnections == 8`, later record가 earlier pending/claimed record를 bypass하지 않음을 assert한다.
+`db.Stats()`를 10 ms마다 sample한다. peak `InUse`는 8을 넘으면 안 되고, 모든 writer는 2-second operation deadline 안에 finish해야 하며,
+backlog는 fixed test deadline 안에 drain되어야 한다. relay monopolization이 조용히 pass하지 못하도록 total `WaitDuration`은
+`2 seconds * writerCount` 아래여야 한다.
 
-- [ ] **Step 3: Run the sequential package proof**
+- [ ] **Step 3: sequential package proof 실행**
 
 ```bash
 go test -count=1 -p 1 ./examples/audited-order-workflow-outbox/... -run 'TestIntegration'
 go test -race -count=1 -p 1 ./examples/audited-order-workflow-outbox/... -run 'TestIntegration(Relay|Concurrent)'
 ```
 
-Expected: PostgreSQL then Redis cases PASS with fresh exit 0 and no parallel
-container startup.
+기대값: PostgreSQL 이후 Redis case가 fresh exit 0으로 PASS하고 parallel container startup이 없다.
 
-- [ ] **Step 4: Commit integration proof**
+- [ ] **Step 4: integration proof commit**
 
 ```bash
 git add examples/audited-order-workflow-outbox/internal/orderworkflow/integration_test.go
 git commit -m "test: prove audited workflow delivery integration"
 ```
 
-## Task 7: Add runnable POST JSON documentation
+## Task 7: runnable POST JSON documentation 추가
 
 **Complexity:** Medium. **Depends on:** Tasks 4-6. **Pattern skills:** `bluetape-writer`, `bluetape-go-patterns`. **Write scope:** example README pair, `requests.http`, root README pair, issue #57 README pair.
 
-- [ ] **Step 1: Write `requests.http` as the executable source contract**
+- [ ] **Step 1: `requests.http`를 executable source contract로 작성**
 
-Include variables and complete JSON for create, confirm, identical replay,
-two-page search, detail revision 2, second-order cancel with reason, and rejected
-post-cancel confirm. Every request includes method, URL, content type, and body.
+create, confirm, identical replay, two-page search, detail revision 2, reason이 있는 second-order cancel,
+rejected post-cancel confirm에 대한 variable 및 complete JSON을 포함한다.
+모든 request는 method, URL, content type, body를 포함한다.
 
 ```http
 ### Create order
@@ -496,28 +479,26 @@ Content-Type: application/json
 {"order_id":"order-1001","command_id":"cmd-create-1001","metadata":{"channel":"workshop"}}
 ```
 
-- [ ] **Step 2: Write source-equivalent English and Korean READMEs**
+- [ ] **Step 2: source-equivalent English 및 Korean README 작성**
 
-Use `English | [한국어](README.ko.md)` and
-`[English](README.md) | 한국어`. Explain architecture, transaction boundary,
-history versus transport, loopback-only startup, at-least-once and reordering,
-status/readiness, exact curl bodies, expected replay/cursor/409/429 results, and
-shutdown. Require copy-paste curl commands, not abbreviated JSON.
+`English | [한국어](README.ko.md)`와 `[English](README.md) | 한국어`를 사용한다.
+architecture, transaction boundary, history versus transport, loopback-only startup, at-least-once 및 reordering,
+status/readiness, exact curl body, expected replay/cursor/409/429 result, shutdown을 설명한다.
+abbreviated JSON이 아니라 copy-paste 가능한 curl command를 요구한다.
 
-- [ ] **Step 3: Add the operator runbook and schema boundary**
+- [ ] **Step 3: operator runbook 및 schema boundary 추가**
 
-Document safe status inspection, Redis outage/recovery, lease wait, dead-letter
-diagnosis, partial-startup restart, and an explicitly destructive local reset.
-State that startup DDL is a single-version workshop bootstrap, not migration or
-production rollback tooling.
+safe status inspection, Redis outage/recovery, lease wait, dead-letter diagnosis,
+partial-startup restart, explicitly destructive local reset을 document한다.
+startup DDL은 migration 또는 production rollback tooling이 아니라 single-version workshop bootstrap이라고 명시한다.
 
-- [ ] **Step 4: Update navigation and fix issue #57 language switches**
+- [ ] **Step 4: navigation 업데이트 및 issue #57 language switch 수정**
 
-Add the new example to both root README tables/run sections. Change only the
-language switch lines in the issue #57 README pair so the current locale is
-plain text. Preserve all other issue #57 content.
+두 root README table/run section에 새 example을 추가한다.
+issue #57 README pair에서는 current locale이 plain text가 되도록 language switch line만 바꾼다.
+다른 issue #57 content는 모두 보존한다.
 
-- [ ] **Step 5: Validate locale and request parity, then commit**
+- [ ] **Step 5: locale 및 request parity 검증 후 commit**
 
 ```bash
 rg -n '^POST |Content-Type: application/json|replayed|next_from_revision|too_many_requests|invalid_transition' examples/audited-order-workflow-outbox/{requests.http,README.md,README.ko.md}
@@ -527,27 +508,23 @@ git add README.md README.ko.md examples/audited-order-workflow-outbox examples/t
 git commit -m "docs: add audited workflow POST JSON guide"
 ```
 
-Expected: every scenario marker exists in all three artifacts and locale
-switches have no current-locale self-link. `TestDocumentationParity` extracts
-normalized scenario names, method, URL, JSON body, expected status, replay/cursor
-expectations, warnings, runbook steps, and unsupported behavior from the English
-README, Korean README, and `requests.http`; it requires structural equality, not
-marker presence alone.
+기대값: 모든 scenario marker가 세 artifact 모두에 있고 locale switch에 current-locale self-link가 없다.
+`TestDocumentationParity`는 English README, Korean README, `requests.http`에서 normalized scenario name,
+method, URL, JSON body, expected status, replay/cursor expectation, warning, runbook step,
+unsupported behavior를 extract한다. marker presence만이 아니라 structural equality를 요구한다.
 
-- [ ] **Step 6: Execute the checked-in HTTP scenario against real backends**
+- [ ] **Step 6: checked-in HTTP scenario를 real backend에 실행**
 
-Create `smoke_test.go` that starts PostgreSQL then Redis through the repository
-fixtures, starts the loopback application, waits for `/readyz`, parses
-`requests.http`, substitutes `{{baseURL}}`, and sends each checked-in request.
-Scenario annotations define expected status and response assertions. Require
-201 create, 200 confirm, 200 replay with `replayed: true`, page cursor 2 then
-null, detail revision 2, cancellation, and stable 409 after cancellation. Always
-stop HTTP and containers through bounded cleanup.
+repository fixture로 PostgreSQL을 먼저 시작한 뒤 Redis를 시작하고, loopback application을 시작하며,
+`/readyz`를 기다리고 `requests.http`를 parse해 `{{baseURL}}`을 substitute한 다음 checked-in request를 각각 보내는 `smoke_test.go`를 만든다.
+scenario annotation은 expected status 및 response assertion을 정의한다. 201 create, 200 confirm,
+`replayed: true`를 가진 200 replay, page cursor 2 이후 null, detail revision 2, cancellation,
+cancellation 이후 stable 409를 요구한다. HTTP와 container는 항상 bounded cleanup으로 stop한다.
 
 Run:
 `go test -count=1 -p 1 ./examples/audited-order-workflow-outbox -run 'TestRequestsHTTPSmoke'`
 
-Expected: PASS using the actual checked-in request bodies and fresh exit 0.
+기대값: actual checked-in request body를 사용해 fresh exit 0으로 PASS한다.
 
 ## Task 8: Create and visually verify architecture and sequence diagrams
 
