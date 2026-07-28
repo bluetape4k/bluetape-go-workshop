@@ -1,4 +1,4 @@
-// Command audit-order-history는 현재 order state와 immutable history를 함께 출력한다.
+// Command audit-order-history 는 현재 order state와 immutable history를 함께 출력한다.
 package main
 
 import (

@@ -1,4 +1,4 @@
-// Package catalogcache는 catalog read model을 위해 Redis near-cache invalidation과
+// Package catalogcache 는 catalog read model을 위해 Redis near-cache invalidation과
 // cross-peer stampede coordination을 보여준다.
 package catalogcache
 
@@ -23,17 +23,17 @@ const (
 	defaultPollInterval = 5 * time.Millisecond
 )
 
-// ErrProductNotFound는 authoritative catalog에 SKU가 없을 때 반환된다.
+// ErrProductNotFound 는 authoritative catalog에 SKU가 없을 때 반환된다.
 var ErrProductNotFound = errors.New("product not found")
 
-// Product는 cached catalog projection이다.
+// Product 는 cached catalog projection이다.
 type Product struct {
 	SKU     string `json:"sku"`
 	Name    string `json:"name"`
 	Version int    `json:"version"`
 }
 
-// Options는 example peer의 cache timing을 제어한다.
+// Options 는 example peer의 cache timing을 제어한다.
 type Options struct {
 	TTL          time.Duration
 	LockTTL      time.Duration
@@ -41,7 +41,7 @@ type Options struct {
 	PollInterval time.Duration
 }
 
-// Store는 example이 사용하는 authoritative in-memory product source다.
+// Store 는 example이 사용하는 authoritative in-memory product source다.
 type Store struct {
 	mu       sync.RWMutex
 	products map[string]Product
@@ -49,7 +49,7 @@ type Store struct {
 	onLoad   func(context.Context, string) error
 }
 
-// NewStore는 optional seed product가 있는 authoritative store를 만든다.
+// NewStore 는 optional seed product가 있는 authoritative store를 만든다.
 func NewStore(products ...Product) (*Store, error) {
 	store := &Store{
 		products: make(map[string]Product, len(products)),
@@ -63,7 +63,7 @@ func NewStore(products ...Product) (*Store, error) {
 	return store, nil
 }
 
-// Put은 authoritative product projection을 쓴다.
+// Put 은 authoritative product projection을 쓴다.
 func (s *Store) Put(ctx context.Context, product Product) error {
 	if s == nil {
 		return fmt.Errorf("store must not be nil")
@@ -83,7 +83,7 @@ func (s *Store) Put(ctx context.Context, product Product) error {
 	return nil
 }
 
-// Load는 authoritative product를 읽고 backing load를 기록한다.
+// Load 는 authoritative product를 읽고 backing load를 기록한다.
 func (s *Store) Load(ctx context.Context, sku string) (Product, error) {
 	var zero Product
 	if s == nil {
@@ -113,7 +113,7 @@ func (s *Store) Load(ctx context.Context, sku string) (Product, error) {
 	return product, nil
 }
 
-// LoadCount는 해당 SKU에 대해 authoritative loader가 몇 번 실행됐는지 반환한다.
+// LoadCount 는 해당 SKU에 대해 authoritative loader가 몇 번 실행됐는지 반환한다.
 func (s *Store) LoadCount(sku string) int {
 	if s == nil {
 		return 0
@@ -146,7 +146,7 @@ func (s *Store) ensureMaps() {
 	}
 }
 
-// Peer는 local cache와 Redis coordination을 가진 catalog service instance 하나다.
+// Peer 는 local cache와 Redis coordination을 가진 catalog service instance 하나다.
 type Peer struct {
 	name  string
 	store *Store
@@ -155,7 +155,7 @@ type Peer struct {
 	cache *rediscoord.StampedeCache[Product]
 }
 
-// NewPeer는 memory, Redis near-cache invalidation, Redis stampede coordination으로
+// NewPeer 는 memory, Redis near-cache invalidation, Redis stampede coordination으로
 // backing되는 catalog peer를 만든다.
 func NewPeer(
 	ctx context.Context,
@@ -221,7 +221,7 @@ func NewPeer(
 	}, nil
 }
 
-// GetProduct는 coordinated near-cache를 통해 product를 반환한다.
+// GetProduct 는 coordinated near-cache를 통해 product를 반환한다.
 func (p *Peer) GetProduct(ctx context.Context, sku string) (Product, error) {
 	var zero Product
 	if p == nil {
@@ -244,7 +244,7 @@ func (p *Peer) GetProduct(ctx context.Context, sku string) (Product, error) {
 	return product, nil
 }
 
-// PutProduct는 authoritative store에 쓰고 peer invalidation을 publish한다.
+// PutProduct 는 authoritative store에 쓰고 peer invalidation을 publish한다.
 func (p *Peer) PutProduct(ctx context.Context, product Product) error {
 	if p == nil {
 		return fmt.Errorf("peer must not be nil")
@@ -262,7 +262,7 @@ func (p *Peer) PutProduct(ctx context.Context, product Product) error {
 	return nil
 }
 
-// Close는 peer의 near-cache subscriber를 멈춘다. Redis client ownership은 caller에게 남는다.
+// Close 는 peer의 near-cache subscriber를 멈춘다. Redis client ownership은 caller에게 남는다.
 func (p *Peer) Close() error {
 	if p == nil {
 		return nil

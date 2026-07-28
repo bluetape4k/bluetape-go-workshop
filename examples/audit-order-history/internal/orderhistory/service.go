@@ -14,13 +14,13 @@ import (
 
 const aggregateType = "order"
 
-// Options는 audit author와 event clock을 설정한다.
+// Options 는 audit author와 event clock을 설정한다.
 type Options struct {
 	Author string
 	Now    func() time.Time
 }
 
-// Service는 현재 order state를 갱신하기 전에 immutable audit entry를 append한다.
+// Service 는 현재 order state를 갱신하기 전에 immutable audit entry를 append한다.
 type Service struct {
 	mu     sync.Mutex
 	repo   audit.Repository
@@ -30,7 +30,7 @@ type Service struct {
 	used   map[string]struct{}
 }
 
-// NewService는 audit-backed order history service를 만든다.
+// NewService 는 audit-backed order history service를 만든다.
 func NewService(repo audit.Repository, options Options) (*Service, error) {
 	if repo == nil {
 		return nil, fmt.Errorf("%w: repository is required", ErrInvalidConfig)
@@ -49,7 +49,7 @@ func NewService(repo audit.Repository, options Options) (*Service, error) {
 	}, nil
 }
 
-// Create는 pending order를 기록한다.
+// Create 는 pending order를 기록한다.
 func (s *Service) Create(ctx context.Context, command CreateCommand) (Order, error) {
 	if !s.ready() {
 		return Order{}, ErrInvalidConfig
@@ -61,7 +61,7 @@ func (s *Service) Create(ctx context.Context, command CreateCommand) (Order, err
 	return s.apply(ctx, orderID, commandID, "order.created", "", StatusPending, "")
 }
 
-// Confirm은 pending order를 confirmed로 이동한다.
+// Confirm 은 pending order를 confirmed로 이동한다.
 func (s *Service) Confirm(ctx context.Context, command TransitionCommand) (Order, error) {
 	if !s.ready() {
 		return Order{}, ErrInvalidConfig
@@ -73,7 +73,7 @@ func (s *Service) Confirm(ctx context.Context, command TransitionCommand) (Order
 	return s.apply(ctx, orderID, commandID, "order.confirmed", StatusPending, StatusConfirmed, "")
 }
 
-// Ship은 confirmed order를 shipped로 이동한다.
+// Ship 은 confirmed order를 shipped로 이동한다.
 func (s *Service) Ship(ctx context.Context, command TransitionCommand) (Order, error) {
 	if !s.ready() {
 		return Order{}, ErrInvalidConfig
@@ -85,7 +85,7 @@ func (s *Service) Ship(ctx context.Context, command TransitionCommand) (Order, e
 	return s.apply(ctx, orderID, commandID, "order.shipped", StatusConfirmed, StatusShipped, "")
 }
 
-// Cancel은 pending 또는 confirmed order를 cancelled로 이동한다.
+// Cancel 은 pending 또는 confirmed order를 cancelled로 이동한다.
 func (s *Service) Cancel(ctx context.Context, command CancelCommand) (Order, error) {
 	if !s.ready() {
 		return Order{}, ErrInvalidConfig
@@ -101,7 +101,7 @@ func (s *Service) Cancel(ctx context.Context, command CancelCommand) (Order, err
 	return s.apply(ctx, orderID, commandID, "order.cancelled", "", StatusCancelled, reason)
 }
 
-// Current는 order 하나의 current-state projection을 반환한다.
+// Current 는 order 하나의 current-state projection을 반환한다.
 func (s *Service) Current(orderID string) (Order, bool) {
 	if !s.ready() {
 		return Order{}, false
@@ -113,7 +113,7 @@ func (s *Service) Current(orderID string) (Order, bool) {
 	return order, ok
 }
 
-// History는 order aggregate 하나의 complete demo history를 반환한다.
+// History 는 order aggregate 하나의 complete demo history를 반환한다.
 func (s *Service) History(ctx context.Context, orderID string) (audit.History, bool, error) {
 	if !s.ready() {
 		return audit.History{}, false, ErrInvalidConfig
@@ -133,7 +133,7 @@ func (s *Service) History(ctx context.Context, orderID string) (audit.History, b
 	return history, ok, nil
 }
 
-// Find는 bounded order-only audit query result를 반환한다.
+// Find 는 bounded order-only audit query result를 반환한다.
 func (s *Service) Find(ctx context.Context, query audit.Query) ([]audit.Entry, error) {
 	if !s.ready() {
 		return nil, ErrInvalidConfig

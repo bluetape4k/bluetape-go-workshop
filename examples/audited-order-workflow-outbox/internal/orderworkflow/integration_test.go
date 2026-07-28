@@ -56,7 +56,7 @@ func TestIntegrationPostgreSQLThenRedis(t *testing.T) {
 		t.Fatalf("Transition() = (%+v, %v, %v)", confirmed, replayed, err)
 	}
 
-	// Redis가 존재하기 전에 동일한 PostgreSQL 데이터베이스 위에서 모든 애플리케이션 객체를 재구성한다.
+	// Redis 가 존재하기 전에 동일한 PostgreSQL 데이터베이스 위에서 모든 애플리케이션 객체를 재구성한다.
 	restartedOutbox := newClockedWorkflowOutbox(t, func() time.Time { return now })
 	restartedHistory, err := NewHistoryStore(db)
 	if err != nil {

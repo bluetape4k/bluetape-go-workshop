@@ -8,14 +8,14 @@ import (
 	"github.com/bluetape4k/bluetape-go/audit"
 )
 
-// Preview는 현재 order state를 full/filtered audit history와 대비해 보여준다.
+// Preview 는 현재 order state를 full/filtered audit history와 대비해 보여준다.
 type Preview struct {
 	Current       Order       `json:"current"`
 	History       []EntryView `json:"history"`
 	RecentHistory []EntryView `json:"recent_history"`
 }
 
-// EntryView는 audit entry 하나의 stable JSON projection이다.
+// EntryView 는 audit entry 하나의 stable JSON projection이다.
 type EntryView struct {
 	EventID      string         `json:"event_id"`
 	EventType    string         `json:"event_type"`
@@ -26,7 +26,7 @@ type EntryView struct {
 	StatusAfter  Status         `json:"status_after"`
 }
 
-// BuildPreview는 deterministic create-confirm-ship lifecycle을 실행한다.
+// BuildPreview 는 deterministic create-confirm-ship lifecycle을 실행한다.
 func BuildPreview(ctx context.Context, service *Service) (Preview, error) {
 	if service == nil {
 		return Preview{}, fmt.Errorf("%w: service is required", ErrInvalidConfig)

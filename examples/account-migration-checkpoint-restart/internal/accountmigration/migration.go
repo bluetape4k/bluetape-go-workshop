@@ -1,4 +1,4 @@
-// Package accountmigration은 local migration에서 batch checkpoint restart를 보여준다.
+// Package accountmigration 은 local migration에서 batch checkpoint restart를 보여준다.
 package accountmigration
 
 import (
@@ -14,28 +14,28 @@ import (
 )
 
 const (
-	// JobName은 report에 표시되는 batch job name이다.
+	// JobName 은 report에 표시되는 batch job name이다.
 	JobName = "account-migration"
-	// StepName은 report에 표시되는 checkpoint-aware step name이다.
+	// StepName 은 report에 표시되는 checkpoint-aware step name이다.
 	StepName = "legacy-account-migration"
-	// DefaultCheckpointKey는 first run과 restart run이 공유하는 checkpoint key다.
+	// DefaultCheckpointKey 는 first run과 restart run이 공유하는 checkpoint key다.
 	DefaultCheckpointKey = "account-migration-v1"
-	// DefaultChunkSize는 checkpoint 이동을 쉽게 검사할 수 있게 작게 유지한다.
+	// DefaultChunkSize 는 checkpoint 이동을 쉽게 검사할 수 있게 작게 유지한다.
 	DefaultChunkSize = 2
 )
 
 var (
-	// ErrInvalidAccount는 migration할 수 없는 legacy account를 나타낸다.
+	// ErrInvalidAccount 는 migration할 수 없는 legacy account를 나타낸다.
 	ErrInvalidAccount = errors.New("invalid legacy account")
-	// ErrMigrationCrash는 교육용으로 고정된 deterministic failure를 나타낸다.
+	// ErrMigrationCrash 는 교육용으로 고정된 deterministic failure를 나타낸다.
 	ErrMigrationCrash = errors.New("simulated migration crash")
-	// ErrInvalidCheckpoint는 restart에 사용할 수 없는 checkpoint를 나타낸다.
+	// ErrInvalidCheckpoint 는 restart에 사용할 수 없는 checkpoint를 나타낸다.
 	ErrInvalidCheckpoint = errors.New("invalid migration checkpoint")
-	// ErrDuplicateAccount는 target account 중복 write를 나타낸다.
+	// ErrDuplicateAccount 는 target account 중복 write를 나타낸다.
 	ErrDuplicateAccount = errors.New("duplicate target account")
 )
 
-// LegacyAccount는 migration fixture의 source row 하나다.
+// LegacyAccount 는 migration fixture의 source row 하나다.
 type LegacyAccount struct {
 	Index     int
 	AccountID string
@@ -44,7 +44,7 @@ type LegacyAccount struct {
 	Region    string
 }
 
-// TargetAccount는 migration이 write하는 normalized row다.
+// TargetAccount 는 migration이 write하는 normalized row다.
 type TargetAccount struct {
 	ID     string `json:"id"`
 	Email  string `json:"email"`
@@ -52,12 +52,12 @@ type TargetAccount struct {
 	Region string `json:"region"`
 }
 
-// MigrationCheckpoint는 다음으로 읽을 source index를 저장한다.
+// MigrationCheckpoint 는 다음으로 읽을 source index를 저장한다.
 type MigrationCheckpoint struct {
 	NextIndex int `json:"next_index"`
 }
 
-// CheckpointOperation은 checkpoint load/save behavior에 대한 stable evidence다.
+// CheckpointOperation 은 checkpoint load/save behavior에 대한 stable evidence다.
 type CheckpointOperation struct {
 	Kind       string               `json:"kind"`
 	Key        string               `json:"key"`
@@ -65,7 +65,7 @@ type CheckpointOperation struct {
 	Found      bool                 `json:"found,omitempty"`
 }
 
-// RunOptions는 account migration run 하나를 설정한다.
+// RunOptions 는 account migration run 하나를 설정한다.
 type RunOptions struct {
 	Accounts        []LegacyAccount
 	ChunkSize       int
@@ -76,7 +76,7 @@ type RunOptions struct {
 	Processor       batch.Processor[LegacyAccount, TargetAccount]
 }
 
-// MigrationRun은 batch run 하나의 stable output이다.
+// MigrationRun 은 batch run 하나의 stable output이다.
 type MigrationRun struct {
 	Report          ReportNode           `json:"report"`
 	Checkpoint      *MigrationCheckpoint `json:"checkpoint,omitempty"`
@@ -87,7 +87,7 @@ type MigrationRun struct {
 	WriterWasClosed bool                 `json:"-"`
 }
 
-// DemoResult는 실행 가능한 fail-and-restart scenario output이다.
+// DemoResult 는 실행 가능한 fail-and-restart scenario output이다.
 type DemoResult struct {
 	CheckpointKey      string                `json:"checkpoint_key"`
 	ChunkSize          int                   `json:"chunk_size"`
@@ -99,7 +99,7 @@ type DemoResult struct {
 	CheckpointActivity []CheckpointOperation `json:"checkpoint_activity"`
 }
 
-// ReportNode는 timestamp를 제거한 batch report projection이다.
+// ReportNode 는 timestamp를 제거한 batch report projection이다.
 type ReportNode struct {
 	Name        string       `json:"name"`
 	Status      batch.Status `json:"status"`
@@ -113,7 +113,7 @@ type ReportNode struct {
 	Children    []ReportNode `json:"children,omitempty"`
 }
 
-// DefaultAccounts는 deterministic legacy account fixture를 반환한다.
+// DefaultAccounts 는 deterministic legacy account fixture를 반환한다.
 func DefaultAccounts() []LegacyAccount {
 	return []LegacyAccount{
 		{Index: 0, AccountID: "acct-1001", Email: "Alpha@Example.com", Plan: "Gold", Region: "NA"},
@@ -124,7 +124,7 @@ func DefaultAccounts() []LegacyAccount {
 	}
 }
 
-// RunDemo는 의도된 first-run failure와 restart sequence를 실행한다.
+// RunDemo 는 의도된 first-run failure와 restart sequence를 실행한다.
 func RunDemo(ctx context.Context) (DemoResult, error) {
 	store := NewRecordingCheckpointStore()
 	targets := NewTargetAccountStore()
@@ -167,7 +167,7 @@ func RunDemo(ctx context.Context) (DemoResult, error) {
 	}, nil
 }
 
-// RunMigration은 checkpoint-aware account migration batch job 하나를 실행한다.
+// RunMigration 은 checkpoint-aware account migration batch job 하나를 실행한다.
 func RunMigration(ctx context.Context, options RunOptions) (MigrationRun, error) {
 	ctx = normalizeContext(ctx)
 	if len(options.Accounts) == 0 {
@@ -224,12 +224,12 @@ func RunMigration(ctx context.Context, options RunOptions) (MigrationRun, error)
 	}, nil
 }
 
-// MarshalResult는 demo CLI를 위한 deterministic indented JSON을 반환한다.
+// MarshalResult 는 demo CLI를 위한 deterministic indented JSON을 반환한다.
 func MarshalResult(result DemoResult) ([]byte, error) {
 	return json.MarshalIndent(result, "", "  ")
 }
 
-// MigrationReader는 legacy account를 읽고 checkpoint restore를 지원한다.
+// MigrationReader 는 legacy account를 읽고 checkpoint restore를 지원한다.
 type MigrationReader struct {
 	accounts []LegacyAccount
 	next     int
@@ -238,12 +238,12 @@ type MigrationReader struct {
 	closed   bool
 }
 
-// NewMigrationReader는 account defensive copy를 읽는 reader를 만든다.
+// NewMigrationReader 는 account defensive copy를 읽는 reader를 만든다.
 func NewMigrationReader(accounts []LegacyAccount) *MigrationReader {
 	return &MigrationReader{accounts: append([]LegacyAccount(nil), accounts...)}
 }
 
-// Open은 deterministic source fixture를 검증한다.
+// Open 은 deterministic source fixture를 검증한다.
 func (r *MigrationReader) Open(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -272,7 +272,7 @@ func (r *MigrationReader) Open(ctx context.Context) error {
 	return nil
 }
 
-// Read는 다음 legacy account를 반환한다.
+// Read 는 다음 legacy account를 반환한다.
 func (r *MigrationReader) Read(ctx context.Context) (LegacyAccount, bool, error) {
 	var zero LegacyAccount
 	if err := ctx.Err(); err != nil {
@@ -290,7 +290,7 @@ func (r *MigrationReader) Read(ctx context.Context) (LegacyAccount, bool, error)
 	return account, true, nil
 }
 
-// Restore는 reader cursor를 저장된 checkpoint로 이동한다.
+// Restore 는 reader cursor를 저장된 checkpoint로 이동한다.
 func (r *MigrationReader) Restore(ctx context.Context, value any) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -309,7 +309,7 @@ func (r *MigrationReader) Restore(ctx context.Context, value any) error {
 	return nil
 }
 
-// Checkpoint는 다음 unread source index를 반환한다.
+// Checkpoint 는 다음 unread source index를 반환한다.
 func (r *MigrationReader) Checkpoint(ctx context.Context) (any, bool, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, false, err
@@ -320,7 +320,7 @@ func (r *MigrationReader) Checkpoint(ctx context.Context) (any, bool, error) {
 	return MigrationCheckpoint{NextIndex: r.next}, true, nil
 }
 
-// Close는 reader cleanup을 기록한다.
+// Close 는 reader cleanup을 기록한다.
 func (r *MigrationReader) Close(ctx context.Context) error {
 	if r == nil {
 		return nil
@@ -332,12 +332,12 @@ func (r *MigrationReader) Close(ctx context.Context) error {
 	return nil
 }
 
-// Closed는 Close 호출 여부를 보고한다.
+// Closed 는 Close 호출 여부를 보고한다.
 func (r *MigrationReader) Closed() bool {
 	return r != nil && r.closed
 }
 
-// ReadIDs는 이 reader가 읽은 source account ID를 반환한다.
+// ReadIDs 는 이 reader가 읽은 source account ID를 반환한다.
 func (r *MigrationReader) ReadIDs() []string {
 	if r == nil {
 		return nil
@@ -345,7 +345,7 @@ func (r *MigrationReader) ReadIDs() []string {
 	return slices.Clone(r.readIDs)
 }
 
-// NewAccountProcessor는 deterministic migration processor를 만든다.
+// NewAccountProcessor 는 deterministic migration processor를 만든다.
 func NewAccountProcessor(crashOnAccount string) batch.Processor[LegacyAccount, TargetAccount] {
 	return batch.ProcessorFunc[LegacyAccount, TargetAccount](func(ctx context.Context, account LegacyAccount) (TargetAccount, bool, error) {
 		if err := ctx.Err(); err != nil {
@@ -365,7 +365,7 @@ func NewAccountProcessor(crashOnAccount string) batch.Processor[LegacyAccount, T
 	})
 }
 
-// TargetAccountStore는 account ID 기준 uniqueness를 지키며 migrated account를 저장한다.
+// TargetAccountStore 는 account ID 기준 uniqueness를 지키며 migrated account를 저장한다.
 type TargetAccountStore struct {
 	mu      sync.RWMutex
 	targets map[string]TargetAccount
@@ -373,12 +373,12 @@ type TargetAccountStore struct {
 	writes  []string
 }
 
-// NewTargetAccountStore는 비어 있는 target store를 만든다.
+// NewTargetAccountStore 는 비어 있는 target store를 만든다.
 func NewTargetAccountStore() *TargetAccountStore {
 	return &TargetAccountStore{targets: make(map[string]TargetAccount)}
 }
 
-// Put은 migrated account 하나를 저장한다.
+// Put 은 migrated account 하나를 저장한다.
 func (s *TargetAccountStore) Put(account TargetAccount) error {
 	if s == nil {
 		return fmt.Errorf("target account store must not be nil")
@@ -394,7 +394,7 @@ func (s *TargetAccountStore) Put(account TargetAccount) error {
 	return nil
 }
 
-// Snapshot은 account를 first-write order로 반환한다.
+// Snapshot 은 account를 first-write order로 반환한다.
 func (s *TargetAccountStore) Snapshot() []TargetAccount {
 	if s == nil {
 		return nil
@@ -408,7 +408,7 @@ func (s *TargetAccountStore) Snapshot() []TargetAccount {
 	return result
 }
 
-// WriteIDs는 target ID를 write order로 반환한다.
+// WriteIDs 는 target ID를 write order로 반환한다.
 func (s *TargetAccountStore) WriteIDs() []string {
 	if s == nil {
 		return nil
@@ -418,7 +418,7 @@ func (s *TargetAccountStore) WriteIDs() []string {
 	return slices.Clone(s.writes)
 }
 
-// TargetAccountWriter는 migrated chunk를 target store에 persist한다.
+// TargetAccountWriter 는 migrated chunk를 target store에 persist한다.
 type TargetAccountWriter struct {
 	store      *TargetAccountStore
 	writtenIDs []string
@@ -426,7 +426,7 @@ type TargetAccountWriter struct {
 	closed     bool
 }
 
-// NewTargetAccountWriter는 chunk writer를 만든다.
+// NewTargetAccountWriter 는 chunk writer를 만든다.
 func NewTargetAccountWriter(store *TargetAccountStore) *TargetAccountWriter {
 	if store == nil {
 		store = NewTargetAccountStore()
@@ -434,7 +434,7 @@ func NewTargetAccountWriter(store *TargetAccountStore) *TargetAccountWriter {
 	return &TargetAccountWriter{store: store}
 }
 
-// Open은 writer startup을 기록한다.
+// Open 은 writer startup을 기록한다.
 func (w *TargetAccountWriter) Open(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -448,7 +448,7 @@ func (w *TargetAccountWriter) Open(ctx context.Context) error {
 	return nil
 }
 
-// Write는 migrated chunk를 commit한다.
+// Write 는 migrated chunk를 commit한다.
 func (w *TargetAccountWriter) Write(ctx context.Context, chunk []TargetAccount) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -468,7 +468,7 @@ func (w *TargetAccountWriter) Write(ctx context.Context, chunk []TargetAccount) 
 	return nil
 }
 
-// Close는 writer cleanup을 기록한다.
+// Close 는 writer cleanup을 기록한다.
 func (w *TargetAccountWriter) Close(ctx context.Context) error {
 	if w == nil {
 		return nil
@@ -480,12 +480,12 @@ func (w *TargetAccountWriter) Close(ctx context.Context) error {
 	return nil
 }
 
-// Closed는 Close 호출 여부를 보고한다.
+// Closed 는 Close 호출 여부를 보고한다.
 func (w *TargetAccountWriter) Closed() bool {
 	return w != nil && w.closed
 }
 
-// WrittenIDs는 이 writer가 쓴 account ID를 반환한다.
+// WrittenIDs 는 이 writer가 쓴 account ID를 반환한다.
 func (w *TargetAccountWriter) WrittenIDs() []string {
 	if w == nil {
 		return nil
@@ -493,19 +493,19 @@ func (w *TargetAccountWriter) WrittenIDs() []string {
 	return slices.Clone(w.writtenIDs)
 }
 
-// RecordingCheckpointStore는 교체 가능한 작은 in-memory checkpoint store다.
+// RecordingCheckpointStore 는 교체 가능한 작은 in-memory checkpoint store다.
 type RecordingCheckpointStore struct {
 	mu         sync.RWMutex
 	values     map[string]any
 	operations []CheckpointOperation
 }
 
-// NewRecordingCheckpointStore는 비어 있는 checkpoint store를 만든다.
+// NewRecordingCheckpointStore 는 비어 있는 checkpoint store를 만든다.
 func NewRecordingCheckpointStore() *RecordingCheckpointStore {
 	return &RecordingCheckpointStore{values: make(map[string]any)}
 }
 
-// Load는 key로 checkpoint를 반환하고 load를 기록한다.
+// Load 는 key로 checkpoint를 반환하고 load를 기록한다.
 func (s *RecordingCheckpointStore) Load(ctx context.Context, key string) (any, bool, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, false, err
@@ -525,7 +525,7 @@ func (s *RecordingCheckpointStore) Load(ctx context.Context, key string) (any, b
 	return value, ok, nil
 }
 
-// Save는 key로 checkpoint를 저장하고 save를 기록한다.
+// Save 는 key로 checkpoint를 저장하고 save를 기록한다.
 func (s *RecordingCheckpointStore) Save(ctx context.Context, key string, checkpoint any) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -545,7 +545,7 @@ func (s *RecordingCheckpointStore) Save(ctx context.Context, key string, checkpo
 	return nil
 }
 
-// Operations는 checkpoint activity를 call order로 반환한다.
+// Operations 는 checkpoint activity를 call order로 반환한다.
 func (s *RecordingCheckpointStore) Operations() []CheckpointOperation {
 	if s == nil {
 		return nil

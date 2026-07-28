@@ -1,4 +1,4 @@
-// Command account-migration-checkpoint-restart는 local checkpoint demo를 실행한다.
+// Command account-migration-checkpoint-restart 는 local checkpoint demo를 실행한다.
 package main
 
 import (

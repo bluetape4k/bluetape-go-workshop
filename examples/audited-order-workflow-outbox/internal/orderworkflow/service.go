@@ -17,7 +17,7 @@ import (
 
 const maxAuthorRunes = 128
 
-// Config는 영속 감사 작성자와 주입 가능한 트랜잭션 시계를 제공한다.
+// Config 는 영속 감사 작성자와 주입 가능한 트랜잭션 시계를 제공한다.
 type Config struct {
 	Author string
 	Now    func() time.Time
@@ -25,7 +25,7 @@ type Config struct {
 
 type transactionRunner func(context.Context, sqlkit.Beginner, *sql.TxOptions, sqlkit.TxFunc) error
 
-// Service는 명령 검증과 주문, 이력, outbox를 함께 기록하는 원자적 트랜잭션을 책임진다.
+// Service 는 명령 검증과 주문, 이력, outbox를 함께 기록하는 원자적 트랜잭션을 책임진다.
 type Service struct {
 	db      *sql.DB
 	history *HistoryStore
@@ -35,7 +35,7 @@ type Service struct {
 	runTx   transactionRunner
 }
 
-// NewService는 기존 store 위에 감사 가능한 주문 명령 서비스를 구성한다.
+// NewService 는 기존 store 위에 감사 가능한 주문 명령 서비스를 구성한다.
 func NewService(db *sql.DB, history *HistoryStore, outbox *sqloutbox.Store, config Config) (*Service, error) {
 	author := strings.TrimSpace(config.Author)
 	if db == nil || history == nil || outbox == nil || author == "" ||
@@ -52,7 +52,7 @@ func NewService(db *sql.DB, history *HistoryStore, outbox *sqloutbox.Store, conf
 	}, nil
 }
 
-// Create는 대기 상태 주문을 영속화하거나 표준 replay 프로젝션을 반환한다.
+// Create 는 대기 상태 주문을 영속화하거나 표준 replay 프로젝션을 반환한다.
 func (s *Service) Create(ctx context.Context, command CreateCommand) (Order, bool, error) {
 	if err := s.validate(); err != nil {
 		return Order{}, false, err
@@ -118,7 +118,7 @@ values ($1, $2, $3, $4)`, result.OrderID, result.Status, result.Revision, result
 	return Order{}, false, fmt.Errorf("%w: create order or command already exists: %w", ErrConflict, err)
 }
 
-// Transition은 하나의 유효한 상태 변경을 적용하거나 표준 replay 프로젝션을 반환한다.
+// Transition 은 하나의 유효한 상태 변경을 적용하거나 표준 replay 프로젝션을 반환한다.
 func (s *Service) Transition(ctx context.Context, command TransitionCommand) (Order, bool, error) {
 	if err := s.validate(); err != nil {
 		return Order{}, false, err
