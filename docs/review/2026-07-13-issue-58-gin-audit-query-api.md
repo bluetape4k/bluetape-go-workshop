@@ -1,50 +1,49 @@
-# Issue #58 Gin Audit Query API Review
+# Issue #58 Gin Audit Query API 리뷰
 
-## Scope
+## 범위
 
-- Baseline: `origin/develop` at `612f57f`
-- Branch: `feat/issue-58-gin-audit-query-api`
-- Slice: `examples/gin-audit-query-api`, paired README navigation, approved spec and plan
-- Excluded: authentication, authorization, durable storage, metadata filtering, public library APIs, and new dependencies
+- 기준선: `612f57f`의 `origin/develop`
+- 브랜치: `feat/issue-58-gin-audit-query-api`
+- Slice: `examples/gin-audit-query-api`, paired README navigation, 승인된 spec 및 plan
+- 제외: authentication, authorization, durable storage, metadata filtering, public library API, new dependency
 
-## Spec and Plan Verifier
+## Spec 및 Plan 검증기
 
-| Requirement | Implementation and proof |
+| 요구사항 | 구현과 증거 |
 |---|---|
-| Aggregate-scoped POST search | Strict JSON handler and service tests cover revision/time filters, both orderings, limits, empty results, and continuation boundaries. |
-| Exact revision detail | GET handler and service tests cover existing, missing, malformed, and encoded-path inputs. |
-| Current audit API | The example composes `audit.HistoryReader`, `audit.Query`, `audit.Entry`, and `audit.NewMemoryRepository` from the pinned v0.18.0 baseline. |
-| Deterministic lesson | Two fixed order histories provide stable revisions, timestamps, events, changes, payloads, and metadata. |
-| HTTP boundaries | Tests cover media type, charset, content encoding, UTF-8, duplicate keys, unknown fields, trailing JSON, body size, timeouts, cancellation, 404, and 405. |
-| Safe lifecycle | Loopback is the default, remote exposure requires explicit opt-in, server timeouts are bounded, and SIGTERM completes graceful shutdown. |
-| Public documentation | English and Korean README pairs show the lesson, POST body, pagination, detail lookup, run command, and production non-goals. |
+| Aggregate-scoped POST search | Strict JSON handler와 service test가 revision/time filter, 양방향 ordering, limit, empty result, continuation boundary를 다룬다. |
+| Exact revision detail | GET handler와 service test가 existing, missing, malformed, encoded-path input을 다룬다. |
+| Current audit API | 예제는 pinned v0.18.0 baseline의 `audit.HistoryReader`, `audit.Query`, `audit.Entry`, `audit.NewMemoryRepository`를 조합한다. |
+| Deterministic lesson | 고정 order history 2개가 안정적인 revision, timestamp, event, change, payload, metadata를 제공한다. |
+| HTTP boundaries | 테스트는 media type, charset, content encoding, UTF-8, duplicate key, unknown field, trailing JSON, body size, timeout, cancellation, 404, 405를 다룬다. |
+| Safe lifecycle | loopback이 기본값이고 remote exposure는 명시 opt-in이 필요하며 server timeout은 bounded이고 SIGTERM은 graceful shutdown을 완료한다. |
+| Public documentation | English/Korean README pair는 lesson, POST body, pagination, detail lookup, run command, production non-goal을 보여 준다. |
 
-Verifier verdict: `PASS`. The implementation remains application-shaped and does
-not add reusable workshop infrastructure or claim production readiness.
+검증기 판정: `PASS`. 구현은 application-shaped 상태를 유지하며 reusable workshop
+infrastructure를 추가하거나 production readiness를 주장하지 않는다.
 
-## Review Convergence
+## 리뷰 수렴
 
-| Lens | P0 | P1 | Result |
+| 관점 | P0 | P1 | 결과 |
 |---|---:|---:|---|
-| Developer/API | 0 | 0 | Request, response, error, zero-value, and pagination contracts are explicit and tested. |
-| Performance | 0 | 0 | Page size is capped at 100; the v0.18.0 memory-reader scan remains a documented demo limitation. |
-| Stability | 0 | 0 | Context propagation, timeout handling, owned server goroutine, shutdown, and race proof converge. |
-| Security | 0 | 0 | Loopback default, bounded input, strict JSON, raw-path handling, proxy distrust, safe errors, and metadata exposure warning converge. |
-| Operator/Ops | 0 | 0 | Health, structured lifecycle logs, startup failure, timeout, shutdown, remote opt-in, and non-durability are documented. |
-| User/caller | 0 | 0 | Commands and representative responses match the live server and explain the exclusive revision cursor. |
-| Main integration | 0 | 0 | Scope, locale parity, root navigation, issue metadata, and repository hazards are aligned. |
+| Developer/API | 0 | 0 | request, response, error, zero-value, pagination contract가 명시되어 있고 테스트된다. |
+| Performance | 0 | 0 | page size는 100으로 제한된다. v0.18.0 memory-reader scan은 문서화된 demo limitation으로 남는다. |
+| Stability | 0 | 0 | context propagation, timeout handling, owned server goroutine, shutdown, race proof가 수렴한다. |
+| Security | 0 | 0 | loopback default, bounded input, strict JSON, raw-path handling, proxy distrust, safe error, metadata exposure warning이 수렴한다. |
+| Operator/Ops | 0 | 0 | health, structured lifecycle log, startup failure, timeout, shutdown, remote opt-in, non-durability가 문서화되어 있다. |
+| User/caller | 0 | 0 | command와 대표 response가 live server와 일치하고 exclusive revision cursor를 설명한다. |
+| Main integration | 0 | 0 | scope, locale parity, root navigation, issue metadata, repository hazard가 정렬되어 있다. |
 
-The code-review graph contained no indexed nodes or edges for this checkout, so
-it was not used as evidence. Installed-role dispatch was unavailable through the
-active collaboration interface; the repository workflow's allowed main-session
-fallback covered every required perspective without claiming an independent
-review.
+이 checkout의 code-review graph에는 indexed node나 edge가 없었으므로 증거로
+사용하지 않았다. active collaboration interface에서는 installed-role dispatch를
+사용할 수 없었다. repository workflow가 허용한 main-session fallback으로 모든
+필수 관점을 다뤘고, 독립 review를 수행했다고 주장하지 않았다.
 
-## Cleanup and Evidence
+## 정리와 검증 자료
 
-The anti-slop pass found no masking fallback, dead code, UI surface, or needless
-abstraction. The strict decoder remains local because sibling `internal` packages
-cannot be shared and this example must not invent reusable library code.
+anti-slop pass는 masking fallback, dead code, UI surface, 불필요한 abstraction을
+찾지 못했다. sibling `internal` package는 공유할 수 없고 이 예제가 reusable
+library code를 invent하면 안 되므로 strict decoder는 local로 유지된다.
 
 ```text
 golangci-lint run ./examples/gin-audit-query-api/...                PASS, 0 issues
@@ -55,4 +54,4 @@ make ci                                                             PASS, exit 0
 git diff --check                                                    PASS
 ```
 
-Final pre-PR verdict: `P0=0, P1=0`.
+최종 pre-PR 판정: `P0=0, P1=0`.
