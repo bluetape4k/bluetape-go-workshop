@@ -1,15 +1,15 @@
-# Issue #44 ID/JWT Boundary Spec Review
+# Issue #44 ID/JWT Boundary 명세 리뷰
 
-## Scope
+## 범위
 
 - Branch: `feat/issue-44-id-jwt-boundary`
 - Issue: #44 `[v0.6.0] Add ID and JWT boundary example`
-- Reviewed artifact:
+- 검토 artifact:
   - `docs/superpowers/specs/2026-06-22-issue-44-id-jwt-boundary-design.md`
 
-## Six-Lane Review
+## Six-Lane 리뷰
 
-| Lane | P0 | P1 | P2 | P3 | Result |
+| Lane | P0 | P1 | P2 | P3 | 결과 |
 |---|---:|---:|---:|---:|---|
 | Performance | 0 | 0 | 0 | 0 | PASS |
 | Stability | 0 | 0 | 0 | 0 | PASS |
@@ -18,31 +18,28 @@
 | Developer/API | 0 | 0 | 0 | 0 | PASS |
 | User/Caller | 0 | 0 | 0 | 0 | PASS |
 
-## Findings
+## finding
 
-No P0/P1 findings.
+P0/P1 finding은 없다.
 
-## Review Notes
+## 리뷰 note
 
-- Performance: the design has no background workers, stores, retries, sleeps,
-  or external services. UUID/JWT operations are request-local and bounded.
-- Stability: the service contract uses injected clock/generator/provider
-  boundaries for deterministic tests and maps domain sentinels through
-  `errors.Is`.
-- Security: the selected scope avoids building an auth framework, explicitly
-  documents that JWT claims are not encrypted, and forbids leaking raw token,
-  secret, or parser diagnostics in responses.
-- Operator/Ops: public error codes are allowlisted and stable; live smoke
-  commands cover valid, missing, malformed, expired, and forbidden paths.
-- Developer/API: the example stays under a single `internal` package and uses
-  existing `bluetape-go/id` and `bluetape-go/jwt` APIs instead of new helper
-  abstractions.
-- User/Caller: the selected Gin route set is small enough for README curl
-  commands while still showing the trust boundary requested by #44.
+- Performance: design에는 background worker, store, retry, sleep, external service가 없다.
+  UUID/JWT operation은 request-local이며 bounded하다.
+- Stability: service contract는 deterministic test를 위해 injected clock/generator/provider
+  boundary를 사용하고 domain sentinel을 `errors.Is`로 매핑한다.
+- Security: 선택된 scope는 auth framework 구축을 피하고 JWT claim이 encrypted가 아님을 명시적으로
+  문서화하며 response에서 raw token, secret, parser diagnostic leak을 금지한다.
+- Operator/Ops: public error code는 allowlisted되고 stable하다. live smoke command는 valid,
+  missing, malformed, expired, forbidden path를 다룬다.
+- Developer/API: example은 단일 `internal` package 아래에 머물고 새 helper abstraction 대신 기존
+  `bluetape-go/id`와 `bluetape-go/jwt` API를 사용한다.
+- User/Caller: 선택된 Gin route set은 README curl command에 충분히 작으면서도 #44가 요청한
+  trust boundary를 보여준다.
 
-## Acceptance Mapping
+## Acceptance 매핑
 
-| Issue #44 criterion | Spec coverage |
+| Issue #44 criterion | spec coverage |
 |---|---|
 | Internal order ID and external request token flow | Scenario, HTTP Contract, Domain Contract |
 | Generate IDs | ID Contract |
@@ -54,6 +51,6 @@ No P0/P1 findings.
 | No real secrets committed | JWT Contract, Documentation Requirements |
 | README pair in sync and root navigation update | Documentation Requirements |
 
-## Convergence
+## 수렴
 
-Spec is implementation-ready.
+spec은 implementation-ready 상태다.
