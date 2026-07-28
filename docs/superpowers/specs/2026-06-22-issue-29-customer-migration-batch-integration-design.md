@@ -1,129 +1,126 @@
-# Issue #29/#75 Design: Customer Migration Batch Integration Example
+# Issue #29/#75 설계: Customer Migration Batch Integration 예제
 
-## Classification
+## 분류
 
-- Work type: Type A - Full Feature.
-- Basis: issue #29 is the v0.5.0 batch umbrella; open child issues #42, #43,
-  and #75 require a Gin operations API, leader-guarded scheduled execution, and
-  a milestone-level integration example.
-- Repository: `bluetape4k/bluetape-go-workshop`.
-- Branch/worktree: `feat/issue-29-batch-integration` under
+- 작업 유형: Type A - Full Feature.
+- 근거: issue #29는 v0.5.0 batch umbrella이며, 열려 있는 child issue #42, #43,
+  #75는 Gin operations API, leader-guarded scheduled execution, milestone-level
+  integration 예제를 요구한다.
+- 저장소: `bluetape4k/bluetape-go-workshop`.
+- 브랜치/워크트리: `feat/issue-29-batch-integration`, 위치는
   `.worktrees/feat-issue-29-batch-integration`.
 
-## Goal
+## 목표
 
-Add one runnable v0.5.0 customer migration batch integration example that
-combines checkpoint restart, a Gin operations API, leader-guarded scheduled
-execution, retry/dead-letter behavior, deterministic status output, and
-English/Korean README walkthroughs.
+Checkpoint restart, Gin operations API, leader-guarded scheduled execution,
+retry/dead-letter 동작, 결정적 status output, 영어/한국어 README walkthrough를
+결합한 실행 가능한 v0.5.0 customer migration batch integration 예제를 하나
+추가한다.
 
-This PR should be able to close #42, #43, #75, and then #29 because the focused
-checkpoint/retry prerequisites #41, #73, and #74 are already implemented.
+집중 checkpoint/retry prerequisite인 #41, #73, #74가 이미 구현되어 있으므로,
+이 PR은 #42, #43, #75를 닫고 그 다음 #29를 닫을 수 있어야 한다.
 
-## Current Evidence
+## 현재 근거
 
-- `gh issue view 29` shows #29 as the umbrella for checkpoint, restart, report,
-  scheduled execution, retries, and integration.
-- `gh issue view 42` requires Gin start/status/report handlers while keeping
-  batch policy outside handlers.
-- `gh issue view 43` requires a small scheduler loop guarded by existing leader
-  primitives, with held/missing/cancellation tests and no long sleeps.
-- `gh issue view 75` requires an integration example that composes checkpoint
-  restart, operations API, scheduled execution, retry/dead-letter behavior, and
-  import fixtures.
-- Existing examples provide the local patterns:
-  - `examples/account-migration-checkpoint-restart` for checkpoint restore.
-  - `examples/chunked-csv-import-checkpoint` for replay after a failed chunk.
-  - `examples/retry-dead-letter-batch-worker` for `batch.RetryPolicy` and
+- `gh issue view 29`는 #29가 checkpoint, restart, report, scheduled execution,
+  retry, integration을 포괄하는 umbrella임을 보여준다.
+- `gh issue view 42`는 batch policy를 handler 밖에 유지하면서 Gin
+  start/status/report handler를 요구한다.
+- `gh issue view 43`은 기존 leader primitive로 보호되는 작은 scheduler loop를
+  요구하며, held/missing/cancellation 테스트와 긴 sleep 금지를 포함한다.
+- `gh issue view 75`는 checkpoint restart, operations API, scheduled execution,
+  retry/dead-letter 동작, import fixture를 조합하는 integration 예제를 요구한다.
+- 기존 예제는 local pattern을 제공한다.
+  - `examples/account-migration-checkpoint-restart`: checkpoint restore.
+  - `examples/chunked-csv-import-checkpoint`: failed chunk 이후 replay.
+  - `examples/retry-dead-letter-batch-worker`: `batch.RetryPolicy`와
     `batch.SkipPolicy`.
-  - `examples/operations-report-policy` and `examples/order-fulfillment-integration`
-    for Gin handler shape, status mapping, and stable report projection.
-  - `examples/leader-coordination-jobs` for leader-owned scheduled work.
-- `go doc github.com/bluetape4k/bluetape-go/batch` confirms `Step`, `Job`,
-  `CheckpointReader`, `CheckpointStore`, `RetryErrors`, and `SkipErrors`.
-- `go doc github.com/bluetape4k/bluetape-go/leader` confirms the existing
-  `leader.Elector` contract and sentinel errors.
-- `go doc github.com/gin-gonic/gin.Engine` confirms `gin.New`,
-  `ServeHTTP`, and standard `net/http` integration used by repository tests.
+  - `examples/operations-report-policy`와 `examples/order-fulfillment-integration`:
+    Gin handler 형태, status mapping, 안정적인 report projection.
+  - `examples/leader-coordination-jobs`: leader-owned scheduled work.
+- `go doc github.com/bluetape4k/bluetape-go/batch`는 `Step`, `Job`,
+  `CheckpointReader`, `CheckpointStore`, `RetryErrors`, `SkipErrors`를 확인한다.
+- `go doc github.com/bluetape4k/bluetape-go/leader`는 기존 `leader.Elector`
+  계약과 sentinel error를 확인한다.
+- `go doc github.com/gin-gonic/gin.Engine`은 저장소 테스트가 사용하는
+  `gin.New`, `ServeHTTP`, 표준 `net/http` integration을 확인한다.
 
-## Non-Goals
+## 비목표
 
-- Do not add durable queues, Redis, NATS, databases, or object storage.
-- Do not implement a generic scheduler, queue worker, retry framework, or
-  checkpoint storage framework.
-- Do not import existing focused example `internal` packages across example
-  boundaries; Go `internal` package visibility intentionally prevents that.
-- Do not claim in-memory checkpoint stores, leader fakes, or dead-letter lists
-  are production durable.
-- Do not add new dependencies.
+- durable queue, Redis, NATS, database, object storage를 추가하지 않는다.
+- generic scheduler, queue worker, retry framework, checkpoint storage
+  framework를 구현하지 않는다.
+- 기존 focused example의 `internal` package를 example boundary 너머로 import하지
+  않는다. Go `internal` package visibility가 이를 의도적으로 막는다.
+- in-memory checkpoint store, leader fake, dead-letter list가 production
+  durable하다고 주장하지 않는다.
+- 새 의존성을 추가하지 않는다.
 
-## Approaches Considered
+## 검토한 접근
 
-### A. One integrated Gin example directory
+### A. 하나의 통합 Gin 예제 디렉터리
 
-Create `examples/customer-migration-batch-integration` with a single internal
-package that owns the domain engine, in-memory operations service, leader-gated
-scheduler, Gin handlers, tests, CLI entrypoint, and README pair.
+Domain engine, in-memory operations service, leader-gated scheduler, Gin
+handler, 테스트, CLI entrypoint, README pair를 소유하는 단일 internal package와
+함께 `examples/customer-migration-batch-integration`을 만든다.
 
-This is the selected approach. It keeps the milestone example runnable,
-reviewable, and faithful to #75 while satisfying #42 and #43 in the same
-scenario.
+이 접근을 선택한다. 같은 시나리오 안에서 #42와 #43을 충족하면서 milestone
+예제를 실행 가능하고 review 가능하며 #75에 충실하게 유지한다.
 
-### B. Three separate example directories for #42, #43, and #75
+### B. #42, #43, #75를 위한 세 개의 별도 예제 디렉터리
 
-This would keep each child issue maximally focused, but it would duplicate
-batch fixtures and delay the milestone integration. It also makes #75 a thin
-wrapper instead of the user-visible milestone example.
+각 child issue를 가장 집중된 형태로 유지할 수 있지만 batch fixture를 중복하고
+milestone integration을 늦춘다. 또한 #75를 user-visible milestone example이
+아닌 얇은 wrapper로 만든다.
 
-Rejected because the repository already has focused examples for checkpoint
-and retry, and the remaining useful gap is integration.
+저장소에는 이미 checkpoint와 retry를 위한 focused example이 있고, 남은 유의미한
+공백은 integration이므로 기각한다.
 
-### C. Import focused example packages into the integration example
+### C. Focused example package를 integration 예제로 import
 
-This would avoid duplicate domain concepts, but the existing focused examples
-place code under `examples/<name>/internal/...`. A sibling example cannot import
-those packages without violating Go's `internal` visibility rule.
+Domain concept 중복을 피할 수 있지만 기존 focused example은 코드를
+`examples/<name>/internal/...` 아래에 둔다. Sibling example은 Go의 `internal`
+visibility rule을 위반하지 않고 해당 package를 import할 수 없다.
 
-Rejected because preserving example-local boundaries is preferable to moving
-existing packages or broadening public API surface.
+기존 package 이동이나 public API surface 확장보다 example-local boundary 보존이
+낫기 때문에 기각한다.
 
-## Example
+## 예제
 
-- Path: `examples/customer-migration-batch-integration`
-- Package: `internal/customermigration`
-- Runnable entrypoint: `main.go`
+- 경로: `examples/customer-migration-batch-integration`
+- 패키지: `internal/customermigration`
+- 실행 entrypoint: `main.go`
 - HTTP framework: Gin
-- Default address: `127.0.0.1:8095`
-- Package dependency focus: `batch`, `leader`, and standard-library
-  `context`, `net/http`, `sync`, and `time`.
-- Chunk size: `2`, fixed in the example so the restart demo leaves the
-  checkpoint at `NextIndex=2` after the simulated crash.
+- 기본 주소: `127.0.0.1:8095`
+- Package dependency focus: `batch`, `leader`, 표준 라이브러리 `context`,
+  `net/http`, `sync`, `time`.
+- Chunk size: `2`. Restart demo가 simulated crash 이후 checkpoint를
+  `NextIndex=2`에 남기도록 예제에서 고정한다.
 
-## Scenario
+## 시나리오
 
-A customer migration service exposes an operations API and a leader-guarded
-scheduled trigger. Each run imports deterministic customer records in chunks,
-stores a small checkpoint cursor, retries one transient customer enrichment
-failure, dead-letters one permanent customer, and can restart after a simulated
-writer crash without reprocessing the completed chunk.
+Customer migration service는 operations API와 leader-guarded scheduled trigger를
+노출한다. 각 실행은 결정적인 customer record를 chunk 단위로 import하고, 작은
+checkpoint cursor를 저장하며, transient customer enrichment failure 하나를
+retry하고, permanent customer 하나를 dead-letter 처리한다. 또한 simulated writer
+crash 이후 완료된 chunk를 재처리하지 않고 restart할 수 있다.
 
-Default records:
+기본 record:
 
-- `cust-1001`: succeeds.
-- `cust-1002`: succeeds.
-- `cust-1003`: fails transiently once, then succeeds on retry.
-- `cust-1004`: permanent validation failure; records a dead letter and is
-  skipped.
-- `cust-1005`: succeeds after restart.
+- `cust-1001`: 성공한다.
+- `cust-1002`: 성공한다.
+- `cust-1003`: 한 번 transient하게 실패한 뒤 retry에서 성공한다.
+- `cust-1004`: permanent validation failure. Dead letter를 기록하고 skip된다.
+- `cust-1005`: restart 이후 성공한다.
 
-The demo flow has two visible runs:
+Demo flow에는 눈에 보이는 두 실행이 있다.
 
-1. A manual API start with `crash_after_new_writes=3` fails after the first
-   checkpointed chunk and a partial second chunk.
-2. A scheduler tick under leader guard starts a restart run with the same
-   checkpoint store and sink. It restores the checkpoint, replays the failed
-   chunk, treats the already-written boundary customer as an idempotent no-op,
-   finishes remaining work, and reports the final checkpoint.
+1. `crash_after_new_writes=3`을 사용하는 manual API start는 첫 번째 checkpointed
+   chunk와 부분 second chunk 이후 실패한다.
+2. Leader guard 아래의 scheduler tick은 같은 checkpoint store와 sink로 restart
+   run을 시작한다. Checkpoint를 restore하고 실패한 chunk를 replay하며, 이미
+   쓰인 boundary customer를 idempotent no-op으로 처리하고, 남은 작업을 끝낸 뒤
+   final checkpoint를 보고한다.
 
 ## Domain Model
 
