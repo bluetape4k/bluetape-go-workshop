@@ -1,4 +1,4 @@
-# Issue #50 Graph Abuse Cluster Design
+# Issue #50 Graph Abuse Cluster 설계
 
 ## Status
 
@@ -7,75 +7,66 @@
 - Parent track: #36
 - Parent roadmap: #27
 - Implementation baseline: `bluetape-go v0.18.0`
-- Design decision: user approved approach 1, Neo4j-only persistence with
-  application-owned cluster analysis
+- Design decision: user가 approach 1을 승인했다. Neo4j-only persistence와 application-owned
+  cluster analysis를 사용한다.
 - Approval date: 2026-07-14 KST
 
 ## Problem and Outcome
 
-The workshop needs its first graph-domain example. It must demonstrate the
-released `graph` values and narrow `graph/neo4j` adapter in a concrete abuse
-investigation scenario without turning the workshop into a graph framework or
-fraud product.
+workshop에는 첫 graph-domain example이 필요하다. 이 예제는 workshop을 graph framework나 fraud
+product로 만들지 않으면서, 구체적인 abuse investigation scenario 안에서 released `graph` value와
+좁은 `graph/neo4j` adapter를 보여줘야 한다.
 
-The example will seed opaque users and identifiers into one Neo4j fixture,
-read a bounded graph through the released adapter, calculate connected abuse
-clusters in Go, and print deterministic JSON evidence. A reader should be able
-to see which behavior belongs to Neo4j, which belongs to `bluetape-go`, and
-which remains application policy.
+예제는 opaque user와 identifier를 하나의 Neo4j fixture에 seed하고, released adapter로 bounded graph를
+읽은 뒤, Go에서 connected abuse cluster를 계산하고 deterministic JSON evidence를 출력한다. reader는 어떤
+behavior가 Neo4j에 속하고, 어떤 behavior가 `bluetape-go`에 속하며, 무엇이 application policy로 남는지
+볼 수 있어야 한다.
 
 ## Evidence and Adopt Decisions
 
 ### Adopt
 
-- `graph.Vertex`, `graph.Edge`, `graph.Properties`, and their validation
-  contracts for fixture values.
-- `graph/neo4j.Client` around a caller-owned official Neo4j driver.
-- `ExecuteWrite`, `ReadVertices`, and `ReadEdges` for the small fixed Cypher
-  boundary.
-- The upstream `graph/neo4j` Testcontainers pattern using
-  `testcontainers-go/modules/neo4j`, because `bluetape-go v0.18.0` does not
-  provide a reusable `testcontainers/neo4j` launcher.
-- The repository convention of a runnable `main` plus an `internal` package,
-  bilingual README pair, root navigation, focused tests, and serial container
-  evidence.
+- fixture value에는 `graph.Vertex`, `graph.Edge`, `graph.Properties`와 이들의 validation
+  contract를 사용한다.
+- caller-owned official Neo4j driver 주위에는 `graph/neo4j.Client`를 사용한다.
+- 작은 fixed Cypher boundary에는 `ExecuteWrite`, `ReadVertices`, `ReadEdges`를 사용한다.
+- `bluetape-go v0.18.0`이 reusable `testcontainers/neo4j` launcher를 제공하지 않으므로
+  `testcontainers-go/modules/neo4j`를 사용하는 upstream `graph/neo4j` Testcontainers pattern을
+  채택한다.
+- runnable `main`과 `internal` package, bilingual README pair, root navigation, focused test,
+  serial container evidence라는 repository convention을 따른다.
 
 ### Borrow
 
-- The earlier graph candidate research decision that #50 is the first graph
-  example and should use opaque identifiers, a deterministic fixture, and a
-  domain-owned algorithm.
-- The Kotlin abuse-detection scenario only as domain inspiration. No Kotlin
-  repository, traversal abstraction, or API shape is ported.
+- #50이 첫 graph example이며 opaque identifier, deterministic fixture, domain-owned algorithm을
+  사용해야 한다는 이전 graph candidate research decision을 빌린다.
+- Kotlin abuse-detection scenario는 domain inspiration으로만 사용한다. Kotlin repository, traversal
+  abstraction, API shape는 port하지 않는다.
 
 ### Reject
 
-- Full cluster computation in Cypher. It hides the teaching policy in a
-  backend query and makes deterministic unit testing less direct.
-- An in-memory-only graph with Neo4j used as a connectivity smoke test. It does
-  not prove the released adapter in the actual data flow.
-- Memgraph coverage. The user selected Neo4j-only scope for this focused
-  example; backend compatibility belongs upstream or in later work.
+- Cypher 안의 full cluster computation. 이는 teaching policy를 backend query에 숨기고 deterministic
+  unit testing을 덜 직접적으로 만든다.
+- Neo4j를 connectivity smoke test로만 사용하는 in-memory-only graph. 실제 data flow에서 released
+  adapter를 증명하지 못한다.
+- Memgraph coverage. user는 이 focused example에 Neo4j-only scope를 선택했다. backend compatibility는
+  upstream 또는 later work에 속한다.
 
 ## Architecture
 
-The example lives at `examples/graph-abuse-cluster` and has four bounded
-components.
+example은 `examples/graph-abuse-cluster`에 위치하며 네 개의 bounded component를 가진다.
 
-1. **Fixture builder** creates validated graph vertices and edges from opaque
-   constants. It contains no database behavior.
-2. **Neo4j store** translates the validated fixture to parameter maps, resets
-   and seeds only its fixture namespace in one atomic write, and reads bounded
-   vertices and edges through `graph/neo4j.Client`.
-3. **Analyzer** builds the bipartite adjacency map in memory, finds connected
-   user components, extracts shared evidence, calculates an illustrative risk
-   score, and sorts the report deterministically.
-4. **CLI** owns configuration, driver/client lifecycle, signal and timeout
-   context, JSON output, and redacted terminal errors.
+1. **Fixture builder**는 opaque constant에서 검증된 graph vertex와 edge를 만든다. database behavior는
+   포함하지 않는다.
+2. **Neo4j store**는 검증된 fixture를 parameter map으로 변환하고, 하나의 atomic write 안에서 자기 fixture
+   namespace만 reset/seed하며, `graph/neo4j.Client`로 bounded vertex와 edge를 읽는다.
+3. **Analyzer**는 in-memory bipartite adjacency map을 만들고, connected user component를 찾고, shared
+   evidence를 추출하며, illustrative risk score를 계산하고 report를 deterministic하게 정렬한다.
+4. **CLI**는 configuration, driver/client lifecycle, signal 및 timeout context, JSON output, redacted
+   terminal error를 소유한다.
 
-No component defines a reusable graph repository, algorithm library, schema
-DSL, query builder, or provider abstraction. Reusable capability changes, if
-discovered, belong in a separate `bluetape-go` issue.
+어떤 component도 reusable graph repository, algorithm library, schema DSL, query builder, provider
+abstraction을 정의하지 않는다. reusable capability change가 발견되면 별도 `bluetape-go` issue에 속한다.
 
 ## Graph Schema
 
@@ -86,29 +77,26 @@ discovered, belong in a separate `bluetape-go` issue.
 | `User` | `opaque_id`, `fixture_id` | One investigated account fixture |
 | `Identifier` | `opaque_id`, `kind`, `fixture_id` | Opaque device, IP, or payment-token reference |
 
-`kind` accepts only `device`, `ip`, or `payment_token`. All IDs are fixture
-values that reveal no raw device, address, account, or payment data.
+`kind`는 `device`, `ip`, `payment_token`만 허용한다. 모든 ID는 raw device, address, account,
+payment data를 드러내지 않는 fixture value다.
 
 ### Edges
 
-`(User)-[:USES_IDENTIFIER]->(Identifier)` records a directed association. The
-fixture builder validates every graph value before database work. The
-application also rejects an unknown identifier kind, duplicate opaque vertex
-ID, duplicate logical edge, or edge whose endpoint is absent.
+`(User)-[:USES_IDENTIFIER]->(Identifier)`는 directed association을 기록한다. fixture builder는
+database 작업 전에 모든 graph value를 검증한다. application은 unknown identifier kind, duplicate
+opaque vertex ID, duplicate logical edge, endpoint가 없는 edge도 거부한다.
 
-Neo4j `ElementId` values remain adapter identities. The application joins read
-vertices and edges by `graph.ElementID` and uses the opaque properties only for
-domain output and deterministic ordering.
+Neo4j `ElementId` value는 adapter identity로 남는다. application은 `graph.ElementID`로 읽은 vertex와
+edge를 join하고, opaque property는 domain output과 deterministic ordering에만 사용한다.
 
 ## Fixture and Database Boundary
 
-The checked-in fixture has enough structure to prove:
+checked-in fixture는 다음을 증명할 만큼 충분한 구조를 가진다.
 
-- one three-user component connected transitively through more than one
-  identifier kind;
-- one two-user component with a score tie candidate;
-- one isolated user with only unique identifiers;
-- deterministic ordering independent of input order.
+- 둘 이상의 identifier kind를 통해 transitive하게 연결된 three-user component 하나
+- score tie candidate를 가진 two-user component 하나
+- unique identifier만 가진 isolated user 하나
+- input order와 무관한 deterministic ordering
 
 The exact logical fixture is:
 
@@ -121,56 +109,50 @@ The exact logical fixture is:
 | `ip-002` | `ip` | `usr-004`, `usr-005` |
 | `ip-003` | `ip` | `usr-006` only; isolated user evidence |
 
-This produces two score-4 clusters. `cluster:usr-001` sorts first because it
-contains three users, while `cluster:usr-004` contains two. `usr-006` is the
-only isolated user. Pure unit fixtures separately prove the payment-token
-weight and the final smallest-user-ID tie-break.
+이는 두 개의 score-4 cluster를 만든다. `cluster:usr-001`은 user 세 명을 포함하므로 user 두 명을
+포함하는 `cluster:usr-004`보다 먼저 정렬된다. `usr-006`은 유일한 isolated user다. pure unit fixture는
+payment-token weight와 최종 smallest-user-ID tie-break를 별도로 증명한다.
 
-The CLI uses one constant fixture namespace. One `ExecuteWrite` statement
-deletes only nodes with that exact `fixture_id` and then creates every fixture
-vertex and edge in the same managed Neo4j transaction. A validation or write
-failure rolls back both reset and seed; it never leaves a half-seeded fixture
-and never runs an unscoped delete. Test code uses a per-test namespace and
-registers bounded cleanup.
+CLI는 하나의 constant fixture namespace를 사용한다. 하나의 `ExecuteWrite` statement는 정확히 해당
+`fixture_id`를 가진 node만 삭제한 뒤 같은 managed Neo4j transaction 안에서 모든 fixture vertex와 edge를
+생성한다. validation 또는 write failure는 reset과 seed를 모두 rollback한다. half-seeded fixture를 남기지
+않고 unscoped delete를 실행하지 않는다. test code는 per-test namespace를 사용하고 bounded cleanup을
+등록한다.
 
-All Cypher labels and relationship types are fixed source constants. Every
-fixture value is a query parameter. Writes occur through
-`graph/neo4j.Client.ExecuteWrite`. Reads use separate bounded vertex and edge
-queries through `ReadVertices` and `ReadEdges`.
+모든 Cypher label과 relationship type은 fixed source constant다. 모든 fixture value는 query parameter다.
+write는 `graph/neo4j.Client.ExecuteWrite`를 통해 발생한다. read는 `ReadVertices`와 `ReadEdges`를 통한
+별도 bounded vertex/edge query를 사용한다.
 
-After connectivity, the normal path has exactly three database operations: one
-atomic reset/seed, one vertex read, and one edge read. It performs no per-user
-or per-identifier query. The focused CLI is single-run teaching code; concurrent
-processes sharing its constant fixture namespace are unsupported and are
-called out in both READMEs.
+connectivity 이후 normal path에는 정확히 세 database operation이 있다. 하나의 atomic reset/seed, 하나의
+vertex read, 하나의 edge read다. per-user 또는 per-identifier query는 수행하지 않는다. focused CLI는
+single-run teaching code다. constant fixture namespace를 공유하는 concurrent process는 지원하지 않으며
+양쪽 README에 명시한다.
 
-Each read asks for `maximum + 1` records. The store returns a typed size error
-instead of silently truncating when the result exceeds these limits:
+각 read는 `maximum + 1` record를 요청한다. result가 다음 limit을 넘으면 store는 조용히 truncate하지 않고
+typed size error를 반환한다.
 
-- maximum vertices: 256;
-- maximum edges: 1024.
+- maximum vertices: 256
+- maximum edges: 1024
 
-The example intentionally collects this bounded fixture in memory. It makes no
-production-scale traversal or throughput claim.
+예제는 이 bounded fixture를 의도적으로 memory에 collect한다. production-scale traversal 또는 throughput
+claim은 하지 않는다.
 
 ## Cluster Contract
 
-The analyzer treats the graph as a bipartite user-to-identifier graph.
+analyzer는 graph를 bipartite user-to-identifier graph로 다룬다.
 
-1. Build adjacency only from validated `USES_IDENTIFIER` edges.
-2. Traverse connected components through identifiers.
-3. A component with two or more users is an abuse cluster.
-4. An identifier is evidence only when at least two users in that component
-   reference it.
-5. A user outside every abuse cluster is reported as isolated.
+1. validated `USES_IDENTIFIER` edge에서만 adjacency를 만든다.
+2. identifier를 통해 connected component를 traverse한다.
+3. user가 두 명 이상인 component는 abuse cluster다.
+4. identifier는 해당 component 안의 user 최소 두 명이 reference할 때만 evidence다.
+5. 모든 abuse cluster 밖의 user는 isolated로 report한다.
 
-Transitive linkage is intentional: if user A shares a device with B and B
-shares an IP with C, A, B, and C form one component even when A and C share no
-identifier directly.
+transitive linkage는 의도된 동작이다. user A가 B와 device를 공유하고 B가 C와 IP를 공유하면, A와 C가
+identifier를 직접 공유하지 않아도 A, B, C는 하나의 component를 형성한다.
 
 ### Illustrative Score
 
-Each distinct shared identifier contributes once:
+각 distinct shared identifier는 한 번만 기여한다.
 
 | Identifier kind | Weight |
 |---|---:|
@@ -178,19 +160,18 @@ Each distinct shared identifier contributes once:
 | `device` | 3 |
 | `ip` | 1 |
 
-The cluster score is the sum of those evidence weights. It is a transparent
-workshop policy, not a fraud probability, production threshold, or model.
+cluster score는 해당 evidence weight의 합이다. 이는 투명한 workshop policy이지 fraud probability,
+production threshold, model이 아니다.
 
 ### Deterministic Ordering
 
-- evidence: kind, then opaque identifier ID, both ascending;
-- users inside a cluster: opaque user ID ascending;
-- clusters: score descending, user count descending, then smallest opaque user
-  ID ascending;
-- isolated users: opaque user ID ascending;
-- cluster ID: `cluster:` plus the smallest opaque user ID in the component.
+- evidence: kind, 그다음 opaque identifier ID, 둘 다 ascending
+- cluster 안의 user: opaque user ID ascending
+- cluster: score descending, user count descending, 그다음 smallest opaque user ID ascending
+- isolated user: opaque user ID ascending
+- cluster ID: `cluster:`에 component 안의 smallest opaque user ID를 붙인 값
 
-Input fixture order and Neo4j record order must not change the output.
+input fixture order와 Neo4j record order는 output을 바꾸면 안 된다.
 
 ## CLI Contract
 
