@@ -1,44 +1,51 @@
 # Issue #29 Customer Migration Batch Integration Code Review
 
-## Scope
+## 범위
 
 - Branch: `feat/issue-29-batch-integration`
 - Base commit: `cb1ea0e Update bluetape-go to v0.6.2`
 - Planning commit: `663c6e3 Capture batch integration contract before implementation`
-- Reviewed changed scope:
+- 검토 범위:
   - `examples/customer-migration-batch-integration/**`
   - `README.md`
   - `README.ko.md`
   - `docs/superpowers/specs/2026-06-22-issue-29-customer-migration-batch-integration-design.md`
   - `docs/superpowers/plans/2026-06-22-issue-29-customer-migration-batch-integration-plan.md`
 
-## Step 5 Verifier Result
+## Step 5 Verifier 결과
 
 PASS.
 
-- Spec and plan requirements map to implementation:
-  - Checkpoint restart and fixed `ChunkSize: 2`: `engine.go` uses `DefaultChunkSize` in `batch.NewStep`.
-  - Gin operations API: `NewRouter` exposes `/healthz`, `/batch/start`, `/batch/schedule/tick`, `/batch/cancel`, `/batch/status`, and `/batch/report`.
-  - Leader-guarded scheduled execution: `RunScheduledTick` delegates through `LeaderGate.RunIfLeader`; `ElectorLeaderGate` handles `leader.ErrAlreadyLeader` and bounded resign cleanup.
-  - Cancel operation: `CancelActiveRun` cancels the active context and returns `202` with `cancel_requested`.
-  - Public projection safety: migrated emails are internal-only and README/API responses are ID/count based.
-  - Local trust boundary: `HTTP_ADDR` rejects non-loopback binds and `NewRouter` disables trusted proxies.
-- No unrelated files or dependency changes entered the diff.
-- Bilingual docs and root README entries are included.
-- Fresh validation evidence is listed below.
+- spec과 plan 요구사항은 구현에 mapping된다.
+  - checkpoint restart와 고정 `ChunkSize: 2`: `engine.go`가 `batch.NewStep`에서
+    `DefaultChunkSize`를 사용한다.
+  - Gin operations API: `NewRouter`가 `/healthz`, `/batch/start`,
+    `/batch/schedule/tick`, `/batch/cancel`, `/batch/status`, `/batch/report`를 노출한다.
+  - leader-guarded scheduled execution: `RunScheduledTick`은
+    `LeaderGate.RunIfLeader`를 통해 위임하고, `ElectorLeaderGate`는
+    `leader.ErrAlreadyLeader`와 bounded resign cleanup을 처리한다.
+  - cancel operation: `CancelActiveRun`은 active context를 cancel하고
+    `cancel_requested`와 함께 `202`를 반환한다.
+  - public projection safety: migrated email은 internal-only이고 README/API response는
+    ID/count 기반이다.
+  - local trust boundary: `HTTP_ADDR`는 non-loopback bind를 거부하고 `NewRouter`는 trusted
+    proxy를 비활성화한다.
+- unrelated file이나 dependency 변경은 diff에 들어오지 않았다.
+- bilingual docs와 root README entry가 포함되어 있다.
+- fresh validation evidence는 아래에 정리했다.
 
 ## Step 4-P Performance/Stability Scan
 
-No performance or stability issues found in the reviewed scope.
+검토 범위에서 performance 또는 stability issue는 발견되지 않았다.
 
 | Priority | File:Line | Area | Finding | Fix |
 |---|---|---|---|---|
-| N/A | `examples/customer-migration-batch-integration/main.go:41` | STABILITY | Scheduler ticker is a single process-local ticker and is stopped with `defer ticker.Stop()`. | N/A |
-| N/A | `examples/customer-migration-batch-integration/main.go:45` | STABILITY | Scheduler goroutine is tied to a cancelable context and exits on cancellation. | N/A |
-| N/A | `examples/customer-migration-batch-integration/main.go:52` | STABILITY | HTTP server goroutine is owned by the process lifecycle and shut down through `server.Shutdown`. | N/A |
-| N/A | `examples/customer-migration-batch-integration/internal/customermigration/service.go:341` | SECURITY/STABILITY | JSON request bodies are capped at 8 KiB before binding. | N/A |
-| N/A | `examples/customer-migration-batch-integration/internal/customermigration/service.go:447` | STABILITY | Leader resign uses bounded cleanup over `context.WithoutCancel(ctx)`. | N/A |
-| N/A | `examples/customer-migration-batch-integration/internal/customermigration/engine.go:435` | STABILITY | Checkpoint, sink, and dead-letter stores use owned locks and snapshot APIs. | N/A |
+| N/A | `examples/customer-migration-batch-integration/main.go:41` | STABILITY | scheduler ticker는 single process-local ticker이며 `defer ticker.Stop()`으로 정지된다. | N/A |
+| N/A | `examples/customer-migration-batch-integration/main.go:45` | STABILITY | scheduler goroutine은 cancelable context에 묶여 cancellation 시 종료된다. | N/A |
+| N/A | `examples/customer-migration-batch-integration/main.go:52` | STABILITY | HTTP server goroutine은 process lifecycle이 소유하고 `server.Shutdown`으로 종료된다. | N/A |
+| N/A | `examples/customer-migration-batch-integration/internal/customermigration/service.go:341` | SECURITY/STABILITY | JSON request body는 binding 전에 8 KiB로 제한된다. | N/A |
+| N/A | `examples/customer-migration-batch-integration/internal/customermigration/service.go:447` | STABILITY | leader resign은 `context.WithoutCancel(ctx)` 위에서 bounded cleanup으로 실행된다. | N/A |
+| N/A | `examples/customer-migration-batch-integration/internal/customermigration/engine.go:435` | STABILITY | checkpoint, sink, dead-letter store는 owned lock과 snapshot API를 사용한다. | N/A |
 
 ## Step 6-R Six-Lane Review
 
@@ -51,16 +58,24 @@ No performance or stability issues found in the reviewed scope.
 | Tier 5 Developer/API | 0 | 0 | 0 | 0 | PASS |
 | Tier 6 User/Caller | 0 | 0 | 0 | 0 | PASS |
 
-### Tier Notes
+## Tier 메모
 
-- Performance: no hot path with unbounded fan-out, retries, polling, sleeps, or body reads. The only ticker is the demo scheduler loop.
-- Stability: active-run state is serialized by `Service.mu`; checkpoint/sink/dead-letter reads use store-local locks; race tests cover mixed start/schedule/cancel/status/report access.
-- Security: API is intentionally unauthenticated but loopback-only by default; non-loopback `HTTP_ADDR` is rejected; Gin trusted proxies are disabled; public responses omit fixture emails.
-- Operator/Ops: status/report/cancel/error-code surfaces are stable and documented; `/healthz` is liveness only; graceful shutdown is bounded.
-- Developer/API: example-local internal package keeps reusable library code out of the workshop repo; context-first APIs and sentinel error wrapping match `bluetape-go-patterns`.
-- User/Caller: English/Korean READMEs document run commands, curl flows, leader modes, restart behavior, error codes, limits, and production hardening boundaries.
+- Performance: unbounded fan-out, retry, polling, sleep, body read가 있는 hot path는 없다.
+  유일한 ticker는 demo scheduler loop다.
+- Stability: active-run state는 `Service.mu`로 직렬화된다. checkpoint/sink/dead-letter read는
+  store-local lock을 사용하고, race test가 start/schedule/cancel/status/report 혼합 access를
+  다룬다.
+- Security: API는 의도적으로 unauthenticated지만 기본값은 loopback-only다. non-loopback
+  `HTTP_ADDR`는 거부되고 Gin trusted proxy는 비활성화되며 public response는 fixture email을
+  노출하지 않는다.
+- Operator/Ops: status/report/cancel/error-code surface는 안정적이고 문서화되어 있다.
+  `/healthz`는 liveness 전용이며 graceful shutdown은 bounded다.
+- Developer/API: example-local internal package가 reusable library code를 workshop repo 밖에
+  둔다. context-first API와 sentinel error wrapping은 `bluetape-go-patterns`와 맞다.
+- User/Caller: 영어/한국어 README는 run command, curl flow, leader mode, restart behavior,
+  error code, limit, production hardening boundary를 문서화한다.
 
-## Production Concurrency Quick Scan
+## Production Concurrency Quick Scan 결과
 
 Command:
 
@@ -68,14 +83,14 @@ Command:
 rg -n "context\\.TODO\\(|context\\.Background\\(|go func|time\\.Tick\\(|http\\.ListenAndServe\\(|panic\\(|RealIP|X-Forwarded-For" examples/customer-migration-batch-integration README.md README.ko.md
 ```
 
-Result: intentional hits only.
+결과: intentional hit만 있었다.
 
-- `main.go:38` and `main.go:66`: process root and shutdown contexts.
-- `main.go:45` and `main.go:52`: owned scheduler and HTTP server goroutines.
+- `main.go:38` 및 `main.go:66`: process root와 shutdown context.
+- `main.go:45` 및 `main.go:52`: owned scheduler와 HTTP server goroutine.
 - `engine.go:735`: nil context normalization fallback.
-- Test files: standard test roots, goroutine overlap harnesses, and bounded stress tests.
+- test files: standard test root, goroutine overlap harness, bounded stress test.
 
-## Validation Evidence
+## 검증 Evidence
 
 - `make lint` -> `0 issues.`
 - `go test -count=1 ./examples/customer-migration-batch-integration/...` -> PASS.
@@ -83,11 +98,14 @@ Result: intentional hits only.
 - `GOFLAGS=-p=1 make ci` -> PASS.
 - `git diff --check` -> PASS.
 - Live smoke:
-  - held leader: `/healthz` 200, manual crash 409 `writer_crash`, status 200, schedule 200, report 200, idle cancel 404 `no_active_run`, malformed JSON 400 `invalid_request`, blank run id 400 `invalid_run_id`, oversized body 413 `request_too_large`.
+  - held leader: `/healthz` 200, manual crash 409 `writer_crash`, status 200,
+    schedule 200, report 200, idle cancel 404 `no_active_run`, malformed JSON
+    400 `invalid_request`, blank run id 400 `invalid_run_id`, oversized body
+    413 `request_too_large`.
   - missing leader: schedule 409 `not_leader`, status 200 with `leader_held=false`.
 
-## Convergence
+## 수렴 결과
 
 Final gate: P0 = 0, P1 = 0.
 
-No P2/P3 follow-up was identified in the final review scope.
+final review scope에서 P2/P3 follow-up은 발견되지 않았다.

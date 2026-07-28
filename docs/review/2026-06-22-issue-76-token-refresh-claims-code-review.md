@@ -1,34 +1,32 @@
 # Issue #76 Token Refresh Claims Code Review
 
-## Scope
+## 범위
 
 - Branch: `feat/issue-76-token-refresh`
 - Issue: #76 `[v0.6.0] Add token refresh and claims validation example`
 - Planning commit: `0000001 Define the token refresh claims boundary`
-- Reviewed files:
+- 검토 파일:
   - `examples/token-refresh-claims/**`
   - `README.md`
   - `README.ko.md`
   - `docs/lessons/2026-06-22-token-refresh-claims.md`
 
-## Findings
+## 발견 사항
 
-No P0/P1 findings.
+P0/P1 finding은 없다.
 
 ## Acceptance Evidence
 
-- Runnable example: `examples/token-refresh-claims/main.go` wires a loopback
-  Gin API with `/healthz`, `/sessions`, `/profile`, and `/tokens/refresh`.
-- Valid claims: `/profile` accepts access tokens with issuer, access audience,
-  `token_use=access`, role, scope, subject, and `session_id`.
-- Expired tokens: tests compose expired access and refresh tokens and assert
-  `expired_token`.
-- Invalid claims: tests cover wrong audience, wrong `token_use`, missing scope,
-  refresh-as-access, and access-as-refresh.
-- Refresh behavior: valid refresh token returns a new access token accepted by
-  `/profile`.
-- README linkage: English/Korean root and example READMEs link #44
-  `examples/id-jwt-boundary` as the base boundary lesson.
+- runnable example: `examples/token-refresh-claims/main.go`가 `/healthz`, `/sessions`,
+  `/profile`, `/tokens/refresh`를 가진 loopback Gin API를 wiring한다.
+- valid claims: `/profile`은 issuer, access audience, `token_use=access`, role, scope,
+  subject, `session_id`가 있는 access token을 accept한다.
+- expired tokens: test는 expired access/refresh token을 구성하고 `expired_token`을 assert한다.
+- invalid claims: test는 wrong audience, wrong `token_use`, missing scope,
+  refresh-as-access, access-as-refresh를 다룬다.
+- refresh behavior: valid refresh token은 `/profile`이 accept하는 새 access token을 반환한다.
+- README linkage: English/Korean root 및 example README는 #44 `examples/id-jwt-boundary`를
+  base boundary lesson으로 link한다.
 
 ## Six-Lane Review
 
@@ -41,23 +39,23 @@ No P0/P1 findings.
 | Developer/API | 0 | 0 | 0 | 0 | PASS |
 | User/Caller | 0 | 0 | 0 | 0 | PASS |
 
-## Review Notes
+## Review 메모
 
-- Performance: token issue and parse work is request-local. The example adds no
-  background workers, stores, network clients, sleeps, or retry loops.
-- Stability: tests inject clock, secret, and deterministic ID generation. HTTP
-  body size is capped at 8 KiB before JSON binding.
-- Security: access and refresh tokens are separated by audience and
-  `token_use`; public error responses are allowlisted and tests assert no raw
-  token, demo secret, or parser diagnostic leaks.
-- Operator/Ops: the entrypoint rejects non-loopback `HTTP_ADDR` values and uses
-  bounded read-header, read, write, and idle timeouts.
-- Developer/API: the example stays in an `internal/tokenrefresh` package and
-  uses existing `bluetape-go/jwt` APIs directly.
-- User/Caller: README flows cover session issue, protected profile, refresh
-  exchange, and boundary failures.
+- Performance: token issue/parse work는 request-local이다. background worker, store,
+  network client, sleep, retry loop를 추가하지 않는다.
+- Stability: test는 clock, secret, deterministic ID generation을 inject한다. HTTP body size는
+  JSON binding 전에 8 KiB로 제한된다.
+- Security: access token과 refresh token은 audience 및 `token_use`로 분리된다. public error
+  response는 allowlisted이고 test는 raw token, demo secret, parser diagnostic leak이 없음을
+  assert한다.
+- Operator/Ops: entrypoint는 non-loopback `HTTP_ADDR` 값을 거부하고 bounded read-header,
+  read, write, idle timeout을 사용한다.
+- Developer/API: 예제는 `internal/tokenrefresh` package에 머물며 기존 `bluetape-go/jwt` API를
+  직접 사용한다.
+- User/Caller: README flow는 session issue, protected profile, refresh exchange, boundary
+  failure를 다룬다.
 
-## Verification
+## 검증
 
 ```bash
 go test -count=1 ./examples/token-refresh-claims/...
@@ -72,7 +70,7 @@ git diff --check
 rg -n "context\\.TODO\\(|httptest\\.NewRequest\\(|X-Forwarded-For|RealIP|ListenAndServe\\(|panic\\(|secret|token" examples/token-refresh-claims README.md README.ko.md
 ```
 
-Result:
+결과:
 
 - `go test -count=1 ./examples/token-refresh-claims/...` -> PASS.
 - `go test -race -count=1 ./examples/token-refresh-claims/...` -> PASS.
@@ -80,18 +78,17 @@ Result:
 - `make fmt-check` -> PASS.
 - `make tidy-check` -> PASS.
 - `make vet` -> PASS.
-- `make lint` -> PASS after `golangci-lint cache clean` removed stale paths
-  from deleted issue #44 worktree.
+- `make lint` -> deleted issue #44 worktree의 stale path를 `golangci-lint cache clean`으로
+  제거한 뒤 PASS.
 - `GOFLAGS=-p=1 make ci` -> PASS.
 - `git diff --check` -> PASS.
-- `rg` review found expected token/secret documentation and test fixtures only;
-  no `panic`, forwarded-header trust, or unbounded server construction issue.
-- Live smoke with `go run ./examples/token-refresh-claims` -> PASS for
-  `/healthz`, `/sessions`, access-token `/profile`, refresh exchange, refreshed
-  `/profile`, and refresh-as-access `403 invalid_claims`.
+- `rg` review는 expected token/secret documentation과 test fixture만 찾았다. `panic`,
+  forwarded-header trust, unbounded server construction issue는 없었다.
+- live smoke with `go run ./examples/token-refresh-claims` -> `/healthz`, `/sessions`,
+  access-token `/profile`, refresh exchange, refreshed `/profile`, refresh-as-access
+  `403 invalid_claims`에서 PASS.
 
-## Residual Risk
+## 잔여 Risk
 
-- Refresh-token reuse detection is intentionally out of scope. README documents
-  durable session/revocation storage and replay monitoring as production
-  hardening.
+refresh-token reuse detection은 의도적으로 scope 밖이다. README는 durable session/revocation
+storage와 replay monitoring을 production hardening으로 문서화한다.
