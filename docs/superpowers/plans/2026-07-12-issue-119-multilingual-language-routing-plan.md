@@ -1,16 +1,16 @@
-# Issue #119 Multilingual Language Routing Implementation Plan
+# Issue #119 Multilingual Language Routing 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **에이전트 작업자 참고:** 필수 하위 스킬: `superpowers:subagent-driven-development`(권장) 또는 `superpowers:executing-plans`를 사용해 이 계획을 작업 단위로 구현한다. 단계 추적에는 체크박스(`- [ ]`) 문법을 사용한다.
 
-**Goal:** Build a deterministic CLI example that routes bluetape-go v0.18.0 language evidence to moderation, Japanese tokenization, or manual review while comparing lazy and preloaded detector lifecycle.
+**목표:** Lazy detector lifecycle과 preloaded detector lifecycle을 비교하면서 bluetape-go v0.18.0 language evidence를 moderation, Japanese tokenization, manual review로 route하는 deterministic CLI example을 만든다.
 
-**Architecture:** A framework-independent `internal/routing.Router` owns one reusable four-language detector and creates call-local evidence and decisions. A fixed-fixture preview and a thin testable CLI expose identical route decisions in lazy and preloaded modes; bilingual READMEs explain the policy and its security/privacy boundary.
+**아키텍처:** 프레임워크에 독립적인 `internal/routing.Router`가 재사용 가능한 four-language detector 하나를 소유하고 call-local evidence와 decision을 만든다. Fixed-fixture preview와 얇고 testable한 CLI는 lazy/preloaded mode에서 동일한 route decision을 노출한다. Bilingual README는 policy와 security/privacy boundary를 설명한다.
 
-**Tech Stack:** Go 1.26.3, `github.com/bluetape4k/bluetape-go/textsearch/language` v0.18.0, standard `flag`, `encoding/json`, `sync`, and `sync/atomic` packages.
+**기술 스택:** Go 1.26.3, `github.com/bluetape4k/bluetape-go/textsearch/language` v0.18.0, 표준 `flag`, `encoding/json`, `sync`, `sync/atomic` package.
 
 ---
 
-## Approved Inputs and Execution Contract
+## 승인된 입력과 실행 계약
 
 - Spec: `docs/superpowers/specs/2026-07-12-issue-119-multilingual-language-routing-design.md`
 - Issue: GitHub #119, milestone `0.8.0`, labels `enhancement` and `examples`, assignee `debop`
@@ -18,57 +18,56 @@
 - Worktree: `.worktrees/feat-issue-119-multilingual-language-routing`
 - Branch: `feat/issue-119-multilingual-language-routing`
 - Dependency baseline: `github.com/bluetape4k/bluetape-go v0.18.0`
-- Implementation workflow: after this plan is approved, use `subagent-driven-development` with a fresh `executor` for each disjoint write task, then a `verifier` and `code-reviewer` before the next task.
-- Executors stop with an uncommitted scoped diff. The main session integrates the diff, applies review repairs, reruns proof, and owns every commit and external effect. PR creation, CI monitoring, rebase merge, issue update, local sync, and worktree cleanup follow the user's already approved delivery scope.
+- Implementation workflow: 이 계획이 승인된 뒤 서로 겹치지 않는 write task마다 fresh `executor`와 함께 `subagent-driven-development`를 사용하고, 다음 task 전에 `verifier`와 `code-reviewer`를 거친다.
+- Executor는 uncommitted scoped diff 상태에서 멈춘다. Main session은 diff를 통합하고 review repair를 적용하며 proof를 다시 실행하고 모든 commit과 external effect를 소유한다. PR creation, CI monitoring, rebase merge, issue update, local sync, worktree cleanup은 사용자가 이미 승인한 delivery scope를 따른다.
 
-## File Map and Ownership
+## 파일 지도와 Ownership
 
-| File | Responsibility | Write task |
+| File | 책임 | Write task |
 |---|---|---|
-| `examples/multilingual-language-routing/internal/routing/router.go` | Types, config, shared detector, evidence projection, route matrix | Task 1 only |
-| `examples/multilingual-language-routing/internal/routing/router_test.go` | Core, lifecycle, fixture, concurrency, and race contracts | Tasks 1-2, disjoint test sections |
-| `examples/multilingual-language-routing/internal/routing/preview.go` | Fixed fixtures and deterministic preview metadata | Task 2 only |
-| `examples/multilingual-language-routing/main.go` | Testable flag parsing and deterministic JSON output | Task 3 only |
-| `examples/multilingual-language-routing/main_test.go` | CLI help/error/determinism/mode-equivalence tests | Task 3 only |
-| `examples/multilingual-language-routing/README.md` | English lesson and actual output | Task 4 only |
+| `examples/multilingual-language-routing/internal/routing/router.go` | Type, config, shared detector, evidence projection, route matrix | Task 1 only |
+| `examples/multilingual-language-routing/internal/routing/router_test.go` | Core, lifecycle, fixture, concurrency, race contract | Tasks 1-2, disjoint test sections |
+| `examples/multilingual-language-routing/internal/routing/preview.go` | Fixed fixture와 deterministic preview metadata | Task 2 only |
+| `examples/multilingual-language-routing/main.go` | Testable flag parsing과 deterministic JSON output | Task 3 only |
+| `examples/multilingual-language-routing/main_test.go` | CLI help/error/determinism/mode-equivalence test | Task 3 only |
+| `examples/multilingual-language-routing/README.md` | English lesson과 actual output | Task 4 only |
 | `examples/multilingual-language-routing/README.ko.md` | Source-equivalent natural Korean lesson | Task 4 only |
-| `README.md`, `README.ko.md` | Root example navigation and run commands | Task 4 only |
-| `docs/lessons/2026-07-12-issue-119-multilingual-language-routing.md` | Durable outcome, evidence, misses, future guard | Task 5 only |
+| `README.md`, `README.ko.md` | Root example navigation과 run command | Task 4 only |
+| `docs/lessons/2026-07-12-issue-119-multilingual-language-routing.md` | Durable outcome, evidence, miss, future guard | Task 5 only |
 
-No `go.mod`, `go.sum`, workflow, Nightly, Docker, Testcontainers, coverage,
-catalog, or AGENTS file should change. Any such diff is a stop condition.
+`go.mod`, `go.sum`, workflow, Nightly, Docker, Testcontainers, coverage, catalog, AGENTS file은 변경하면 안 된다. 이런 diff는 stop condition이다.
 
 ## Spec-to-Task Traceability
 
-| Acceptance criterion | Task and proof |
+| Acceptance criterion | Task와 proof |
 |---|---|
-| Four-language subset and reusable detector | Task 1 constructor tests and package inspection |
-| English/Korean common moderation route | Task 1 route matrix table tests |
-| Kana-backed Japanese route and Han-only fail-closed behavior | Task 1 Japanese/Chinese tests |
-| Confidence list, ISO codes, sections, script hints | Task 1 evidence tests and byte slicing |
-| Short/unknown/low-confidence/mixed ordered review reasons | Task 1 exact table assertions |
+| Four-language subset과 reusable detector | Task 1 constructor test와 package inspection |
+| English/Korean common moderation route | Task 1 route matrix table test |
+| Kana-backed Japanese route와 Han-only fail-closed behavior | Task 1 Japanese/Chinese test |
+| Confidence list, ISO code, section, script hint | Task 1 evidence test와 byte slicing |
+| Short/unknown/low-confidence/mixed ordered review reason | Task 1 exact table assertion |
 | Lazy/preloaded lifecycle equality | Task 2 preview comparison |
-| Shared detector bounded race proof | Task 2 exact 18-call concurrency test plus `go test -race` |
-| Deterministic CLI and `--preload` | Task 3 repeated byte comparison and decoded decision comparison |
-| Bilingual lesson and root navigation | Task 4 locale parity review and run-output evidence |
-| Heuristic/security/privacy boundary | Tasks 2 and 4 preview notes and README boundary sections |
-| Repository quality | Task 5 `make ci`, diff audit, verifier and review convergence |
+| Shared detector bounded race proof | Task 2 exact 18-call concurrency test와 `go test -race` |
+| Deterministic CLI와 `--preload` | Task 3 repeated byte comparison과 decoded decision comparison |
+| Bilingual lesson과 root navigation | Task 4 locale parity review와 run-output evidence |
+| Heuristic/security/privacy boundary | Tasks 2 and 4 preview note와 README boundary section |
+| Repository quality | Task 5 `make ci`, diff audit, verifier와 review convergence |
 
 ## Risk Prediction
 
 | Risk | Signal | Mitigation | Rerun/rollback point |
 |---|---|---|---|
-| Lazy first-use model state races | `go test -race` report or inconsistent decisions | Construct once; keep results call-local; bounded shared-router test in both modes | Return to Task 1/2 and rerun focused normal/race from the beginning |
-| Han-only input reaches Japanese processing | Route is `japanese-tokenization` without `kana` hint | Japanese route requires detected Japanese plus Kana; exact negative fixtures | Revert route-matrix edit and rerun all Task 1 tables |
-| Detector upgrade changes low-confidence fixture | Candidate is no longer detected below the explicit `1.0` threshold | Keep default `0.70`; isolate fixture `support 문의 订单 delivery` in a threshold `1.0` policy check and fail intentionally | Re-evaluate fixture/policy in spec; never weaken assertion silently |
-| Mixed section offsets corrupt UTF-8 slicing | `decision.Text[start:end] != section.Text` | Preserve upstream byte spans unchanged and assert every section | Return to evidence projection and rerun focused tests/race |
-| CLI modes differ beyond lifecycle metadata | Decoded decisions differ or stdout is nondeterministic | One constructor/preview path parameterized only by preload option | Return to Task 2/3; compare decoded payloads before docs |
-| Original text is copied to logs | README/preview omit privacy boundary | Fixed non-sensitive CLI fixtures; explicit caller redaction/access-control note | Block Task 4 completion and PR until both locales match |
-| Three detector passes are treated as throughput guidance | README claims performance or omits cost | Explain this is inspectable teaching evidence and production should gather only needed views | Block docs review; no benchmark numbers may be added |
+| Lazy first-use model state race | `go test -race` report 또는 inconsistent decision | 한 번만 construct하고 result는 call-local로 유지한다. 두 mode 모두 bounded shared-router test를 둔다. | Task 1/2로 돌아가 focused normal/race를 처음부터 다시 실행한다. |
+| Han-only input이 Japanese processing에 도달 | `kana` hint 없이 route가 `japanese-tokenization` | Japanese route는 detected Japanese와 Kana를 모두 요구한다. Exact negative fixture를 둔다. | Route-matrix edit을 revert하고 모든 Task 1 table을 다시 실행한다. |
+| Detector upgrade가 low-confidence fixture를 변경 | 명시적 `1.0` threshold 아래에서 candidate가 더 이상 감지되지 않음 | Default `0.70`을 유지한다. `support 문의 订单 delivery` fixture를 threshold `1.0` policy check에 격리하고 의도적으로 fail한다. | Spec에서 fixture/policy를 재평가한다. Assertion을 조용히 약화하지 않는다. |
+| Mixed section offset이 UTF-8 slicing을 손상 | `decision.Text[start:end] != section.Text` | Upstream byte span을 그대로 보존하고 모든 section을 assert한다. | Evidence projection으로 돌아가 focused test/race를 다시 실행한다. |
+| CLI mode가 lifecycle metadata 외에 다름 | Decoded decision이 다르거나 stdout이 nondeterministic | Constructor/preview path 하나만 두고 preload option으로만 parameterize한다. | Task 2/3으로 돌아가 docs 전 decoded payload를 비교한다. |
+| Original text가 log에 copy됨 | README/preview가 privacy boundary를 생략 | Fixed non-sensitive CLI fixture, 명시적 caller redaction/access-control note | 두 locale이 일치할 때까지 Task 4 completion과 PR을 막는다. |
+| Three detector pass가 throughput guidance로 취급됨 | README가 performance를 claim하거나 cost를 생략 | Inspectable teaching evidence이며 production은 필요한 view만 수집해야 한다고 설명한다. | Docs review를 막는다. Benchmark number는 추가하면 안 된다. |
 
-## Task 1: Route Policy and Evidence Contract
+## Task 1: Route Policy와 Evidence Contract
 
-**Complexity:** High. This task owns the complete behavior matrix and upstream error preservation.
+**Complexity:** High. 이 task는 complete behavior matrix와 upstream error preservation을 소유한다.
 
 **Required skills:** `test-driven-development`, `bluetape-go-patterns`.
 
@@ -77,11 +76,9 @@ catalog, or AGENTS file should change. Any such diff is a stop condition.
 - Create: `examples/multilingual-language-routing/internal/routing/router.go`
 - Create: `examples/multilingual-language-routing/internal/routing/router_test.go`
 
-- [x] **Step 1: Write failing configuration and input tests**
+- [x] **Step 1: 실패하는 configuration 및 input test 작성**
 
-Create `router_test.go` in package `routing` with exact table assertions:
-Its import block includes `errors`, `math`, `reflect`, `slices`, `strings`,
-`testing`, and the bluetape-go `language` package used below.
+Package `routing`에 exact table assertion을 가진 `router_test.go`를 만든다. Import block은 `errors`, `math`, `reflect`, `slices`, `strings`, `testing`, 그리고 아래에서 사용하는 bluetape-go `language` package를 포함한다.
 
 ```go
 func TestDefaultConfigAndSelectedLanguages(t *testing.T) {
@@ -143,7 +140,7 @@ func TestRouteRejectsInvalidRequests(t *testing.T) {
 }
 ```
 
-- [x] **Step 2: Run tests and observe the RED state**
+- [x] **Step 2: Test 실행 및 RED state 관찰**
 
 Run:
 
@@ -151,13 +148,11 @@ Run:
 go test -count=1 ./examples/multilingual-language-routing/internal/routing
 ```
 
-Expected: FAIL to compile because `Config`, `DefaultConfig`, `NewRouter`,
-`Router`, `Request`, `ErrInvalidConfig`, and `ErrInvalidRequest` do not exist.
+기대값: `Config`, `DefaultConfig`, `NewRouter`, `Router`, `Request`, `ErrInvalidConfig`, `ErrInvalidRequest`가 없어서 compile FAIL한다.
 
-- [x] **Step 3: Add the minimal configuration, types, and constructor**
+- [x] **Step 3: 최소 configuration, type, constructor 추가**
 
-Create `router.go` with package documentation, English GoDoc, and these exact
-contracts:
+Package documentation, English GoDoc, 다음 exact contract를 포함한 `router.go`를 만든다.
 
 ```go
 package routing
