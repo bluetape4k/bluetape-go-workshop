@@ -1,79 +1,74 @@
-# Issue #67 Gin Content Moderation Workflow Design
+# Issue #67 Gin Content Moderation Workflow 설계
 
-## Status
+## 상태
 
-User-approved design for Issue #67, based on bluetape-go v0.18.0. The Type A
-specification review has converged at P0=0/P1=0. Implementation planning remains
-blocked until the user reviews this committed artifact.
+bluetape-go v0.18.0 기반 Issue #67 사용자 승인 설계. Type A specification review는
+P0=0/P1=0으로 수렴했다. 사용자가 이 committed artifact를 review하기 전까지
+implementation planning은 blocked 상태로 유지한다.
 
-## Goal
+## 목표
 
-Add an application-shaped Gin example that accepts multilingual content,
-routes it with shared language-detection evidence, moderates supported text,
-prepares Japanese search terms, stores an inspectable in-memory record, and
-searches accepted records through a JSON request.
+Multilingual content를 받고, shared language-detection evidence로 route하며,
+supported text를 moderate하고, Japanese search term을 prepare하며, inspectable
+in-memory record를 저장하고, JSON request로 accepted record를 search하는
+application-shaped Gin 예제를 추가한다.
 
-The lesson is composition at a production-shaped HTTP boundary: one
-application-owned detector and tokenizer, a framework-independent service,
-bounded JSON input, cooperative request deadlines, stable errors,
-cancellation-aware commit, and concurrent reuse. It demonstrates policy and
-lifecycle; it does not claim to provide a production moderation, privacy, or
-durable-search system.
+Lesson은 production-shaped HTTP boundary에서의 composition이다. 즉 하나의
+application-owned detector와 tokenizer, framework-independent service, bounded JSON
+input, cooperative request deadline, stable error, cancellation-aware commit,
+concurrent reuse를 보여준다. 이 예제는 policy와 lifecycle을 설명하지만 production
+moderation, privacy, durable-search system을 제공한다고 주장하지 않는다.
 
-## Context and Current Evidence
+## 맥락 및 현재 근거
 
-This is the final integration example under milestone epic #34. Its completed
-prerequisites supply the individual lessons:
+이 예제는 milestone epic #34 아래의 최종 integration example이다. 완료된 prerequisite은
+개별 lesson을 제공한다.
 
-- Issue #53 introduced blockword moderation and masking;
-- Issue #54 introduced text-search matching and byte-span evidence;
-- Issue #55 established multilingual intake feasibility;
-- Issue #118 isolated Japanese search preparation; and
-- Issue #119 defined confidence- and script-aware language routing.
+- Issue #53은 blockword moderation과 masking을 도입했다.
+- Issue #54는 text-search matching과 byte-span evidence를 도입했다.
+- Issue #55는 multilingual intake feasibility를 세웠다.
+- Issue #118은 Japanese search preparation을 분리했다.
+- Issue #119는 confidence- 및 script-aware language routing을 정의했다.
 
-The example composes bluetape-go v0.18.0 directly. It cannot import sibling
-example `internal` packages, and it must not copy their package algorithms.
-The relevant library surfaces are the text-search blockword matcher and masking
-helpers, `textsearch.SimpleTokenizer` for Unicode-word preparation, the
-language detector and script hints, and the Japanese Search-mode tokenizer and
-token byte spans.
+예제는 bluetape-go v0.18.0을 직접 compose한다. Sibling example `internal` package를
+import할 수 없고, 그 package algorithm을 복사하면 안 된다. 관련 library surface는
+text-search blockword matcher와 masking helper, Unicode-word preparation을 위한
+`textsearch.SimpleTokenizer`, language detector 및 script hint, Japanese Search-mode
+tokenizer와 token byte span이다.
 
-## Chosen Approach
+## 선택한 접근
 
-Use a thin Gin adapter over one framework-independent `Service`. The service
-owns one detector, one Japanese tokenizer, one stateless simple tokenizer, one
-immutable moderation policy, and one mutex-protected in-memory record map.
-Request-specific evidence and result slices remain call-local. HTTP handlers
-own JSON limits, strict decoding, timeouts, body closure, and error-to-status
-mapping.
+Framework-independent `Service` 하나 위에 얇은 Gin adapter를 둔다. Service는 detector
+하나, Japanese tokenizer 하나, stateless simple tokenizer 하나, immutable moderation
+policy 하나, mutex-protected in-memory record map 하나를 소유한다. Request-specific
+evidence와 result slice는 call-local로 유지한다. HTTP handler는 JSON limit, strict
+decoding, timeout, body closure, error-to-status mapping을 소유한다.
 
-This keeps the example application-shaped without turning workshop code into a
-generic framework. A narrow service interface at the Gin boundary permits
-deterministic cancellation and error-mapping tests without sleeps or mutable
-production hooks.
+이 방식은 workshop code를 generic framework로 만들지 않고 예제를 application-shaped로
+유지한다. Gin boundary의 좁은 service interface는 sleep 또는 mutable production hook
+없이 deterministic cancellation 및 error-mapping test를 가능하게 한다.
 
-## Rejected Alternatives
+## 기각한 대안
 
 ### Fully pluggable stage pipeline
 
-Rejected because separate interfaces for detector, router, moderator,
-tokenizer, and repository would make substitution easy but obscure the
-composition lesson behind framework-like abstraction.
+Detector, router, moderator, tokenizer, repository용 별도 interface는 substitution을
+쉽게 만들지만 composition lesson을 framework-like abstraction 뒤에 숨기므로 기각한다.
 
-### One monolithic Gin handler
+### 하나의 monolithic Gin handler
 
-Rejected because it couples transport and policy, makes cancellation before
-commit difficult to prove, and prevents direct service testing.
+Transport와 policy를 결합하고 commit 전 cancellation 증명을 어렵게 하며 direct
+service testing을 막으므로 기각한다.
 
-### Import sibling workshop examples
+### Sibling workshop example import
 
-Rejected because their `internal` packages are intentionally inaccessible and
-are not reusable libraries. The integration must use bluetape-go public APIs
-and retain only application policy and projections locally.
+해당 `internal` package는 의도적으로 접근할 수 없고 reusable library가 아니므로
+기각한다. Integration은 bluetape-go public API를 사용하고 application policy와
+projection만 local로 유지해야 한다.
 
-## Package and Files
+## Package 및 파일
 
-The implementation will live under:
+구현은 다음 위치에 둔다.
 
 ```text
 examples/gin-content-moderation-workflow/
@@ -89,12 +84,12 @@ examples/gin-content-moderation-workflow/
     server_test.go
 ```
 
-The root `README.md` and `README.ko.md` will link the example. No dependency,
-module, workflow, container, database, or coverage-policy change is required.
+Root `README.md`와 `README.ko.md`는 예제를 link한다. Dependency, module, workflow,
+container, database, coverage-policy 변경은 필요하지 않다.
 
-## Configuration and Lifecycle
+## Configuration 및 Lifecycle
 
-Application configuration owns these explicit defaults:
+Application configuration은 다음 explicit default를 소유한다.
 
 ```go
 type AppConfig struct {
@@ -116,39 +111,36 @@ type HTTPConfig struct {
 }
 ```
 
-Defaults are minimum confidence `0.70`, minimum routing length `8` runes,
-maximum content length `8,000` runes, maximum JSON body size `64 KiB`, and a
-request timeout of two seconds. The teaching store holds at most 1,000 records;
-a search defaults to 20 results and may request at most the configured maximum,
-which defaults to 100 and cannot be below 20. Invalid non-positive limits or
-timeout fail construction. Minimum confidence must be finite and in `[0,1]`;
-constructors explicitly reject `NaN` and either infinity.
+기본값은 minimum confidence `0.70`, minimum routing length `8` rune, maximum content
+length `8,000` rune, maximum JSON body size `64 KiB`, request timeout 2초다.
+Teaching store는 최대 1,000 record를 보관한다. Search는 기본적으로 20 result를
+반환하며 configured maximum까지만 요청할 수 있다. 이 maximum의 기본값은 100이고
+20보다 작을 수 없다. 유효하지 않은 non-positive limit 또는 timeout은 construction을
+실패시킨다. Minimum confidence는 finite 값이며 `[0,1]` 안에 있어야 한다. Constructor는
+`NaN`과 양/음 infinity를 명시적으로 거부한다.
 
-`NewService` constructs exactly one language detector for English, Korean,
-Japanese, and Chinese, one Japanese tokenizer configured in Search mode, one
-stateless simple tokenizer, and one moderation matcher. They live for the
-application lifetime and are never created per request. `main` constructs one
-service and one Gin engine.
+`NewService`는 English, Korean, Japanese, Chinese용 language detector 하나, Search
+mode로 설정된 Japanese tokenizer 하나, stateless simple tokenizer 하나, moderation
+matcher 하나를 정확히 construct한다. 이들은 application lifetime 동안 유지되며
+request마다 생성하지 않는다. `main`은 service 하나와 Gin engine 하나를 construct한다.
 
-The HTTP process binds to `127.0.0.1:8080` by default; `HTTP_ADDR` may explicitly
-override it. A non-loopback address is rejected unless
-`ALLOW_UNAUTHENTICATED_REMOTE=1` is also set, making the example's missing auth
-boundary an explicit opt-in. Its `http.Server` uses a two-second read-header
-timeout, five-second read timeout, five-second write timeout, and 30-second idle
-timeout. Gin trusted proxies are set to `nil`.
+HTTP process는 기본적으로 `127.0.0.1:8080`에 bind한다. `HTTP_ADDR`는 이를 명시적으로
+override할 수 있다. `ALLOW_UNAUTHENTICATED_REMOTE=1`도 설정하지 않으면
+non-loopback address를 거부해, 이 예제의 missing auth boundary를 명시적인 opt-in으로
+만든다. `http.Server`는 2초 read-header timeout, 5초 read timeout, 5초 write timeout,
+30초 idle timeout을 사용한다. Gin trusted proxy는 `nil`로 설정한다.
 
-`main` treats construction and non-`ErrServerClosed` listen failures as fatal.
-It handles `SIGINT` and `SIGTERM`, gives `Server.Shutdown` five seconds to drain,
-then calls `Server.Close` if the deadline expires. Shutdown or forced-close
-failures are logged safely and produce a non-zero exit. Lifecycle logic is
-factored behind a narrow local server interface so tests drive signals and
-deadlines without binding a public port. The service owns no background
-goroutine or external resource, so no artificial service `Close` method is
-added.
+`main`은 construction failure와 non-`ErrServerClosed` listen failure를 fatal로
+취급한다. `SIGINT`와 `SIGTERM`을 처리하고 `Server.Shutdown`에 drain 시간 5초를 준
+뒤, deadline이 만료되면 `Server.Close`를 호출한다. Shutdown 또는 forced-close failure는
+안전하게 log하고 non-zero exit을 만든다. Lifecycle logic은 좁은 local server
+interface 뒤로 factoring하여 테스트가 public port bind 없이 signal과 deadline을
+구동할 수 있게 한다. Service는 background goroutine이나 external resource를 소유하지
+않으므로 artificial service `Close` method를 추가하지 않는다.
 
-## HTTP Contract
+## HTTP 계약
 
-### Create a moderation record
+### Moderation record 생성
 
 ```http
 POST /moderation/records
@@ -166,37 +158,36 @@ Content-Type: application/json
 }
 ```
 
-`content_id` is trimmed, then must match
-`[A-Za-z0-9][A-Za-z0-9._-]{0,127}`. The same canonicalization and validation
-apply to lookup and search cursors, so every accepted ID round-trips safely as a
-Gin path segment; encoded separators, controls, and other escaped path syntax
-are rejected. `content` is preserved byte for byte so reported spans slice the
-submitted UTF-8 bytes; blank or over-limit content is rejected. Metadata is
-optional, string-to-string, copied on input, and stored with the record. Keys
-are trimmed and must be nonblank; two source keys that collide after trimming
-are invalid. Values are preserved rather than trimmed because they are
-caller-owned exact-match dimensions. Metadata is observable in API responses
-and must not contain credentials or secrets.
+`content_id`는 trim한 뒤 `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`와 match해야 한다.
+Lookup과 search cursor에도 같은 canonicalization 및 validation을 적용하므로, 모든
+accepted ID는 Gin path segment로 안전하게 round-trip된다. Encoded separator,
+control, 그 밖의 escaped path syntax는 reject한다. Reported span이 제출된 UTF-8
+byte를 slice해야 하므로 `content`는 byte for byte로 보존한다. Blank 또는 over-limit
+content는 reject한다. Metadata는 optional string-to-string 값이며 input에서 copy하고
+record와 함께 저장한다. Key는 trim하고 nonblank여야 한다. Trim 이후 충돌하는 두
+source key는 invalid다. Value는 caller-owned exact-match dimension이므로 trim하지
+않고 보존한다. Metadata는 API response에서 관찰 가능하므로 credential 또는 secret을
+포함하면 안 된다.
 
-Creation returns `201 Created` and the complete stored record. Reusing an
-existing canonical `content_id` returns `409 Conflict`; it never overwrites the
-record, even when the payload is identical. A new ID after the teaching store
-reaches its configured capacity returns `503 Service Unavailable`; duplicate
-checking takes precedence so a known ID remains a conflict at capacity.
+Creation은 `201 Created`와 complete stored record를 반환한다. 기존 canonical
+`content_id`를 재사용하면 `409 Conflict`를 반환하며, payload가 동일해도 record를
+overwrite하지 않는다. Teaching store가 configured capacity에 도달한 뒤 새 ID를
+사용하면 `503 Service Unavailable`을 반환한다. Duplicate checking이 우선하므로 known
+ID는 capacity 상태에서도 conflict로 남는다.
 
-### Get one record
+### Record 하나 조회
 
 ```http
 GET /moderation/records/:content_id
 ```
 
-The response includes original content, display text, metadata, routing and
-language evidence, findings, Japanese terms, outcome, and timestamps. This is
-an intentionally inspectable teaching endpoint. The README states that a real
-application must own authentication, authorization, retention, audit logging,
-and log redaction before exposing original content.
+응답은 original content, display text, metadata, routing 및 language evidence,
+finding, Japanese term, outcome, timestamp를 포함한다. 이는 의도적으로 inspectable한
+teaching endpoint다. README는 real application이 original content를 노출하기 전에
+authentication, authorization, retention, audit logging, log redaction을 소유해야
+한다고 설명한다.
 
-### Search accepted records
+### Accepted record 검색
 
 ```http
 POST /moderation/records/search
@@ -214,57 +205,51 @@ Content-Type: application/json
 }
 ```
 
-The JSON body avoids URI-length constraints and supports extensible filters.
-`query` must be valid UTF-8, nonblank, and no longer than 8,000 runes. Metadata
-uses the same key validation as creation. Every supplied metadata key/value
-must exactly match the stored record. A missing or zero `limit` uses 20; values
-above `ServiceConfig.MaximumSearchResults` or below zero are invalid.
-`after_content_id` is optional and exclusive; when present, only canonical IDs
-lexically greater than it are eligible. Search includes only `allowed` and
-`masked` records; `manual-review` records are never searchable.
+JSON body는 URI-length constraint를 피하고 extensible filter를 지원한다. `query`는
+valid UTF-8, nonblank, 8,000 rune 이하이어야 한다. Metadata는 creation과 같은 key
+validation을 사용한다. 제공된 모든 metadata key/value는 stored record와 정확히 match해야
+한다. 누락되었거나 0인 `limit`은 20을 사용한다. `ServiceConfig.MaximumSearchResults`
+보다 크거나 0보다 작은 값은 invalid다. `after_content_id`는 optional 및 exclusive다.
+존재하면 그보다 lexically greater인 canonical ID만 eligible하다. Search는 `allowed` 및
+`masked` record만 포함한다. `manual-review` record는 절대 searchable하지 않다.
 
-Japanese queries use terms from the shared Search-mode tokenizer. English and
-Korean queries use normalized Unicode-word terms. All distinct query terms are
-required. Search responses contain `content_id`, outcome, `display_text`,
-metadata, and detected language, but omit original content, prepared terms, and
-raw findings. Results are sorted by canonical `content_id`, truncated to the
-effective limit, and returned with `truncated` plus `next_after_content_id` set
-to the final returned ID when another match exists. Passing that value as the
-next exclusive cursor continues the existing ordered result set without
-duplicates. The in-memory endpoint has no snapshot isolation: concurrent
-inserts may appear on later pages or be skipped when their ID sorts before the
-cursor. Empty results are a successful non-nil JSON array.
+Japanese query는 shared Search-mode tokenizer의 term을 사용한다. English와 Korean
+query는 normalized Unicode-word term을 사용한다. 모든 distinct query term이 필요하다.
+Search response는 `content_id`, outcome, `display_text`, metadata, detected
+language를 포함하지만 original content, prepared term, raw finding은 생략한다.
+Result는 canonical `content_id` 기준으로 sort하고 effective limit으로 truncate한다.
+다른 match가 있으면 `truncated`와 함께 `next_after_content_id`를 final returned ID로
+설정한다. 그 값을 다음 exclusive cursor로 넘기면 duplicate 없이 기존 ordered result
+set을 계속 조회한다. In-memory endpoint에는 snapshot isolation이 없다. Concurrent
+insert는 이후 page에 나타나거나, ID가 cursor 앞에 sort되면 skip될 수 있다. Empty
+result는 successful non-nil JSON array다.
 
 ### Health
 
-`GET /healthz` is liveness-only. It returns a small stable `200 OK` response and
-does not run the detector, tokenizer, or moderation pipeline. Store capacity
-does not change liveness. No readiness endpoint is provided because the example
-has no external dependency.
+`GET /healthz`는 liveness-only다. 작고 안정적인 `200 OK` response를 반환하며 detector,
+tokenizer, moderation pipeline을 실행하지 않는다. Store capacity는 liveness를 바꾸지
+않는다. 예제에는 external dependency가 없으므로 readiness endpoint를 제공하지 않는다.
 
-## Strict JSON and Request Bounds
+## Strict JSON 및 Request Bounds
 
-Both POST endpoints require `Content-Type: application/json`, optionally with a
-case-insensitive `charset=utf-8` parameter. Missing, malformed, or other media
-types return `415 Unsupported Media Type` before reading the body. A nonempty
-`Content-Encoding` other than `identity` is rejected with
-`unsupported_content_encoding`; compressed request decoding is not provided.
-Handlers install `http.MaxBytesReader` before decoding and close the request
-body on every path. A bounded token preflight rejects duplicate keys at the
-root and metadata-object levels before typed decoding. Decoding also rejects
-unknown fields, trailing JSON values, malformed JSON, non-object metadata, and
-an oversized body. The adapter distinguishes body overflow from ordinary
-invalid JSON.
+두 POST endpoint는 optional case-insensitive `charset=utf-8` parameter를 포함할 수 있는
+`Content-Type: application/json`을 요구한다. 누락, malformed, 다른 media type은 body를
+읽기 전에 `415 Unsupported Media Type`을 반환한다. `identity`가 아닌 nonempty
+`Content-Encoding`은 `unsupported_content_encoding`으로 reject한다. Compressed request
+decoding은 제공하지 않는다. Handler는 decode 전에 `http.MaxBytesReader`를 설치하고 모든
+path에서 request body를 닫는다. Bounded token preflight는 typed decoding 전에 root 및
+metadata-object level duplicate key를 reject한다. Decoding은 unknown field, trailing
+JSON value, malformed JSON, non-object metadata, oversized body도 reject한다. Adapter는
+body overflow를 일반 invalid JSON과 구분한다.
 
-Each workflow request derives a two-second timeout context from the incoming
-request. Configuration remains injectable so tests use deterministic short
-deadlines. The service checks context before each bounded synchronous stage,
-during a record scan, and again while holding the store lock immediately before
-commit. This is cooperative cancellation between library calls, not a hard
-CPU-latency guarantee for a detector or tokenizer call already in progress. A
-canceled or expired operation cannot create a record. The adapter returns a
-stable timeout response when its own deadline expires and preserves client
-cancellation internally without attempting an unreliable response write.
+각 workflow request는 incoming request에서 2초 timeout context를 derive한다.
+Configuration은 injectable로 유지해 테스트가 deterministic short deadline을 사용하게
+한다. Service는 각 bounded synchronous stage 전, record scan 중, commit 직전 store lock을
+잡은 상태에서 다시 context를 확인한다. 이는 이미 진행 중인 detector 또는 tokenizer
+call에 대한 hard CPU-latency guarantee가 아니라 library call 사이의 cooperative
+cancellation이다. Canceled 또는 expired operation은 record를 만들 수 없다. Adapter는
+자체 deadline이 만료되면 안정적인 timeout response를 반환하고, client cancellation은
+신뢰할 수 없는 response write를 시도하지 않은 채 내부적으로 보존한다.
 
 ## Domain Model
 
