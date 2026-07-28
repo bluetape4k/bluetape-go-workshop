@@ -1,12 +1,12 @@
 # Issue #44 ID/JWT Boundary Diagrams Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Add three source-backed, bilingual README diagrams that explain the ID/JWT demo scenario, runtime trust ownership, and protected order request sequence.
+**Goal:** ID/JWT demo scenario, runtime trust ownership, protected order request sequence를 설명하는 source-backed bilingual README diagram 세 개를 추가한다.
 
-**Architecture:** This is a documentation-only change. Each diagram is a hand-authored SVG in the canonical README asset directory, rendered to a paired 2x PNG with CairoSVG, audited independently, visually inspected at full and original detail, and embedded in both README locales in identical order.
+**Architecture:** documentation-only 변경이다. 각 diagram은 canonical README asset directory에 hand-authored SVG로 작성하고, CairoSVG로 paired 2x PNG를 렌더링한다. 각 asset은 독립 audit, full/original detail visual inspection을 거쳐 두 README locale에 같은 순서로 embed한다.
 
-**Tech Stack:** SVG, CairoSVG, XMLLint, bluetape-diagram audit scripts, ImageMagick metadata inspection, Markdown, Go repository verification.
+**Tech Stack:** SVG, CairoSVG, XMLLint, bluetape-diagram audit script, ImageMagick metadata inspection, Markdown, Go repository verification를 사용한다.
 
 ---
 
@@ -24,13 +24,13 @@
 - Modify: `docs/superpowers/specs/2026-07-13-issue-44-id-jwt-boundary-diagrams-design.md`
 - Create: `docs/superpowers/plans/2026-07-13-issue-44-id-jwt-boundary-diagrams-plan.md`
 
-The root README files, Go source, tests, module metadata, and workflows are out of scope.
+root README file, Go source, test, module metadata, workflow는 scope 밖이다.
 
-## Task 1: Lock Source and Visual Evidence
+## Task 1: Source and Visual Evidence 고정
 
-- [ ] **Step 1: Confirm source invariants**
+- [ ] **Step 1: source invariant 확인**
 
-Run:
+실행한다.
 
 ```bash
 sed -n '1,220p' examples/id-jwt-boundary/README.md
@@ -38,11 +38,11 @@ sed -n '1,430p' examples/id-jwt-boundary/internal/idjwtboundary/service.go
 sed -n '1,380p' examples/id-jwt-boundary/internal/idjwtboundary/service_test.go
 ```
 
-Expected: bounded `/tokens` and `/orders` JSON, fixed-HMAC demo composition, expected issuer/audience/expiration parsing, `customer` role, `orders:create` scope, validation before two UUID v7 generations, and stable public error mapping are present.
+기대값: bounded `/tokens` and `/orders` JSON, fixed-HMAC demo composition, expected issuer/audience/expiration parsing, `customer` role, `orders:create` scope, validation before two UUID v7 generations, stable public error mapping이 존재한다.
 
-- [ ] **Step 2: Inspect approved visual baselines**
+- [ ] **Step 2: 승인된 visual baseline 검사**
 
-Open these PNGs at original detail:
+다음 PNG를 original detail로 연다.
 
 ```text
 /Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/workflow-image-upload.png
@@ -54,30 +54,17 @@ Open these PNGs at original detail:
 
 Original-detail inspection ledger:
 
-- `workflow-image-upload.png` — 1200x480; numbered primary stages read left to
-  right, with supporting responsibility cards below the main path.
-- `utils-idgenerators-diagram-03.png` — 6000x3400; timestamp, machine,
-  sequence, packing, and result responsibilities form semantic regions rather
-  than a uniform grid.
-- `leader-ktor-architecture-01.png` — 2640x1800; application code, Ktor
-  process, integration layer, core API, and backend implementations have clear
-  framework and ownership boundaries.
-- `sequence-workflow-sample.png` — 3720x2272; rectangular participants,
-  dashed lifelines, activations, numbered message pills, visible call/return
-  heads, and a transparent retry frame establish the catalog sequence family.
-- `gin-audit-query-api-sequence.png` — 3360x2520; the nearest repo-local Gin
-  reference preserves the same signals while adding a Gin adapter boundary,
-  explicit success/error branches, and sender-colored messages.
+- `workflow-image-upload.png` — 1200x480; numbered primary stage가 왼쪽에서 오른쪽으로 읽히며, supporting responsibility card가 main path 아래에 놓인다.
+- `utils-idgenerators-diagram-03.png` — 6000x3400; timestamp, machine, sequence, packing, result responsibility가 uniform grid가 아니라 semantic region을 이룬다.
+- `leader-ktor-architecture-01.png` — 2640x1800; application code, Ktor process, integration layer, core API, backend implementation의 framework/ownership boundary가 명확하다.
+- `sequence-workflow-sample.png` — 3720x2272; rectangular participant, dashed lifeline, activation, numbered message pill, visible call/return head, transparent retry frame이 catalog sequence family를 만든다.
+- `gin-audit-query-api-sequence.png` — 3360x2520; 가장 가까운 repo-local Gin reference이며 같은 signal을 보존하면서 Gin adapter boundary, explicit success/error branch, sender-colored message를 추가한다.
 
-Expected: scenario stages read in one direction; architecture uses responsibility
-regions and explicit framework/application/provider boundaries rather than a box
-grid; and both sequence references use rectangular participants, dashed
-lifelines, activation bars, numbered labels, visible arrowheads, and transparent
-branch frames. The repo-local Gin sequence is the nearest module-family baseline.
+기대값: scenario stage는 한 방향으로 읽힌다. architecture는 box grid 대신 responsibility region과 명시적인 framework/application/provider boundary를 사용한다. 두 sequence reference는 rectangular participant, dashed lifeline, activation bar, numbered label, visible arrowhead, transparent branch frame을 사용한다. repo-local Gin sequence가 가장 가까운 module-family baseline이다.
 
-- [ ] **Step 3: Lock marker geometry**
+- [ ] **Step 3: marker geometry 고정**
 
-Use these exact invariants:
+다음 exact invariant를 사용한다.
 
 ```text
 primary/scenario marker: markerWidth="14" markerHeight="14" viewBox="0 0 14 14"
@@ -94,13 +81,13 @@ endpoint corner clearance: >= max(8 px, rx / 2)
 connector endpoint: exactly on the card boundary, never inside the card
 ```
 
-Expected: the final segment determines rendered arrow direction, and no bend occupies the marker footprint.
+기대값: final segment가 rendered arrow direction을 결정하며, 어떤 bend도 marker footprint를 침범하지 않는다.
 
-## Task 2: Create and Prove the Scenario Diagram
+## Task 2: Scenario Diagram 생성 및 증명
 
-- [ ] **Step 1: Create the scenario SVG**
+- [ ] **Step 1: scenario SVG 생성**
 
-Create `docs/images/readme-diagrams/id-jwt-boundary-scenario.svg` on a 1200x650 light canvas with a rounded outer decorator, title, subtitle, six numbered left-to-right cards, and one lower trust-notes band:
+`docs/images/readme-diagrams/id-jwt-boundary-scenario.svg`를 1200x650 light canvas에 생성한다. rounded outer decorator, title, subtitle, 왼쪽에서 오른쪽으로 이어지는 numbered card 여섯 개, lower trust-notes band 하나를 사용한다.
 
 ```text
 1 Request Demo Token
@@ -117,7 +104,7 @@ Create `docs/images/readme-diagrams/id-jwt-boundary-scenario.svg` on a 1200x650 
   UUID v7 order_id + request_id · 201 Created
 ```
 
-The trust-notes band contains:
+trust-notes band에는 다음 문구를 넣는다.
 
 ```text
 Signed claims are not encrypted
@@ -125,11 +112,11 @@ UUIDs are identifiers, not credentials
 The fixed HMAC secret is local demo material only
 ```
 
-Use blue for request progress, violet for JWT trust, and olive for authorized ID creation. Every progression line is orthogonal, attaches perpendicularly to a card edge with the required corner clearance, and leaves at least 24 px after its final bend.
+request progress에는 blue, JWT trust에는 violet, authorized ID creation에는 olive를 사용한다. 모든 progression line은 orthogonal이어야 하며, 필요한 corner clearance를 지키면서 card edge에 perpendicular로 붙고, final bend 뒤에는 최소 24 px를 남긴다.
 
-- [ ] **Step 2: Validate and render the scenario**
+- [ ] **Step 2: scenario 검증 및 렌더링**
 
-Run:
+실행한다.
 
 ```bash
 xmllint --noout docs/images/readme-diagrams/id-jwt-boundary-scenario.svg
@@ -141,24 +128,24 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-end
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-mixed-corner-audit.py" docs/images/readme-diagrams/id-jwt-boundary-scenario.svg
 ```
 
-Expected: XML/render success, PNG 2400x1300, five primary progression connectors, and zero diagonal, endpoint, or mixed-corner failures.
+기대값: XML/render success, PNG 2400x1300, primary progression connector 다섯 개, diagonal/endpoint/mixed-corner failure 0개.
 
-- [ ] **Step 3: Inspect the rendered scenario**
+- [ ] **Step 3: rendered scenario 검사**
 
-Open the 2400x1300 PNG at full and original detail. Inspect all five endpoints at native pixels. Verify every arrow points toward the next card, no head is clipped or detached, no line crosses a card, labels fit, the trust band stays secondary, and margins are balanced.
+2400x1300 PNG를 full detail과 original detail로 연다. 다섯 endpoint를 모두 native pixel에서 검사한다. 모든 arrow가 다음 card를 향하고, head가 clipped/detached 되지 않으며, line이 card를 가로지르지 않고, label이 맞으며, trust band가 secondary로 남고, margin이 균형적인지 확인한다.
 
-- [ ] **Step 4: Commit the scenario pair**
+- [ ] **Step 4: scenario pair commit**
 
 ```bash
 git add docs/images/readme-diagrams/id-jwt-boundary-scenario.svg docs/images/readme-diagrams/id-jwt-boundary-scenario.png
 git commit -m "docs: add ID JWT boundary scenario diagram"
 ```
 
-## Task 3: Create and Prove the Architecture Diagram
+## Task 3: Architecture Diagram 생성 및 증명
 
-- [ ] **Step 1: Create the architecture SVG**
+- [ ] **Step 1: architecture SVG 생성**
 
-Create `docs/images/readme-diagrams/id-jwt-boundary-architecture.svg` on a 1400x900 light canvas. Use responsibility regions and aligned cards, not a flat grid:
+`docs/images/readme-diagrams/id-jwt-boundary-architecture.svg`를 1400x900 light canvas에 생성한다. flat grid가 아니라 responsibility region과 aligned card를 사용한다.
 
 ```text
 Caller and demo boundary
@@ -186,11 +173,11 @@ Public outcomes
   400/401/403/500 stable error response
 ```
 
-Use blue for HTTP/application ownership, violet for signed-claim composition and verification, olive for the authorized UUID path, and muted red for failure mapping. Include an in-image legend. Keep `/tokens` and `/orders` separate until their shared service boundary. Never connect UUID generation to a failure path.
+HTTP/application ownership에는 blue, signed-claim composition/verification에는 violet, authorized UUID path에는 olive, failure mapping에는 muted red를 사용한다. in-image legend를 포함한다. `/tokens`와 `/orders`는 shared service boundary에 도달하기 전까지 분리한다. UUID generation을 failure path에 연결하면 안 된다.
 
-- [ ] **Step 2: Validate and render the architecture**
+- [ ] **Step 2: architecture 검증 및 렌더링**
 
-Run:
+실행한다.
 
 ```bash
 xmllint --noout docs/images/readme-diagrams/id-jwt-boundary-architecture.svg
@@ -202,11 +189,11 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-end
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-mixed-corner-audit.py" docs/images/readme-diagrams/id-jwt-boundary-architecture.svg
 ```
 
-Expected: XML/render success, PNG 2800x1800, at least twelve cards and ten connectors, and zero automated audit failures.
+기대값: XML/render success, PNG 2800x1800, card 최소 12개, connector 최소 10개, automated audit failure 0개.
 
-- [ ] **Step 3: Inspect architecture connector geometry**
+- [ ] **Step 3: architecture connector geometry 검사**
 
-Open the final PNG at full and original detail. For every connector compare the SVG final segment with the rendered head and verify:
+final PNG를 full detail과 original detail로 연다. 모든 connector에서 SVG final segment와 rendered head를 비교하고 다음을 확인한다.
 
 ```text
 arrowhead direction matches the final path segment
@@ -218,22 +205,22 @@ no connector crosses a card, label, lane title, or another line
 no connector rides a card edge or appears tangent
 ```
 
-On any failure, move ports or bend coordinates, rerender, rerun every architecture audit, and repeat the full-size inspection.
+failure가 있으면 port 또는 bend coordinate를 이동하고, 다시 render하며, 모든 architecture audit를 다시 실행한 뒤 full-size inspection을 반복한다.
 
-- [ ] **Step 4: Commit the architecture pair**
+- [ ] **Step 4: architecture pair commit**
 
 ```bash
 git add docs/images/readme-diagrams/id-jwt-boundary-architecture.svg docs/images/readme-diagrams/id-jwt-boundary-architecture.png
 git commit -m "docs: add ID JWT boundary architecture diagram"
 ```
 
-## Task 4: Create and Prove the Request Sequence
+## Task 4: Request Sequence 생성 및 증명
 
-- [ ] **Step 1: Create the sequence SVG**
+- [ ] **Step 1: sequence SVG 생성**
 
-Create `docs/images/readme-diagrams/id-jwt-boundary-sequence.svg` on a 1600x1300 light canvas with participants `Caller`, `Gin Router`, `Boundary Service`, `JWT Provider`, and `UUID v7 Generator`. Use rectangular participant headers, five dashed lifelines without arrowheads, activation bars, transparent branch frames, numbered message pills, and continuous message lines.
+`docs/images/readme-diagrams/id-jwt-boundary-sequence.svg`를 1600x1300 light canvas에 생성하고 participant `Caller`, `Gin Router`, `Boundary Service`, `JWT Provider`, `UUID v7 Generator`를 배치한다. rectangular participant header, arrowhead 없는 dashed lifeline 다섯 개, activation bar, transparent branch frame, numbered message pill, continuous message line을 사용한다.
 
-Show this success order:
+success order는 다음과 같다.
 
 ```text
 1  POST /orders + Bearer JWT
@@ -250,7 +237,7 @@ Show this success order:
 12 201 Created
 ```
 
-Add compact failure branches at their actual decision levels:
+실제 decision level에 compact failure branch를 추가한다.
 
 ```text
 missing token -> 401 missing_token before JWT parse
@@ -261,11 +248,11 @@ invalid order -> 400 invalid_request before UUID generation
 ID generation failure -> 500 internal_error without internals
 ```
 
-Use solid calls, dashed returns, red only for failures, violet for JWT messages, and olive for UUID creation. Each explicit per-color sequence marker uses the locked 16x16 geometry, `markerUnits="userSpaceOnUse"`, `orient="auto"`, matching fill color, and at least 24 px of straight terminal route after the last bend. Attach message endpoints perpendicularly at participant or activation boundaries with corner clearance of at least `max(8 px, rx / 2)` where rounded cards are involved.
+solid call, dashed return, failure 전용 red, JWT message용 violet, UUID creation용 olive를 사용한다. 각 explicit per-color sequence marker는 locked 16x16 geometry, `markerUnits="userSpaceOnUse"`, `orient="auto"`, matching fill color, final bend 뒤 최소 24 px straight terminal route를 사용한다. message endpoint는 participant 또는 activation boundary에 perpendicular로 붙이고, rounded card와 관련된 곳은 최소 `max(8 px, rx / 2)` corner clearance를 지킨다.
 
-- [ ] **Step 2: Validate and render the sequence**
+- [ ] **Step 2: sequence 검증 및 렌더링**
 
-Run:
+실행한다.
 
 ```bash
 xmllint --noout docs/images/readme-diagrams/id-jwt-boundary-sequence.svg
@@ -278,26 +265,26 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-mix
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-sequence-style-audit.py" docs/images/readme-diagrams/id-jwt-boundary-sequence.svg
 ```
 
-Expected: PNG 3200x2600, five participant headers/lifelines, twelve numbered success messages, transparent nonempty failure branches, zero common failures, and a passing sequence-style audit.
+기대값: PNG 3200x2600, participant header/lifeline 다섯 개, numbered success message 12개, transparent nonempty failure branch, common failure 0개, sequence-style audit PASS.
 
-- [ ] **Step 3: Inspect sequence direction**
+- [ ] **Step 3: sequence direction 검사**
 
-Open the final PNG at full and original detail. Verify solid calls point right, dashed returns point left, labels sit above their uninterrupted lines, activation bars do not hide marker heads, branch frames preserve chronology, and no failure branch reaches UUID generation.
+final PNG를 full detail과 original detail로 연다. solid call은 오른쪽을 향하고 dashed return은 왼쪽을 향하는지, label이 끊기지 않은 line 위에 놓이는지, activation bar가 marker head를 가리지 않는지, branch frame이 chronology를 보존하는지, failure branch가 UUID generation에 도달하지 않는지 확인한다.
 
-- [ ] **Step 4: Commit the sequence pair**
+- [ ] **Step 4: sequence pair commit**
 
 ```bash
 git add docs/images/readme-diagrams/id-jwt-boundary-sequence.svg docs/images/readme-diagrams/id-jwt-boundary-sequence.png
 git commit -m "docs: add ID JWT boundary sequence diagram"
 ```
 
-## Task 5: Integrate README Locales and Lesson
+## Task 5: README Locale 및 Lesson 통합
 
-- [ ] **Step 1: Update the English README**
+- [ ] **Step 1: English README 업데이트**
 
-Under `## Scenario`, add the scenario PNG and explain that it separates the local demo issuer from the protected order boundary. Before `## What It Demonstrates`, add `## Architecture` with the architecture PNG and ownership explanation. Before `## Boundary Notes`, add `## Protected Order Sequence` with the sequence PNG and state that auth failures exit before UUID generation.
+`## Scenario` 아래에 scenario PNG를 추가하고, local demo issuer와 protected order boundary를 분리한다는 점을 설명한다. `## What It Demonstrates` 앞에 `## Architecture`를 추가하고 architecture PNG와 ownership 설명을 넣는다. `## Boundary Notes` 앞에 `## Protected Order Sequence`를 추가하고 sequence PNG를 넣으며, auth failure는 UUID generation 전에 종료된다고 명시한다.
 
-Use these links:
+다음 link를 사용한다.
 
 ```markdown
 ![ID and JWT boundary scenario](../../docs/images/readme-diagrams/id-jwt-boundary-scenario.png)
@@ -305,13 +292,13 @@ Use these links:
 ![ID and JWT protected order sequence](../../docs/images/readme-diagrams/id-jwt-boundary-sequence.png)
 ```
 
-- [ ] **Step 2: Update the Korean README**
+- [ ] **Step 2: Korean README 업데이트**
 
-Add the same three paths in the same order under the corresponding headings. Localize naturally while preserving `/tokens`, `/orders`, `issuer`, `audience`, `expiration`, `customer`, `orders:create`, UUID v7, and public error codes.
+corresponding heading 아래에 같은 path 세 개를 같은 순서로 추가한다. `/tokens`, `/orders`, `issuer`, `audience`, `expiration`, `customer`, `orders:create`, UUID v7, public error code는 보존하면서 자연스럽게 localize한다.
 
-- [ ] **Step 3: Update the lesson**
+- [ ] **Step 3: lesson 업데이트**
 
-Append `## Diagram Evidence` to `docs/lessons/2026-06-22-id-jwt-boundary.md` with these points:
+`docs/lessons/2026-06-22-id-jwt-boundary.md`에 `## Diagram Evidence`를 추가하고 다음 point를 기록한다.
 
 ```text
 The three assets are source-backed and shared by both README locales.
@@ -320,9 +307,9 @@ Connector bends reserve straight terminal distance for the marker footprint; aut
 JWT failure paths visibly end before UUID generation, so identifiers never appear to authorize a request.
 ```
 
-- [ ] **Step 4: Verify locale order and links**
+- [ ] **Step 4: locale order 및 link 검증**
 
-Run:
+실행한다.
 
 ```bash
 diff <(rg -o 'readme-diagrams/[^) ]+\.png' examples/id-jwt-boundary/README.md) <(rg -o 'readme-diagrams/[^) ]+\.png' examples/id-jwt-boundary/README.ko.md)
@@ -330,9 +317,9 @@ for asset in $(rg -o 'readme-diagrams/[^) ]+\.png' examples/id-jwt-boundary/READ
 git diff --check
 ```
 
-Expected: locale diff empty, all three PNG/SVG pairs resolve, and diff check exits zero.
+기대값: locale diff가 비어 있고, 세 PNG/SVG pair가 모두 resolve되며, diff check가 exit zero로 끝난다.
 
-- [ ] **Step 5: Commit README and lesson integration**
+- [ ] **Step 5: README 및 lesson integration commit**
 
 ```bash
 git add examples/id-jwt-boundary/README.md examples/id-jwt-boundary/README.ko.md docs/lessons/2026-06-22-id-jwt-boundary.md
@@ -341,9 +328,9 @@ git commit -m "docs: explain ID JWT boundary diagrams"
 
 ## Task 6: Final Verification and PR Delivery
 
-- [ ] **Step 1: Rerun every final diagram gate**
+- [ ] **Step 1: 모든 final diagram gate 재실행**
 
-Run:
+실행한다.
 
 ```bash
 for name in scenario architecture sequence; do
@@ -360,29 +347,28 @@ done
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-sequence-style-audit.py" docs/images/readme-diagrams/id-jwt-boundary-sequence.svg
 ```
 
-Reopen every PNG at full and original detail after this final render and inspect
-every arrow endpoint and bend again.
+이 final render 뒤에 모든 PNG를 full detail과 original detail로 다시 열고 모든 arrow endpoint와 bend를 다시 검사한다.
 
-Expected: three SVG/PNG pairs, exact 2x dimensions, meaningful counts, zero unexplained failures, correct rendered arrowhead direction, safe marker/bend clearance, no intrusions/crossings, and readable labels.
+기대값: SVG/PNG pair 세 개, 정확한 2x dimension, 의미 있는 count, 설명되지 않은 failure 0개, 올바른 rendered arrowhead direction, 안전한 marker/bend clearance, intrusion/crossing 없음, readable label.
 
-- [ ] **Step 2: Run focused tests**
+- [ ] **Step 2: focused test 실행**
 
 ```bash
 go test -count=1 ./examples/id-jwt-boundary/...
 go test -race -count=1 ./examples/id-jwt-boundary/...
 ```
 
-Expected: all packages pass and the race detector reports no race.
+기대값: 모든 package가 pass하고 race detector가 race를 보고하지 않는다.
 
-- [ ] **Step 3: Run repository CI**
+- [ ] **Step 3: repository CI 실행**
 
 ```bash
 make ci
 ```
 
-Expected: format, tidy, vet, lint, test, and race gates pass.
+기대값: format, tidy, vet, lint, test, race gate가 pass한다.
 
-- [ ] **Step 4: Review diff and checklist ledger**
+- [ ] **Step 4: diff 및 checklist ledger review**
 
 ```bash
 git status --short
@@ -391,12 +377,12 @@ git diff --stat develop...HEAD
 git log --oneline develop..HEAD
 ```
 
-Expected: only the approved spec, plan, README pair, lesson, and six assets differ. Type E, Go public-evidence, diagram, and workflow rows have fresh evidence; `P0=0`, `P1=0`, and `Blocked=0`.
+기대값: approved spec, plan, README pair, lesson, asset 여섯 개만 differ한다. Type E, Go public-evidence, diagram, workflow row는 fresh evidence를 가진다. `P0=0`, `P1=0`, `Blocked=0`.
 
-- [ ] **Step 5: Push and create the PR**
+- [ ] **Step 5: push 및 PR 생성**
 
-Push `docs/issue-44-id-jwt-boundary-diagrams`. Create an English PR documenting #44 with base `develop`, milestone `0.6.0`, assignee `debop`, label `examples`, and `## DoD Status` as the final level-two heading.
+`docs/issue-44-id-jwt-boundary-diagrams`를 push한다. base `develop`, milestone `0.6.0`, assignee `debop`, label `examples`, final level-two heading `## DoD Status`를 사용해 #44를 문서화하는 English PR을 생성한다.
 
-- [ ] **Step 6: Wait for CI and stop before merge**
+- [ ] **Step 6: CI 대기 및 merge 전 중단**
 
-Verify live body, labels, milestone, assignee, reviews/threads, checks, and head SHA after CI succeeds. Report the PR URL and exact worktree path. Do not merge or delete the remote branch without explicit user approval.
+CI가 성공한 뒤 live body, label, milestone, assignee, review/thread, check, head SHA를 확인한다. PR URL과 exact worktree path를 보고한다. 명시적인 사용자 승인 없이 merge하거나 remote branch를 삭제하지 않는다.
