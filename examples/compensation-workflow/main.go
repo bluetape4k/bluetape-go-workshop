@@ -1,4 +1,4 @@
-// Package main runs the compensation workflow example.
+// Package main 은 compensation workflow 예제를 실행한다.
 package main
 
 import (

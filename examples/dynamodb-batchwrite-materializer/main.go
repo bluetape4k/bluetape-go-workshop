@@ -1,4 +1,4 @@
-// Package main prints the DynamoDB batch write materializer preview.
+// Package main 은 DynamoDB batch write materializer preview를 출력한다.
 package main
 
 import (

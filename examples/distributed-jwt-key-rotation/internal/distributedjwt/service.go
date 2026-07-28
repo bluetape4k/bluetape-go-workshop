@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	// DefaultIssuer is the issuer expected by distributed JWT demo tokens.
+	// DefaultIssuer 는 distributed JWT 데모 token이 기대하는 issuer다.
 	DefaultIssuer = "distributed-jwt-key-rotation"
-	// DefaultAudience is the protected API audience expected by the demo.
+	// DefaultAudience 는 데모가 기대하는 보호 API audience다.
 	DefaultAudience = "orders-api"
 
 	defaultNamespace        = "workshop-auth"
@@ -32,17 +32,17 @@ const (
 )
 
 var (
-	// ErrInvalidRequest reports invalid public request fields or JSON.
+	// ErrInvalidRequest 는 공개 요청 필드 또는 JSON이 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("distributedjwt: invalid request")
-	// ErrInvalidToken reports a token that cannot be verified by this boundary.
+	// ErrInvalidToken 은 이 boundary에서 검증할 수 없는 token을 나타낸다.
 	ErrInvalidToken = errors.New("distributedjwt: invalid token")
-	// ErrExpiredToken reports a verified token that is past expiration.
+	// ErrExpiredToken 은 검증은 되었지만 만료 시간이 지난 token을 나타낸다.
 	ErrExpiredToken = errors.New("distributedjwt: expired token")
-	// ErrMissingToken reports a missing bearer token.
+	// ErrMissingToken 은 bearer token이 누락되었음을 나타낸다.
 	ErrMissingToken = errors.New("distributedjwt: missing token")
 )
 
-// Config holds service wiring for the distributed JWT example.
+// Config 는 distributed JWT 예제를 구성하는 service 연결값을 보관한다.
 type Config struct {
 	issuer           string
 	audience         string
@@ -53,10 +53,10 @@ type Config struct {
 	operationTimeout time.Duration
 }
 
-// Option customizes Config before the service is constructed.
+// Option 은 service 생성 전에 Config를 조정한다.
 type Option func(*Config)
 
-// WithIssuer sets the expected JWT issuer.
+// WithIssuer 는 기대하는 JWT issuer를 설정한다.
 func WithIssuer(issuer string) Option {
 	return func(cfg *Config) {
 		if text := strings.TrimSpace(issuer); text != "" {
@@ -65,7 +65,7 @@ func WithIssuer(issuer string) Option {
 	}
 }
 
-// WithAudience sets the expected JWT audience.
+// WithAudience 는 기대하는 JWT audience를 설정한다.
 func WithAudience(audience string) Option {
 	return func(cfg *Config) {
 		if text := strings.TrimSpace(audience); text != "" {
@@ -74,7 +74,7 @@ func WithAudience(audience string) Option {
 	}
 }
 
-// WithNamespace sets the Redis key namespace for shared signing keys.
+// WithNamespace 는 공유 signing key에 사용할 Redis key namespace를 설정한다.
 func WithNamespace(namespace string) Option {
 	return func(cfg *Config) {
 		if text := strings.TrimSpace(namespace); text != "" {
@@ -83,7 +83,7 @@ func WithNamespace(namespace string) Option {
 	}
 }
 
-// WithNodeID sets the demo node identifier used in generated key and token IDs.
+// WithNodeID 는 생성되는 key와 token ID에 사용할 데모 node identifier를 설정한다.
 func WithNodeID(nodeID string) Option {
 	return func(cfg *Config) {
 		if text := strings.TrimSpace(nodeID); text != "" {
@@ -92,7 +92,7 @@ func WithNodeID(nodeID string) Option {
 	}
 }
 
-// WithClock sets the service clock used for token issue, parse, and rotation.
+// WithClock 은 token 발급, parsing, rotation에 사용할 service clock을 설정한다.
 func WithClock(clock func() time.Time) Option {
 	return func(cfg *Config) {
 		if clock != nil {
@@ -101,7 +101,7 @@ func WithClock(clock func() time.Time) Option {
 	}
 }
 
-// WithKeyTTL sets the retention window for repository-backed signing keys.
+// WithKeyTTL 은 repository-backed signing key의 보존 기간을 설정한다.
 func WithKeyTTL(ttl time.Duration) Option {
 	return func(cfg *Config) {
 		if ttl > 0 {
@@ -110,7 +110,7 @@ func WithKeyTTL(ttl time.Duration) Option {
 	}
 }
 
-// WithOperationTimeout sets the child context budget for repository operations.
+// WithOperationTimeout 은 repository operation에 사용할 child context 예산을 설정한다.
 func WithOperationTimeout(timeout time.Duration) Option {
 	return func(cfg *Config) {
 		if timeout > 0 {
@@ -119,7 +119,7 @@ func WithOperationTimeout(timeout time.Duration) Option {
 	}
 }
 
-// Service owns distributed token issue, verification, and key rotation.
+// Service 는 distributed token 발급, 검증, key rotation을 소유한다.
 type Service struct {
 	provider         *btjwt.CachedDistributedProvider
 	issuer           string
@@ -131,14 +131,14 @@ type Service struct {
 	nextJTI          atomic.Uint64
 }
 
-// IssueRequest is the local demo access-token issue request.
+// IssueRequest 는 로컬 데모 access-token 발급 요청이다.
 type IssueRequest struct {
 	Subject    string   `json:"subject"`
 	Scopes     []string `json:"scopes"`
 	TTLSeconds int      `json:"ttl_seconds"`
 }
 
-// TokenResponse is the issued bearer token and signing key projection.
+// TokenResponse 는 발급된 bearer token과 signing key 프로젝션이다.
 type TokenResponse struct {
 	TokenType        string `json:"token_type"`
 	AccessToken      string `json:"access_token"`
@@ -146,14 +146,14 @@ type TokenResponse struct {
 	KID              string `json:"kid"`
 }
 
-// RotationResponse describes the new current signing key after rotation.
+// RotationResponse 는 rotation 이후 새 current signing key를 설명한다.
 type RotationResponse struct {
 	KID       string    `json:"kid"`
 	Previous  string    `json:"previous_kid,omitempty"`
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
-// ProfileResponse is the protected resource projection from verified claims.
+// ProfileResponse 는 검증된 claim에서 만든 보호 resource 프로젝션이다.
 type ProfileResponse struct {
 	Subject          string `json:"subject"`
 	Scope            string `json:"scope"`
@@ -161,13 +161,13 @@ type ProfileResponse struct {
 	ExpiresInSeconds int    `json:"expires_in_seconds"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적인 공개 오류 형식이다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService builds the distributed JWT example service.
+// NewService 는 distributed JWT 예제 service를 만든다.
 func NewService(ctx context.Context, client redis.Cmdable, options ...Option) (*Service, error) {
 	cfg := defaultConfig()
 	for _, option := range options {
@@ -228,7 +228,7 @@ func defaultConfig() Config {
 	}
 }
 
-// IssueToken signs an access token with the current distributed signing key.
+// IssueToken 은 current distributed signing key로 access token에 서명한다.
 func (s *Service) IssueToken(ctx context.Context, request IssueRequest) (TokenResponse, error) {
 	if err := validateIssueRequest(request); err != nil {
 		return TokenResponse{}, err
@@ -260,7 +260,7 @@ func (s *Service) IssueToken(ctx context.Context, request IssueRequest) (TokenRe
 	}, nil
 }
 
-// VerifyToken verifies an access token and returns the protected profile view.
+// VerifyToken 은 access token을 검증하고 보호된 profile view를 반환한다.
 func (s *Service) VerifyToken(ctx context.Context, token string) (ProfileResponse, error) {
 	token = strings.TrimSpace(token)
 	if token == "" {
@@ -282,7 +282,7 @@ func (s *Service) VerifyToken(ctx context.Context, token string) (ProfileRespons
 	}, nil
 }
 
-// RotateKey forces a new distributed signing key and clears local reader cache.
+// RotateKey 는 새 distributed signing key를 강제로 만들고 local reader cache를 비운다.
 func (s *Service) RotateKey(ctx context.Context) (RotationResponse, error) {
 	opCtx, cancel := s.operationContext(ctx)
 	defer cancel()
@@ -374,7 +374,7 @@ func mapError(err error) error {
 	}
 }
 
-// NewRouter builds the HTTP surface for token issue, verification, and rotation.
+// NewRouter 는 token 발급, 검증, rotation용 HTTP surface를 만든다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

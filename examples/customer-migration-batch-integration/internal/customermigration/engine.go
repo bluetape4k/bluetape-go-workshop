@@ -1,4 +1,4 @@
-// Package customermigration implements the customer migration batch integration example.
+// Package customermigration 은 customer migration batch integration 예제를 구현한다.
 package customermigration
 
 import (
@@ -13,88 +13,88 @@ import (
 )
 
 const (
-	// BatchName is the stable batch job name used in reports.
+	// BatchName 은 report에서 사용하는 안정적인 batch job 이름이다.
 	BatchName = "customer-migration-batch"
-	// StepName is the stable step name used inside batch reports.
+	// StepName 은 batch report 내부에서 사용하는 안정적인 step 이름이다.
 	StepName = "customer-migration-step"
-	// CheckpointKey identifies this demo batch in the checkpoint store.
+	// CheckpointKey 는 checkpoint store 안에서 이 데모 batch를 식별한다.
 	CheckpointKey = "customer-migration"
-	// DefaultChunkSize fixes the demo chunk size so restart behavior is predictable.
+	// DefaultChunkSize 는 restart 동작을 예측 가능하게 만들도록 데모 chunk 크기를 고정한다.
 	DefaultChunkSize = 2
 )
 
 const (
-	// TriggerManual labels operator-started runs.
+	// TriggerManual 은 운영자가 시작한 run에 붙이는 label이다.
 	TriggerManual = "manual"
-	// TriggerSchedule labels scheduler-started runs.
+	// TriggerSchedule 은 scheduler가 시작한 run에 붙이는 label이다.
 	TriggerSchedule = "schedule"
 )
 
 const (
-	// ErrorCodeRequestCancelled is returned when caller cancellation stops work.
+	// ErrorCodeRequestCancelled 는 호출자 cancellation으로 작업이 중단될 때 반환된다.
 	ErrorCodeRequestCancelled = "request_cancelled"
-	// ErrorCodeWriterCrash is returned when the demo writer crash is injected.
+	// ErrorCodeWriterCrash 는 데모 writer crash가 주입될 때 반환된다.
 	ErrorCodeWriterCrash = "writer_crash"
-	// ErrorCodeTransientCustomer is returned when transient retries are exhausted.
+	// ErrorCodeTransientCustomer 는 transient retry가 모두 소진될 때 반환된다.
 	ErrorCodeTransientCustomer = "transient_customer_exhausted"
-	// ErrorCodePermanentCustomer is returned when a customer is dead-lettered.
+	// ErrorCodePermanentCustomer 는 customer가 dead-letter 처리될 때 반환된다.
 	ErrorCodePermanentCustomer = "permanent_customer"
-	// ErrorCodeInvalidCheckpoint is returned when checkpoint state is corrupt.
+	// ErrorCodeInvalidCheckpoint 는 checkpoint 상태가 손상되었을 때 반환된다.
 	ErrorCodeInvalidCheckpoint = "invalid_checkpoint"
-	// ErrorCodeInvalidCrashAfter is returned when crash injection is malformed.
+	// ErrorCodeInvalidCrashAfter 는 crash injection 설정이 잘못되었을 때 반환된다.
 	ErrorCodeInvalidCrashAfter = "invalid_crash_after_new_writes"
-	// ErrorCodeRunInProgress is returned when another run owns the stores.
+	// ErrorCodeRunInProgress 는 다른 run이 store 소유권을 갖고 있을 때 반환된다.
 	ErrorCodeRunInProgress = "run_in_progress"
-	// ErrorCodeNotLeader is returned when the process does not hold leadership.
+	// ErrorCodeNotLeader 는 process가 leadership을 보유하지 않을 때 반환된다.
 	ErrorCodeNotLeader = "not_leader"
-	// ErrorCodeInvalidRunID is returned when a required run id is blank.
+	// ErrorCodeInvalidRunID 는 필수 run id가 비어 있을 때 반환된다.
 	ErrorCodeInvalidRunID = "invalid_run_id"
-	// ErrorCodeInvalidRequest is returned when request JSON is malformed.
+	// ErrorCodeInvalidRequest 는 요청 JSON 형식이 잘못되었을 때 반환된다.
 	ErrorCodeInvalidRequest = "invalid_request"
-	// ErrorCodeRequestTooLarge is returned when request JSON exceeds the cap.
+	// ErrorCodeRequestTooLarge 는 요청 JSON이 상한을 넘을 때 반환된다.
 	ErrorCodeRequestTooLarge = "request_too_large"
-	// ErrorCodeReportNotFound is returned when a run report is unavailable.
+	// ErrorCodeReportNotFound 는 run report를 사용할 수 없을 때 반환된다.
 	ErrorCodeReportNotFound = "report_not_found"
-	// ErrorCodeNoActiveRun is returned when cancel has no in-flight run to stop.
+	// ErrorCodeNoActiveRun 은 cancel할 in-flight run이 없을 때 반환된다.
 	ErrorCodeNoActiveRun = "no_active_run"
 )
 
 var (
-	// ErrInvalidCustomer reports a malformed fixture customer.
+	// ErrInvalidCustomer 는 형식이 잘못된 fixture customer를 나타낸다.
 	ErrInvalidCustomer = errors.New("invalid customer")
-	// ErrTransientCustomer reports an exhausted transient fixture failure.
+	// ErrTransientCustomer 는 transient fixture 실패가 모두 소진되었음을 나타낸다.
 	ErrTransientCustomer = errors.New("transient customer")
-	// ErrPermanentCustomer reports a deterministic dead-letter fixture failure.
+	// ErrPermanentCustomer 는 결정적인 dead-letter fixture 실패를 나타낸다.
 	ErrPermanentCustomer = errors.New("permanent customer")
-	// ErrWriterCrash reports the injected writer crash.
+	// ErrWriterCrash 는 주입된 writer crash를 나타낸다.
 	ErrWriterCrash = errors.New("writer crash")
-	// ErrDuplicateCustomer reports an unexpected duplicate sink write.
+	// ErrDuplicateCustomer 는 예상하지 못한 중복 sink write를 나타낸다.
 	ErrDuplicateCustomer = errors.New("duplicate customer")
-	// ErrInvalidCheckpoint reports corrupt checkpoint state.
+	// ErrInvalidCheckpoint 는 손상된 checkpoint 상태를 나타낸다.
 	ErrInvalidCheckpoint = errors.New("invalid checkpoint")
-	// ErrRunInProgress reports concurrent mutation of the shared demo stores.
+	// ErrRunInProgress 는 공유 데모 store의 동시 변경을 나타낸다.
 	ErrRunInProgress = errors.New("run in progress")
-	// ErrNotLeader reports an operation attempted without leadership.
+	// ErrNotLeader 는 leadership 없이 작업을 시도했음을 나타낸다.
 	ErrNotLeader = errors.New("not leader")
-	// ErrInvalidRunID reports a blank or malformed run identifier.
+	// ErrInvalidRunID 는 비어 있거나 형식이 잘못된 run identifier를 나타낸다.
 	ErrInvalidRunID = errors.New("invalid run id")
-	// ErrInvalidCrashAfter reports malformed crash injection configuration.
+	// ErrInvalidCrashAfter 는 형식이 잘못된 crash injection 설정을 나타낸다.
 	ErrInvalidCrashAfter = errors.New("invalid crash_after_new_writes")
 )
 
-// FailureScenario describes deterministic per-customer behavior.
+// FailureScenario 는 customer별 결정적 동작을 설명한다.
 type FailureScenario string
 
 const (
-	// ScenarioSuccess migrates without injected failure.
+	// ScenarioSuccess 는 실패 주입 없이 migration한다.
 	ScenarioSuccess = FailureScenario("success")
-	// ScenarioTransientOnce fails once, then succeeds on retry.
+	// ScenarioTransientOnce 는 한 번 실패한 뒤 retry에서 성공한다.
 	ScenarioTransientOnce FailureScenario = "transient_once"
-	// ScenarioPermanent always moves the customer to the dead-letter store.
+	// ScenarioPermanent 는 항상 customer를 dead-letter store로 보낸다.
 	ScenarioPermanent FailureScenario = "permanent"
 )
 
-// CustomerRecord is one source customer fixture.
+// CustomerRecord 는 source customer fixture 하나다.
 type CustomerRecord struct {
 	Index    int
 	ID       string
@@ -104,7 +104,7 @@ type CustomerRecord struct {
 	Reason   string
 }
 
-// MigratedCustomer is the internal migrated-customer sink value.
+// MigratedCustomer 는 내부 migrated-customer sink 값이다.
 type MigratedCustomer struct {
 	ID       string `json:"id"`
 	Email    string `json:"-"`
@@ -112,26 +112,26 @@ type MigratedCustomer struct {
 	Attempts int    `json:"attempts"`
 }
 
-// Checkpoint stores the next source index to read.
+// Checkpoint 는 다음으로 읽을 source index를 저장한다.
 type Checkpoint struct {
 	NextIndex int `json:"next_index"`
 }
 
-// DeadLetter records a permanently skipped customer.
+// DeadLetter 는 영구적으로 건너뛴 customer를 기록한다.
 type DeadLetter struct {
 	CustomerID string `json:"customer_id"`
 	Reason     string `json:"reason"`
 	Attempts   int    `json:"attempts"`
 }
 
-// Stores groups the shared in-memory batch stores.
+// Stores 는 공유 in-memory batch store들을 묶는다.
 type Stores struct {
 	Checkpoints *RecordingCheckpointStore
 	Sink        *CustomerSink
 	DeadLetters *DeadLetterStore
 }
 
-// NewStores creates empty in-memory stores for one demo process.
+// NewStores 는 데모 process 하나를 위한 빈 in-memory store들을 만든다.
 func NewStores() *Stores {
 	return &Stores{
 		Checkpoints: NewRecordingCheckpointStore(),
@@ -156,7 +156,7 @@ func (s *Stores) normalize() *Stores {
 	return s
 }
 
-// RunOptions configures one batch run.
+// RunOptions 는 batch run 하나를 설정한다.
 type RunOptions struct {
 	RunID               string
 	Trigger             string
@@ -165,7 +165,7 @@ type RunOptions struct {
 	BeforeWrite         func(context.Context)
 }
 
-// RunResponse is the public run projection returned by HTTP handlers.
+// RunResponse 는 HTTP handler가 반환하는 공개 run 프로젝션이다.
 type RunResponse struct {
 	RunID         string       `json:"run_id"`
 	Trigger       string       `json:"trigger"`
@@ -192,7 +192,7 @@ func (r RunResponse) String() string {
 	return string(data)
 }
 
-// Summary captures stable run counters.
+// Summary 는 안정적인 run counter를 담는다.
 type Summary struct {
 	ReadCount          int  `json:"read_count"`
 	WriteCount         int  `json:"write_count"`
@@ -204,7 +204,7 @@ type Summary struct {
 	Failure            bool `json:"failure"`
 }
 
-// ReportNode is a timestamp-free batch report projection.
+// ReportNode 는 timestamp를 제거한 batch report 프로젝션이다.
 type ReportNode struct {
 	Name        string       `json:"name"`
 	Status      batch.Status `json:"status"`
@@ -219,7 +219,7 @@ type ReportNode struct {
 	EndedAt     string       `json:"-"`
 }
 
-// RunBatch executes one customer migration batch run.
+// RunBatch 는 customer migration batch run 하나를 실행한다.
 func RunBatch(ctx context.Context, options RunOptions) (RunResponse, error) {
 	ctx = normalizeContext(ctx)
 	stores := options.Stores.normalize()
@@ -432,18 +432,18 @@ func failedPhaseFor(err error) string {
 	}
 }
 
-// RecordingCheckpointStore stores checkpoints behind a lock.
+// RecordingCheckpointStore 는 lock 뒤에 checkpoint를 저장한다.
 type RecordingCheckpointStore struct {
 	mu     sync.RWMutex
 	values map[string]Checkpoint
 }
 
-// NewRecordingCheckpointStore creates an empty checkpoint store.
+// NewRecordingCheckpointStore 는 빈 checkpoint store를 만든다.
 func NewRecordingCheckpointStore() *RecordingCheckpointStore {
 	return &RecordingCheckpointStore{values: make(map[string]Checkpoint)}
 }
 
-// Load returns the checkpoint for key when present.
+// Load 는 key에 해당하는 checkpoint가 있으면 반환한다.
 func (s *RecordingCheckpointStore) Load(ctx context.Context, key string) (any, bool, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, false, err
@@ -457,7 +457,7 @@ func (s *RecordingCheckpointStore) Load(ctx context.Context, key string) (any, b
 	return checkpoint, ok, nil
 }
 
-// Save stores a checkpoint for key.
+// Save 는 key에 대한 checkpoint를 저장한다.
 func (s *RecordingCheckpointStore) Save(ctx context.Context, key string, checkpoint any) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -475,7 +475,7 @@ func (s *RecordingCheckpointStore) Save(ctx context.Context, key string, checkpo
 	return nil
 }
 
-// Snapshot returns a typed defensive checkpoint snapshot.
+// Snapshot 은 타입이 보존된 defensive checkpoint snapshot을 반환한다.
 func (s *RecordingCheckpointStore) Snapshot(key string) (Checkpoint, bool) {
 	if s == nil {
 		return Checkpoint{}, false
@@ -486,7 +486,7 @@ func (s *RecordingCheckpointStore) Snapshot(key string) (Checkpoint, bool) {
 	return checkpoint, ok
 }
 
-// CustomerSink stores migrated customers idempotently.
+// CustomerSink 는 migration된 customer를 idempotent하게 저장한다.
 type CustomerSink struct {
 	mu       sync.RWMutex
 	byID     map[string]MigratedCustomer
@@ -494,12 +494,12 @@ type CustomerSink struct {
 	newCount int
 }
 
-// NewCustomerSink creates an empty migrated customer sink.
+// NewCustomerSink 는 빈 migrated customer sink를 만든다.
 func NewCustomerSink() *CustomerSink {
 	return &CustomerSink{byID: make(map[string]MigratedCustomer)}
 }
 
-// Put stores customer if the ID has not already been migrated.
+// Put 은 해당 ID가 아직 migration되지 않았을 때만 customer를 저장한다.
 func (s *CustomerSink) Put(customer MigratedCustomer) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -512,7 +512,7 @@ func (s *CustomerSink) Put(customer MigratedCustomer) bool {
 	return true
 }
 
-// IDs returns migrated customer IDs in insertion order.
+// IDs 는 migration된 customer ID를 삽입 순서대로 반환한다.
 func (s *CustomerSink) IDs() []string {
 	if s == nil {
 		return nil
@@ -522,7 +522,7 @@ func (s *CustomerSink) IDs() []string {
 	return copyStrings(s.order)
 }
 
-// NewCount returns the number of newly inserted customers.
+// NewCount 는 새로 삽입된 customer 수를 반환한다.
 func (s *CustomerSink) NewCount() int {
 	if s == nil {
 		return 0
@@ -532,19 +532,19 @@ func (s *CustomerSink) NewCount() int {
 	return s.newCount
 }
 
-// DeadLetterStore stores unique dead letters by customer ID.
+// DeadLetterStore 는 customer ID 기준으로 고유한 dead letter를 저장한다.
 type DeadLetterStore struct {
 	mu    sync.RWMutex
 	byID  map[string]DeadLetter
 	order []string
 }
 
-// NewDeadLetterStore creates an empty dead-letter store.
+// NewDeadLetterStore 는 빈 dead-letter store를 만든다.
 func NewDeadLetterStore() *DeadLetterStore {
 	return &DeadLetterStore{byID: make(map[string]DeadLetter)}
 }
 
-// Record stores one dead letter if it has not already been recorded.
+// Record 는 아직 기록되지 않은 경우 dead letter 하나를 저장한다.
 func (s *DeadLetterStore) Record(letter DeadLetter) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -555,7 +555,7 @@ func (s *DeadLetterStore) Record(letter DeadLetter) {
 	s.order = append(s.order, letter.CustomerID)
 }
 
-// Snapshot returns dead letters in insertion order.
+// Snapshot 은 dead letter를 삽입 순서대로 반환한다.
 func (s *DeadLetterStore) Snapshot() []DeadLetter {
 	if s == nil {
 		return nil

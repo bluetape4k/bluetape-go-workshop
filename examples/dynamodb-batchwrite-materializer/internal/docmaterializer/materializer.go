@@ -1,4 +1,4 @@
-// Package docmaterializer demonstrates DynamoDB batch-write materialization.
+// Package docmaterializer 는 DynamoDB batch-write materialization을 보여준다.
 package docmaterializer
 
 import (
@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	// ErrInvalidEvent reports a document event that cannot be indexed.
+	// ErrInvalidEvent 는 index할 수 없는 document event를 나타낸다.
 	ErrInvalidEvent = errors.New("docmaterializer: invalid event")
-	// ErrRetryExhausted reports that DynamoDB returned unprocessed items after retry budget exhaustion.
+	// ErrRetryExhausted 는 retry 예산을 모두 쓴 뒤에도 DynamoDB가 unprocessed item을 반환했음을 나타낸다.
 	ErrRetryExhausted = errors.New("docmaterializer: batch write retry exhausted")
 )
 
-// DocumentEvent is the application event projected into the search index table.
+// DocumentEvent 는 search index table로 projection되는 application event다.
 type DocumentEvent struct {
 	DocumentID string `json:"document_id"`
 	TenantID   string `json:"tenant_id"`
@@ -28,7 +28,7 @@ type DocumentEvent struct {
 	BodyHash   string `json:"body_hash"`
 }
 
-// Preview describes the write shape without contacting DynamoDB.
+// Preview 는 DynamoDB에 접속하지 않고 write shape를 설명한다.
 type Preview struct {
 	Table          string   `json:"table"`
 	EventCount     int      `json:"event_count"`
@@ -41,7 +41,7 @@ type Preview struct {
 	ExampleEventID string   `json:"example_event_id"`
 }
 
-// WriteReport summarizes one materialization run.
+// WriteReport 는 materialization run 하나를 요약한다.
 type WriteReport struct {
 	Table     string `json:"table"`
 	Submitted int    `json:"submitted"`
@@ -51,14 +51,14 @@ type WriteReport struct {
 	Exhausted bool   `json:"exhausted,omitempty"`
 }
 
-// Materializer writes document index projections to DynamoDB.
+// Materializer 는 document index projection을 DynamoDB에 쓴다.
 type Materializer struct {
 	Table       string
 	MaxAttempts int
 	Backoff     batchwrite.Backoff
 }
 
-// NewMaterializer creates a DynamoDB document materializer.
+// NewMaterializer 는 DynamoDB document materializer를 만든다.
 func NewMaterializer(table string, options ...Option) (Materializer, error) {
 	m := Materializer{
 		Table:       table,
@@ -86,24 +86,24 @@ func NewMaterializer(table string, options ...Option) (Materializer, error) {
 	return m, nil
 }
 
-// Option configures a Materializer.
+// Option 은 Materializer를 설정한다.
 type Option func(*Materializer)
 
-// WithMaxAttempts sets the WriteAll retry budget.
+// WithMaxAttempts 는 WriteAll retry 예산을 설정한다.
 func WithMaxAttempts(maxAttempts int) Option {
 	return func(m *Materializer) {
 		m.MaxAttempts = maxAttempts
 	}
 }
 
-// WithBackoff sets the delay before WriteAll retries unprocessed items.
+// WithBackoff 는 WriteAll이 unprocessed item을 retry하기 전 대기 시간을 설정한다.
 func WithBackoff(backoff batchwrite.Backoff) Option {
 	return func(m *Materializer) {
 		m.Backoff = backoff
 	}
 }
 
-// NewPreview builds an inspectable local preview for README and go run output.
+// NewPreview 는 README와 go run 출력에서 확인할 수 있는 local preview를 만든다.
 func NewPreview(table string, events []DocumentEvent) (Preview, error) {
 	m, err := NewMaterializer(table)
 	if err != nil {
@@ -136,7 +136,7 @@ func NewPreview(table string, events []DocumentEvent) (Preview, error) {
 	}, nil
 }
 
-// Write writes all document index projections through batchwrite.WriteAll.
+// Write 는 모든 document index projection을 batchwrite.WriteAll로 기록한다.
 func (m Materializer) Write(ctx context.Context, client batchwrite.Client, events []DocumentEvent) (WriteReport, error) {
 	requests, err := m.RequestItems(events)
 	if err != nil {
@@ -167,7 +167,7 @@ func (m Materializer) Write(ctx context.Context, client batchwrite.Client, event
 	return report, fmt.Errorf("write document index to DynamoDB: %w", err)
 }
 
-// RequestItems maps domain events to the AWS SDK request shape.
+// RequestItems 는 domain event를 AWS SDK request shape로 매핑한다.
 func (m Materializer) RequestItems(events []DocumentEvent) (map[string][]types.WriteRequest, error) {
 	if m.Table == "" {
 		return nil, fmt.Errorf("%w: table is required", ErrInvalidEvent)
@@ -198,7 +198,7 @@ func (m Materializer) RequestItems(events []DocumentEvent) (map[string][]types.W
 	return map[string][]types.WriteRequest{m.Table: requests}, nil
 }
 
-// SampleEvents returns enough events to demonstrate DynamoDB 25-item chunking.
+// SampleEvents 는 DynamoDB 25-item chunking을 보여주기에 충분한 event를 반환한다.
 func SampleEvents() []DocumentEvent {
 	events := make([]DocumentEvent, 0, 30)
 	for i := 1; i <= 30; i++ {

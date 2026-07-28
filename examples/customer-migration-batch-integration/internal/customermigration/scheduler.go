@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// RunScheduler executes one scheduled tick per received tick value.
+// RunScheduler 는 수신한 tick 값마다 scheduled tick 하나를 실행한다.
 func RunScheduler(ctx context.Context, service *Service, ticks <-chan time.Time, runIDPrefix string) error {
 	if service == nil {
 		return fmt.Errorf("service must not be nil")

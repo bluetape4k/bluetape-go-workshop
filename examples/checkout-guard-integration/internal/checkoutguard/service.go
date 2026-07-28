@@ -1,4 +1,4 @@
-// Package checkoutguard implements the utility-composed checkout guard example.
+// Package checkoutguard 는 여러 유틸리티를 조합한 checkout guard 예제를 구현한다.
 package checkoutguard
 
 import (
@@ -18,13 +18,13 @@ import (
 )
 
 const (
-	// DefaultIssuer is the demo issuer expected by the checkout guard.
+	// DefaultIssuer 는 checkout guard가 기대하는 데모 issuer다.
 	DefaultIssuer = "checkout-guard-integration"
-	// AccessAudience is the audience required for checkout access tokens.
+	// AccessAudience 는 checkout access token에 필요한 audience다.
 	AccessAudience = "checkout-api"
-	// TokenUseAccess marks tokens accepted by the checkout guard.
+	// TokenUseAccess 는 checkout guard가 허용하는 token 용도를 표시한다.
 	TokenUseAccess = "access"
-	// RequiredScope is the scope required by guarded checkout submissions.
+	// RequiredScope 는 보호되는 checkout 제출에 필요한 scope다.
 	RequiredScope = "checkout:submit"
 
 	defaultRole        = "customer"
@@ -37,23 +37,23 @@ const (
 )
 
 var (
-	// ErrMissingToken reports a missing bearer token.
+	// ErrMissingToken 은 bearer token이 누락되었음을 나타낸다.
 	ErrMissingToken = errors.New("checkoutguard: missing token")
-	// ErrInvalidToken reports a malformed or unverifiable bearer token.
+	// ErrInvalidToken 은 형식이 잘못되었거나 검증할 수 없는 bearer token을 나타낸다.
 	ErrInvalidToken = errors.New("checkoutguard: invalid token")
-	// ErrExpiredToken reports a verified token that is past expiration.
+	// ErrExpiredToken 은 검증은 되었지만 만료 시간이 지난 token을 나타낸다.
 	ErrExpiredToken = errors.New("checkoutguard: expired token")
-	// ErrInvalidClaims reports a verified token with the wrong claim contract.
+	// ErrInvalidClaims 는 검증된 token의 claim 계약이 기대와 다름을 나타낸다.
 	ErrInvalidClaims = errors.New("checkoutguard: invalid claims")
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("checkoutguard: invalid request")
-	// ErrInvalidMoney reports invalid money values or currency mismatches.
+	// ErrInvalidMoney 는 money 값이 유효하지 않거나 currency가 맞지 않음을 나타낸다.
 	ErrInvalidMoney = errors.New("checkoutguard: invalid money")
-	// ErrRuleDenied reports a local checkout eligibility rule denial.
+	// ErrRuleDenied 는 로컬 checkout eligibility rule이 요청을 거부했음을 나타낸다.
 	ErrRuleDenied = errors.New("checkoutguard: rule denied")
-	// ErrDuplicateSubmission reports a repeated or probably repeated idempotency key.
+	// ErrDuplicateSubmission 은 반복되었거나 반복되었을 가능성이 있는 idempotency key를 나타낸다.
 	ErrDuplicateSubmission = errors.New("checkoutguard: duplicate submission")
-	// ErrGuard reports unexpected guard setup or runtime failures.
+	// ErrGuard 는 예상하지 못한 guard 구성 또는 런타임 실패를 나타낸다.
 	ErrGuard = errors.New("checkoutguard: guard error")
 )
 
@@ -61,36 +61,36 @@ type stringGenerator interface {
 	NextString() (string, error)
 }
 
-// Decision is the public admission decision.
+// Decision 은 공개 admission 판단값이다.
 type Decision string
 
 const (
-	// DecisionAdmit means the idempotency key was definitely not present before insertion.
+	// DecisionAdmit 은 삽입 전 idempotency key가 확실히 없었다는 뜻이다.
 	DecisionAdmit Decision = "admit"
-	// DecisionProbablySeen means the idempotency key might have been seen before.
+	// DecisionProbablySeen 은 idempotency key가 이전에 관측되었을 수 있다는 뜻이다.
 	DecisionProbablySeen Decision = "probably_seen"
 )
 
 const (
-	// ReasonDefinitelyNew describes the no-false-negative Bloom filter path.
+	// ReasonDefinitelyNew 는 false negative가 없는 Bloom filter 경로를 설명한다.
 	ReasonDefinitelyNew = "definitely_new"
-	// ReasonMightBeDuplicate describes the possible duplicate or false-positive path.
+	// ReasonMightBeDuplicate 은 중복 가능성 또는 false positive 경로를 설명한다.
 	ReasonMightBeDuplicate = "might_be_duplicate_or_false_positive"
 )
 
-// RuleStatus is the public status for local checkout rules.
+// RuleStatus 는 로컬 checkout rule의 공개 상태값이다.
 type RuleStatus string
 
 const (
-	// RuleAccepted means a rule applied and changed or approved the checkout.
+	// RuleAccepted 는 rule이 적용되어 checkout을 변경했거나 승인했다는 뜻이다.
 	RuleAccepted RuleStatus = "accepted"
-	// RuleSkipped means a rule did not apply.
+	// RuleSkipped 는 rule이 적용 대상이 아니었다는 뜻이다.
 	RuleSkipped RuleStatus = "skipped"
-	// RuleDenied means a rule blocked the checkout.
+	// RuleDenied 는 rule이 checkout을 차단했다는 뜻이다.
 	RuleDenied RuleStatus = "denied"
 )
 
-// Config holds service wiring for the demo guard.
+// Config 는 데모 guard를 구성하는 서비스 연결값을 보관한다.
 type Config struct {
 	issuer                   string
 	accessAudience           string
@@ -104,10 +104,10 @@ type Config struct {
 	scenarioName             string
 }
 
-// Option customizes Config before the service is constructed.
+// Option 은 서비스 생성 전에 Config를 조정한다.
 type Option func(*Config)
 
-// WithClock sets the service clock used for token issue and parse checks.
+// WithClock 은 token 발급과 parsing 검증에 사용할 서비스 시계를 설정한다.
 func WithClock(clock func() time.Time) Option {
 	return func(cfg *Config) {
 		if clock != nil {
@@ -116,14 +116,14 @@ func WithClock(clock func() time.Time) Option {
 	}
 }
 
-// WithSecret sets the fixed HMAC demo secret.
+// WithSecret 은 고정 HMAC 데모 secret을 설정한다.
 func WithSecret(secret []byte) Option {
 	return func(cfg *Config) {
 		cfg.secret = append([]byte(nil), secret...)
 	}
 }
 
-// WithIDGenerator sets the ID generator used for sessions, JWT IDs, requests, and orders.
+// WithIDGenerator 는 session, JWT ID, request, order에 사용할 ID generator를 설정한다.
 func WithIDGenerator(generator stringGenerator) Option {
 	return func(cfg *Config) {
 		if generator != nil {
@@ -132,7 +132,7 @@ func WithIDGenerator(generator stringGenerator) Option {
 	}
 }
 
-// WithBloomConfig sets the expected Bloom filter size and target false-positive probability.
+// WithBloomConfig 는 예상 Bloom filter 크기와 목표 false-positive probability를 설정한다.
 func WithBloomConfig(expectedInsertions uint64, falsePositiveProbability float64) Option {
 	return func(cfg *Config) {
 		if expectedInsertions > 0 {
@@ -144,7 +144,7 @@ func WithBloomConfig(expectedInsertions uint64, falsePositiveProbability float64
 	}
 }
 
-// Service owns token issue, token verification, money rules, and Bloom admission.
+// Service 는 token 발급, token 검증, money rule, Bloom admission을 소유한다.
 type Service struct {
 	provider       *btjwt.Provider
 	idGenerator    stringGenerator
@@ -158,7 +158,7 @@ type Service struct {
 	filter         probabilistic.BloomFilter[string]
 }
 
-// TokenRequest is the local demo access-token issue request.
+// TokenRequest 는 로컬 데모 access-token 발급 요청이다.
 type TokenRequest struct {
 	Subject    string   `json:"subject"`
 	Role       string   `json:"role"`
@@ -166,7 +166,7 @@ type TokenRequest struct {
 	TTLSeconds int      `json:"ttl_seconds"`
 }
 
-// TokenResponse is the local demo access-token issue response.
+// TokenResponse 는 로컬 데모 access-token 발급 응답이다.
 type TokenResponse struct {
 	TokenType        string `json:"token_type"`
 	ExpiresInSeconds int    `json:"expires_in_seconds"`
@@ -174,7 +174,7 @@ type TokenResponse struct {
 	SessionID        string `json:"session_id"`
 }
 
-// CheckoutRequest is the protected checkout submission request.
+// CheckoutRequest 는 보호되는 checkout 제출 요청이다.
 type CheckoutRequest struct {
 	CheckoutID     string            `json:"checkout_id"`
 	IdempotencyKey string            `json:"idempotency_key"`
@@ -184,7 +184,7 @@ type CheckoutRequest struct {
 	Items          []LineItemRequest `json:"items"`
 }
 
-// LineItemRequest is one checkout line.
+// LineItemRequest 는 checkout line 하나를 나타낸다.
 type LineItemRequest struct {
 	LineID    string `json:"line_id"`
 	SKU       string `json:"sku"`
@@ -194,7 +194,7 @@ type LineItemRequest struct {
 	Category  string `json:"category"`
 }
 
-// CheckoutResponse is the accepted checkout projection returned to callers.
+// CheckoutResponse 는 호출자에게 반환되는 승인된 checkout 프로젝션이다.
 type CheckoutResponse struct {
 	CheckoutID string            `json:"checkout_id"`
 	RequestID  string            `json:"request_id"`
@@ -206,7 +206,7 @@ type CheckoutResponse struct {
 	Rules      []RuleDecision    `json:"rules"`
 }
 
-// AdmissionDecision is the stable public Bloom decision projection.
+// AdmissionDecision 은 안정적인 공개 Bloom 판단 프로젝션이다.
 type AdmissionDecision struct {
 	IdempotencyKey string      `json:"idempotency_key"`
 	Scenario       string      `json:"scenario"`
@@ -216,7 +216,7 @@ type AdmissionDecision struct {
 	Stats          FilterStats `json:"stats"`
 }
 
-// FilterStats reports approximate Bloom filter state.
+// FilterStats 는 대략적인 Bloom filter 상태를 보고한다.
 type FilterStats struct {
 	ExpectedInsertions                 uint64  `json:"expected_insertions"`
 	TargetFalsePositiveProbability     float64 `json:"target_false_positive_probability"`
@@ -228,7 +228,7 @@ type FilterStats struct {
 	ProbabilisticFalsePositivePossible bool    `json:"probabilistic_false_positive_possible"`
 }
 
-// PricingSummary reports rounded money totals for one checkout currency.
+// PricingSummary 는 하나의 checkout currency에 대해 반올림된 money 합계를 보고한다.
 type PricingSummary struct {
 	Currency      string      `json:"currency"`
 	Subtotal      MoneyValue  `json:"subtotal"`
@@ -238,7 +238,7 @@ type PricingSummary struct {
 	Lines         []LineQuote `json:"lines"`
 }
 
-// LineQuote reports rounded line totals.
+// LineQuote 는 반올림된 line 합계를 보고한다.
 type LineQuote struct {
 	LineID    string     `json:"line_id"`
 	SKU       string     `json:"sku"`
@@ -247,7 +247,7 @@ type LineQuote struct {
 	LineTotal MoneyValue `json:"line_total"`
 }
 
-// RuleDecision is a stable public local-rule projection.
+// RuleDecision 은 안정적인 공개 local-rule 프로젝션이다.
 type RuleDecision struct {
 	Name     string      `json:"name"`
 	LineID   string      `json:"line_id,omitempty"`
@@ -257,13 +257,13 @@ type RuleDecision struct {
 	Reason   string      `json:"reason,omitempty"`
 }
 
-// MoneyValue is the JSON-safe money representation.
+// MoneyValue 는 JSON에 안전하게 담을 수 있는 money 표현이다.
 type MoneyValue struct {
 	Amount   string `json:"amount"`
 	Currency string `json:"currency"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적인 공개 오류 형식이다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
@@ -276,7 +276,7 @@ type tokenClaims struct {
 	sessionID string
 }
 
-// NewService builds the demo service with deterministic local JWT and Bloom defaults.
+// NewService 는 결정적인 로컬 JWT와 Bloom 기본값으로 데모 서비스를 만든다.
 func NewService(options ...Option) (*Service, error) {
 	cfg, err := defaultConfig()
 	if err != nil {
@@ -320,7 +320,7 @@ func NewService(options ...Option) (*Service, error) {
 	}, nil
 }
 
-// IssueToken issues a local demo access token for the checkout guard.
+// IssueToken 은 checkout guard에 사용할 로컬 데모 access token을 발급한다.
 func (s *Service) IssueToken(request TokenRequest) (TokenResponse, error) {
 	if err := validateTokenRequest(request); err != nil {
 		return TokenResponse{}, err
@@ -357,7 +357,7 @@ func (s *Service) IssueToken(request TokenRequest) (TokenResponse, error) {
 	}, nil
 }
 
-// GuardCheckout verifies claims, prices the checkout, and admits the idempotency key.
+// GuardCheckout 은 claim을 검증하고 checkout 가격을 계산한 뒤 idempotency key를 admission 처리한다.
 func (s *Service) GuardCheckout(authorization string, request CheckoutRequest) (CheckoutResponse, error) {
 	claims, err := s.verifyAuthorization(authorization)
 	if err != nil {
@@ -626,7 +626,7 @@ func applyTaxRule(taxBase money.Money, item LineItemRequest, region string) (mon
 	return tax, rule, nil
 }
 
-// NewRouter creates the Gin router for the checkout guard API.
+// NewRouter 는 checkout guard API용 Gin router를 만든다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())
