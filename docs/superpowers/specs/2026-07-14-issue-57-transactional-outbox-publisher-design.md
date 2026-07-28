@@ -299,102 +299,87 @@ coordinate 변경 후 full-size PNG로 inspect한다. arrowhead clearance는 ben
 
 ## Testing
 
-Focused TDD proves:
+focused TDD는 다음을 증명한다.
 
-- constructor, zero-value, nil database, identifier, total, timestamp, and
-  context validation;
-- atomic order/outbox commit and rollback on order conflict and an outbox
-  identity conflict that occurs after the order insert against real PostgreSQL;
-- successful `RunOnce`, transient failure, time-controlled retry, duplicate
-  attempts, stable `EventID`/`IdempotencyKey`, max-attempt dead letter, and
-  inspectable errors with `RecordingPublisher`;
-- `PublisherFunc` caller cancellation without retry/dead-letter conversion;
-- continuous `Run` cancellation, joined goroutine, and no late publish;
-- PostgreSQL plus Redis readiness, official adapter publish, all documented
-  stream fields, valid `entry_json`, and deterministic cleanup; and
-- runnable configuration, output shape, error propagation, and resource closure
-  without opening a public listener.
+- constructor, zero-value, nil database, identifier, total, timestamp, context validation
+- real PostgreSQL에서 order insert 이후 발생하는 order conflict 및 outbox identity conflict에 대한 atomic
+  order/outbox commit과 rollback
+- `RecordingPublisher`를 사용한 successful `RunOnce`, transient failure, time-controlled retry,
+  duplicate attempt, stable `EventID`/`IdempotencyKey`, max-attempt dead letter, inspectable error
+- retry/dead-letter conversion 없는 `PublisherFunc` caller cancellation
+- continuous `Run` cancellation, joined goroutine, late publish 없음
+- PostgreSQL plus Redis readiness, official adapter publish, 모든 documented stream field, valid
+  `entry_json`, deterministic cleanup
+- public listener를 열지 않는 runnable configuration, output shape, error propagation, resource closure
 
-Concurrency, retry, and lifecycle tests run under `go test -race`. No test uses
-unbounded sleeps; injected clocks and bounded channels coordinate state. The
-validation order is focused package tests, focused race tests, the sequential
-container integration package, a configured `go run` smoke check when local
-services are available, diagram audits, `git diff --check`, and repository-wide
-`make ci`.
+concurrency, retry, lifecycle test는 `go test -race` 아래에서 실행한다. 어떤 test도 unbounded sleep을
+사용하지 않는다. injected clock과 bounded channel이 state를 조율한다. validation order는 focused package
+test, focused race test, sequential container integration package, local service를 사용할 수 있을 때의
+configured `go run` smoke check, diagram audit, `git diff --check`, repository-wide `make ci`다.
 
 ## README Contract
 
-`README.md` and `README.ko.md` include the language switch, package lesson,
-architecture and sequence diagrams, prerequisites, exact run command, expected
-JSON and stream fields, focused test commands, and production boundaries. They
-state:
+`README.md`와 `README.ko.md`는 language switch, package lesson, architecture 및 sequence diagram,
+prerequisite, exact run command, expected JSON 및 stream field, focused test command, production
+boundary를 포함한다. 이들은 다음을 명시한다.
 
-- order and outbox commit atomically, but Redis publication is asynchronous;
-- delivery is at-least-once, not exactly-once;
-- consumers deduplicate with stable event identity;
-- replay can duplicate delivery and requires authorization/audit policy;
-- dead-letter and poison-message automation are not implemented;
-- Redis is a transport, not the audit source of truth; and
-- PostgreSQL/Redis clients and relay lifecycle belong to the application.
+- order와 outbox는 atomically commit되지만 Redis publication은 asynchronous다.
+- delivery는 exactly-once가 아니라 at-least-once다.
+- consumer는 stable event identity로 deduplicate한다.
+- replay는 delivery를 duplicate할 수 있으며 authorization/audit policy가 필요하다.
+- dead-letter 및 poison-message automation은 구현하지 않는다.
+- Redis는 audit source of truth가 아니라 transport다.
+- PostgreSQL/Redis client와 relay lifecycle은 application에 속한다.
 
-The prerequisites include pinned PostgreSQL and Redis container commands,
-bounded readiness checks, environment configuration, and rerun guidance that
-uses a new order/command identity instead of deleting or rewriting a committed
-record.
+prerequisite에는 pinned PostgreSQL 및 Redis container command, bounded readiness check, environment
+configuration, committed record를 삭제하거나 rewrite하는 대신 새 order/command identity를 사용하는 rerun
+guidance가 포함된다.
 
-The root README locale pair adds one navigation row and a short lesson section
-only if the existing root structure uses per-example detail. It does not copy
-the full package README.
+root README locale pair는 기존 root structure가 per-example detail을 사용할 때만 navigation row 하나와 짧은
+lesson section을 추가한다. full package README를 복사하지 않는다.
 
 ## Compatibility, Migration, and Rollback
 
-The example adds only workshop files and uses dependencies already present in
-`go.mod`: bluetape-go v0.18.0, pgx, and go-redis. It changes no public library
-API, database owned by another example, module registration, or workflow.
-Schemas are example-prefixed and created idempotently.
+example은 workshop file만 추가하고 `go.mod`에 이미 있는 dependency인 bluetape-go v0.18.0, pgx,
+go-redis를 사용한다. public library API, 다른 example이 소유한 database, module registration, workflow를
+변경하지 않는다. schema는 example-prefixed이며 idempotently 생성된다.
 
-Rollback is deletion of the example, root navigation entries, paired diagrams,
-and durable workflow artifacts. No production migration exists. An existing
-example database can drop `transactional_outbox_orders` and the configured
-outbox table only when it is known to be disposable; the README does not publish
-destructive SQL as a normal rollback command.
+rollback은 example, root navigation entry, paired diagram, durable workflow artifact를 삭제하는 것이다.
+production migration은 없다. 기존 example database가 disposable임이 알려진 경우에만
+`transactional_outbox_orders`와 configured outbox table을 drop할 수 있다. README는 destructive SQL을
+normal rollback command로 게시하지 않는다.
 
 ## Acceptance Criteria and DoD
 
-- Order and outbox entry are committed in one PostgreSQL transaction and roll
-  back together on every pre-commit failure.
-- The relay proves success, transient failure, retry, duplicate attempt, stable
-  event/idempotency identity, cancellation, dead letter, and clean shutdown.
-- Redis integration uses `audit/sqloutbox/redisstreams`, verifies every
-  documented field plus `entry_json`, and never hand-writes publish mapping.
-- PostgreSQL and Redis integration is sequential, bounded, readiness-proved,
-  and deterministically cleaned up.
-- English and Korean README files explain the run path, expected record,
-  at-least-once delivery, consumer deduplication, replay, poison-message limits,
-  and ownership boundaries; root navigation links the example.
-- Architecture and sequence SVG/PNG pairs pass source, render, audit, marker,
-  geometry, endpoint, mixed-corner, exposure, and full-size visual gates.
-- Focused tests, race validation, runnable smoke evidence where services are
-  available, `make ci`, Type A verification/review, lesson, PR, and CI complete
-  with P0=0 and P1=0.
-- The workflow stops at a green PR and requests explicit user approval before
-  merge. After approval, rebase merge, local sync, and owned-worktree cleanup
-  are verified separately.
+- order와 outbox entry는 하나의 PostgreSQL transaction에서 commit되고 모든 pre-commit failure에서 함께
+  rollback된다.
+- relay는 success, transient failure, retry, duplicate attempt, stable event/idempotency identity,
+  cancellation, dead letter, clean shutdown을 증명한다.
+- Redis integration은 `audit/sqloutbox/redisstreams`를 사용하고 모든 documented field와 `entry_json`을
+  검증하며 publish mapping을 hand-write하지 않는다.
+- PostgreSQL 및 Redis integration은 sequential, bounded, readiness-proved이며 deterministic하게 cleanup된다.
+- English 및 Korean README file은 run path, expected record, at-least-once delivery, consumer
+  deduplication, replay, poison-message limit, ownership boundary를 설명한다. root navigation은 example을
+  link한다.
+- architecture 및 sequence SVG/PNG pair는 source, render, audit, marker, geometry, endpoint,
+  mixed-corner, exposure, full-size visual gate를 통과한다.
+- focused test, race validation, service가 available할 때의 runnable smoke evidence, `make ci`,
+  Type A verification/review, lesson, PR, CI가 P0=0/P1=0으로 완료된다.
+- workflow는 green PR에서 멈추고 merge 전에 explicit user approval을 요청한다. approval 이후 rebase merge,
+  local sync, owned-worktree cleanup은 별도로 검증한다.
 
 ## Specification Review Record
 
-The installed-role review could not be dispatched because the active subagent
-interface does not expose the required `agent_type` field. Following the routing
-contract, the main session performed six isolated reviews of this exact spec and
-integrated their findings against the v0.18.0 `go doc`, tagged source, live issue,
-GNO evidence, and repository rules.
+active subagent interface가 required `agent_type` field를 노출하지 않아 installed-role review를 dispatch할
+수 없었다. routing contract에 따라 main session이 이 exact spec을 여섯 번 isolated review하고, v0.18.0
+`go doc`, tagged source, live issue, GNO evidence, repository rule에 맞춰 finding을 통합했다.
 
 | Lens | Result | Resolution |
 |---|---|---|
-| Performance | P0=0, P1=0, P2=1 | Kept the teaching batch at one record, bounded Redis inspection with `XRangeN`/`XRevRangeN`, and deferred production batch tuning to measured capacity. |
-| Stability | P0=0, P1=0 after repair | Added an exact successful batch invariant, shared injected clock for retry eligibility, claimed-record cancellation semantics, joined continuous-run shutdown, and fail-closed handling for stale pending rows. |
-| Security | P0=0, P1=0, P2=1 | Bounded author, identifiers, stream key, and timestamp parsing; prohibited endpoint interpolation and successful payload/error disclosure; retained a warning that diagnostic stderr is sensitive. |
-| Operator/Ops | P0=0, P1=0 | Defined readiness commands, idempotent partial-DDL recovery, durable-source ownership, dead-letter/replay limits, nonzero exits, and disposable rollback boundaries. |
-| Developer/API | P0=0, P1=0 after repair | Changed schema creation to service-owned store delegation, fixed the example-specific table, specified nil/zero/error behavior, and separated occurred-at from recorded-at ownership. |
-| User/caller | P0=0, P1=0, P2=1 | Added pinned container prerequisites, rerun identity guidance, expected output/field requirements, and explicit exactly-once, poison-message, replay, and consumer-deduplication warnings. |
-| Main integration | P0=0, P1=0 | All issue acceptance criteria map to a source-backed component, test, document, diagram gate, or explicit non-goal; no dependency, workflow, public API, or issue #68 scope leak remains. |
+| Performance | P0=0, P1=0, P2=1 | teaching batch를 record 하나로 유지하고, Redis inspection을 `XRangeN`/`XRevRangeN`으로 제한했으며, production batch tuning은 measured capacity로 미뤘다. |
+| Stability | P0=0, P1=0 after repair | exact successful batch invariant, retry eligibility용 shared injected clock, claimed-record cancellation semantic, joined continuous-run shutdown, stale pending row에 대한 fail-closed handling을 추가했다. |
+| Security | P0=0, P1=0, P2=1 | author, identifier, stream key, timestamp parsing을 bounded로 제한했다. endpoint interpolation과 successful payload/error disclosure를 금지했고 diagnostic stderr가 sensitive라는 warning을 유지했다. |
+| Operator/Ops | P0=0, P1=0 | readiness command, idempotent partial-DDL recovery, durable-source ownership, dead-letter/replay limit, nonzero exit, disposable rollback boundary를 정의했다. |
+| Developer/API | P0=0, P1=0 after repair | schema creation을 service-owned store delegation으로 바꾸고, example-specific table을 고정했으며, nil/zero/error behavior를 지정하고 occurred-at ownership과 recorded-at ownership을 분리했다. |
+| User/caller | P0=0, P1=0, P2=1 | pinned container prerequisite, rerun identity guidance, expected output/field requirement, 명시적인 exactly-once, poison-message, replay, consumer-deduplication warning을 추가했다. |
+| Main integration | P0=0, P1=0 | 모든 issue acceptance criterion이 source-backed component, test, document, diagram gate 또는 explicit non-goal에 mapping된다. dependency, workflow, public API, issue #68 scope leak는 남지 않았다. |
