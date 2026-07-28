@@ -509,7 +509,7 @@ git commit -m "feat: search prepared Japanese catalog terms"
 
 **Rollback/rerun point:** Unicode boundary가 exact space-delimited term matching을 강제하지 못하면 boundary-focused test를 추가하고, 진행 전에 spec의 prepared index encoding을 수정한다.
 
-### Task 4: Prove Shared Reuse and Add the Runnable Preview
+### Task 4: Shared Reuse 증명과 Runnable Preview 추가
 
 **Complexity:** Medium
 **Depends on:** Tasks 1-3
@@ -518,9 +518,9 @@ git commit -m "feat: search prepared Japanese catalog terms"
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 - Create: `examples/japanese-search-preparation/main.go`
 
-- [x] **Step 1: Add failing bounded concurrency and preview tests**
+- [x] **Step 1: 실패하는 bounded concurrency 및 preview test 추가**
 
-Use `concurrencytest.NewGoroutineStressTester` with 6 workers, 6 tasks, 3 rounds, and a 5-second timeout. Share one service. Every task must assert exact hit SKUs, JP-200 masked text, and every returned source span:
+`concurrencytest.NewGoroutineStressTester`를 worker 6개, task 6개, round 3개, 5초 timeout으로 사용한다. Service 하나를 공유한다. 모든 task는 exact hit SKU, JP-200 masked text, 반환된 모든 source span을 검증해야 한다.
 
 ```go
 func TestServiceSharedReuseUnderBoundedConcurrency(t *testing.T) {
@@ -568,17 +568,17 @@ func validateProducts(products []PreparedProduct) error {
 }
 ```
 
-Add `TestNewPreviewDocumentsScenario` asserting three products, three searches, one masked fixture, lifecycle/boundary notes, and exact focused normal/race commands.
+Product 세 개, search 세 개, masked fixture 하나, lifecycle/boundary note, exact focused normal/race command를 검증하는 `TestNewPreviewDocumentsScenario`를 추가한다.
 
-- [x] **Step 2: Run focused normal and race tests and capture RED**
+- [x] **Step 2: Focused normal 및 race test 실행 후 RED 기록**
 
-Expected: preview test FAIL before `NewPreview`; concurrency assertions may expose any shared-slice defect.
+기대값: `NewPreview` 전에는 preview test가 FAIL한다. Concurrency assertion은 shared-slice defect를 드러낼 수 있다.
 
-- [x] **Step 3: Implement Preview and CLI**
+- [x] **Step 3: Preview와 CLI 구현**
 
-`NewPreview` constructs one service from defaults, copies its products, evaluates fixed queries `"ランニング シューズ"`, `"保存 容器"`, and `"宇宙船"`, and returns deterministic JSON-friendly slices.
+`NewPreview`는 default로 service 하나를 구성하고 product를 copy한 뒤 fixed query `"ランニング シューズ"`, `"保存 容器"`, `"宇宙船"`를 평가하고 deterministic JSON-friendly slice를 반환한다.
 
-Create `main.go`:
+`main.go`를 만든다.
 
 ```go
 package main
@@ -592,7 +592,7 @@ func main() {
 }
 ```
 
-- [x] **Step 4: Run focused proof and validate CLI JSON**
+- [x] **Step 4: Focused proof 실행 및 CLI JSON 검증**
 
 ```bash
 go test -count=1 ./examples/japanese-search-preparation/...
@@ -601,7 +601,7 @@ go run ./examples/japanese-search-preparation >/tmp/japanese-search-preparation.
 python3 -m json.tool /tmp/japanese-search-preparation.json >/dev/null
 ```
 
-Expected: all commands PASS; output contains `JP-100`, `JP-200`, `kagome-ipa-search`, and masked `**`.
+기대값: 모든 명령이 PASS한다. Output에는 `JP-100`, `JP-200`, `kagome-ipa-search`, masked `**`가 포함된다.
 
 - [x] **Step 5: Commit Task 4**
 
@@ -610,7 +610,7 @@ git add examples/japanese-search-preparation
 git commit -m "feat: add Japanese search preparation preview"
 ```
 
-### Task 5: Document the Lesson in Both Locales
+### Task 5: 두 Locale에 Lesson 문서화
 
 **Complexity:** Medium
 **Depends on:** generated preview from Task 4
@@ -620,15 +620,15 @@ git commit -m "feat: add Japanese search preparation preview"
 - Modify: `README.md`
 - Modify: `README.ko.md`
 
-- [x] **Step 1: Write the paired example READMEs from actual output**
+- [x] **Step 1: 실제 output 기반 paired example README 작성**
 
-Both files must include package lesson, three-stage flow, run/test commands, representative token/POS/span/index/search/mask output, Normal-vs-Search mode intent, construct-once reuse, IPA dictionary footprint, NFC/source-span semantics, substring masking boundary, and non-goals. English public prose is authoritative; Korean content mirrors every factual section.
+두 파일은 package lesson, three-stage flow, run/test command, representative token/POS/span/index/search/mask output, Normal-vs-Search mode intent, construct-once reuse, IPA dictionary footprint, NFC/source-span semantic, substring masking boundary, non-goal을 포함해야 한다. English public prose가 authoritative이며, Korean content는 모든 factual section을 대응시킨다.
 
-- [x] **Step 2: Add root navigation and run sections**
+- [x] **Step 2: Root navigation과 run section 추가**
 
-Insert one table row beside the other textsearch examples and one compact run section in both root locales. Link English and Korean example files explicitly.
+두 root locale에서 다른 textsearch example 옆에 table row 하나와 compact run section 하나를 넣는다. English 및 Korean example file을 명시적으로 link한다.
 
-- [x] **Step 3: Verify locale parity and links**
+- [x] **Step 3: Locale parity와 link 검증**
 
 ```bash
 test -f examples/japanese-search-preparation/README.md
@@ -638,7 +638,7 @@ rg -n "go run ./examples/japanese-search-preparation|go test -race" examples/jap
 git diff --check
 ```
 
-Expected: both locale files and both root files contain the example links/commands; diff check is clean.
+기대값: 두 locale file과 두 root file이 example link/command를 포함하고 diff check가 clean이다.
 
 - [x] **Step 4: Commit Task 5**
 
@@ -647,15 +647,15 @@ git add README.md README.ko.md examples/japanese-search-preparation/README.md ex
 git commit -m "docs: explain Japanese search preparation"
 ```
 
-### Task 6: Verify the Approved Spec, Review the Diff, and Prepare Delivery
+### Task 6: 승인된 Spec 검증, Diff Review, Delivery 준비
 
 **Complexity:** High verification
 **Depends on:** Tasks 1-5
 **Files:**
-- Review all branch changes against the spec and plan.
-- Create `docs/lessons/2026-07-12-issue-118-japanese-search-preparation.md` with evidence or an evidence-backed N/A decision, as required by the Type A workflow.
+- 모든 branch change를 spec 및 plan과 대조해 review한다.
+- Type A workflow가 요구하는 대로 evidence 또는 evidence-backed N/A decision을 담은 `docs/lessons/2026-07-12-issue-118-japanese-search-preparation.md`를 만든다.
 
-- [x] **Step 1: Run fast static and focused gates**
+- [x] **Step 1: Fast static 및 focused gate 실행**
 
 ```bash
 make fmt-check
@@ -666,35 +666,35 @@ go test -count=1 ./examples/japanese-search-preparation/...
 go test -race -count=1 ./examples/japanese-search-preparation/...
 ```
 
-Expected: every command PASS with no lint or race finding.
+기대값: 모든 명령이 PASS하고 lint 또는 race finding이 없다.
 
-- [x] **Step 2: Run repository-wide CI sequentially**
+- [x] **Step 2: Repository-wide CI 순차 실행**
 
 ```bash
 make ci
 ```
 
-Expected: tidy, format, vet, lint, all normal tests, and all race tests PASS. Do not run another Docker-backed suite in parallel.
+기대값: tidy, format, vet, lint, 모든 normal test, 모든 race test가 PASS한다. 다른 Docker-backed suite를 병렬로 실행하지 않는다.
 
-- [x] **Step 3: Verify spec/plan acceptance line by line**
+- [x] **Step 3: Spec/plan acceptance를 line-by-line 검증**
 
-Read the spec, this plan, command JSON, README pair, tests, and diff. Record each acceptance row PASS or return to the owning task. Confirm `go.mod` is unchanged and no HTTP, ranking, persistence, new dependency, or rune-offset contract appeared.
+Spec, 이 plan, command JSON, README pair, test, diff를 읽는다. 각 acceptance row를 PASS로 기록하거나 owning task로 돌아간다. `go.mod`가 변경되지 않았고 HTTP, ranking, persistence, new dependency, rune-offset contract가 생기지 않았는지 확인한다.
 
-- [x] **Step 4: Run final structural and severity review**
+- [x] **Step 4: 최종 structural 및 severity review 실행**
 
-Read `performance-stability-scan.md`, attempt CodeGraph change detection with explicit new files, then perform the six Type A perspectives plus main integration. When the collaboration spawn schema lacks a separate `agent_type` field, explicitly inject the installed native role into each child prompt; this workflow used executor, verifier, code-reviewer, and writer lanes. P0 or P1 blocks delivery; fix, rerun affected focused/full gates, and repeat the affected lens.
+`performance-stability-scan.md`를 읽고, 명시적 new file로 CodeGraph change detection을 시도한 뒤 six Type A perspective와 main integration을 수행한다. Collaboration spawn schema에 별도 `agent_type` field가 없으면 각 child prompt에 설치된 native role을 명시적으로 주입한다. 이 workflow는 executor, verifier, code-reviewer, writer lane을 사용했다. P0 또는 P1은 delivery를 막는다. 수정하고 영향받은 focused/full gate를 다시 실행한 뒤 해당 lens를 반복한다.
 
-- [x] **Step 5: Commit the required durable lesson**
+- [x] **Step 5: 필요한 durable lesson commit**
 
-Write the concrete decision, normalization/span distinction, masked-token exclusion, verification evidence, observed misses, and future guard. Then:
+구체적인 decision, normalization/span distinction, masked-token exclusion, verification evidence, observed miss, future guard를 작성한다. 그런 다음:
 
 ```bash
 git add docs/lessons/2026-07-12-issue-118-japanese-search-preparation.md
 git commit -m "docs: record Japanese search preparation lessons"
 ```
 
-- [x] **Step 6: Stop at the external delivery boundary**
+- [x] **Step 6: External delivery boundary에서 중단**
 
-Show branch commits, clean status, checklist counts, P0=0/P1=0, and verification evidence. PR creation, Issue #34 edit, merge, remote branch deletion, and local synchronization require explicit user authorization in the active thread.
+Branch commit, clean status, checklist count, P0=0/P1=0, verification evidence를 제시한다. PR creation, Issue #34 edit, merge, remote branch deletion, local synchronization은 active thread의 명시적 user authorization이 필요하다.
 
-**Rollback/rerun point:** The feature is application-shaped and additive; rollback is branch abandonment. Any spec mismatch returns to the owning task and invalidates later verification evidence until rerun.
+**Rollback/rerun point:** 이 feature는 application-shaped additive change다. Rollback은 branch abandonment다. Spec mismatch는 owning task로 돌아가며, rerun 전까지 이후 verification evidence를 무효화한다.
