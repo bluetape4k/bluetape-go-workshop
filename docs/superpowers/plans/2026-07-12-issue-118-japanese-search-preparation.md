@@ -278,7 +278,7 @@ git commit -m "feat: define Japanese catalog preparation contract"
 
 **Rollback/rerun point:** Constructor가 다른 dependency를 요구하면 중단하고 이 task를 revert한다. 승인된 dependency boundary가 이를 금지한다.
 
-### Task 2: Prepare Tokens, Preserve Spans, and Exclude Masked Terms
+### Task 2: Token 준비, Span 보존, Masked Term 제외
 
 **Complexity:** High
 **Depends on:** Task 1
@@ -286,9 +286,9 @@ git commit -m "feat: define Japanese catalog preparation contract"
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service_test.go`
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 
-- [x] **Step 1: Add failing token, normalization, POS, masking, and oversized-input tests**
+- [x] **Step 1: 실패하는 token, normalization, POS, masking, oversized-input test 추가**
 
-Use a fixed product whose unsafe noun is observable:
+Unsafe noun을 관찰할 수 있는 fixed product를 사용한다.
 
 ```go
 func TestPrepareProductPreservesSpansAndExcludesMaskedTerms(t *testing.T) {
@@ -341,15 +341,15 @@ func TestPrepareProductUsesNFCWithoutMovingSourceSpans(t *testing.T) {
 }
 ```
 
-Add table cases for input longer than `textsearch.MaxTokenizeTextLength` and assert both `ErrInvalidProduct` and `textsearch.ErrTokenizeTextTooLong` remain inspectable with `errors.Is`.
+`textsearch.MaxTokenizeTextLength`보다 긴 input에 대한 table case를 추가하고, `ErrInvalidProduct`와 `textsearch.ErrTokenizeTextTooLong`을 모두 `errors.Is`로 검사할 수 있는지 검증한다.
 
-- [x] **Step 2: Run the focused test and capture RED**
+- [x] **Step 2: Focused test 실행 및 RED 기록**
 
-Expected: FAIL because preparation/masking fields and behavior are absent or incorrect.
+기대값: preparation/masking field와 behavior가 없거나 잘못되어 FAIL한다.
 
-- [x] **Step 3: Implement preparation and masking projection**
+- [x] **Step 3: Preparation 및 masking projection 구현**
 
-Implement `prepareField`, `prepareProduct`, `indexTerm`, and overlap helpers. The core projection is:
+`prepareField`, `prepareProduct`, `indexTerm`, overlap helper를 구현한다. Core projection은 다음과 같다.
 
 ```go
 request, err := textsearch.NewTokenizeRequest(input, textsearch.TokenizeOptions{Normalize: textsearch.NormalizeNFC})
@@ -359,9 +359,9 @@ selected := japanese.Filter(response.Tokens, func(token textsearch.Token) bool {
 })
 ```
 
-For support text, call `dictionary.Process` with `BlockwordOptions{Mask: s.mask}`. Convert every blockword match into `MaskMatch`, mark overlapping selected tokens non-indexable, and exclude them from the first-seen `IndexTerms`. Use the Kagome base form unless it is empty or `"*"`; normalize the chosen term with NFC.
+Support text에는 `BlockwordOptions{Mask: s.mask}`로 `dictionary.Process`를 호출한다. 모든 blockword match를 `MaskMatch`로 변환하고, 겹치는 selected token은 non-indexable로 표시하며, first-seen `IndexTerms`에서 제외한다. Kagome base form이 비어 있거나 `"*"`가 아니면 이를 사용하고, 선택한 term은 NFC로 normalize한다.
 
-Implement defaults exactly once:
+Default는 정확히 한 번 구현한다.
 
 ```go
 func DefaultMaskPolicy() MaskPolicy {
@@ -380,9 +380,9 @@ func DefaultProducts() []ProductInput {
 }
 ```
 
-`DefaultProducts` returns three stable SKUs (`JP-100`, `JP-200`, `JP-300`) covering running shoes, glass storage, and a folding bicycle. JP-200 uses the exact support text asserted above.
+`DefaultProducts`는 running shoes, glass storage, folding bicycle을 다루는 stable SKU 세 개(`JP-100`, `JP-200`, `JP-300`)를 반환한다. JP-200은 위 assertion에 사용한 정확한 support text를 사용한다.
 
-Add the shared Task 2 test helpers:
+공유 Task 2 test helper를 추가한다.
 
 ```go
 func newTestService(t *testing.T) *Service {
@@ -402,14 +402,14 @@ func productBySKU(t *testing.T, products []PreparedProduct, sku string) Prepared
 }
 ```
 
-- [x] **Step 4: Run focused normal and race tests**
+- [x] **Step 4: Focused normal 및 race test 실행**
 
 ```bash
 go test -count=1 ./examples/japanese-search-preparation/internal/catalogprep
 go test -race -count=1 ./examples/japanese-search-preparation/internal/catalogprep
 ```
 
-Expected: PASS. If the NFC fixture exposes a different Kagome segmentation, preserve the contract assertion (normalization plus original slicing) and adjust only fixture-specific token lookup, not the source-span rule.
+기대값: PASS. NFC fixture가 다른 Kagome segmentation을 드러내면 contract assertion(normalization plus original slicing)은 보존하고, source-span rule이 아니라 fixture-specific token lookup만 조정한다.
 
 - [x] **Step 5: Commit Task 2**
 
@@ -418,9 +418,9 @@ git add examples/japanese-search-preparation/internal/catalogprep
 git commit -m "feat: prepare and mask Japanese catalog terms"
 ```
 
-**Rollback/rerun point:** Any span that cannot slice its original field is P1; stop and repair before search work.
+**Rollback/rerun point:** Original field를 slice할 수 없는 span은 P1이다. Search 작업 전에 중단하고 수리한다.
 
-### Task 3: Add Deterministic All-Term Catalog Search
+### Task 3: Deterministic All-Term Catalog Search 추가
 
 **Complexity:** Medium
 **Depends on:** Task 2
@@ -428,7 +428,7 @@ git commit -m "feat: prepare and mask Japanese catalog terms"
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service_test.go`
 - Modify: `examples/japanese-search-preparation/internal/catalogprep/service.go`
 
-- [x] **Step 1: Add failing search success, ordering, no-match, and invalid-query tests**
+- [x] **Step 1: 실패하는 search success, ordering, no-match, invalid-query test 추가**
 
 ```go
 func TestSearchRequiresAllPreparedTermsAndSortsBySKU(t *testing.T) {
@@ -462,9 +462,9 @@ func TestSearchRejectsBlankOrUnindexableQuery(t *testing.T) {
 }
 ```
 
-Add a duplicate-term query and assert `QueryTerms` is first-seen unique.
+Duplicate-term query를 추가하고 `QueryTerms`가 first-seen unique인지 검증한다.
 
-Add the exact result helper used by search and concurrency tests:
+Search 및 concurrency test에서 사용할 exact result helper를 추가한다.
 
 ```go
 func hitSKUs(hits []SearchHit) []string {
@@ -474,13 +474,13 @@ func hitSKUs(hits []SearchHit) []string {
 }
 ```
 
-- [x] **Step 2: Run the focused test and capture RED**
+- [x] **Step 2: Focused test 실행 및 RED 기록**
 
-Expected: FAIL at the missing or incomplete `Search` implementation.
+기대값: 누락되었거나 불완전한 `Search` 구현 때문에 FAIL한다.
 
-- [x] **Step 3: Implement query preparation and matcher-based search**
+- [x] **Step 3: Query preparation 및 matcher-based search 구현**
 
-Prepare query terms with the same NFC/base-form projection. Compile patterns using term text as stable IDs:
+같은 NFC/base-form projection으로 query term을 준비한다. Term text를 stable ID로 사용해 pattern을 compile한다.
 
 ```go
 patterns := make([]textsearch.Pattern, len(terms))
@@ -494,11 +494,11 @@ matcher, err := textsearch.Compile(patterns, textsearch.Config{
 })
 ```
 
-For each product, call `matcher.FindAll(product.IndexText)`, collect unique matched pattern IDs, and emit a hit only when every query term matched. Return matched terms in query order and sort hits by SKU. Allocate non-nil empty `QueryTerms`/`Hits` slices for successful empty results.
+각 product에 `matcher.FindAll(product.IndexText)`를 호출하고 unique matched pattern ID를 수집한다. 모든 query term이 match된 경우에만 hit를 emit한다. Matched term은 query order로 반환하고 hit는 SKU 기준으로 정렬한다. 성공했지만 결과가 비어 있는 경우에도 non-nil empty `QueryTerms`/`Hits` slice를 할당한다.
 
-- [x] **Step 4: Run focused normal and race tests**
+- [x] **Step 4: Focused normal 및 race test 실행**
 
-Expected: both PASS with exact hit and ordering assertions.
+기대값: exact hit 및 ordering assertion과 함께 둘 다 PASS한다.
 
 - [x] **Step 5: Commit Task 3**
 
@@ -507,7 +507,7 @@ git add examples/japanese-search-preparation/internal/catalogprep
 git commit -m "feat: search prepared Japanese catalog terms"
 ```
 
-**Rollback/rerun point:** If Unicode boundaries do not enforce exact space-delimited term matching, add boundary-focused tests and revise the prepared index encoding in the spec before proceeding.
+**Rollback/rerun point:** Unicode boundary가 exact space-delimited term matching을 강제하지 못하면 boundary-focused test를 추가하고, 진행 전에 spec의 prepared index encoding을 수정한다.
 
 ### Task 4: Prove Shared Reuse and Add the Runnable Preview
 
