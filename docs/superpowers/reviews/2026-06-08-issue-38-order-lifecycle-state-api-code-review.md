@@ -1,6 +1,6 @@
-# Issue 38 Order Lifecycle State API Code Review
+# Issue 38 Order Lifecycle State API 코드 리뷰
 
-## Final Gate
+## 최종 Gate
 
 PASS
 
@@ -9,27 +9,27 @@ PASS
 - P2: 0
 - P3: 0
 
-Final convergence: `P0 = 0`, `P1 = 0`.
+최종 수렴: `P0 = 0`, `P1 = 0`.
 
-## Reviewed Scope
+## 검토 범위
 
-- Go implementation:
+- Go 구현:
   - `examples/order-lifecycle-state-api/main.go`
   - `examples/order-lifecycle-state-api/internal/orderstate/server.go`
   - `examples/order-lifecycle-state-api/internal/orderstate/server_test.go`
-- Documentation:
+- 문서:
   - `README.md`
   - `README.ko.md`
   - `examples/order-lifecycle-state-api/README.md`
   - `examples/order-lifecycle-state-api/README.ko.md`
-- Diagram generation and rendered assets:
+- diagram generation과 rendered asset:
   - `scripts/generate-order-lifecycle-diagrams.sh`
   - `docs/images/readme-diagrams/order-lifecycle-state-api-*`
-- Dependency files:
+- 의존성 파일:
   - `go.mod`
   - `go.sum`
 
-## Tier Results
+## Tier 결과
 
 | Tier | Area | P0 | P1 | P2 | P3 | Result |
 |---|---|---:|---:|---:|---:|---|
@@ -43,99 +43,120 @@ Final convergence: `P0 = 0`, `P1 = 0`.
 
 ## Tier 1: Security
 
-No findings.
+finding 없음.
 
-Evidence:
+근거:
 
-- User-controlled transition input is parsed through Gin JSON binding and a closed event parser before reaching the state machine: `server.go:171-184`, `server.go:233-247`.
-- Unknown events and malformed JSON return `400` instead of flowing into dynamic execution: `server.go:171-181`; tests cover POST and can-transition unknown-event paths in `server_test.go:145-161`, `server_test.go:288-317`.
-- The example has no database, no secrets, no auth boundary, and no unsafe deserialization path.
+- user-controlled transition input은 state machine에 도달하기 전에 Gin JSON binding과 closed
+  event parser를 통과한다: `server.go:171-184`, `server.go:233-247`.
+- unknown event와 malformed JSON은 dynamic execution으로 흐르지 않고 `400`을 반환한다:
+  `server.go:171-181`; test는 `server_test.go:145-161`,
+  `server_test.go:288-317`에서 POST와 can-transition unknown-event path를 다룬다.
+- 예제에는 database, secret, auth boundary, unsafe deserialization path가 없다.
 
 ## Tier 2: Ops/SRE Reliability
 
-No findings.
+finding 없음.
 
-Evidence:
+근거:
 
-- Runnable main uses `http.Server` with `ReadHeaderTimeout`: `main.go`.
-- Health endpoint exists: `server.go:125`, `server.go:163-165`.
-- Transition errors are mapped to stable status codes including request timeout and conflict cases: `server.go:250-264`.
-- The example is intentionally in-memory and documented as not production persistence: `README.md:73-74`.
+- runnable main은 `ReadHeaderTimeout`이 있는 `http.Server`를 사용한다: `main.go`.
+- health endpoint가 있다: `server.go:125`, `server.go:163-165`.
+- transition error는 request timeout과 conflict case를 포함한 stable status code로
+  매핑된다: `server.go:250-264`.
+- 예제는 의도적으로 in-memory이며 production persistence가 아니라고 문서화되어 있다:
+  `README.md:73-74`.
 
 ## Tier 3: Structural Impact
 
-No findings.
+finding 없음.
 
-Evidence:
+근거:
 
-- New example is isolated under `examples/order-lifecycle-state-api`.
-- Only one new direct dependency was added: `github.com/gin-gonic/gin v1.12.0`.
+- 새 예제는 `examples/order-lifecycle-state-api` 아래에 격리되어 있다.
+- 새 direct dependency는 `github.com/gin-gonic/gin v1.12.0` 하나뿐이다.
 - `codegraph index && codegraph status`: 35 files, 479 nodes, 1,049 edges.
 - `code-review-graph build --repo "$PWD"` after staging: 33 files, 233 nodes, 2,274 edges.
 
 ## Tier 4: Go Code Quality
 
-No findings.
+finding 없음.
 
-Evidence:
+근거:
 
-- Exported public types/constants have English comments: `server.go:15-47`, `server.go:56-63`, `server.go:71-77`, `server.go:103-134`.
-- The server preserves context propagation from request handlers into `state.Machine`: `server.go:184`, `server.go:205`.
-- `errors.Is` is used for bluetape-go/state sentinel errors: `server.go:250-264`.
-- Production concurrency quick scan hit only the intended concurrency test goroutine: `server_test.go:329-333`.
-- `make ci` passed after lint fixes.
+- exported public type/constant에는 English comment가 있다: `server.go:15-47`,
+  `server.go:56-63`, `server.go:71-77`, `server.go:103-134`.
+- server는 request handler에서 `state.Machine`까지 context propagation을 보존한다:
+  `server.go:184`, `server.go:205`.
+- bluetape-go/state sentinel error에는 `errors.Is`를 사용한다: `server.go:250-264`.
+- production concurrency quick scan은 의도된 concurrency test goroutine만 발견했다:
+  `server_test.go:329-333`.
+- lint fix 뒤 `make ci`가 통과했다.
 
 ## Tier 5: Tests, Types, Silent Failure
 
-No findings.
+finding 없음.
 
-Evidence:
+근거:
 
-- Health and initial state: `server_test.go:20-41`.
-- Allowed transition path and can-transition inquiry: `server_test.go:43-73`.
-- Default options and normalized event input: `server_test.go:75-96`.
-- Can-transition unavailable, guard rejection, and unknown-event paths: `server_test.go:98-161`.
-- Invalid transition keeps state unchanged: `server_test.go:163-179`.
-- Guard rejection keeps state unchanged: `server_test.go:181-202`.
-- Cancel from draft, submitted, and paid reaches a final state: `server_test.go:204-246`.
-- Final state rejects further transitions and can-transition reports unavailable: `server_test.go:248-286`.
-- Malformed JSON, missing event, and unknown events return `400`: `server_test.go:288-317`.
-- Concurrent duplicate transition is race-safe and leaves one valid state: `server_test.go:319-364`.
-- Request tests use `httptest.NewRequestWithContext`: `server_test.go:396-406`.
+- health와 initial state: `server_test.go:20-41`.
+- allowed transition path와 can-transition inquiry: `server_test.go:43-73`.
+- default option과 normalized event input: `server_test.go:75-96`.
+- can-transition unavailable, guard rejection, unknown-event path:
+  `server_test.go:98-161`.
+- invalid transition은 state를 변경하지 않는다: `server_test.go:163-179`.
+- guard rejection은 state를 변경하지 않는다: `server_test.go:181-202`.
+- draft, submitted, paid에서 cancel하면 final state에 도달한다:
+  `server_test.go:204-246`.
+- final state는 추가 transition을 거부하고 can-transition은 unavailable을 보고한다:
+  `server_test.go:248-286`.
+- malformed JSON, missing event, unknown event는 `400`을 반환한다:
+  `server_test.go:288-317`.
+- concurrent duplicate transition은 race-safe하며 valid state 하나를 남긴다:
+  `server_test.go:319-364`.
+- request test는 `httptest.NewRequestWithContext`를 사용한다:
+  `server_test.go:396-406`.
 
 ## Tier 6: Performance/Stability
 
-No performance or stability issues found.
+performance 또는 stability issue는 발견되지 않았다.
 
-Reviewed scope:
+검토 범위:
 
 - `server.go`
 - `server_test.go`
 - `main.go`
 - README and diagram generation paths
 
-Evidence:
+근거:
 
-- No blocking calls inside event-loop contexts or unbounded polling/retry loops.
-- The shared mutable state is owned by `state.Machine`; race test passed for concurrent duplicate transition requests.
-- Diagram generation is a developer script, not runtime code, and fails fast on missing tools/fonts before rendering.
+- event-loop context 안의 blocking call이나 unbounded polling/retry loop는 없다.
+- shared mutable state는 `state.Machine`이 소유한다. concurrent duplicate transition
+  request에 대한 race test가 통과했다.
+- diagram generation은 runtime code가 아니라 developer script이며, render 전 missing
+  tool/font에 대해 fail fast한다.
 
 ## Tier 7: Documentation, Release, Evidence
 
-No findings.
+finding 없음.
 
-Evidence:
+근거:
 
-- Example README pair includes scenario, state model, run commands, endpoint examples, finite-state-machine vs workflow-runner guidance, Architecture, Sequence Diagram, and tests: `README.md:9-98`.
-- Root README pair includes the new example and updates the web framework guidance for Gin public API examples.
-- README embeds PNG files only; SVG sources sit beside matching PNG assets under `docs/images/readme-diagrams/`.
-- `bluetape4k-diagram` gates were applied:
-  - SVG/PNG pairs exist.
-  - dot/plain/graphviz evidence exists.
-  - rendered PNGs were inspected individually.
-  - required font names and `8x8` arrowheads are present; forbidden UI fonts are absent from generated SVG assets.
+- example README pair는 scenario, state model, run command, endpoint example,
+  finite-state-machine vs workflow-runner guidance, Architecture, Sequence Diagram,
+  test를 포함한다: `README.md:9-98`.
+- root README pair는 새 예제를 포함하고 Gin public API example에 대한 web framework
+  guidance를 갱신한다.
+- README는 PNG file만 embed한다. SVG source는 matching PNG asset 옆의
+  `docs/images/readme-diagrams/` 아래에 있다.
+- `bluetape4k-diagram` gate를 적용했다.
+  - SVG/PNG pair가 있다.
+  - dot/plain/graphviz evidence가 있다.
+  - rendered PNG를 개별 검사했다.
+  - required font name과 `8x8` arrowhead가 있으며, generated SVG asset에는 forbidden UI
+    font가 없다.
 
-## Verification Commands
+## 검증 명령
 
 ```bash
 bash scripts/generate-order-lifecycle-diagrams.sh
