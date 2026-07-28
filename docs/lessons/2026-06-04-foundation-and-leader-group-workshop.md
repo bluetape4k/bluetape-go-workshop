@@ -1,23 +1,18 @@
-# Foundation And Leader Group Workshop Examples
+# Foundation과 Leader Group Workshop 예제
 
-## Context
+## 맥락
 
-`bluetape-go-workshop` still had open 0.1.0 foundation example issues and one
-0.2.0 LeaderGroupElector example issue after the resilience HTTP example landed.
+resilience HTTP 예제가 들어간 뒤에도 `bluetape-go-workshop`에는 열린 `0.1.0` foundation 예제 issue와 `0.2.0` `LeaderGroupElector` 예제 issue가 남아 있었다.
 
-## Decision
+## 결정
 
-Add scenario-first examples instead of API catalog pages. Keep each package thin
-and prove snippets with normal `go test`, Testcontainers integration tests, and
-stress helpers where concurrency behavior matters.
+API catalog page가 아니라 scenario-first 예제를 추가한다. 각 package는 얇게 유지하고, 일반 `go test`, Testcontainers integration test, concurrency 동작이 중요한 경우의 stress helper로 snippet을 증명한다.
 
-## Outcome
+## 결과
 
-The workshop now covers cache snapshot codecs, order feed cleanup, invitation
-codecs, Redis leader jobs, product enrichment fan-out, Testcontainers-backed
-order pipeline integration, and Redis leader group web coordination.
+workshop은 이제 cache snapshot codec, order feed cleanup, invitation codec, Redis leader job, product enrichment fan-out, Testcontainers-backed order pipeline integration, Redis leader group web coordination을 다룬다.
 
-## Verification
+## 검증
 
 - `go test -count=1 ./examples/cache-snapshot-codecs/... ./examples/order-intake-cleanup/... ./examples/invitation-codecs/... ./examples/product-enrichment-fanout/...`
 - `go test -count=1 ./examples/leader-coordination-jobs/... ./examples/order-pipeline-testcontainers/... ./examples/leader-group-web/...`
@@ -25,8 +20,6 @@ order pipeline integration, and Redis leader group web coordination.
 - `make ci`
 - `git diff --check`
 
-## Future Guard
+## 이후 Guard
 
-For Go feature examples with goroutine, cancellation, async, shared-state, or
-coordination behavior, include `GoroutineStressTester` or `AsyncJobTester`
-coverage before opening the PR.
+goroutine, cancellation, async, shared-state, coordination 동작을 다루는 Go feature 예제는 PR을 열기 전에 `GoroutineStressTester` 또는 `AsyncJobTester` coverage를 포함한다.

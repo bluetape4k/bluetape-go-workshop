@@ -1,42 +1,29 @@
-# Order Lifecycle State API Example
+# Order Lifecycle State API 예제
 
-## Context
+## 맥락
 
-Issue #38 added the first v0.4.0 state-machine HTTP example. The example had to
-use Gin, exercise `bluetape-go/state`, and include bilingual README content with
-scenario, architecture, and sequence diagrams.
+issue #38은 첫 v0.4.0 state-machine HTTP 예제를 추가했다. 이 예제는 Gin을 사용하고, `bluetape-go/state`를 exercise하고, scenario, architecture, sequence diagram을 포함한 다국어 README content를 제공해야 했다.
 
-## Decision
+## 결정
 
-Keep the service intentionally in-memory and expose one order through a small
-Gin router. Let `state.Machine` own transition legality, final-state rejection,
-guard rejection, and concurrent transition conflicts. Keep the handler limited
-to JSON binding, event parsing, and HTTP error mapping.
+service는 의도적으로 in-memory로 유지하고 작은 Gin router를 통해 order 하나를 노출한다. `state.Machine`이 transition legality, final-state rejection, guard rejection, concurrent transition conflict를 소유하게 한다. handler는 JSON binding, event parsing, HTTP error mapping으로 제한한다.
 
-## Outcome
+## 결과
 
-- Added `examples/order-lifecycle-state-api` with a runnable main package.
-- Added focused tests for allowed transitions, invalid transitions, guard
-  rejection, final-state rejection, bad requests, and concurrent duplicate
-  transition safety.
-- Added README and README.ko content with finite-state-machine vs workflow
-  runner guidance.
-- Added generated README diagrams for scenario, architecture, and sequence
-  flows with PNG/SVG plus DOT, Plain, and Graphviz evidence.
+- 실행 가능한 main package가 있는 `examples/order-lifecycle-state-api`를 추가했다.
+- allowed transition, invalid transition, guard rejection, final-state rejection, bad request, concurrent duplicate transition safety에 대한 focused test를 추가했다.
+- finite-state-machine과 workflow runner의 차이를 설명하는 README와 README.ko content를 추가했다.
+- scenario, architecture, sequence flow를 위한 generated README diagram을 PNG/SVG와 DOT, Plain, Graphviz evidence로 추가했다.
 
-## Verification
+## 검증
 
 - `bash scripts/generate-order-lifecycle-diagrams.sh`
 - `go test -count=1 ./examples/order-lifecycle-state-api/...`
 - `go test -race -count=1 ./examples/order-lifecycle-state-api/...`
 - `go test -count=1 ./...`
 - `make ci`
-- Individual rendered PNG inspection for the scenario, architecture, and
-  sequence diagrams.
+- scenario, architecture, sequence diagram의 rendered PNG를 개별 검사했다.
 
-## Future Guard
+## 이후 Guard
 
-Add the framework import before relying on `go mod tidy`; otherwise tidy removes
-the dependency and the direct dependency check becomes misleading. For README
-diagrams, regenerate assets from a checked-in script, keep PNG embeds in both
-locales, and inspect the rendered PNGs after every visual route change.
+`go mod tidy`에 의존하기 전에 framework import를 추가한다. 그렇지 않으면 tidy가 dependency를 제거하고 direct dependency check가 misleading해진다. README diagram은 checked-in script에서 asset을 regenerate하고, 양쪽 locale에 PNG embed를 유지하며, visual route 변경 뒤 rendered PNG를 검사한다.
