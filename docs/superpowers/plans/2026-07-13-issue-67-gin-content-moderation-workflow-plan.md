@@ -1,12 +1,12 @@
 # Gin Content Moderation Workflow Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Build the Issue #67 Gin example that moderates and stores multilingual content, exposes inspectable records, and searches accepted records through bounded POST JSON requests.
+**Goal:** multilingual content를 moderate/store하고, inspectable record를 노출하며, bounded POST JSON request로 accepted record를 search하는 Issue #67 Gin example을 만든다.
 
-**Architecture:** A framework-independent `moderationapi.Service` owns the reusable bluetape-go detector, Japanese and simple tokenizers, blockword dictionary, and bounded mutex-protected record store. A thin Gin adapter owns strict JSON/media-type handling, request deadlines, stable public errors, and safe diagnostics; `main` owns one HTTP server and bounded signal-driven shutdown.
+**Architecture:** framework-independent `moderationapi.Service`가 reusable bluetape-go detector, Japanese/simple tokenizer, blockword dictionary, bounded mutex-protected record store를 소유한다. 얇은 Gin adapter는 strict JSON/media-type handling, request deadline, stable public error, safe diagnostic을 소유한다. `main`은 HTTP server 하나와 bounded signal-driven shutdown을 소유한다.
 
-**Tech Stack:** Go 1.25, bluetape-go v0.18.0 `textsearch`, `textsearch/japanese`, and `textsearch/language`, Gin v1.12.0, standard `net/http`, and bluetape-go concurrency test helpers.
+**Tech Stack:** Go 1.25, bluetape-go v0.18.0 `textsearch`, `textsearch/japanese`, `textsearch/language`, Gin v1.12.0, standard `net/http`, bluetape-go concurrency test helper를 사용한다.
 
 ---
 
@@ -14,48 +14,46 @@
 
 | File | Responsibility |
 |---|---|
-| `examples/gin-content-moderation-workflow/internal/moderationapi/model.go` | Configuration, requests/responses, records, projections, sentinels, and deep-copy helpers |
-| `examples/gin-content-moderation-workflow/internal/moderationapi/service.go` | Shared detector/tokenizers/dictionary, create/get/search policy, bounded store, and context checks |
-| `examples/gin-content-moderation-workflow/internal/moderationapi/service_test.go` | Domain, byte-span, search, cancellation, copy-isolation, capacity, and race-safe concurrency tests |
-| `examples/gin-content-moderation-workflow/internal/moderationapi/server.go` | Gin routes, strict bounded JSON, timeout/error mapping, health, and safe request diagnostics |
-| `examples/gin-content-moderation-workflow/internal/moderationapi/server_test.go` | HTTP contract, body closure, media types, malformed input, cancellation, redaction, and route tests |
-| `examples/gin-content-moderation-workflow/main.go` | App construction, loopback-safe address policy, `http.Server`, signals, and bounded shutdown |
-| `examples/gin-content-moderation-workflow/main_test.go` | Address/server defaults and fake-server lifecycle tests without a public listener |
-| `examples/gin-content-moderation-workflow/README.md` | English lesson, run/curl examples, boundaries, and validation |
-| `examples/gin-content-moderation-workflow/README.ko.md` | Korean equivalent of the public lesson |
-| `README.md`, `README.ko.md` | Root navigation entries |
+| `examples/gin-content-moderation-workflow/internal/moderationapi/model.go` | Configuration, request/response, record, projection, sentinel, deep-copy helper를 정의한다. |
+| `examples/gin-content-moderation-workflow/internal/moderationapi/service.go` | shared detector/tokenizer/dictionary, create/get/search policy, bounded store, context check를 구현한다. |
+| `examples/gin-content-moderation-workflow/internal/moderationapi/service_test.go` | domain, byte-span, search, cancellation, copy-isolation, capacity, race-safe concurrency test를 담는다. |
+| `examples/gin-content-moderation-workflow/internal/moderationapi/server.go` | Gin route, strict bounded JSON, timeout/error mapping, health, safe request diagnostic을 구현한다. |
+| `examples/gin-content-moderation-workflow/internal/moderationapi/server_test.go` | HTTP contract, body closure, media type, malformed input, cancellation, redaction, route test를 담는다. |
+| `examples/gin-content-moderation-workflow/main.go` | app construction, loopback-safe address policy, `http.Server`, signal, bounded shutdown을 담당한다. |
+| `examples/gin-content-moderation-workflow/main_test.go` | public listener 없이 address/server default와 fake-server lifecycle test를 검증한다. |
+| `examples/gin-content-moderation-workflow/README.md` | English lesson, run/curl example, boundary, validation을 설명한다. |
+| `examples/gin-content-moderation-workflow/README.ko.md` | public lesson과 동등한 Korean 문서를 제공한다. |
+| `README.md`, `README.ko.md` | root navigation entry를 갱신한다. |
 
-The example is one testable subsystem and does not need a split plan. It adds no
-module, dependency, database, container, workflow, coverage, changelog, public
-bluetape-go API, or diagram. Rollback is removal of the example and root links;
-all in-memory records are intentionally lost on every restart or rollback.
+이 example은 testable subsystem 하나이며 split plan이 필요하지 않다. module, dependency, database, container,
+workflow, coverage, changelog, public bluetape-go API, diagram을 추가하지 않는다. rollback은 example과 root link를 제거하는 것이다.
+모든 in-memory record는 restart 또는 rollback마다 의도적으로 사라진다.
 
 ## Spec Coverage Matrix
 
 | Approved spec area | Plan task | Primary evidence |
 |---|---|---|
-| Configuration, shared lifecycle, Go API, sentinels | Task 1 | constructor tests and focused package tests |
-| Routing, evidence, masking, Japanese/simple terms, atomic create | Task 2 | create tables, UTF-8 span assertions, race run |
-| Get, accepted-only metadata search, cursor/limit/copy semantics | Task 3 | get/search tables, cancellation, bounded stress |
-| Strict JSON/media types/body closure/timeouts/public errors/health | Task 4 | `httptest`, tracking body, blocking workflow, redaction assertions |
-| Loopback safety, server timeouts, signals, graceful/forced shutdown | Task 5 | fake-server lifecycle and race tests |
-| English/Korean lesson, risks, curl examples, root discovery | Task 6 | locale parity inspection and runnable focused tests |
+| Configuration, shared lifecycle, Go API, sentinels | Task 1 | constructor test와 focused package test |
+| Routing, evidence, masking, Japanese/simple terms, atomic create | Task 2 | create table, UTF-8 span assertion, race run |
+| Get, accepted-only metadata search, cursor/limit/copy semantics | Task 3 | get/search table, cancellation, bounded stress |
+| Strict JSON/media types/body closure/timeouts/public errors/health | Task 4 | `httptest`, tracking body, blocking workflow, redaction assertion |
+| Loopback safety, server timeouts, signals, graceful/forced shutdown | Task 5 | fake-server lifecycle 및 race test |
+| English/Korean lesson, risks, curl examples, root discovery | Task 6 | locale parity inspection 및 runnable focused test |
 | P0/P1 review, full CI, rollback evidence, PR/issue closure | Task 7 | fresh `make ci`, PR CI, merged/synchronized SHA proof |
 
-Conditional JVM, coroutine, Exposed, Spring Boot, streaming, database,
-Testcontainers, migration, module-registration, BOM, and coverage-aggregation
-checks are N/A because this is an existing-module in-memory Go example with no
-new dependency or generated/published API.
+conditional JVM, coroutine, Exposed, Spring Boot, streaming, database, Testcontainers,
+migration, module-registration, BOM, coverage-aggregation check는 N/A이다. 이 작업은 new dependency나
+generated/published API가 없는 existing-module in-memory Go example이기 때문이다.
 
-### Task 1: Define the domain contract and reusable service construction
+### Task 1: domain contract 및 reusable service construction 정의
 
 **Complexity:** Medium
 
-**Dependencies:** Approved design commit `8f108d9`; no implementation task dependency.
+**Dependencies:** approved design commit `8f108d9`; implementation task dependency는 없다.
 
-**Write scope:** `model.go`, constructor portion of `service.go`, focused constructor tests only.
+**Write scope:** `model.go`, `service.go`의 constructor portion, focused constructor test만 포함한다.
 
-**Pattern and hazards:** Use `bluetape-go-patterns` constructor validation, sentinel wrapping, immutable shared components, NFC normalization, and caller-owned copies. Reject `NaN`/infinity explicitly. Do not import sibling example `internal` packages or reproduce tokenizer/matcher algorithms.
+**Pattern and hazards:** `bluetape-go-patterns`의 constructor validation, sentinel wrapping, immutable shared component, NFC normalization, caller-owned copy를 사용한다. `NaN`/infinity는 명시적으로 reject한다. sibling example `internal` package를 import하거나 tokenizer/matcher algorithm을 재구현하지 않는다.
 
 **Files:**
 
@@ -63,12 +61,11 @@ new dependency or generated/published API.
 - Create: `examples/gin-content-moderation-workflow/internal/moderationapi/service.go`
 - Create: `examples/gin-content-moderation-workflow/internal/moderationapi/service_test.go`
 
-- [ ] **Step 1: Write failing configuration and construction tests**
+- [ ] **Step 1: 실패하는 configuration 및 construction test 작성**
 
-Add `TestDefaultConfig`, `TestNewServiceRejectsInvalidConfig`,
-`TestNewServiceBuildsSharedComponents`, and `TestZeroValueServiceFailsClosed`.
-The invalid table must exercise zero/negative integer limits, a search maximum
-below 20, confidence below zero/above one, `math.NaN()`, and both infinities:
+`TestDefaultConfig`, `TestNewServiceRejectsInvalidConfig`, `TestNewServiceBuildsSharedComponents`,
+`TestZeroValueServiceFailsClosed`를 추가한다. invalid table은 zero/negative integer limit, 20 미만 search maximum,
+0 미만/1 초과 confidence, `math.NaN()`, 양쪽 infinity를 실행해야 한다.
 
 ```go
 func TestNewServiceRejectsInvalidConfidence(t *testing.T) {
@@ -83,19 +80,19 @@ func TestNewServiceRejectsInvalidConfidence(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run the focused tests and observe RED**
+- [ ] **Step 2: focused test 실행 및 RED 확인**
 
-Run:
+실행한다.
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'Test(DefaultConfig|NewService|ZeroValue)'
 ```
 
-Expected: FAIL because `DefaultConfig`, `NewService`, and domain types do not yet exist.
+기대값: `DefaultConfig`, `NewService`, domain type이 아직 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement the minimum domain and constructor surface**
+- [ ] **Step 3: minimum domain 및 constructor surface 구현**
 
-Define the exact spec types and defaults, including:
+exact spec type과 default를 정의한다. 다음을 포함한다.
 
 ```go
 var (
@@ -121,24 +118,21 @@ func DefaultConfig() AppConfig {
 }
 ```
 
-`NewService` must validate configuration, compile the five fixed blockword
-entries with `IgnoreCase`, `NormalizeNFC`, and `BoundaryUnicodeWord`, construct
-one four-language detector, one `japanese.Search` tokenizer, and one
-`textsearch.NewSimpleTokenizer()`, install `time.Now` unless `WithClock` is
-provided, and initialize the bounded map. A nil clock and zero-value receiver
-return an error rather than panic.
+`NewService`는 configuration을 validate하고, `IgnoreCase`, `NormalizeNFC`, `BoundaryUnicodeWord`로 fixed blockword
+entry 다섯 개를 compile해야 한다. four-language detector 하나, `japanese.Search` tokenizer 하나,
+`textsearch.NewSimpleTokenizer()` 하나를 만들고, `WithClock`이 없으면 `time.Now`를 설치하며, bounded map을 initialize한다.
+nil clock과 zero-value receiver는 panic 대신 error를 반환한다.
 
-Also assert `errors.Is` for every sentinel, preserved bluetape-go construction
-cause, `context.Canceled`, and `context.DeadlineExceeded`; no test may depend on
-matching formatted error text.
+모든 sentinel, 보존된 bluetape-go construction cause, `context.Canceled`, `context.DeadlineExceeded`에 대해
+`errors.Is`를 assert한다. 어떤 test도 formatted error text matching에 의존하면 안 된다.
 
-- [ ] **Step 4: Run focused tests and observe GREEN**
+- [ ] **Step 4: focused test 실행 및 GREEN 확인**
 
-Run the Step 2 command.
+Step 2 command를 실행한다.
 
-Expected: PASS with constructor/default/zero-value cases covered.
+기대값: constructor/default/zero-value case가 cover되고 PASS한다.
 
-- [ ] **Step 5: Format and commit the constructor slice**
+- [ ] **Step 5: constructor slice format 및 commit**
 
 ```bash
 gofmt -w examples/gin-content-moderation-workflow/internal/moderationapi/model.go examples/gin-content-moderation-workflow/internal/moderationapi/service.go examples/gin-content-moderation-workflow/internal/moderationapi/service_test.go
@@ -146,28 +140,27 @@ git add examples/gin-content-moderation-workflow/internal/moderationapi
 git commit -m "feat: initialize moderation workflow service"
 ```
 
-### Task 2: Implement create routing, moderation, and immutable storage
+### Task 2: create routing, moderation, immutable storage 구현
 
 **Complexity:** High
 
-**Dependencies:** Task 1 domain and shared components.
+**Dependencies:** Task 1 domain 및 shared component.
 
-**Write scope:** Create-path additions in `service.go` and create-focused tests in `service_test.go`.
+**Write scope:** `service.go`의 create-path addition과 `service_test.go`의 create-focused test.
 
-**Pattern and hazards:** TDD each policy branch. Preserve original UTF-8 byte offsets, use `BlockwordDictionary.Process`, and project bluetape-go outputs rather than duplicating algorithms. Context is cooperative; after duplicate/capacity checks, call the non-blocking clock and recheck context under the lock immediately before commit.
+**Pattern and hazards:** 각 policy branch를 TDD로 진행한다. original UTF-8 byte offset을 보존하고 `BlockwordDictionary.Process`를 사용하며, algorithm을 중복하지 말고 bluetape-go output을 project한다. context는 cooperative이다. duplicate/capacity check 뒤 non-blocking clock을 호출하고, commit 직전 lock 안에서 context를 다시 확인한다.
 
 **Files:**
 
 - Modify: `examples/gin-content-moderation-workflow/internal/moderationapi/service.go`
 - Modify: `examples/gin-content-moderation-workflow/internal/moderationapi/service_test.go`
 
-- [ ] **Step 1: Write failing create-policy table tests**
+- [ ] **Step 1: 실패하는 create-policy table test 작성**
 
-Add table cases for allowed English, allowed Korean, masked English, masked
-Korean with exact multibyte spans, Japanese with Kana and Search-mode token
-spans, short text, mixed language, unknown input, Han-only ambiguity, and
-unsupported Chinese. Assert that manual-review uses the fixed placeholder and
-retains ordered evidence:
+allowed English, allowed Korean, masked English, exact multibyte span을 가진 masked Korean,
+Kana와 Search-mode token span을 가진 Japanese, short text, mixed language, unknown input,
+Han-only ambiguity, unsupported Chinese table case를 추가한다. manual-review가 fixed placeholder를 사용하고
+ordered evidence를 보존하는지 assert한다.
 
 ```go
 func TestCreateMasksKoreanAndPreservesByteSpan(t *testing.T) {
@@ -180,20 +173,18 @@ func TestCreateMasksKoreanAndPreservesByteSpan(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run create tests and observe RED**
+- [ ] **Step 2: create test 실행 및 RED 확인**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'TestCreate'
 ```
 
-Expected: FAIL because `Create` and policy projections are absent.
+기대값: `Create`와 policy projection이 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement validation and routing helpers**
+- [ ] **Step 3: validation 및 routing helper 구현**
 
-Use one path-safe ID helper with
-`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`, UTF-8/rune validation, metadata-key
-trimming with post-trim collision detection, and copied values. Implement the
-Issue #119 reason order exactly:
+`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`를 사용하는 path-safe ID helper 하나, UTF-8/rune validation,
+post-trim collision detection을 가진 metadata-key trimming, copied value를 사용한다. Issue #119 reason order를 정확히 구현한다.
 
 ```go
 var reviewReasonOrder = []ReviewReason{
@@ -206,16 +197,14 @@ var reviewReasonOrder = []ReviewReason{
 }
 ```
 
-Route confident non-mixed English/Korean to moderation, confident non-mixed
-Japanese with Kana to Japanese preparation plus moderation, and every review
-reason to `manual-review`. Check `ctx.Err()` before detector calls, moderation,
-tokenization, and record stamping.
+confident non-mixed English/Korean은 moderation으로 route한다. Kana가 있는 confident non-mixed Japanese는
+Japanese preparation과 moderation으로 route한다. 모든 review reason은 `manual-review`로 보낸다.
+detector call, moderation, tokenization, record stamping 전에 `ctx.Err()`를 확인한다.
 
-- [ ] **Step 4: Implement library-owned masking and term projections**
+- [ ] **Step 4: library-owned masking 및 term projection 구현**
 
-For supported content call `NewBlockwordRequest` and
-`BlockwordDictionary.Process`. Convert matches to copied findings. Use one
-shared `prepareTerms` helper for both future queries and records:
+supported content에는 `NewBlockwordRequest`와 `BlockwordDictionary.Process`를 호출한다.
+match를 copied finding으로 변환한다. future query와 record 모두에 shared `prepareTerms` helper 하나를 사용한다.
 
 ```go
 var simpleTokenizeOptions = textsearch.TokenizeOptions{Normalize: textsearch.NormalizeNFC}
@@ -227,30 +216,27 @@ func simpleIndexTerm(token textsearch.Token) (string, bool) {
 }
 ```
 
-Japanese projection must select nouns/verbs, prefer a nonempty Kagome base
-form, NFC-normalize it, retain original token byte spans, and stable-deduplicate
-terms. Do not implement another tokenizer or offset mapper.
+Japanese projection은 noun/verb를 선택하고, nonempty Kagome base form을 우선하며, NFC-normalize하고,
+original token byte span을 유지하며, term을 stable-deduplicate해야 한다. 다른 tokenizer나 offset mapper를 구현하지 않는다.
 
-- [ ] **Step 5: Implement atomic duplicate/capacity/cancellation commit**
+- [ ] **Step 5: atomic duplicate/capacity/cancellation commit 구현**
 
-Build the complete unstamped candidate, check context, lock, check context
-again, then check duplicate before capacity. Call the serialized non-blocking
-clock only for an insertable candidate, stamp it, recheck context, and insert
-one value. Deep-copy every returned map/slice. Add failing-then-green tests for
-duplicate no-overwrite, capacity with duplicate precedence, metadata copying,
-and immediate pre-commit cancellation via a clock that cancels its context;
-assert that the final under-lock check prevents insertion.
+complete unstamped candidate를 만들고 context를 확인한 뒤 lock을 잡고 context를 다시 확인한다. capacity보다 duplicate를 먼저 확인한다.
+insert 가능한 candidate에 대해서만 serialized non-blocking clock을 호출하고 stamp한 뒤 context를 다시 확인하고 value 하나를 insert한다.
+반환되는 모든 map/slice는 deep-copy한다. duplicate no-overwrite, duplicate precedence가 있는 capacity,
+metadata copying, context를 cancel하는 clock을 통한 immediate pre-commit cancellation에 대해 failing-then-green test를 추가한다.
+final under-lock check가 insertion을 막는지 assert한다.
 
-- [ ] **Step 6: Run create tests and race validation**
+- [ ] **Step 6: create test 및 race validation 실행**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'Test(Create|Duplicate|Capacity|Metadata)'
 go test -race -count=1 ./examples/gin-content-moderation-workflow/internal/moderationapi -run 'TestCreate'
 ```
 
-Expected: PASS; multibyte slices equal original text and cancellation leaves the store unchanged.
+기대값: PASS. multibyte slice는 original text와 같고 cancellation은 store를 변경하지 않는다.
 
-- [ ] **Step 7: Format and commit the create workflow**
+- [ ] **Step 7: create workflow format 및 commit**
 
 ```bash
 gofmt -w examples/gin-content-moderation-workflow/internal/moderationapi/*.go
