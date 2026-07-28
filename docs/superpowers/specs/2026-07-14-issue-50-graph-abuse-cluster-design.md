@@ -175,41 +175,37 @@ input fixture order와 Neo4j record order는 output을 바꾸면 안 된다.
 
 ## CLI Contract
 
-The executable is run with:
+executable은 다음과 같이 실행한다.
 
 ```bash
 NEO4J_URI=bolt://127.0.0.1:7687 \
   go run ./examples/graph-abuse-cluster
 ```
 
-The local README run path starts Neo4j with authentication disabled and binds
-Bolt to loopback. `NEO4J_URI` is required; the CLI does not start a container.
-Authentication, TLS, routing, secret loading, and production Neo4j deployment
-remain explicit non-goals.
+local README run path는 authentication을 비활성화한 Neo4j를 시작하고 Bolt를 loopback에 bind한다.
+`NEO4J_URI`는 필수다. CLI는 container를 시작하지 않는다. Authentication, TLS, routing, secret loading,
+production Neo4j deployment는 명시적 non-goal로 남는다.
 
-Because the example deliberately uses `neo4j.NoAuth`, configuration validation
-accepts only a `bolt` URI with a required numeric port and a loopback host:
-`localhost`, `127.0.0.0/8`, or `::1`. It rejects user information, paths, query
-parameters, fragments, non-loopback hosts, missing or invalid ports, and every
-other scheme before driver creation. This is a local lesson, not a general
-Neo4j connection parser.
+예제는 의도적으로 `neo4j.NoAuth`를 사용하므로 configuration validation은 필수 numeric port와 loopback
+host를 가진 `bolt` URI만 허용한다. 허용 host는 `localhost`, `127.0.0.0/8`, `::1`이다. driver 생성
+전에 user information, path, query parameter, fragment, non-loopback host, 누락되었거나 유효하지 않은
+port, 그 밖의 모든 scheme을 거부한다. 이것은 local lesson이지 general Neo4j connection parser가 아니다.
 
-The CLI:
+CLI는 다음을 수행한다.
 
-- derives one signal-aware context with a 15-second operation deadline;
-- creates the official Neo4j driver and released adapter client;
-- verifies connectivity before fixture reset;
-- seeds, reads, analyzes, and encodes one JSON report into memory;
-- closes the client/driver with a fresh bounded cleanup context before success
-  output;
-- writes the complete encoded report to stdout only after cleanup succeeds;
-- writes only a stable error category to stderr and returns non-zero on failure.
+- 15초 operation deadline을 가진 signal-aware context 하나를 파생한다.
+- official Neo4j driver와 released adapter client를 생성한다.
+- fixture reset 전에 connectivity를 검증한다.
+- seed, read, analyze를 수행하고 하나의 JSON report를 memory에 encode한다.
+- success output 전에 fresh bounded cleanup context로 client/driver를 닫는다.
+- cleanup이 성공한 뒤에만 완전히 encode된 report를 stdout에 쓴다.
+- failure 시 stderr에는 stable error category만 쓰고 non-zero를 반환한다.
 
-The JSON report contains `clusters` and `isolated_users`. Each cluster contains
-`cluster_id`, sorted `users`, sorted `evidence`, and `risk_score`. Evidence
-contains only fixture-safe `kind`, `opaque_id`, `user_count`, and `weight`.
+JSON report는 `clusters`와 `isolated_users`를 포함한다. 각 cluster는 `cluster_id`, 정렬된
+`users`, 정렬된 `evidence`, `risk_score`를 포함한다. evidence는 fixture-safe `kind`, `opaque_id`,
+`user_count`, `weight`만 포함한다.
 
-The exact checked-in fixture output is:
+정확한 checked-in fixture output은 다음과 같다.
 
 ```json
 {
@@ -268,79 +264,68 @@ The exact checked-in fixture output is:
 
 ## Errors, Cancellation, and Cleanup
 
-Internal errors preserve causes with `%w` for tests and caller inspection. The
-application defines stable categories for invalid fixture, invalid graph data,
-oversized graph, configuration, and backend operation failure. It preserves
-`context.Canceled` and `context.DeadlineExceeded` so tests can distinguish
-caller cancellation from provider failure.
+internal error는 test와 caller inspection을 위해 `%w`로 cause를 보존한다. application은 invalid
+fixture, invalid graph data, oversized graph, configuration, backend operation failure에 대한 stable
+category를 정의한다. test가 caller cancellation과 provider failure를 구분할 수 있도록
+`context.Canceled`와 `context.DeadlineExceeded`를 보존한다.
 
-The terminal boundary does not print raw Cypher, parameters, Neo4j provider
-messages, credentials, URIs, or identifier values on failures. Successful JSON
-contains only the intentionally opaque fixture evidence.
+terminal boundary는 failure 시 raw Cypher, parameter, Neo4j provider message, credential, URI,
+identifier value를 출력하지 않는다. successful JSON은 의도적으로 opaque한 fixture evidence만 포함한다.
 
-The driver is owned by the CLI or test that created it. Cleanup uses a fresh
-bounded context so a canceled operation context does not prevent resource
-closure. Testcontainers termination is registered immediately after startup
-and uses its own bounded cleanup context.
+driver는 이를 생성한 CLI 또는 test가 소유한다. cleanup은 fresh bounded context를 사용해 canceled
+operation context가 resource closure를 막지 못하게 한다. Testcontainers termination은 startup 직후
+등록되고 자체 bounded cleanup context를 사용한다.
 
-The complete JSON report is encoded into a buffer before cleanup and output.
-Any invalid record, missing endpoint, unknown kind, over-limit result,
-cancellation, query failure, JSON encoding failure, or cleanup failure returns
-an error and does not attempt success output. A low-level stdout write failure
-may leave bytes already accepted by the operating system; it still returns
-non-zero and is never reported as success.
+complete JSON report는 cleanup과 output 전에 buffer에 encode된다. invalid record, missing endpoint,
+unknown kind, over-limit result, cancellation, query failure, JSON encoding failure, cleanup
+failure는 error를 반환하고 success output을 시도하지 않는다. low-level stdout write failure는 operating
+system이 이미 받아들인 byte를 남길 수 있다. 그래도 non-zero를 반환하며 success로 보고하지 않는다.
 
 ## Dependency Decision
 
-This issue promotes only the dependencies required by the approved Neo4j
-boundary:
+이 issue는 승인된 Neo4j boundary에 필요한 dependency만 promote한다.
 
-- `github.com/neo4j/neo4j-go-driver/v6` for the caller-owned runtime driver;
-- `github.com/testcontainers/testcontainers-go/modules/neo4j` for serial
-  integration evidence.
+- caller-owned runtime driver용 `github.com/neo4j/neo4j-go-driver/v6`
+- serial integration evidence용 `github.com/testcontainers/testcontainers-go/modules/neo4j`
 
-Both match the released `bluetape-go v0.18.0 graph/neo4j` implementation and
-test surface. No alternative driver, graph algorithm library, CLI framework, or
-logging dependency is added. `go mod tidy` owns the exact selected versions and
-`tidy-check` must remain clean.
+둘 다 released `bluetape-go v0.18.0 graph/neo4j` implementation 및 test surface와 맞는다.
+alternative driver, graph algorithm library, CLI framework, logging dependency는 추가하지 않는다.
+`go mod tidy`가 정확한 selected version을 소유하며 `tidy-check`는 계속 clean해야 한다.
 
 ## Security and Privacy Boundary
 
-- All fixture identifiers are synthetic opaque strings.
-- The application never hashes raw user input and therefore makes no hashing
-  strength or collision claim.
-- Cypher structure is fixed; all data values are parameterized.
-- The local run command binds Neo4j only to loopback, and CLI validation rejects
-  non-loopback or credential-bearing connection URIs before driver creation.
-- Raw provider errors and connection details are redacted at the terminal
-  boundary.
-- Authentication, authorization, tenant isolation, encryption, retention,
-  audit logging, and production fraud decisions are not implemented and must
-  be called out in both READMEs.
+- 모든 fixture identifier는 synthetic opaque string이다.
+- application은 raw user input을 hash하지 않으므로 hashing strength 또는 collision claim을 하지 않는다.
+- Cypher structure는 고정이고 모든 data value는 parameterized다.
+- local run command는 Neo4j를 loopback에만 bind하며, CLI validation은 driver 생성 전에 non-loopback
+  또는 credential-bearing connection URI를 거부한다.
+- raw provider error와 connection detail은 terminal boundary에서 redact된다.
+- authentication, authorization, tenant isolation, encryption, retention, audit logging,
+  production fraud decision은 구현하지 않으며 양쪽 README에 명시해야 한다.
 
 ## Documentation and Diagrams
 
-`README.md` and `README.ko.md` will stay source-equivalent and include:
+`README.md`와 `README.ko.md`는 source-equivalent를 유지하고 다음을 포함한다.
 
-- the lesson and non-goals;
-- the vertex/edge schema and score formula;
-- the Docker and `go run` commands;
-- representative deterministic JSON output;
-- cancellation, bounds, privacy, and production caveats;
-- focused, race, and serial Testcontainers test commands.
+- lesson과 non-goal
+- vertex/edge schema와 score formula
+- Docker 및 `go run` command
+- representative deterministic JSON output
+- cancellation, bound, privacy, production caveat
+- focused, race, serial Testcontainers test command
 
-The root README pair adds one navigation and run entry.
+root README pair는 navigation 및 run entry 하나를 추가한다.
 
-Two paired SVG/PNG diagrams will be produced through `bluetape-diagram`:
+두 쌍의 SVG/PNG diagram은 `bluetape-diagram`을 통해 생성한다.
 
 1. architecture: fixture validation -> Neo4j adapter -> Neo4j -> bounded read
-   -> Go analyzer -> JSON report;
+   -> Go analyzer -> JSON report
 2. sequence: configuration, connectivity, scoped reset, seed, bounded reads,
-   cluster analysis, output, and cleanup.
+   cluster analysis, output, cleanup
 
-The diagram checklist includes automated connector/geometry/endpoint/style
-audits, deterministic rerendering, original-size SVG/PNG eye inspection,
-arrowhead direction after conversion, and bend clearance for marker size.
+diagram checklist는 automated connector/geometry/endpoint/style audit, deterministic rerendering,
+original-size SVG/PNG eye inspection, conversion 이후 arrowhead direction, marker size에 대한 bend
+clearance를 포함한다.
 
 ## Test Strategy
 
