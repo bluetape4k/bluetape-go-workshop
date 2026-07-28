@@ -1,45 +1,44 @@
-# Issue #77 Design: Multi-Currency Invoice Rule Evaluation Example
+# Issue #77 설계: Multi-Currency Invoice Rule Evaluation 예제
 
-## Frame
+## 프레임
 
 - Issue: #77 `[v0.6.0] Add multi currency invoice rule evaluation example`
 - Milestone: `0.6.0`
-- Branch/worktree: `feat/issue-77-multi-currency-invoice` under
+- 브랜치/워크트리: `feat/issue-77-multi-currency-invoice`, 위치는
   `.worktrees/feat-issue-77-multi-currency-invoice`.
-- Base example: #45 `examples/money-rule-pricing` teaches single-currency cart
-  pricing with `money.Money` and local rule decisions.
+- Base example: #45 `examples/money-rule-pricing`는 `money.Money`와 local rule
+  decision으로 single-currency cart pricing을 설명한다.
 
-## Goal
+## 목표
 
-Create `examples/multi-currency-invoice-rules`, a runnable Gin example that
-evaluates invoice lines grouped by currency, applies explicit discount and
-tax-like rules without exchange-rate conversion, and exposes rounded totals per
-currency.
+Currency별로 grouped invoice line을 평가하고, exchange-rate conversion 없이 명시적인
+discount 및 tax-like rule을 적용하며, currency별 rounded total을 노출하는 실행
+가능한 Gin 예제 `examples/multi-currency-invoice-rules`를 만든다.
 
-This example teaches invoice-level multi-currency semantics. It is not a
-general rule engine, tax engine, exchange-rate service, accounting ledger, or
-invoice persistence layer.
+이 예제는 invoice-level multi-currency semantics를 설명한다. General rule engine,
+tax engine, exchange-rate service, accounting ledger, invoice persistence layer가
+아니다.
 
-## Evidence
+## 근거
 
-- `gh issue view 77` requires a runnable example, money utilities, rule-engine
-  style invoice decisions, visible rounding, invalid currency rejection, and
-  README navigation that links #45 as the base money/rule pricing example.
-- `examples/money-rule-pricing` already proves local rule decisions with
-  `accepted`, `rejected`, and `skipped` statuses.
-- `github.com/bluetape4k/bluetape-go/money` provides explicit ISO 4217
-  currencies, `Money.Round()` with currency scale, and same-currency
-  arithmetic. There is no dedicated reusable rules package in the current
-  module surface, so rules stay example-local.
+- `gh issue view 77`은 실행 가능한 예제, money utility, rule-engine style invoice
+  decision, visible rounding, invalid currency rejection, #45를 base money/rule
+  pricing 예제로 link하는 README navigation을 요구한다.
+- `examples/money-rule-pricing`는 이미 `accepted`, `rejected`, `skipped` status로
+  local rule decision을 증명한다.
+- `github.com/bluetape4k/bluetape-go/money`는 명시적인 ISO 4217 currency,
+  currency scale을 사용하는 `Money.Round()`, same-currency arithmetic을 제공한다.
+  현재 module surface에는 dedicated reusable rules package가 없으므로 rule은
+  example-local로 유지한다.
 
-## HTTP Contract
+## HTTP 계약
 
-| Method | Path | Purpose |
+| Method | Path | 목적 |
 |---|---|---|
-| `GET` | `/healthz` | Process liveness only. |
-| `POST` | `/invoices/evaluate` | Evaluate one invoice and return grouped currency totals plus rule decisions. |
+| `GET` | `/healthz` | Process liveness 전용. |
+| `POST` | `/invoices/evaluate` | Invoice 하나를 평가하고 grouped currency total과 rule decision을 반환한다. |
 
-## Request Contract
+## Request 계약
 
 ```json
 {
@@ -59,72 +58,71 @@ invoice persistence layer.
 }
 ```
 
-## Rule Contract
+## Rule 계약
 
 - `vip-service-discount`
-  - Applies a 5% discount to service lines when `customer_tier = vip`.
-  - Skips non-service lines and non-VIP customers with explicit reasons.
+  - `customer_tier = vip`일 때 service line에 5% discount를 적용한다.
+  - Non-service line과 non-VIP customer는 명시적인 reason과 함께 skip한다.
 - `regional-vat`
-  - Applies a 20% tax-like adjustment to taxable lines when `region = EU`.
-  - Computes tax on the line total after the line's discount.
-  - Skips `tax_exempt` lines and non-EU regions with explicit reasons.
-- Rules never combine values across currencies. Each rule decision carries a
-  currency and an optional rounded amount.
+  - `region = EU`일 때 taxable line에 20% tax-like adjustment를 적용한다.
+  - Line discount 이후의 line total에서 tax를 계산한다.
+  - `tax_exempt` line과 non-EU region은 명시적인 reason과 함께 skip한다.
+- Rule은 currency를 넘어 값을 결합하지 않는다. 각 rule decision은 currency와
+  선택적인 rounded amount를 가진다.
 
-## Money Contract
+## Money 계약
 
-- Parse every line currency with `money.ParseCurrency`.
-- Parse every line amount with `money.New`.
-- Round each line total, discount, tax, and final currency total with
-  `Money.Round()`.
-- Group totals by currency code. Do not convert or merge currencies.
-- Reject `XXX`, empty, or otherwise invalid currency input as `invalid_money`.
+- 모든 line currency는 `money.ParseCurrency`로 parse한다.
+- 모든 line amount는 `money.New`로 parse한다.
+- 각 line total, discount, tax, final currency total은 `Money.Round()`로 round한다.
+- Total은 currency code별로 group한다. Currency를 convert하거나 merge하지 않는다.
+- `XXX`, empty, 그 밖의 invalid currency input은 `invalid_money`로 reject한다.
 
-## Error Contract
+## Error 계약
 
-Public responses use this shape:
+Public response는 다음 형태를 사용한다.
 
 ```json
 {"error_code":"invalid_money","message":"invalid money input"}
 ```
 
-Allowed public codes:
+허용되는 public code:
 
 - `invalid_request` (`400`)
 - `invalid_money` (`400`)
 - `invoice_error` (`500`)
 
-Responses must not echo raw invalid amount or currency parser diagnostics.
+Response는 raw invalid amount 또는 currency parser diagnostic을 echo하면 안 된다.
 
-## Non-Goals
+## 비목표
 
-- No exchange rates or cross-currency settlement.
-- No reusable rule framework.
-- No persistent invoices, payment capture, accounting export, or locale tax
-  compliance.
-- No new dependencies beyond existing Gin and `bluetape-go/money`.
+- Exchange rate 또는 cross-currency settlement 없음.
+- Reusable rule framework 없음.
+- Persistent invoice, payment capture, accounting export, locale tax compliance
+  없음.
+- 기존 Gin과 `bluetape-go/money`를 넘어서는 새 의존성 없음.
 
-## Documentation Requirements
+## 문서 요구사항
 
-- Add English/Korean README pair under
-  `examples/multi-currency-invoice-rules`.
-- Root English/Korean README tables include the example.
-- Root run section links #45 as the base money/rule pricing example and states
-  that #77 extends it to multi-currency invoices without conversion.
-- Add `docs/lessons/2026-06-22-multi-currency-invoice-rules.md`.
+- `examples/multi-currency-invoice-rules` 아래에 English/Korean README pair를
+  추가한다.
+- Root English/Korean README table은 예제를 포함한다.
+- Root run section은 #45를 base money/rule pricing 예제로 link하고, #77이 이를
+  conversion 없는 multi-currency invoice로 확장한다고 설명한다.
+- `docs/lessons/2026-06-22-multi-currency-invoice-rules.md`를 추가한다.
 
-## Test Requirements
+## 테스트 요구사항
 
-- Currency-specific rounding is visible, including a zero-minor-unit currency.
-- Discount eligibility applies only to VIP service lines.
-- Invalid currency input is rejected as `ErrInvalidMoney` and public
-  `invalid_money`.
-- HTTP success and error paths map to stable public response shapes.
-- `main.go` keeps loopback binding and bounded server timeouts.
+- Zero-minor-unit currency를 포함해 currency-specific rounding이 보여야 한다.
+- Discount eligibility는 VIP service line에만 적용된다.
+- Invalid currency input은 `ErrInvalidMoney` 및 public `invalid_money`로
+  reject된다.
+- HTTP success 및 error path는 안정적인 public response shape로 mapping된다.
+- `main.go`는 loopback binding과 bounded server timeout을 유지한다.
 
-## Completion Criteria
+## 완료 기준
 
-- Issue #77 acceptance criteria are implemented.
-- PR body closes #77 and ends with `## DoD Status`.
-- PR metadata mirrors the issue: assignee `debop`, milestone `0.6.0`, labels
-  `enhancement` and `examples`.
+- Issue #77 acceptance criteria를 구현한다.
+- PR body는 #77을 close하고 `## DoD Status`로 끝난다.
+- PR metadata는 issue를 반영한다. Assignee `debop`, milestone `0.6.0`, label
+  `enhancement`, `examples`.
