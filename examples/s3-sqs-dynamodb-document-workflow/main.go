@@ -1,4 +1,4 @@
-// Package main prints the S3-SQS-DynamoDB document workflow preview.
+// Package main 은 S3-SQS-DynamoDB 문서 워크플로 미리보기를 출력한다.
 package main
 
 import (

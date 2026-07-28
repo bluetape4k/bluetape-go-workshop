@@ -1,4 +1,4 @@
-// Package receiptstore demonstrates a small S3-backed storage boundary.
+// Package receiptstore 는 작은 S3 기반 저장소 경계를 보여준다.
 package receiptstore
 
 import (
@@ -23,13 +23,13 @@ import (
 const defaultDownloadTTL = 15 * time.Minute
 
 var (
-	// ErrInvalidObject reports an object request that is unsafe or incomplete.
+	// ErrInvalidObject 는 안전하지 않거나 불완전한 객체 요청을 나타낸다.
 	ErrInvalidObject = errors.New("receiptstore: invalid object")
-	// ErrObjectNotFound reports a missing S3 object using an application-level error.
+	// ErrObjectNotFound 는 누락된 S3 객체를 애플리케이션 수준 오류로 나타낸다.
 	ErrObjectNotFound = errors.New("receiptstore: object not found")
 )
 
-// Client is the narrow S3 client surface needed by Store.
+// Client 는 Store 에 필요한 좁은 S3 클라이언트 표면이다.
 type Client interface {
 	PutObject(context.Context, *s3.PutObjectInput, ...func(*s3.Options)) (*s3.PutObjectOutput, error)
 	GetObject(context.Context, *s3.GetObjectInput, ...func(*s3.Options)) (*s3.GetObjectOutput, error)
@@ -37,18 +37,18 @@ type Client interface {
 	DeleteObject(context.Context, *s3.DeleteObjectInput, ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 }
 
-// Presigner is the narrow presign surface needed for caller-owned download links.
+// Presigner 는 호출자 소유 다운로드 링크에 필요한 좁은 presign 표면이다.
 type Presigner interface {
 	PresignGetObject(context.Context, *s3.GetObjectInput, ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error)
 }
 
-// Store owns the bucket name, object key convention, and metadata contract.
+// Store 는 버킷 이름, 객체 키 규칙, 메타데이터 계약을 소유한다.
 type Store struct {
 	Bucket      string
 	DownloadTTL time.Duration
 }
 
-// ReceiptDocument is the application-owned upload command.
+// ReceiptDocument 는 애플리케이션이 소유하는 업로드 명령이다.
 type ReceiptDocument struct {
 	TenantID  string            `json:"tenant_id"`
 	ReceiptID string            `json:"receipt_id"`
@@ -57,7 +57,7 @@ type ReceiptDocument struct {
 	Metadata  map[string]string `json:"metadata,omitempty"`
 }
 
-// StoredObject describes the object persisted in S3.
+// StoredObject 는 S3에 저장된 객체를 설명한다.
 type StoredObject struct {
 	TenantID    string            `json:"tenant_id"`
 	ReceiptID   string            `json:"receipt_id"`
@@ -68,20 +68,20 @@ type StoredObject struct {
 	Metadata    map[string]string `json:"metadata,omitempty"`
 }
 
-// DownloadedObject contains the S3 object body and selected metadata.
+// DownloadedObject 는 S3 객체 본문과 선택된 메타데이터를 담는다.
 type DownloadedObject struct {
 	StoredObject
 	Body []byte `json:"body,omitempty"`
 }
 
-// PresignedDownload describes the caller-facing presigned URL result.
+// PresignedDownload 는 호출자에게 반환되는 presigned URL 결과를 설명한다.
 type PresignedDownload struct {
 	Method    string        `json:"method"`
 	URL       string        `json:"url"`
 	ExpiresIn time.Duration `json:"expires_in"`
 }
 
-// Preview describes the example contract without contacting S3.
+// Preview 는 S3에 접속하지 않고 예제 계약을 설명한다.
 type Preview struct {
 	Bucket        string   `json:"bucket"`
 	ObjectPrefix  string   `json:"object_prefix"`
@@ -90,7 +90,7 @@ type Preview struct {
 	SmokeTest     string   `json:"smoke_test"`
 }
 
-// NewStore creates an S3 receipt store.
+// NewStore 는 S3 영수증 저장소를 생성한다.
 func NewStore(bucket string, downloadTTL time.Duration) (Store, error) {
 	if bucket == "" {
 		return Store{}, fmt.Errorf("%w: bucket is required", ErrInvalidObject)
@@ -101,7 +101,7 @@ func NewStore(bucket string, downloadTTL time.Duration) (Store, error) {
 	return Store{Bucket: bucket, DownloadTTL: downloadTTL}, nil
 }
 
-// NewPreview builds a local preview for README and go run output.
+// NewPreview 는 README 와 go run 출력용 로컬 미리보기를 구성한다.
 func NewPreview(bucket string) (Preview, error) {
 	if _, err := NewStore(bucket, defaultDownloadTTL); err != nil {
 		return Preview{}, err
@@ -125,7 +125,7 @@ func NewPreview(bucket string) (Preview, error) {
 	}, nil
 }
 
-// Upload stores a tenant receipt object in S3.
+// Upload 는 tenant 영수증 객체를 S3에 저장한다.
 func (s Store) Upload(ctx context.Context, client Client, doc ReceiptDocument) (StoredObject, error) {
 	if err := ctx.Err(); err != nil {
 		return StoredObject{}, err
@@ -160,7 +160,7 @@ func (s Store) Upload(ctx context.Context, client Client, doc ReceiptDocument) (
 	return object, nil
 }
 
-// Download reads a receipt object and closes the response body.
+// Download 는 영수증 객체를 읽고 응답 본문을 닫는다.
 func (s Store) Download(ctx context.Context, client Client, tenantID, receiptID, fileName string) (DownloadedObject, error) {
 	if err := ctx.Err(); err != nil {
 		return DownloadedObject{}, err
@@ -208,7 +208,7 @@ func (s Store) Download(ctx context.Context, client Client, tenantID, receiptID,
 	}, nil
 }
 
-// ListTenantReceipts lists receipt objects under one tenant prefix.
+// ListTenantReceipts 는 하나의 tenant prefix 아래 영수증 객체를 나열한다.
 func (s Store) ListTenantReceipts(ctx context.Context, client Client, tenantID string) ([]StoredObject, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -242,7 +242,7 @@ func (s Store) ListTenantReceipts(ctx context.Context, client Client, tenantID s
 	return items, nil
 }
 
-// Delete removes one receipt object.
+// Delete 는 영수증 객체 하나를 제거한다.
 func (s Store) Delete(ctx context.Context, client Client, tenantID, receiptID, fileName string) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -264,7 +264,7 @@ func (s Store) Delete(ctx context.Context, client Client, tenantID, receiptID, f
 	return nil
 }
 
-// PresignDownload creates a caller-facing GET URL for one receipt object.
+// PresignDownload 는 영수증 객체 하나에 대한 호출자용 GET URL을 생성한다.
 func (s Store) PresignDownload(ctx context.Context, presigner Presigner, tenantID, receiptID, fileName string) (PresignedDownload, error) {
 	if err := ctx.Err(); err != nil {
 		return PresignedDownload{}, err
@@ -289,7 +289,7 @@ func (s Store) PresignDownload(ctx context.Context, presigner Presigner, tenantI
 	return PresignedDownload{Method: request.Method, URL: request.URL, ExpiresIn: expires}, nil
 }
 
-// SampleDocuments returns tenant-shaped data for preview and tests.
+// SampleDocuments 는 미리보기와 테스트에 사용할 tenant 형태 데이터를 반환한다.
 func SampleDocuments() []ReceiptDocument {
 	return []ReceiptDocument{
 		{TenantID: "tenant-alpha", ReceiptID: "receipt-1001", FileName: "invoice-1001.txt", Body: []byte("receipt 1001\n"), Metadata: map[string]string{"source": "checkout"}},

@@ -1,4 +1,4 @@
-// Package main runs the safe decompression upload example service.
+// Package main 은 안전한 압축 해제 업로드 예제 서비스를 실행한다.
 package main
 
 import (

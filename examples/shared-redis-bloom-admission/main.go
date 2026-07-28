@@ -1,4 +1,4 @@
-// Package main runs the shared Redis Bloom admission example service.
+// Package main 은 공유 Redis Bloom 입장 판단 예제 서비스를 실행한다.
 package main
 
 import (

@@ -1,4 +1,4 @@
-// Package documentworkflow demonstrates a small S3, SQS, and DynamoDB workflow.
+// Package documentworkflow 는 작은 S3, SQS, DynamoDB 워크플로를 보여준다.
 package documentworkflow
 
 import (
@@ -30,21 +30,21 @@ const (
 )
 
 var (
-	// ErrInvalidDocument reports an unsafe or incomplete document workflow request.
+	// ErrInvalidDocument 는 안전하지 않거나 불완전한 문서 워크플로 요청을 나타낸다.
 	ErrInvalidDocument = errors.New("documentworkflow: invalid document")
-	// ErrNoMessages reports that SQS returned no visible messages.
+	// ErrNoMessages 는 SQS가 visible message 를 반환하지 않았음을 나타낸다.
 	ErrNoMessages = errors.New("documentworkflow: no messages")
-	// ErrConditionalConflict reports a duplicate DynamoDB processing record.
+	// ErrConditionalConflict 는 중복 DynamoDB 처리 레코드를 나타낸다.
 	ErrConditionalConflict = errors.New("documentworkflow: conditional conflict")
 )
 
-// StorageClient is the narrow S3 surface used by the workflow.
+// StorageClient 는 워크플로가 사용하는 좁은 S3 표면이다.
 type StorageClient interface {
 	PutObject(context.Context, *s3.PutObjectInput, ...func(*s3.Options)) (*s3.PutObjectOutput, error)
 	GetObject(context.Context, *s3.GetObjectInput, ...func(*s3.Options)) (*s3.GetObjectOutput, error)
 }
 
-// QueueClient is the narrow SQS surface used by the workflow.
+// QueueClient 는 워크플로가 사용하는 좁은 SQS 표면이다.
 type QueueClient interface {
 	SendMessage(context.Context, *sqs.SendMessageInput, ...func(*sqs.Options)) (*sqs.SendMessageOutput, error)
 	ReceiveMessage(context.Context, *sqs.ReceiveMessageInput, ...func(*sqs.Options)) (*sqs.ReceiveMessageOutput, error)
@@ -52,12 +52,12 @@ type QueueClient interface {
 	ChangeMessageVisibility(context.Context, *sqs.ChangeMessageVisibilityInput, ...func(*sqs.Options)) (*sqs.ChangeMessageVisibilityOutput, error)
 }
 
-// StateClient is the narrow DynamoDB surface used by the workflow.
+// StateClient 는 워크플로가 사용하는 좁은 DynamoDB 표면이다.
 type StateClient interface {
 	PutItem(context.Context, *dynamodb.PutItemInput, ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
 }
 
-// Workflow owns resource names, key conventions, and retry policy.
+// Workflow 는 리소스 이름, 키 규칙, 재시도 정책을 소유한다.
 type Workflow struct {
 	Bucket                string
 	QueueURL              string
@@ -67,7 +67,7 @@ type Workflow struct {
 	FailureVisibleSeconds int32
 }
 
-// DocumentUpload is the caller-owned document ingestion command.
+// DocumentUpload 은 호출자가 소유하는 문서 ingest 명령이다.
 type DocumentUpload struct {
 	TenantID   string            `json:"tenant_id"`
 	DocumentID string            `json:"document_id"`
@@ -76,7 +76,7 @@ type DocumentUpload struct {
 	Metadata   map[string]string `json:"metadata,omitempty"`
 }
 
-// DocumentEvent is the SQS message payload created after S3 persistence.
+// DocumentEvent 는 S3 저장 후 생성되는 SQS 메시지 payload 다.
 type DocumentEvent struct {
 	TenantID       string `json:"tenant_id"`
 	DocumentID     string `json:"document_id"`
@@ -86,7 +86,7 @@ type DocumentEvent struct {
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
-// SubmittedDocument describes the stored object and queued processing event.
+// SubmittedDocument 는 저장된 객체와 큐에 들어간 처리 이벤트를 설명한다.
 type SubmittedDocument struct {
 	TenantID       string `json:"tenant_id"`
 	DocumentID     string `json:"document_id"`
@@ -97,7 +97,7 @@ type SubmittedDocument struct {
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
-// ProcessResult describes one SQS processing attempt.
+// ProcessResult 는 SQS 처리 시도 하나를 설명한다.
 type ProcessResult struct {
 	Event             DocumentEvent `json:"event,omitempty"`
 	MessageID         string        `json:"message_id,omitempty"`
@@ -111,7 +111,7 @@ type ProcessResult struct {
 	VisibilitySeconds int32         `json:"visibility_seconds,omitempty"`
 }
 
-// Preview describes the example contract without contacting AWS services.
+// Preview 는 AWS 서비스에 접속하지 않고 예제 계약을 설명한다.
 type Preview struct {
 	Bucket           string   `json:"bucket"`
 	QueueName        string   `json:"queue_name"`
@@ -124,7 +124,7 @@ type Preview struct {
 	SmokeTest        string   `json:"smoke_test"`
 }
 
-// NewWorkflow creates a document workflow with bounded receive defaults.
+// NewWorkflow 는 제한된 receive 기본값을 가진 문서 워크플로를 생성한다.
 func NewWorkflow(bucket, queueURL, table string, waitTimeSeconds, visibilitySeconds, failureVisibleSeconds int32) (Workflow, error) {
 	switch {
 	case bucket == "":
@@ -153,7 +153,7 @@ func NewWorkflow(bucket, queueURL, table string, waitTimeSeconds, visibilitySeco
 	}, nil
 }
 
-// NewPreview builds an inspectable local preview for README and go run output.
+// NewPreview 는 README 와 go run 출력용으로 검토 가능한 로컬 미리보기를 구성한다.
 func NewPreview(bucket, queueName, table string) (Preview, error) {
 	if _, err := NewWorkflow(bucket, "https://sqs.local/000000000000/"+queueName, table, 2, 30, 0); err != nil {
 		return Preview{}, err
@@ -185,7 +185,7 @@ func NewPreview(bucket, queueName, table string) (Preview, error) {
 	}, nil
 }
 
-// Submit persists the document object, then publishes one SQS processing event.
+// Submit 은 문서 객체를 저장한 뒤 SQS 처리 이벤트 하나를 발행한다.
 func (w Workflow) Submit(ctx context.Context, storage StorageClient, queue QueueClient, doc DocumentUpload) (SubmittedDocument, error) {
 	if err := ctx.Err(); err != nil {
 		return SubmittedDocument{}, err
@@ -251,7 +251,7 @@ func (w Workflow) Submit(ctx context.Context, storage StorageClient, queue Queue
 	}, nil
 }
 
-// ProcessOnce receives at most one SQS message and acknowledges only terminal outcomes.
+// ProcessOnce 는 최대 하나의 SQS 메시지를 받고 종료 결과에만 acknowledge 한다.
 func (w Workflow) ProcessOnce(ctx context.Context, storage StorageClient, queue QueueClient, state StateClient) (ProcessResult, error) {
 	if err := ctx.Err(); err != nil {
 		return ProcessResult{}, err
@@ -305,7 +305,7 @@ func (w Workflow) ProcessOnce(ctx context.Context, storage StorageClient, queue 
 	return result, nil
 }
 
-// SampleDocuments returns enough scenario data for preview and tests.
+// SampleDocuments 는 미리보기와 테스트에 충분한 시나리오 데이터를 반환한다.
 func SampleDocuments() []DocumentUpload {
 	return []DocumentUpload{
 		{TenantID: "tenant-alpha", DocumentID: "doc-1001", FileName: "contract-1001.txt", Body: []byte("contract 1001\n"), Metadata: map[string]string{"source": "portal"}},

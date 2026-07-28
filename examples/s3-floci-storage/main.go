@@ -1,4 +1,4 @@
-// Package main prints the S3 Floci storage preview.
+// Package main 은 S3 Floci 저장소 미리보기를 출력한다.
 package main
 
 import (

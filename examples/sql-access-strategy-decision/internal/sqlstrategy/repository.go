@@ -1,4 +1,4 @@
-// Package sqlstrategy compares direct database/sql and sqlkit repository shapes.
+// Package sqlstrategy 는 직접 database/sql 사용과 sqlkit repository 형태를 비교한다.
 package sqlstrategy
 
 import (
@@ -16,46 +16,46 @@ const (
 )
 
 var (
-	// ErrInvalidHold reports missing or invalid hold input.
+	// ErrInvalidHold 는 누락되었거나 유효하지 않은 hold 입력을 나타낸다.
 	ErrInvalidHold = errors.New("sqlstrategy: invalid hold")
-	// ErrAuditRejected is used by tests to prove transaction rollback.
+	// ErrAuditRejected 는 테스트에서 트랜잭션 롤백을 증명하기 위해 사용된다.
 	ErrAuditRejected = errors.New("sqlstrategy: audit rejected")
-	// ErrDirectTooManyRows reports direct database/sql cardinality overflow.
+	// ErrDirectTooManyRows 는 직접 database/sql 조회의 cardinality 초과를 나타낸다.
 	ErrDirectTooManyRows = errors.New("sqlstrategy: direct query returned too many rows")
 )
 
-// HoldStatus is a narrow order-hold lifecycle state used by the example.
+// HoldStatus 는 예제가 사용하는 좁은 주문 hold 수명주기 상태다.
 type HoldStatus string
 
 const (
-	// StatusPending means the hold is created but not confirmed.
+	// StatusPending 은 hold 가 생성됐지만 확정되지 않았음을 의미한다.
 	StatusPending HoldStatus = "pending"
-	// StatusConfirmed means the hold was confirmed inside a transaction.
+	// StatusConfirmed 는 hold 가 트랜잭션 안에서 확정됐음을 의미한다.
 	StatusConfirmed HoldStatus = "confirmed"
 )
 
-// Hold is the domain row used by both repository strategies.
+// Hold 는 두 repository 전략이 함께 사용하는 도메인 행이다.
 type Hold struct {
 	ID       string     `json:"id"`
 	Customer string     `json:"customer"`
 	Status   HoldStatus `json:"status"`
 }
 
-// StatementSnapshot is an inspectable SQL statement plus argument list.
+// StatementSnapshot 은 검토 가능한 SQL 문과 인자 목록이다.
 type StatementSnapshot struct {
 	Name string `json:"name"`
 	SQL  string `json:"sql"`
 	Args []any  `json:"args,omitempty"`
 }
 
-// StrategyChoice documents when each SQL access style should be selected.
+// StrategyChoice 는 각 SQL 접근 방식을 언제 선택해야 하는지 문서화한다.
 type StrategyChoice struct {
 	Name     string `json:"name"`
 	UseWhen  string `json:"use_when"`
 	Boundary string `json:"boundary"`
 }
 
-// DecisionReport is the runnable example output.
+// DecisionReport 는 실행 가능한 예제 출력이다.
 type DecisionReport struct {
 	Scenario   string              `json:"scenario"`
 	Direct     []StatementSnapshot `json:"direct_database_sql"`
@@ -64,13 +64,13 @@ type DecisionReport struct {
 	Production []string            `json:"production_hardening"`
 }
 
-// DirectRepository uses caller-owned SQL strings and database/sql directly.
+// DirectRepository 는 호출자가 소유한 SQL 문자열과 database/sql 을 직접 사용한다.
 type DirectRepository struct{}
 
-// SQLKitRepository uses sqlkit statements, row helpers, and transactions.
+// SQLKitRepository 는 sqlkit 문, 행 helper, 트랜잭션을 사용한다.
 type SQLKitRepository struct{}
 
-// NewDecisionReport builds inspectable SQL and tool-selection guidance.
+// NewDecisionReport 는 검토 가능한 SQL과 도구 선택 가이드를 구성한다.
 func NewDecisionReport(sample Hold) (DecisionReport, error) {
 	if err := validateHold(sample); err != nil {
 		return DecisionReport{}, err
@@ -137,7 +137,7 @@ func NewDecisionReport(sample Hold) (DecisionReport, error) {
 	}, nil
 }
 
-// Create inserts a hold with direct database/sql.
+// Create 는 직접 database/sql 로 hold 를 삽입한다.
 func (DirectRepository) Create(ctx context.Context, db sqlkit.Execer, hold Hold) error {
 	stmt, err := (DirectRepository{}).CreateStatement(hold)
 	if err != nil {
@@ -147,7 +147,7 @@ func (DirectRepository) Create(ctx context.Context, db sqlkit.Execer, hold Hold)
 	return err
 }
 
-// Find reads exactly one hold with direct database/sql and manual cardinality.
+// Find 는 직접 database/sql 과 수동 cardinality 검사로 hold 하나만 읽는다.
 func (DirectRepository) Find(ctx context.Context, db sqlkit.Queryer, id string) (result Hold, err error) {
 	stmt := (DirectRepository{}).FindStatement(id)
 	rows, err := db.QueryContext(ctx, stmt.SQL, stmt.Args...)
@@ -180,7 +180,7 @@ func (DirectRepository) Find(ctx context.Context, db sqlkit.Queryer, id string) 
 	return found[0], nil
 }
 
-// Confirm marks a hold confirmed and writes an audit event with direct SQL.
+// Confirm 은 직접 SQL로 hold 를 확정 표시하고 감사 이벤트를 기록한다.
 func (repo DirectRepository) Confirm(ctx context.Context, db *sql.DB, id string) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -207,7 +207,7 @@ func (repo DirectRepository) Confirm(ctx context.Context, db *sql.DB, id string)
 	return nil
 }
 
-// CreateStatement returns the direct SQL insert shape.
+// CreateStatement 는 직접 SQL insert 형태를 반환한다.
 func (DirectRepository) CreateStatement(hold Hold) (StatementSnapshot, error) {
 	if err := validateHold(hold); err != nil {
 		return StatementSnapshot{}, err
@@ -219,7 +219,7 @@ func (DirectRepository) CreateStatement(hold Hold) (StatementSnapshot, error) {
 	}, nil
 }
 
-// FindStatement returns the direct SQL lookup shape.
+// FindStatement 는 직접 SQL lookup 형태를 반환한다.
 func (DirectRepository) FindStatement(id string) StatementSnapshot {
 	return StatementSnapshot{
 		Name: "direct.find_hold",
@@ -228,7 +228,7 @@ func (DirectRepository) FindStatement(id string) StatementSnapshot {
 	}
 }
 
-// ConfirmStatement returns the direct SQL update shape.
+// ConfirmStatement 는 직접 SQL update 형태를 반환한다.
 func (DirectRepository) ConfirmStatement(id string) StatementSnapshot {
 	return StatementSnapshot{
 		Name: "direct.confirm_hold",
@@ -237,7 +237,7 @@ func (DirectRepository) ConfirmStatement(id string) StatementSnapshot {
 	}
 }
 
-// Create inserts a hold with sqlkit.
+// Create 는 sqlkit 으로 hold 를 삽입한다.
 func (repo SQLKitRepository) Create(ctx context.Context, db sqlkit.Execer, hold Hold) error {
 	stmt, err := repo.createSQL(hold)
 	if err != nil {
@@ -247,7 +247,7 @@ func (repo SQLKitRepository) Create(ctx context.Context, db sqlkit.Execer, hold 
 	return err
 }
 
-// Find reads exactly one hold with sqlkit.QueryOne.
+// Find 는 sqlkit.QueryOne 으로 hold 하나만 읽는다.
 func (repo SQLKitRepository) Find(ctx context.Context, db sqlkit.Queryer, id string) (Hold, error) {
 	stmt, err := repo.findSQL(id)
 	if err != nil {
@@ -256,7 +256,7 @@ func (repo SQLKitRepository) Find(ctx context.Context, db sqlkit.Queryer, id str
 	return sqlkit.QueryOne(ctx, db, stmt.SQL, scanHold, stmt.Args...)
 }
 
-// FindOnePendingByCustomer demonstrates sqlkit.QueryOptional cardinality.
+// FindOnePendingByCustomer 는 sqlkit.QueryOptional cardinality 를 보여준다.
 func (repo SQLKitRepository) FindOnePendingByCustomer(ctx context.Context, db sqlkit.Queryer, customer string) (Hold, bool, error) {
 	stmt, err := sqlkit.SelectFrom(holdsTable).
 		Columns("id", "customer", "status").
@@ -270,7 +270,7 @@ func (repo SQLKitRepository) FindOnePendingByCustomer(ctx context.Context, db sq
 	return sqlkit.QueryOptional(ctx, db, stmt.SQL, scanHold, stmt.Args...)
 }
 
-// ConfirmWithEvent marks a hold confirmed and records an audit event in one tx.
+// ConfirmWithEvent 는 하나의 tx 안에서 hold 를 확정 표시하고 감사 이벤트를 기록한다.
 func (repo SQLKitRepository) ConfirmWithEvent(ctx context.Context, db *sql.DB, id string, rejectAudit bool) error {
 	return sqlkit.WithTx(ctx, db, nil, func(ctx context.Context, tx *sql.Tx) error {
 		confirm, err := repo.confirmSQL(id)
@@ -292,25 +292,25 @@ func (repo SQLKitRepository) ConfirmWithEvent(ctx context.Context, db *sql.DB, i
 	})
 }
 
-// CreateStatement returns the sqlkit insert shape.
+// CreateStatement 는 sqlkit insert 형태를 반환한다.
 func (repo SQLKitRepository) CreateStatement(hold Hold) (StatementSnapshot, error) {
 	stmt, err := repo.createSQL(hold)
 	return snapshot("sqlkit.create_hold", stmt, err)
 }
 
-// FindStatement returns the sqlkit lookup shape.
+// FindStatement 는 sqlkit lookup 형태를 반환한다.
 func (repo SQLKitRepository) FindStatement(id string) (StatementSnapshot, error) {
 	stmt, err := repo.findSQL(id)
 	return snapshot("sqlkit.find_hold", stmt, err)
 }
 
-// ConfirmStatement returns the sqlkit update shape.
+// ConfirmStatement 는 sqlkit update 형태를 반환한다.
 func (repo SQLKitRepository) ConfirmStatement(id string) (StatementSnapshot, error) {
 	stmt, err := repo.confirmSQL(id)
 	return snapshot("sqlkit.confirm_hold", stmt, err)
 }
 
-// EventStatement returns the sqlkit audit insert shape.
+// EventStatement 는 sqlkit 감사 insert 형태를 반환한다.
 func (repo SQLKitRepository) EventStatement(id, kind string) (StatementSnapshot, error) {
 	stmt, err := repo.eventSQL(id, kind)
 	return snapshot("sqlkit.add_event", stmt, err)

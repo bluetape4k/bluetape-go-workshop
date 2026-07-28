@@ -1,4 +1,4 @@
-// Package ticketworker demonstrates batch retry and dead-letter handling.
+// Package ticketworker 는 배치 재시도와 dead-letter 처리를 보여준다.
 package ticketworker
 
 import (
@@ -13,36 +13,36 @@ import (
 )
 
 const (
-	// JobName is the batch job name shown in the demo report.
+	// JobName 은 데모 리포트에 표시되는 배치 작업 이름이다.
 	JobName = "ticket-batch-worker"
-	// StepName is the batch step name shown in the demo report.
+	// StepName 은 데모 리포트에 표시되는 배치 단계 이름이다.
 	StepName = "ticket-retry-dead-letter-worker"
-	// DefaultChunkSize keeps the workshop output small enough to inspect.
+	// DefaultChunkSize 는 워크숍 출력을 검토하기에 충분히 작게 유지한다.
 	DefaultChunkSize = 2
 )
 
 var (
-	// ErrTransientTicket reports a ticket failure that can be retried safely.
+	// ErrTransientTicket 은 안전하게 재시도할 수 있는 티켓 실패를 나타낸다.
 	ErrTransientTicket = errors.New("transient ticket failure")
-	// ErrPermanentTicket reports a ticket failure that should be dead-lettered.
+	// ErrPermanentTicket 은 dead-letter 로 보내야 하는 티켓 실패를 나타낸다.
 	ErrPermanentTicket = errors.New("permanent ticket failure")
-	// ErrDuplicateTicket reports a duplicate processed ticket write.
+	// ErrDuplicateTicket 은 처리 완료 티켓 중복 쓰기를 나타낸다.
 	ErrDuplicateTicket = errors.New("duplicate processed ticket")
 )
 
-// FailureScenario controls deterministic processor behavior for the example.
+// FailureScenario 는 예제의 결정적 processor 동작을 제어한다.
 type FailureScenario string
 
 const (
-	// ScenarioSuccess processes a ticket without an injected failure.
+	// ScenarioSuccess 는 주입된 실패 없이 티켓을 처리한다.
 	ScenarioSuccess FailureScenario = "success"
-	// ScenarioTransientOnce fails the first processor attempt and succeeds on retry.
+	// ScenarioTransientOnce 는 첫 processor 시도를 실패시키고 재시도에서 성공한다.
 	ScenarioTransientOnce FailureScenario = "transient_once"
-	// ScenarioPermanent records a dead-letter entry and returns a skippable error.
+	// ScenarioPermanent 는 dead-letter 항목을 기록하고 건너뛸 수 있는 오류를 반환한다.
 	ScenarioPermanent FailureScenario = "permanent"
 )
 
-// Ticket is one queued support ticket.
+// Ticket 은 큐에 들어간 지원 티켓 하나다.
 type Ticket struct {
 	ID       string
 	Channel  string
@@ -51,7 +51,7 @@ type Ticket struct {
 	Reason   string
 }
 
-// ProcessedTicket is the successful output written by the batch writer.
+// ProcessedTicket 은 배치 writer 가 기록한 성공 출력이다.
 type ProcessedTicket struct {
 	ID       string `json:"id"`
 	Channel  string `json:"channel"`
@@ -59,14 +59,14 @@ type ProcessedTicket struct {
 	Attempts int    `json:"attempts"`
 }
 
-// DeadLetter preserves a skipped permanent item and the reason it was skipped.
+// DeadLetter 는 건너뛴 영구 실패 항목과 그 이유를 보존한다.
 type DeadLetter struct {
 	TicketID string `json:"ticket_id"`
 	Reason   string `json:"reason"`
 	Attempts int    `json:"attempts"`
 }
 
-// Options configures the local batch worker demo.
+// Options 는 로컬 배치 worker 데모를 설정한다.
 type Options struct {
 	Tickets     []Ticket
 	ChunkSize   int
@@ -76,7 +76,7 @@ type Options struct {
 	DeadLetters *DeadLetterStore
 }
 
-// Result is the deterministic JSON projection printed by the demo.
+// Result 는 데모가 출력하는 결정적 JSON 표현이다.
 type Result struct {
 	JobName     string            `json:"job_name"`
 	StepName    string            `json:"step_name"`
@@ -91,7 +91,7 @@ type Result struct {
 	Report      ReportNode        `json:"report"`
 }
 
-// ReportNode is a timestamp-free batch report projection.
+// ReportNode 는 타임스탬프 없는 배치 리포트 표현이다.
 type ReportNode struct {
 	Name        string       `json:"name"`
 	Status      batch.Status `json:"status"`
@@ -105,7 +105,7 @@ type ReportNode struct {
 	Children    []ReportNode `json:"children,omitempty"`
 }
 
-// DefaultTickets returns the deterministic support-ticket fixture.
+// DefaultTickets 는 결정적인 지원 티켓 fixture를 반환한다.
 func DefaultTickets() []Ticket {
 	return []Ticket{
 		{ID: "ticket-1001", Channel: "email", Address: "vip@example.com", Scenario: ScenarioSuccess},
@@ -115,12 +115,12 @@ func DefaultTickets() []Ticket {
 	}
 }
 
-// RunDemo executes the default retry/dead-letter batch worker scenario.
+// RunDemo 는 기본 재시도/dead-letter 배치 worker 시나리오를 실행한다.
 func RunDemo(ctx context.Context) (Result, error) {
 	return Run(ctx, Options{})
 }
 
-// Run executes one configured ticket worker batch job.
+// Run 은 설정된 티켓 worker 배치 작업 하나를 실행한다.
 func Run(ctx context.Context, options Options) (Result, error) {
 	ctx = normalizeContext(ctx)
 	if len(options.Tickets) == 0 {
@@ -192,12 +192,12 @@ func Run(ctx context.Context, options Options) (Result, error) {
 	}, nil
 }
 
-// MarshalResult returns deterministic indented JSON for the demo CLI.
+// MarshalResult 는 데모 CLI를 위한 결정적 들여쓰기 JSON을 반환한다.
 func MarshalResult(result Result) ([]byte, error) {
 	return json.MarshalIndent(result, "", "  ")
 }
 
-// TicketReader reads tickets from an in-memory queue.
+// TicketReader 는 인메모리 큐에서 티켓을 읽는다.
 type TicketReader struct {
 	tickets []Ticket
 	next    int
@@ -205,12 +205,12 @@ type TicketReader struct {
 	closed  bool
 }
 
-// NewTicketReader creates a reader over a defensive copy of tickets.
+// NewTicketReader 는 티켓의 방어적 복사본 위에서 동작하는 reader를 생성한다.
 func NewTicketReader(tickets []Ticket) *TicketReader {
 	return &TicketReader{tickets: append([]Ticket(nil), tickets...)}
 }
 
-// Open validates the deterministic queue fixture.
+// Open 은 결정적 큐 fixture를 검증한다.
 func (r *TicketReader) Open(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -229,7 +229,7 @@ func (r *TicketReader) Open(ctx context.Context) error {
 	return nil
 }
 
-// Read returns the next ticket.
+// Read 는 다음 티켓을 반환한다.
 func (r *TicketReader) Read(ctx context.Context) (Ticket, bool, error) {
 	var zero Ticket
 	if err := ctx.Err(); err != nil {
@@ -246,7 +246,7 @@ func (r *TicketReader) Read(ctx context.Context) (Ticket, bool, error) {
 	return ticket, true, nil
 }
 
-// Close records reader cleanup.
+// Close 는 reader 정리를 기록한다.
 func (r *TicketReader) Close(ctx context.Context) error {
 	if r == nil {
 		return nil
@@ -258,19 +258,19 @@ func (r *TicketReader) Close(ctx context.Context) error {
 	return nil
 }
 
-// Closed reports whether Close was called.
+// Closed 는 Close 호출 여부를 보고한다.
 func (r *TicketReader) Closed() bool {
 	return r != nil && r.closed
 }
 
-// TicketProcessor classifies ticket failures and creates dead-letter records.
+// TicketProcessor 는 티켓 실패를 분류하고 dead-letter 레코드를 생성한다.
 type TicketProcessor struct {
 	mu          sync.Mutex
 	attempts    map[string]int
 	deadLetters *DeadLetterStore
 }
 
-// NewTicketProcessor creates a processor that writes permanent failures to store.
+// NewTicketProcessor 는 영구 실패를 저장소에 쓰는 processor를 생성한다.
 func NewTicketProcessor(store *DeadLetterStore) *TicketProcessor {
 	if store == nil {
 		store = NewDeadLetterStore()
@@ -278,7 +278,7 @@ func NewTicketProcessor(store *DeadLetterStore) *TicketProcessor {
 	return &TicketProcessor{attempts: make(map[string]int), deadLetters: store}
 }
 
-// Process turns a valid ticket into a processed ticket or a classified error.
+// Process 는 유효한 티켓을 처리 완료 티켓 또는 분류된 오류로 변환한다.
 func (p *TicketProcessor) Process(ctx context.Context, ticket Ticket) (ProcessedTicket, bool, error) {
 	var zero ProcessedTicket
 	if err := ctx.Err(); err != nil {
@@ -343,14 +343,14 @@ func processedTicket(ticket Ticket, attempt int) ProcessedTicket {
 	}
 }
 
-// TicketWriter persists processed tickets into an in-memory sink.
+// TicketWriter 는 처리 완료 티켓을 인메모리 sink에 저장한다.
 type TicketWriter struct {
 	sink   *ProcessedSink
 	opened bool
 	closed bool
 }
 
-// NewTicketWriter creates a writer for sink.
+// NewTicketWriter 는 sink용 writer를 생성한다.
 func NewTicketWriter(sink *ProcessedSink) *TicketWriter {
 	if sink == nil {
 		sink = NewProcessedSink()
@@ -358,7 +358,7 @@ func NewTicketWriter(sink *ProcessedSink) *TicketWriter {
 	return &TicketWriter{sink: sink}
 }
 
-// Open records writer startup.
+// Open 은 writer 시작을 기록한다.
 func (w *TicketWriter) Open(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -371,7 +371,7 @@ func (w *TicketWriter) Open(ctx context.Context) error {
 	return nil
 }
 
-// Write persists one chunk.
+// Write 는 chunk 하나를 저장한다.
 func (w *TicketWriter) Write(ctx context.Context, tickets []ProcessedTicket) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -390,7 +390,7 @@ func (w *TicketWriter) Write(ctx context.Context, tickets []ProcessedTicket) err
 	return nil
 }
 
-// Close records writer cleanup.
+// Close 는 writer 정리를 기록한다.
 func (w *TicketWriter) Close(ctx context.Context) error {
 	if w == nil {
 		return nil
@@ -402,24 +402,24 @@ func (w *TicketWriter) Close(ctx context.Context) error {
 	return nil
 }
 
-// Closed reports whether Close was called.
+// Closed 는 Close 호출 여부를 보고한다.
 func (w *TicketWriter) Closed() bool {
 	return w != nil && w.closed
 }
 
-// ProcessedSink stores successful processed-ticket writes.
+// ProcessedSink 는 성공한 처리 완료 티켓 쓰기를 저장한다.
 type ProcessedSink struct {
 	mu      sync.RWMutex
 	tickets map[string]ProcessedTicket
 	order   []string
 }
 
-// NewProcessedSink creates an empty processed-ticket sink.
+// NewProcessedSink 는 빈 처리 완료 티켓 sink를 생성한다.
 func NewProcessedSink() *ProcessedSink {
 	return &ProcessedSink{tickets: make(map[string]ProcessedTicket)}
 }
 
-// Put stores ticket and rejects duplicate IDs.
+// Put 은 티켓을 저장하고 중복 ID를 거부한다.
 func (s *ProcessedSink) Put(ticket ProcessedTicket) error {
 	if s == nil {
 		return fmt.Errorf("processed sink must not be nil")
@@ -434,7 +434,7 @@ func (s *ProcessedSink) Put(ticket ProcessedTicket) error {
 	return nil
 }
 
-// List returns processed tickets in write order.
+// List 는 처리 완료 티켓을 쓰기 순서대로 반환한다.
 func (s *ProcessedSink) List() []ProcessedTicket {
 	if s == nil {
 		return nil
@@ -448,19 +448,19 @@ func (s *ProcessedSink) List() []ProcessedTicket {
 	return result
 }
 
-// DeadLetterStore stores permanent failures in deterministic order.
+// DeadLetterStore 는 영구 실패를 결정적 순서로 저장한다.
 type DeadLetterStore struct {
 	mu      sync.RWMutex
 	records []DeadLetter
 	seen    map[string]struct{}
 }
 
-// NewDeadLetterStore creates an empty dead-letter store.
+// NewDeadLetterStore 는 빈 dead-letter 저장소를 생성한다.
 func NewDeadLetterStore() *DeadLetterStore {
 	return &DeadLetterStore{seen: make(map[string]struct{})}
 }
 
-// Record stores the first dead-letter record for a ticket.
+// Record 는 티켓의 첫 dead-letter 레코드를 저장한다.
 func (s *DeadLetterStore) Record(record DeadLetter) {
 	if s == nil {
 		return
@@ -474,7 +474,7 @@ func (s *DeadLetterStore) Record(record DeadLetter) {
 	s.records = append(s.records, record)
 }
 
-// List returns dead letters in insertion order.
+// List 는 dead letter 를 삽입 순서대로 반환한다.
 func (s *DeadLetterStore) List() []DeadLetter {
 	if s == nil {
 		return nil
