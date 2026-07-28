@@ -1,29 +1,27 @@
-# Money Rule Pricing Lesson
+# Money Rule Pricing Lesson 정리
 
 Issue: #45
 
-`examples/money-rule-pricing` demonstrates cart pricing with
-`github.com/bluetape4k/bluetape-go/money`.
+`examples/money-rule-pricing`는 `github.com/bluetape4k/bluetape-go/money`를 사용하는
+cart pricing을 보여준다.
 
-## Decision
+## 결정
 
-Use `money.Money` for all arithmetic and keep rule primitives local to the
-example. The current `bluetape-go` dependency exposes a money package but not a
-general rule-engine package, so a reusable rule abstraction would be extra
-framework work outside the workshop issue.
+모든 산술에는 `money.Money`를 사용하고 rule primitive는 예제 내부에 둔다. 현재
+`bluetape-go` dependency는 money package를 제공하지만 general rule-engine package는
+제공하지 않으므로, reusable rule abstraction은 workshop issue 범위를 벗어나는 framework
+작업이 된다.
 
-## Boundaries
+## 경계
 
-- Public monetary values are strings plus explicit currency.
-- Item currency must match the cart currency before arithmetic starts.
-- Line totals, discount totals, and final totals are rounded at the cart
-  boundary.
-- Rejected pricing rules are visible in `rules[]` when the cart is otherwise
-  valid.
-- Invalid money or mixed currencies are public HTTP errors.
+- public monetary value는 string과 explicit currency로 표현한다.
+- 산술을 시작하기 전에 item currency는 cart currency와 일치해야 한다.
+- line total, discount total, final total은 cart boundary에서 round한다.
+- cart가 그 외에는 valid하다면 rejected pricing rule은 `rules[]`에 보인다.
+- invalid money나 mixed currency는 public HTTP error다.
 
-## Follow-Up
+## 후속 작업
 
-Issue #77 can build multi-currency invoice rule evaluation on this baseline by
-adding explicit invoice-line grouping and conversion or no-conversion policy
-decisions instead of re-teaching basic cart money arithmetic.
+Issue #77은 basic cart money arithmetic을 다시 가르치지 않고 explicit invoice-line
+grouping과 conversion/no-conversion policy decision을 추가해 이 baseline 위에
+multi-currency invoice rule evaluation을 만들 수 있다.
