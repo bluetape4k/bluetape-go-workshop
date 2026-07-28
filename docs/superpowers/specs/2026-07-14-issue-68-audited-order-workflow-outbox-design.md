@@ -351,31 +351,25 @@ dead-letter state, delivery status, safe log로만 나타난다. per-request HTT
 
 ## Runtime, Relay, and Shutdown
 
-Required configuration is `DATABASE_URL` and `REDIS_ADDR`. Optional values are
-`REDIS_STREAM` and `HTTP_ADDR`. `HTTP_ADDR` defaults to `127.0.0.1:8080` and
-must contain a loopback IP; wildcard, hostname-only, and non-loopback binds fail
-closed because the example has no authentication. There is no unsafe remote
-opt-in. `REDIS_STREAM` is trusted application configuration but is still
-required to be valid UTF-8, non-blank, and at most 256 bytes.
+required configuration은 `DATABASE_URL`과 `REDIS_ADDR`다. optional value는 `REDIS_STREAM`과
+`HTTP_ADDR`다. `HTTP_ADDR`는 기본값이 `127.0.0.1:8080`이고 loopback IP를 포함해야 한다. 예제에는
+authentication이 없으므로 wildcard, hostname-only, non-loopback bind는 fail closed한다. unsafe remote
+opt-in은 없다. `REDIS_STREAM`은 trusted application configuration이지만 여전히 valid UTF-8, non-blank,
+최대 256 byte여야 한다.
 
-The application owns the PostgreSQL and Redis clients. Startup parses redacted
-configuration, opens both clients, performs bounded pings, creates schemas,
-constructs one released Redis Streams publisher, starts one background relay,
-then serves HTTP. Readiness is false until all startup work succeeds. Startup,
-request, relay, and shutdown logs contain only stage, stable error class,
-request ID, and grammar-validated identity where needed; raw provider errors,
-endpoint values, and caller metadata are never logged.
+application은 PostgreSQL 및 Redis client를 소유한다. startup은 redacted configuration을 parse하고, 두
+client를 열고, bounded ping을 수행하고, schema를 만들고, released Redis Streams publisher 하나를 구성하고,
+background relay 하나를 시작한 뒤 HTTP를 serve한다. 모든 startup work가 성공하기 전까지 readiness는 false다.
+startup, request, relay, shutdown log는 stage, stable error class, request ID, 필요한 경우
+grammar-validated identity만 포함한다. raw provider error, endpoint value, caller metadata는 절대 log하지 않는다.
 
-PostgreSQL is configured with 8 maximum open and idle connections, 5-minute
-maximum idle time, and 30-minute maximum lifetime. Redis uses a pool of 8 with
-one minimum idle connection and a 2-second pool timeout. The server allows at
-most 32 in-flight requests and rejects excess work with 429 before decoding a
-body. It uses a 2-second request operation deadline, 2-second header timeout,
-5-second read and write timeouts, 30-second idle timeout, 16 KiB maximum header
-size, and 5-second graceful-shutdown deadline. These teaching defaults are
-explicit and are not production sizing advice.
+PostgreSQL은 maximum open/idle connection 8개, maximum idle time 5분, maximum lifetime 30분으로 설정한다.
+Redis는 pool 8개, minimum idle connection 1개, pool timeout 2초를 사용한다. server는 최대 32개의
+in-flight request를 허용하고 body를 decode하기 전에 초과 작업을 429로 거부한다. request operation deadline
+2초, header timeout 2초, read/write timeout 5초, idle timeout 30초, maximum header size 16 KiB,
+graceful-shutdown deadline 5초를 사용한다. 이 teaching default는 명시적이며 production sizing advice가 아니다.
 
-The relay uses explicit bounded options:
+relay는 명시적인 bounded option을 사용한다.
 
 ```go
 sqloutbox.RelayOptions{
@@ -386,208 +380,171 @@ sqloutbox.RelayOptions{
 }
 ```
 
-`/healthz` reports only process liveness. `/readyz` requires a short bounded
-PostgreSQL check and a running supervised relay. Redis failure is reported in
-the 200 response as `"delivery":"degraded"` but does not remove the durable
-command and history service from traffic; the application intentionally accepts
-a local-demo backlog rather than defeating the outbox availability boundary.
-Database failure or a stopped relay returns 503. Outbox emptiness is not a
-readiness condition.
+`/healthz`는 process liveness만 보고한다. `/readyz`는 짧고 bounded한 PostgreSQL check와 실행 중인
+supervised relay를 요구한다. Redis failure는 200 response 안에서 `"delivery":"degraded"`로 보고되지만,
+durable command 및 history service를 traffic에서 제거하지 않는다. application은 outbox availability
+boundary를 깨는 대신 local-demo backlog를 의도적으로 받아들인다. database failure 또는 stopped relay는
+503을 반환한다. outbox emptiness는 readiness condition이 아니다.
 
-`/statusz` exposes only bounded delivery diagnostics: Redis status, relay state,
-pending/retrying/claimed/published/dead-letter counts, and oldest-pending age
-rounded to seconds.
-It never returns entry identity, payload, metadata, endpoints, or provider
-errors. A read-only status query uses the fixed official table and its status
-index under a 250-millisecond deadline; timeout returns a degraded status rather
-than blocking readiness. The official v0.18.0 `Relay.Run` exposes only its
-terminal error, not per-batch results, so the application does not replace it
-with a custom polling loop merely to log batch counts. Delivery degradation and
-lifecycle transitions are logged once per transition to avoid idle-loop noise;
-current counts remain available through `/statusz`. The relay goroutine reports
-its terminal result to the lifecycle owner.
-An unexpected `Relay.Run` error first makes readiness false, then initiates the
-same bounded server shutdown and causes process failure. `context.Canceled` is
-successful only after the lifecycle owner requested shutdown; an early
-cancellation is unexpected.
+`/statusz`는 bounded delivery diagnostic만 노출한다. 여기에는 Redis status, relay state,
+pending/retrying/claimed/published/dead-letter count, 초 단위로 반올림한 oldest-pending age가 포함된다.
+entry identity, payload, metadata, endpoint, provider error는 절대 반환하지 않는다. read-only status query는
+250밀리초 deadline 아래에서 fixed official table과 status index를 사용한다. timeout은 readiness를 막지 않고
+degraded status를 반환한다. official v0.18.0 `Relay.Run`은 per-batch result가 아니라 terminal error만
+노출하므로, application은 batch count를 log하려고 custom polling loop로 대체하지 않는다. delivery degradation과
+lifecycle transition은 idle-loop noise를 피하기 위해 transition마다 한 번만 log한다. current count는
+`/statusz`로 계속 available하다. relay goroutine은 terminal result를 lifecycle owner에게 보고한다.
+unexpected `Relay.Run` error는 먼저 readiness를 false로 만들고, 같은 bounded server shutdown을 시작한 뒤
+process failure를 유발한다. `context.Canceled`는 lifecycle owner가 shutdown을 요청한 뒤에만 successful이다.
+early cancellation은 unexpected다.
 
-Shutdown first stops accepting HTTP work and waits for bounded in-flight
-requests, then cancels the relay context, joins the relay goroutine, and closes
-Redis and PostgreSQL clients. Caller cancellation is preserved. A relay publish
-cancelled during shutdown is not marked published or converted to a retry; its
-claim becomes recoverable under the released lease contract. Shutdown joins
-independent errors without exposing secrets and has a hard deadline.
+shutdown은 먼저 HTTP work 수락을 중지하고 bounded in-flight request를 기다린다. 그런 다음 relay context를
+cancel하고 relay goroutine을 join하며 Redis 및 PostgreSQL client를 닫는다. caller cancellation은 보존한다.
+shutdown 중 cancel된 relay publish는 published로 표시되지 않고 retry로 변환되지도 않는다. 그 claim은 released
+lease contract 아래에서 recoverable해진다. shutdown은 secret을 노출하지 않고 independent error를 join하며 hard
+deadline을 가진다.
 
-Delivery is at-least-once. An accepted Redis append followed by an ambiguous
-client failure, failed SQL completion, or expired claim can append the same
-logical event more than once. The official store blocks a later pending
-revision while an earlier revision is pending or claimed, but dead-letter,
-replay, and ambiguous publish outcomes mean the application does not promise
-consumer-observed ordering. Consumers must deduplicate by `event_id` or
-`idempotency_key` and tolerate reordering. Outbox cleanup, operator replay,
-Redis consumer groups, and consumer idempotency are production follow-up
-concerns rather than hidden behavior in this example.
+delivery는 at-least-once다. accepted Redis append 뒤에 ambiguous client failure, failed SQL completion,
+expired claim이 발생하면 같은 logical event가 한 번 넘게 append될 수 있다. official store는 earlier revision이
+pending 또는 claimed인 동안 later pending revision을 막지만, dead-letter, replay, ambiguous publish outcome 때문에
+application은 consumer-observed ordering을 promise하지 않는다. consumer는 `event_id` 또는 `idempotency_key`로
+deduplicate하고 reordering을 tolerate해야 한다. outbox cleanup, operator replay, Redis consumer group, consumer
+idempotency는 이 예제에 숨은 behavior가 아니라 production follow-up concern이다.
 
 ## Runnable Documentation Contract
 
-Both README locales explain prerequisites, environment variables, startup,
-the order state machine, atomic transaction boundary, history-versus-outbox
-separation, at-least-once behavior, failure recovery, overload response, and
-shutdown. Schema creation is explicitly a single-version workshop bootstrap,
-not a migration framework; an incompatible existing schema fails startup and
-is never altered or dropped automatically. The application owns all three
-example tables. The runbook shows safe outbox status inspection, Redis outage
-and recovery, pending/claimed lease recovery, dead-letter diagnosis, restart
-after partial startup, and an explicitly destructive local-only reset. It does
-not present table deletion or dead-letter mutation as a production rollback.
-The English language switch is `English | [한국어](README.ko.md)` and the Korean
-switch is `[English](README.md) | 한국어`; the current locale is plain text. The
-same deferred language-switch defect is corrected in the issue #57 README pair.
+두 README locale은 prerequisite, environment variable, startup, order state machine, atomic
+transaction boundary, history-versus-outbox separation, at-least-once behavior, failure recovery,
+overload response, shutdown을 설명한다. schema creation은 migration framework가 아니라 single-version
+workshop bootstrap임을 명시한다. incompatible existing schema는 startup을 실패시키며 자동으로 변경하거나
+drop하지 않는다. application은 세 example table을 모두 소유한다. runbook은 safe outbox status inspection,
+Redis outage와 recovery, pending/claimed lease recovery, dead-letter diagnosis, partial startup 이후
+restart, 명시적으로 destructive한 local-only reset을 보여준다. table deletion 또는 dead-letter mutation을
+production rollback으로 제시하지 않는다. English language switch는 `English | [한국어](README.ko.md)`이고
+Korean switch는 `[English](README.md) | 한국어`다. current locale은 plain text다. 같은 deferred
+language-switch defect는 issue #57 README pair에서도 수정한다.
 
-The documented scenario uses complete `curl` POST JSON commands for:
+문서화된 scenario는 다음에 대해 완전한 `curl` POST JSON command를 사용한다.
 
-1. creating an order with metadata;
-2. confirming it with metadata;
-3. retrying the identical confirm command and observing `replayed: true` with no
-   new revision;
-4. searching its audit history, including the two-page cursor example;
-5. loading revision 2 in detail; and
-6. optionally creating and cancelling a second order with a reason, then showing
-   a rejected post-cancellation transition and stable 409 code.
+1. metadata와 함께 order 생성
+2. metadata와 함께 order confirm
+3. identical confirm command를 retry하고 새 revision 없이 `replayed: true` 관찰
+4. two-page cursor example을 포함한 audit history search
+5. revision 2 detail loading
+6. 선택적으로 reason과 함께 두 번째 order를 만들고 cancel한 뒤, post-cancellation transition 거부와 stable
+   409 code 표시
 
-Every request includes its URL, method, content type, and body. The checked-in
-`requests.http` file repeats the scenario with variables and valid JSON bodies,
-so JetBrains and VS Code REST clients can run it without reconstructing a
-request from prose. The README pairs and HTTP file use source-equivalent bodies.
-Expected status, revision, replay marker, asynchronous-delivery marker, history
-ordering, 429 retry rule, invalid-transition code, and duplicate-delivery caveat
-are shown.
+모든 request는 URL, method, content type, body를 포함한다. checked-in `requests.http` file은 variable과
+valid JSON body로 같은 scenario를 반복하므로 JetBrains 및 VS Code REST client가 prose에서 request를
+재구성하지 않고 실행할 수 있다. README pair와 HTTP file은 source-equivalent body를 사용한다. expected status,
+revision, replay marker, asynchronous-delivery marker, history ordering, 429 retry rule,
+invalid-transition code, duplicate-delivery caveat를 보여준다.
 
-The README architecture diagram shows the Gin routes, order service,
-`sqlkit.WithTx`, order/history/outbox tables, background relay, and Redis
-Streams. The sequence diagram shows command validation, row locking, all three
-transactional writes, commit-before-response, later relay delivery, and a
-history query that bypasses Redis. SVG is the source artifact and PNG is the
-GitHub-facing render. Both diagrams follow `bluetape-diagram`, including
-checklist validation and visual inspection of SVG and PNG arrowhead direction,
-arrowhead clearance at bends and card boundaries, clipping, text legibility,
-and correspondence between the two formats.
+README architecture diagram은 Gin route, order service, `sqlkit.WithTx`, order/history/outbox table,
+background relay, Redis Streams를 보여준다. sequence diagram은 command validation, row locking, 세
+transactional write, commit-before-response, 이후 relay delivery, Redis를 우회하는 history query를 보여준다.
+SVG는 source artifact이고 PNG는 GitHub-facing render다. 두 diagram은 `bluetape-diagram`을 따르며 checklist
+validation과 SVG/PNG arrowhead direction, bend 및 card boundary의 arrowhead clearance, clipping, text
+legibility, 두 format 사이의 correspondence에 대한 visual inspection을 포함한다.
 
 ## Failure Modes and Safety Boundaries
 
-- A history insert or outbox enqueue failure rolls back the order write.
-- Redis unavailability never rolls back an already committed command; readiness
-  remains available with degraded delivery status and the relay applies its
-  bounded retry/dead-letter policy.
-- A duplicate command with the same canonical intent is an idempotent replay; a
-  mismatched intent is a 409 conflict.
-- Concurrent transitions serialize through the locked order row. Exactly one
-  valid next revision commits, and losing or now-invalid transitions conflict.
-- Query pagination is bounded and stable per aggregate. Entries committed after
-  a page may appear on a later page but cannot rewrite an existing revision.
-- Corrupt or scalar-mismatched history JSON fails the request closed and is
-  logged by stage and safe identity only.
-- Request and shutdown logs never include database URLs, Redis addresses,
-  credentials, arbitrary metadata, audit payloads, or raw request bodies.
-- The example is unauthenticated and loopback-only. Remote exposure is rejected
-  and remains outside this demonstration.
-- PostgreSQL and Redis Testcontainers start sequentially to reduce constrained
-  host contention. A missing process handle or unobserved exit code is not test
-  evidence.
+- history insert 또는 outbox enqueue failure는 order write를 rollback한다.
+- Redis unavailability는 이미 committed command를 rollback하지 않는다. readiness는 degraded delivery
+  status와 함께 available하게 남고 relay는 bounded retry/dead-letter policy를 적용한다.
+- 같은 canonical intent를 가진 duplicate command는 idempotent replay다. mismatched intent는 409 conflict다.
+- concurrent transition은 locked order row를 통해 serialize된다. 정확히 하나의 valid next revision만
+  commit되고, 진 쪽 또는 이후 invalid가 된 transition은 conflict된다.
+- query pagination은 aggregate별로 bounded이고 stable하다. page 이후 committed entry는 later page에 나타날
+  수 있지만 기존 revision을 rewrite할 수 없다.
+- corrupt 또는 scalar-mismatched history JSON은 request를 fail closed하고 stage 및 safe identity만 log한다.
+- request 및 shutdown log는 database URL, Redis address, credential, arbitrary metadata, audit payload,
+  raw request body를 절대 포함하지 않는다.
+- 예제는 unauthenticated 및 loopback-only다. remote exposure는 거부되며 이 demonstration 밖에 남는다.
+- PostgreSQL 및 Redis Testcontainers는 constrained host contention을 줄이기 위해 sequentially 시작한다. missing
+  process handle 또는 unobserved exit code는 test evidence가 아니다.
 
 ## Test Strategy
 
-Unit and handler tests prove:
+unit 및 handler test는 다음을 증명한다.
 
-- identifier, action, reason, metadata, content type, body size, duplicate key,
-  unknown field, trailing value, compression, and UTF-8 rejection;
-- state-machine transitions, revision increments, entry identity, payload and
-  metadata projection, idempotent replay, and conflicting command reuse;
-- 201/200/400/404/408/409/413/415/429/500 response mapping, replay markers,
-  `Retry-After`, request-body closure, and redaction;
-- search bounds, stable ordering, `limit + 1` cursor derivation, detail lookup,
-  and no Redis dependency in query handlers;
-- zero-value, nil dependency, cancellation, timeout, close, slow-header/body,
-  concurrency-cap, pool-exhaustion, and graceful shutdown behavior.
+- identifier, action, reason, metadata, content type, body size, duplicate key, unknown field,
+  trailing value, compression, UTF-8 rejection
+- state-machine transition, revision increment, entry identity, payload 및 metadata projection,
+  idempotent replay, conflicting command reuse
+- 201/200/400/404/408/409/413/415/429/500 response mapping, replay marker, `Retry-After`,
+  request-body closure, redaction
+- search bound, stable ordering, `limit + 1` cursor derivation, detail lookup, query handler에 Redis
+  dependency 없음
+- zero-value, nil dependency, cancellation, timeout, close, slow-header/body, concurrency-cap,
+  pool-exhaustion, graceful shutdown behavior
 
-PostgreSQL integration tests prove with the released fixture:
+PostgreSQL integration test는 released fixture로 다음을 증명한다.
 
-- order, history, and outbox commit together on create and transition;
-- failures injected after each write roll back every write;
-- two concurrent transitions cannot commit the same revision;
-- the SQL history store implements every `audit.HistoryReader` method and fails
-  closed on corrupted scalar/JSON parity;
-- a clock containing sub-microsecond nanoseconds is normalized once so SQL
-  scalar parity, history reads, and relay claims remain valid;
-- restart preserves order state, audit history, idempotent replay, and pending
-  outbox records; and
-- a seeded large-history query plan uses the intended aggregate/revision or
-  aggregate/time index and applies `limit + 1` without an unbounded scan or
-  sort, verified with `EXPLAIN (FORMAT JSON)`.
+- create 및 transition에서 order, history, outbox가 함께 commit된다.
+- 각 write 이후 주입된 failure는 모든 write를 rollback한다.
+- 두 concurrent transition은 같은 revision을 commit할 수 없다.
+- SQL history store는 모든 `audit.HistoryReader` method를 구현하고 corrupted scalar/JSON parity에서 fail
+  closed한다.
+- sub-microsecond nanosecond를 포함한 clock은 한 번 normalize되어 SQL scalar parity, history read, relay
+  claim이 계속 valid하게 남는다.
+- restart는 order state, audit history, idempotent replay, pending outbox record를 보존한다.
+- seeded large-history query plan은 intended aggregate/revision 또는 aggregate/time index를 사용하고
+  unbounded scan 또는 sort 없이 `limit + 1`을 적용한다. 이는 `EXPLAIN (FORMAT JSON)`으로 검증한다.
 
-Relay tests use `sqloutboxtest.RecordingPublisher` and `PublisherFunc` to prove
-success, one injected retry, duplicate logical identity across attempts,
-dead-letter bounds, caller cancellation, lease recovery, and continuous
-`Run` shutdown without a leaked goroutine. A real Redis integration test starts
-after PostgreSQL and verifies the released provider's documented 13-field
-envelope and stable event/idempotency identity for created and confirmed events.
-It accepts multiple physical stream entries for one logical event. A bounded
-backlog test drains multiple claim batches while commands continue writing,
-records claimed and published counts, observes the configured connection-pool
-ceiling, and completes before a fixed deadline. The claim size and polling delay
-are conservative teaching values validated by this test, not benchmark-derived
-production tuning. A lifecycle test proves that an unexpected relay exit makes
-readiness false and terminates serving. Observability tests prove readiness
-transitions across Redis outage and recovery, accurate bounded status counts and
-oldest-pending age, lifecycle summaries, idle-loop log suppression, and
-the absence of payloads, metadata, endpoints, credentials, and provider errors.
+relay test는 `sqloutboxtest.RecordingPublisher`와 `PublisherFunc`를 사용해 success, 한 번의 injected
+retry, attempt 간 duplicate logical identity, dead-letter bound, caller cancellation, lease recovery,
+leaked goroutine 없는 continuous `Run` shutdown을 증명한다. real Redis integration test는 PostgreSQL 이후
+시작되고 released provider의 documented 13-field envelope와 created/confirmed event의 stable
+event/idempotency identity를 검증한다. 하나의 logical event에 대한 여러 physical stream entry를 허용한다.
+bounded backlog test는 command가 계속 write되는 동안 여러 claim batch를 drain하고, claimed/published count를
+기록하며, configured connection-pool ceiling을 관찰하고 fixed deadline 전에 완료한다. claim size와 polling
+delay는 이 test로 검증된 conservative teaching value이지 benchmark-derived production tuning이 아니다.
+lifecycle test는 unexpected relay exit가 readiness를 false로 만들고 serving을 terminate함을 증명한다.
+observability test는 Redis outage 및 recovery 사이의 readiness transition, accurate bounded status count와
+oldest-pending age, lifecycle summary, idle-loop log suppression, payload/metadata/endpoint/credential/provider
+error 부재를 증명한다.
 
-Validation runs targeted package tests, race tests, sequential container-backed
-integration tests, a resource-bounded `go test -p 1 -count=1 ./...` lane, a
-runnable server smoke scenario using the checked-in POST JSON requests, diagram
-render and checklist validation, then a fresh `make ci`. Every final gate must
-have a newly observed exit code.
+validation은 targeted package test, race test, sequential container-backed integration test,
+resource-bounded `go test -p 1 -count=1 ./...` lane, checked-in POST JSON request를 사용하는 runnable server
+smoke scenario, diagram render 및 checklist validation, fresh `make ci` 순서로 실행한다. 모든 final gate는
+새로 관찰한 exit code를 가져야 한다.
 
 ## Acceptance Criteria
 
-- The example is application-shaped and compiles against bluetape-go v0.18.0.
-- Create and transition commands atomically commit order, durable history, and
-  official SQL outbox state.
-- Audit search and detail use the SQL history store, not Redis or outbox rows.
-- The background official relay publishes through the official Redis Streams
-  adapter with explicit at-least-once semantics.
-- All user operations use strict POST JSON; health and readiness remain GET.
-- Both README locales and `requests.http` provide complete runnable requests.
-- Architecture and sequence SVG/PNG pairs pass automated checks and manual
-  visual inspection, including arrowhead direction and bend clearance.
-- The issue #57 README language switches show the current locale as plain text.
-- Targeted, race, integration, smoke, and full `make ci` gates pass with fresh
-  observed exit codes.
-- The PR is assigned, labeled, attached to milestone 0.9.0, links issue #68, and
-  reaches green CI. Merge remains a separate user approval gate.
+- example은 application-shaped이며 bluetape-go v0.18.0 기준으로 compile된다.
+- create 및 transition command는 order, durable history, official SQL outbox state를 atomically commit한다.
+- audit search와 detail은 Redis 또는 outbox row가 아니라 SQL history store를 사용한다.
+- background official relay는 explicit at-least-once semantic으로 official Redis Streams adapter를 통해
+  publish한다.
+- 모든 user operation은 strict POST JSON을 사용한다. health와 readiness는 GET으로 남는다.
+- 두 README locale과 `requests.http`는 완전한 runnable request를 제공한다.
+- architecture 및 sequence SVG/PNG pair는 arrowhead direction과 bend clearance를 포함한 automated check와
+  manual visual inspection을 통과한다.
+- issue #57 README language switch는 current locale을 plain text로 보여준다.
+- targeted, race, integration, smoke, full `make ci` gate는 fresh observed exit code와 함께 통과한다.
+- PR은 assigned, labeled, milestone 0.9.0 attached 상태이고 issue #68을 link하며 green CI에 도달한다.
+  merge는 별도 user approval gate로 남는다.
 
 ## Specification Review Convergence
 
 | Perspective | Result | Resolved focus |
 |---|---|---|
-| Performance | P0=0, P1=0 | Pool limits, indexed bounded history queries, and backlog contention evidence are explicit. |
-| Stability | P0=0, P1=0 | Race-safe replay, ambiguous commit, relay supervision, delivery ordering limits, and resource-bounded tests are explicit. |
-| Security | P0=0, P1=0 | Loopback-only binding, strict JSON, resource caps, safe identifiers, and all-stage redaction are explicit. |
-| Operator/Ops | P0=0, P1=0 | Redis degradation, readiness, relay/backlog signals, schema ownership, and recovery runbooks are explicit. |
-| Developer/API | P0=0, P1=0 | v0.18.0 reader signatures, timestamp precision, and asynchronous publisher error ownership are explicit. |
-| User/caller | P0=0, P1=0 | Complete POST JSON bodies, cursor continuation, replay, overload, cancellation, and 409 examples are explicit. |
+| Performance | P0=0, P1=0 | pool limit, indexed bounded history query, backlog contention evidence를 명시했다. |
+| Stability | P0=0, P1=0 | race-safe replay, ambiguous commit, relay supervision, delivery ordering limit, resource-bounded test를 명시했다. |
+| Security | P0=0, P1=0 | loopback-only binding, strict JSON, resource cap, safe identifier, all-stage redaction을 명시했다. |
+| Operator/Ops | P0=0, P1=0 | Redis degradation, readiness, relay/backlog signal, schema ownership, recovery runbook을 명시했다. |
+| Developer/API | P0=0, P1=0 | v0.18.0 reader signature, timestamp precision, asynchronous publisher error ownership을 명시했다. |
+| User/caller | P0=0, P1=0 | complete POST JSON body, cursor continuation, replay, overload, cancellation, 409 example을 명시했다. |
 
-All review findings were repaired in this specification. The affected lanes
-were rerun against the integrated artifact and returned clear; no P2/P3 item is
-deferred.
+모든 review finding은 이 specification에서 수정되었다. affected lane은 integrated artifact 대상으로 다시
+실행되어 clear를 반환했다. deferred P2/P3 item은 없다.
 
 ## Non-Goals
 
-- Adding a reusable SQL audit repository to bluetape-go.
-- Exactly-once Redis delivery or global event ordering.
-- A Redis consumer, consumer group, consumer-side projection, or deduplication
-  store.
-- Authentication, authorization, TLS termination, or production deployment.
-- Automated outbox or audit-history retention and operator replay tooling.
-- General workflow engines, arbitrary order states, or cross-aggregate
-  transactions.
+- bluetape-go에 reusable SQL audit repository 추가
+- exactly-once Redis delivery 또는 global event ordering
+- Redis consumer, consumer group, consumer-side projection, deduplication store
+- authentication, authorization, TLS termination, production deployment
+- automated outbox 또는 audit-history retention과 operator replay tooling
+- general workflow engine, arbitrary order state, cross-aggregate transaction
