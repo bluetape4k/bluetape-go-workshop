@@ -1,108 +1,91 @@
-# Issue #68 Audited Order Workflow Outbox Lessons
+# Issue #68 Audited Order Workflow Outbox Lesson
 
-## Context and Chosen Boundary
+## 맥락과 선택한 Boundary
 
-The workshop already had separate audit history and transactional outbox
-lessons, while released `bluetape-go` v0.18.0 already supplied the audit
-contracts, SQL outbox relay, and Redis Streams publisher. The useful next lesson
-was their application boundary: accept one audited order command over HTTP,
-commit current order state plus immutable history plus the outbox record in one
-PostgreSQL transaction, and publish the committed audit event asynchronously.
+workshop에는 이미 audit history와 transactional outbox lesson이 분리되어 있었고, released
+`bluetape-go` v0.18.0은 audit contract, SQL outbox relay, Redis Streams publisher를 제공했다.
+다음 유용한 lesson은 그들의 application boundary였다. audited order command 하나를 HTTP로 받고,
+current order state와 immutable history와 outbox record를 하나의 PostgreSQL transaction으로
+commit한 뒤, committed audit event를 asynchronously publish한다.
 
-History and outbox serve different truths. PostgreSQL order and history rows are
-the durable query and audit source. The outbox is durable delivery intent. Redis
-Streams is transport, not audit storage. Keeping those roles explicit prevents
-Redis degradation from making committed workflow history unavailable and avoids
-teaching a false distributed transaction.
+history와 outbox는 서로 다른 truth를 담당한다. PostgreSQL order/history row는 durable query와
+audit source다. outbox는 durable delivery intent다. Redis Streams는 audit storage가 아니라
+transport다. 이 역할을 명시적으로 유지하면 Redis degradation이 committed workflow history를
+사용 불가로 만드는 일을 막고, 잘못된 distributed transaction을 가르치지 않게 된다.
 
-## Replay, Readiness, and Shutdown
+## Replay, Readiness, Shutdown
 
-The idempotency key belongs to the whole command, not only to the outbox row. A
-retry with the same identity and same canonical payload returns the stored
-result. Reusing the identity with a different payload is a conflict scoped to
-that command. The conflict path must not append a history revision or enqueue
-another event.
+idempotency key는 outbox row만이 아니라 전체 command에 속한다. 같은 identity와 같은 canonical
+payload로 retry하면 stored result를 반환한다. 다른 payload로 identity를 재사용하면 그 command에
+scoped된 conflict다. conflict path는 history revision을 append하거나 다른 event를 enqueue하면
+안 된다.
 
-Readiness follows durable ownership. SQL failure makes the service unready;
-Redis transport failure is reported as degraded while accepted SQL work remains
-recoverable by the relay. An unexpected relay exit still makes the process
-unready because delivery progress has stopped. Status probes must remain
-bounded so a failing dependency cannot consume the entire handler pool.
+readiness는 durable ownership을 따른다. SQL failure는 service를 unready로 만든다. Redis
+transport failure는 degraded로 보고하지만 accepted SQL work는 relay로 recoverable하게 남는다.
+unexpected relay exit는 delivery progress가 멈췄기 때문에 process를 unready로 만든다. status
+probe는 failing dependency가 전체 handler pool을 소비하지 않도록 bounded로 남아야 한다.
 
-Cancellation alone is not a shutdown bound. The first lifecycle implementation
-called relay cancellation and then waited indefinitely for relay join. A test
-relay that ignored cancellation proved the advertised deadline could be
-exceeded. The fix uses one shared deadline budget for HTTP shutdown and relay
-join, forces server close when graceful HTTP shutdown spends the budget, and
-returns a redacted timeout if the relay still does not join. Future supervised
-workers should receive the same adversarial test before their lifecycle is
-accepted.
+cancellation만으로는 shutdown bound가 아니다. 첫 lifecycle implementation은 relay cancellation을
+호출한 뒤 relay join을 무기한 기다렸다. cancellation을 무시하는 test relay가 advertised deadline을
+넘길 수 있음을 증명했다. fix는 HTTP shutdown과 relay join에 하나의 shared deadline budget을
+사용하고, graceful HTTP shutdown이 budget을 다 쓰면 server close를 강제하며, relay가 여전히
+join하지 않으면 redacted timeout을 반환한다. 향후 supervised worker는 lifecycle 승인 전에 같은
+adversarial test를 받아야 한다.
 
-## Integration and Tooling Surprises
+## 통합과 Tooling 의외점
 
-Container-backed proof has to be serialized. PostgreSQL is brought up before
-Redis, and the example integration, smoke, repository test, and race gates run
-sequentially where they share Docker resources. Parallel green runs would not
-prove deterministic ownership of ports, cleanup, or container lifecycle.
+container-backed proof는 serialize해야 한다. PostgreSQL을 Redis보다 먼저 띄우고, Docker resource를
+공유하는 example integration, smoke, repository test, race gate는 sequential하게 실행한다.
+parallel green run은 port, cleanup, container lifecycle의 deterministic ownership을 증명하지
+못한다.
 
-The first lint pass found 63 real quality findings: missing public teaching
-documentation, unchecked row-close failures, direct error comparisons,
-unwrapped errors, contextless network calls, staticcheck conversion and format
-issues, and an empty compare-and-swap loop. Fixing them improved both the lesson
-and failure semantics. Do not reduce a large lint count to a tooling problem
-until every source finding is classified; use cache cleanup only for verified
-stale-worktree paths.
+첫 lint pass는 실제 quality finding 63개를 찾았다. public teaching documentation 누락,
+unchecked row-close failure, direct error comparison, unwrapped error, contextless network
+call, staticcheck conversion/format issue, empty compare-and-swap loop이었다. 이를 고치면서
+lesson과 failure semantics가 모두 개선됐다. 모든 source finding을 분류하기 전에는 큰 lint count를
+tooling problem으로 축소하지 않는다. cache cleanup은 verified stale-worktree path에만 사용한다.
 
-The HTTP smoke test must execute the documented application, not merely call a
-handler in process. That is what proves listener binding, JSON transport,
-readiness, route wiring, lifecycle, and the copyable `requests.http` scenarios
-describe the same program.
+HTTP smoke test는 handler를 process 안에서 호출하는 데 그치지 않고 documented application을
+실행해야 한다. 그래야 listener binding, JSON transport, readiness, route wiring, lifecycle,
+copyable `requests.http` scenario가 같은 program을 설명한다는 점을 증명한다.
 
-## Diagram Lessons
+## Diagram Lesson
 
-Automated geometry checks are necessary but incomplete. The final PNG, not only
-the SVG source, must be inspected because marker rendering can reverse the
-apparent direction or enlarge the arrowhead enough to collide with a bend. Give
-every endpoint at least the marker-size terminal straight segment, end routes at
-card edges, and move bend coordinates when the rendered marker consumes that
-clearance.
+automated geometry check는 필요하지만 불완전하다. SVG source뿐 아니라 final PNG를 inspect해야
+한다. marker rendering이 apparent direction을 뒤집거나 arrowhead를 bend와 충돌할 만큼 키울 수
+있기 때문이다. 모든 endpoint에는 최소 marker-size terminal straight segment를 주고, route는 card
+edge에서 끝내며, rendered marker가 그 clearance를 소비하면 bend coordinate를 옮긴다.
 
-The architecture audit checked all connectors, card intrusions, crossings,
-endpoints, and mixed corners. The sequence audit additionally checked message
-direction and activation layout. Original-pixel quadrant inspection was still
-required: it caught a phase-title and pill overlap that the geometry scripts did
-not flag. After moving the first message rows and activation bars, both the full
-preview and all original-resolution crops were inspected again.
+architecture audit는 모든 connector, card intrusion, crossing, endpoint, mixed corner를
+확인했다. sequence audit는 message direction과 activation layout을 추가로 확인했다. 그래도
+original-pixel quadrant inspection은 필요했다. geometry script가 flag하지 못한 phase-title과
+pill overlap을 잡았기 때문이다. 첫 message row와 activation bar를 옮긴 뒤 full preview와 모든
+original-resolution crop을 다시 inspect했다.
 
-Sequence style must be compared visually with the current best-practices
-reference, not inferred from an older nearby repository diagram. The first
-version used a rounded pill but left the call number as plain inline text. The
-approved baseline separates the number into a semantic-color circular badge
-inside a 34-pixel pill. Applying that pattern to all 22 messages also required
-larger row, phase, activation, lifeline, frame, and canvas coordinates so the
-badge did not force labels onto message lines.
+sequence style은 오래된 nearby repository diagram에서 추론하지 말고 current best-practices
+reference와 시각적으로 비교해야 한다. 첫 version은 rounded pill을 사용했지만 call number를 plain
+inline text로 남겼다. 승인된 baseline은 34-pixel pill 안의 semantic-color circular badge로 number를
+분리한다. 이 pattern을 message 22개 전체에 적용하려면 badge가 label을 message line 위로 밀지
+않도록 row, phase, activation, lifeline, frame, canvas coordinate도 더 커져야 했다.
 
-For future diagrams, retain this order:
+향후 diagram에서는 이 순서를 유지한다.
 
-1. audit connector counts, endpoints, crossings, card intrusions, and bend
-   geometry in the SVG;
-2. render PNG deterministically and compare hashes on a second render;
-3. inspect every arrowhead direction and marker clearance in the PNG;
-4. compare numbered pill and badge styling with the current best-practices
-   sequence PNG, including one- and two-digit numbers;
-5. inspect original-pixel crops for text, pill, activation, and card overlap;
-6. rerun every audit and eye inspection after any coordinate change.
+1. SVG에서 connector count, endpoint, crossing, card intrusion, bend geometry를 audit한다.
+2. PNG를 deterministic하게 render하고 두 번째 render hash와 비교한다.
+3. PNG에서 모든 arrowhead direction과 marker clearance를 inspect한다.
+4. one-/two-digit number를 포함해 numbered pill과 badge styling을 current best-practices
+   sequence PNG와 비교한다.
+5. text, pill, activation, card overlap을 original-pixel crop으로 inspect한다.
+6. coordinate가 바뀌면 모든 audit와 eye inspection을 다시 실행한다.
 
-## Future Guard
+## 향후 Guard
 
-Do not turn this workshop into a generic workflow engine or promise exactly-once
-delivery. Production adoption still requires authentication and authorization,
-tenant isolation, TLS and proxy policy, schema migrations, outbox retention,
-stream trimming, consumer groups, lag and dead-letter metrics, authorized replay
-with audit records, and consumer deduplication by stable event identity.
+이 workshop을 generic workflow engine으로 바꾸거나 exactly-once delivery를 약속하지 않는다.
+production adoption에는 여전히 authentication/authorization, tenant isolation, TLS/proxy policy,
+schema migration, outbox retention, stream trimming, consumer group, lag/dead-letter metric,
+audit record가 있는 authorized replay, stable event identity 기반 consumer deduplication이 필요하다.
 
-Before extending the example, preserve these regression guards: atomic rollback,
-same/different-payload replay, concurrent command serialization, relay lease
-recovery, Redis degradation, unexpected relay exit, cancellation-ignoring relay
-shutdown, actual-app HTTP smoke, bilingual contract parity, and rendered diagram
-inspection.
+예제를 확장하기 전에는 다음 regression guard를 보존한다. atomic rollback,
+same/different-payload replay, concurrent command serialization, relay lease recovery, Redis
+degradation, unexpected relay exit, cancellation-ignoring relay shutdown, actual-app HTTP
+smoke, bilingual contract parity, rendered diagram inspection.
