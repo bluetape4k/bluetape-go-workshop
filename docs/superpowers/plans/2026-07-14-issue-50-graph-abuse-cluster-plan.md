@@ -772,14 +772,14 @@ git add docs/images/readme-diagrams/graph-abuse-cluster-* examples/graph-abuse-c
 git commit -m "docs: diagram graph abuse cluster workflow"
 ```
 
-## Task 9: Run Full Verification, Review, and Durable Learning
+## Task 9: Full Verification, Review, Durable Learning 실행
 
 **Complexity:** High. **Depends on:** Tasks 1-8. **Skills:**
-`verification-before-completion`, `bluetape-full-feature`,
-`bluetape-go-patterns`. **Write scope:** in-scope P0/P1 fixes, review and lesson
-artifacts. **Heavy commands:** sequential only.
+`verification-before-completion`, `bluetape-full-feature`, `bluetape-go-patterns`.
+**Write scope:** in-scope P0/P1 fix, review 및 lesson artifact.
+**Heavy commands:** sequential only.
 
-- [ ] **Step 1: Run focused and repository gates from scratch**
+- [ ] **Step 1: focused 및 repository gate를 처음부터 실행**
 
 ```bash
 git diff --check origin/develop
@@ -797,40 +797,35 @@ make race
 make ci
 ```
 
-Expected: every command has a fresh observed exit 0. If a container test fails
-then passes on retry, diagnose lifecycle/cleanup/host contention, repair the
-cause, rerun the isolated test, then rerun the full required gate; a retry-only
-pass is not accepted.
+기대값: 모든 command가 fresh observed exit 0을 가진다. container test가 fail한 뒤 retry에서 pass하면
+lifecycle/cleanup/host contention을 진단하고 원인을 수정한다. isolated test를 다시 실행한 뒤 full required gate를 다시 실행한다.
+retry-only pass는 수락하지 않는다.
 
-- [ ] **Step 2: Execute performance/stability and dependency scans**
+- [ ] **Step 2: performance/stability 및 dependency scan 실행**
 
-Verify fixed three-operation DB path, 256/1024 caps, iterative traversal,
-bounded buffers, no per-node query, strict deadline propagation, exact close
-ownership, no late mutation on cancellation, scoped transaction rollback,
-single container startup, direct dependency versions/licenses, and no raw
-provider/URI logging. Fix P0/P1 and rerun affected tests.
+fixed three-operation DB path, 256/1024 cap, iterative traversal, bounded buffer, per-node query 없음,
+strict deadline propagation, exact close ownership, cancellation 뒤 late mutation 없음, scoped transaction rollback,
+single container startup, direct dependency version/license, raw provider/URI logging 없음 을 확인한다.
+P0/P1을 수정하고 affected test를 다시 실행한다.
 
-- [ ] **Step 3: Verify every spec and plan item**
+- [ ] **Step 3: 모든 spec 및 plan item 검증**
 
-Use the Type A Step 5 verifier against the exact spec, this plan, current diff,
-tests, README pair, root navigation, four diagram assets, and issue metadata.
-Map every acceptance criterion to fresh evidence; missing behavior returns to
-its owning task and is never reinterpreted as optional.
+exact spec, 이 plan, current diff, test, README pair, root navigation, diagram asset 네 개, issue metadata에 대해
+Type A Step 5 verifier를 사용한다. 모든 acceptance criterion을 fresh evidence에 매핑한다.
+missing behavior는 owning task로 되돌아가며 optional로 재해석하지 않는다.
 
-- [ ] **Step 4: Run six final code-review perspectives**
+- [ ] **Step 4: final code-review perspective 여섯 개 실행**
 
-Review performance, stability, security, operator/Ops, developer/API, and
-user/caller independently, then integrate in the main session. Fix P0/P1,
-resolve or file P2/P3, rerun affected tests/lenses, and write
-`docs/review/2026-07-14-issue-50-graph-abuse-cluster.md` with exact commands,
-diagram counts/hashes/dimensions, dependency evidence, and final P0=0/P1=0.
+performance, stability, security, operator/Ops, developer/API, user/caller를 독립적으로 review한 뒤 main session에서 통합한다.
+P0/P1을 수정하고 P2/P3를 resolve 또는 file하며 affected test/lens를 다시 실행한다.
+exact command, diagram count/hash/dimension, dependency evidence, final P0=0/P1=0을 포함해
+`docs/review/2026-07-14-issue-50-graph-abuse-cluster.md`를 작성한다.
 
-- [ ] **Step 5: Write and commit the durable lesson**
+- [ ] **Step 5: durable lesson 작성 및 commit**
 
-Record the Neo4j/Go policy split, ElementID versus opaque ID mapping, atomic
-reset/seed, limit+1 proof, strict NoAuth loopback boundary, cleanup-before-
-output, Testcontainers behavior, diagram eye-check findings, review misses, and
-the #27 body-edit fail-closed restoration guard.
+Neo4j/Go policy split, ElementID와 opaque ID mapping, atomic reset/seed, limit+1 proof,
+strict NoAuth loopback boundary, cleanup-before-output, Testcontainers behavior,
+diagram eye-check finding, review miss, #27 body-edit fail-closed restoration guard를 기록한다.
 
 ```bash
 git add docs/review/2026-07-14-issue-50-graph-abuse-cluster.md docs/lessons/2026-07-14-issue-50-graph-abuse-cluster.md
@@ -838,98 +833,84 @@ git commit -m "docs: record graph abuse cluster verification"
 git status --short
 ```
 
-Expected: clean worktree, no unresolved P0/P1, and all evidence committed
-before PR creation.
+기대값: clean worktree, unresolved P0/P1 없음, PR 생성 전 모든 evidence commit 완료.
 
-## Task 10: Push, Create the PR, and Stop at Merge Approval
+## Task 10: Push, PR 생성, Merge Approval에서 중단
 
 **Complexity:** Medium. **Depends on:** Task 9. **Skills:**
-`bluetape-workflow`. **Write scope:** live PR metadata/body only unless review
-requires an approved repair.
+`bluetape-workflow`. **Write scope:** review가 approved repair를 요구하지 않는 한 live PR metadata/body만 포함한다.
 
-- [ ] **Step 1: Refresh live issue metadata and branch state**
+- [ ] **Step 1: live issue metadata 및 branch state refresh**
 
-Confirm #50 is OPEN, assigned to `debop`, milestone `0.10.0`, labels
-`enhancement`/`examples`, parent #36 remains open, worktree is clean, and branch
-head equals the intended pushed head.
+#50이 OPEN이고 `debop`에게 assigned되었으며 milestone `0.10.0`, label `enhancement`/`examples`를 갖는지 확인한다.
+parent #36은 open으로 남아야 한다. worktree가 clean이고 branch head가 intended pushed head와 같은지 확인한다.
 
-- [ ] **Step 2: Push and create the English PR**
+- [ ] **Step 2: push 및 English PR 생성**
 
-Push only `feat/issue-50-graph-abuse-cluster`. Create an English PR that closes
-#50, mirrors milestone/assignee/labels, explains why before what, lists exact
-validation and diagram eye evidence, and ends with final heading
-`## DoD Status`. Verify the live body and metadata with `gh pr view`.
+`feat/issue-50-graph-abuse-cluster`만 push한다. #50을 close하고 milestone/assignee/label을 mirror하는 English PR을 생성한다.
+what보다 why를 먼저 설명하고 exact validation과 diagram eye evidence를 나열하며 final heading `## DoD Status`로 끝낸다.
+`gh pr view`로 live body와 metadata를 확인한다.
 
-- [ ] **Step 3: Run live PR review and CI gate**
+- [ ] **Step 3: live PR review 및 CI gate 실행**
 
-Review the actual PR diff through all six perspectives. Wait in bounded
-intervals until every required check is `SUCCESS`; pending, skipped, stale,
-missing, canceled, or failed is not green. After green, reread reviews,
-comments, and unresolved threads; any new P0/P1 reopens implementation.
+actual PR diff를 여섯 perspective 모두로 review한다. 모든 required check가 `SUCCESS`가 될 때까지 bounded interval로 기다린다.
+pending, skipped, stale, missing, canceled, failed는 green이 아니다. green 이후 review, comment, unresolved thread를 다시 읽는다.
+새 P0/P1은 implementation을 다시 연다.
 
-- [ ] **Step 4: Report merge-ready state and stop**
+- [ ] **Step 4: merge-ready state 보고 및 중단**
 
-Report PR URL, head/base/CI SHAs, issue metadata, P0/P1 counts, required checks,
-diagram paths, and clean local state. Do not merge, delete the branch/worktree,
-close #36, or synchronize `develop` without a new explicit user instruction.
+PR URL, head/base/CI SHA, issue metadata, P0/P1 count, required check, diagram path, clean local state를 보고한다.
+새 명시적 사용자 지시 없이 merge, branch/worktree 삭제, #36 close, `develop` synchronize를 하지 않는다.
 
 ## Acceptance Traceability
 
 | Spec acceptance | Owning tasks | Fresh evidence |
 |---|---|---|
-| Released graph-value validation before persistence | Task 1 | Fixture RED/GREEN and graph validation tests |
-| Atomic scoped Neo4j reset/seed and two bounded reads | Tasks 3, 6 | Store tests plus real Neo4j idempotence/unrelated-namespace proof |
-| Exact direct/transitive clusters, scores and tie-breaks | Task 2 | Exact report, shuffle, payment weight and tie tables |
-| Fail-closed invalid/bounds/backend/cancellation behavior | Tasks 2-6 | Negative, cancellation, lifecycle and integration tests |
-| Strict loopback NoAuth CLI and cleanup-before-output | Task 5 | URI matrix and event-order tests |
-| Runnable deterministic JSON lesson | Tasks 4-7 | Exact encoder, CLI and README parity tests |
-| Serial Neo4j readiness/adaptation/cleanup | Task 6 | Normal and race Testcontainers commands |
-| Bilingual docs/root navigation/visuals | Tasks 7-8 | Locale parity plus two complete diagram ledgers |
-| Full validation and P0/P1 convergence | Task 9 | Fresh focused, repository, make CI, verifier and review evidence |
+| Released graph-value validation before persistence | Task 1 | Fixture RED/GREEN 및 graph validation test |
+| Atomic scoped Neo4j reset/seed and two bounded reads | Tasks 3, 6 | store test와 real Neo4j idempotence/unrelated-namespace proof |
+| Exact direct/transitive clusters, scores and tie-breaks | Task 2 | exact report, shuffle, payment weight, tie table |
+| Fail-closed invalid/bounds/backend/cancellation behavior | Tasks 2-6 | negative, cancellation, lifecycle, integration test |
+| Strict loopback NoAuth CLI and cleanup-before-output | Task 5 | URI matrix 및 event-order test |
+| Runnable deterministic JSON lesson | Tasks 4-7 | exact encoder, CLI, README parity test |
+| Serial Neo4j readiness/adaptation/cleanup | Task 6 | normal 및 race Testcontainers command |
+| Bilingual docs/root navigation/visuals | Tasks 7-8 | locale parity와 complete diagram ledger 두 개 |
+| Full validation and P0/P1 convergence | Task 9 | fresh focused, repository, make CI, verifier, review evidence |
 | PR metadata and green live CI | Task 10 | `gh` live body/metadata/check/review evidence |
 
 ## Plan Review Convergence
 
-The main session reviewed this plan independently through all six required
-perspectives after the approved spec. Each P1 below was repaired in the plan
-before implementation approval; no P0 was found.
+main session은 approved spec 이후 여섯 required perspective로 이 plan을 독립 review했다.
+아래 각 P1은 implementation approval 전에 plan에서 수정되었고 P0는 발견되지 않았다.
 
 | Perspective | Initial finding | Plan repair | Final |
 |---|---|---|---|
-| Performance | P1: loaded-result caps existed, but the pre-write fixture boundary did not explicitly test exact/max+1 sizes. | Task 1 now rejects write-side 257/1025 inputs and proves 256/1024 acceptance; Tasks 3 and 9 retain max+1 reads and the fixed three-operation path. | P0=0, P1=0 |
-| Stability | P1: the seed shape and close flag could fail on an empty namespace or retry a failed close; integration namespace creation was implicit. | Task 3 uses `OPTIONAL MATCH` plus one managed transaction, Task 5 marks `closeAttempted` before close, and Tasks 1/6 define `NewFixture` for isolated runs. | P0=0, P1=0 |
-| Security | P1: URI rejection was broad, but rendered provider-secret leakage lacked an explicit adversarial assertion. | Task 5 injects URI/opaque-ID-bearing failures and requires returned/logged redaction; strict loopback parsing remains before driver creation. | P0=0, P1=0 |
-| Operator/Ops | P1: lifecycle tests did not own the actual process exit-code boundary. | Task 5 defines injectable `realMain`, verifies 0/1 behavior, one operation deadline, fresh cleanup, and only then leaves `main` to signal setup and `os.Exit`. | P0=0, P1=0 |
-| Developer/API | P1: the original opener returned only a close owner and could not supply the workflow store; the unique fixture API was missing. | Task 5 now opens one three-method application, Task 1 owns `NewFixture`, Task 4 has a concrete encoder-failure seam, and Task 8 gives executable audit commands. | P0=0, P1=0 |
-| User/caller | P1: the foreground container and CLI commands could look like one terminal flow, and visual references were directory-level. | Task 7 labels Terminal 1/2; Task 8 pins four full reference paths and preserves exact JSON, caveats, and original-size eye checks. | P0=0, P1=0 |
+| Performance | P1: loaded-result cap은 있었지만 pre-write fixture boundary가 exact/max+1 size를 명시적으로 test하지 않았다. | Task 1은 write-side 257/1025 input을 reject하고 256/1024 acceptance를 증명한다. Tasks 3/9는 max+1 read와 fixed three-operation path를 유지한다. | P0=0, P1=0 |
+| Stability | P1: seed shape와 close flag가 empty namespace에서 실패하거나 failed close를 retry할 수 있었다. integration namespace creation은 암묵적이었다. | Task 3은 `OPTIONAL MATCH`와 managed transaction 하나를 사용한다. Task 5는 close 전에 `closeAttempted`를 mark하고, Tasks 1/6은 isolated run용 `NewFixture`를 정의한다. | P0=0, P1=0 |
+| Security | P1: URI rejection은 넓었지만 rendered provider-secret leakage에 명시적인 adversarial assertion이 부족했다. | Task 5는 URI/opaque-ID-bearing failure를 inject하고 returned/logged redaction을 요구한다. strict loopback parsing은 driver creation 전에 남는다. | P0=0, P1=0 |
+| Operator/Ops | P1: lifecycle test가 실제 process exit-code boundary를 소유하지 않았다. | Task 5는 injectable `realMain`을 정의하고 0/1 behavior, operation deadline 하나, fresh cleanup을 검증한 뒤 `main`을 signal setup과 `os.Exit`에만 남긴다. | P0=0, P1=0 |
+| Developer/API | P1: original opener가 close owner만 반환하여 workflow store를 제공할 수 없었고 unique fixture API가 없었다. | Task 5는 three-method application 하나를 열고, Task 1은 `NewFixture`를 소유하며, Task 4는 concrete encoder-failure seam을 갖고, Task 8은 executable audit command를 제공한다. | P0=0, P1=0 |
+| User/caller | P1: foreground container와 CLI command가 하나의 terminal flow처럼 보일 수 있었고 visual reference가 directory-level이었다. | Task 7은 Terminal 1/2를 label하고, Task 8은 full reference path 네 개를 pin하며 exact JSON, caveat, original-size eye check를 보존한다. | P0=0, P1=0 |
 
 ## Risk Prediction and Rerun Points
 
 | Risk | Signal | Mitigation | Rerun or rollback point |
 |---|---|---|---|
-| Cypher reset leaves partial fixture | counts differ after injected/second seed | one scoped managed transaction and exact real counts | reopen Task 3, rerun Task 6 from fresh container |
-| Adapter ElementID is confused with opaque ID | endpoint lookup or output IDs drift | map backend IDs only for topology; domain output uses validated properties | reopen Task 2 and shuffle/integration tests |
-| Limit query silently truncates | exactly 256/1024 passes but larger graph reports success | query max+1 and reject before analysis | reopen Task 3 boundary tests |
-| NoAuth URI reaches remote host | hostname/userinfo/scheme matrix unexpectedly passes | strict parsed loopback Bolt validation before driver | reopen Task 5 config tests/security lens |
-| Cleanup failure follows successful output | stdout event precedes close or close error still prints JSON | buffer, explicit close, then checked stdout write | reopen Tasks 4-5 lifecycle tests |
-| Two processes race on fixed namespace | inconsistent vertices/edges or missing endpoint | explicit single-run boundary; unique namespaces in tests | stop concurrent run, rerun Task 6 serially |
-| Docker host contention creates flaky CI | readiness timeout or retry-only pass | one serial container, connectivity proof, bounded cleanup | diagnose, isolated rerun, then full Task 9 gates |
-| Diagram arrows pass scripts but render reversed/colliding | PNG differs from intended receiver or bend | PNG authoritative; move ports/bends and rerun one-asset loop | return to owning Task 8 asset |
-| Scope grows into graph abstraction or Memgraph | new package/interface/dependency outside map | stop and request new scope; preserve issue #50 boundary | revert only new task-owned drift |
+| Cypher reset leaves partial fixture | injected/second seed 뒤 count가 다름 | scoped managed transaction 하나와 exact real count | Task 3 재개방, fresh container에서 Task 6 재실행 |
+| Adapter ElementID is confused with opaque ID | endpoint lookup 또는 output ID drift | backend ID는 topology에만 map하고 domain output은 validated property 사용 | Task 2와 shuffle/integration test 재개방 |
+| Limit query silently truncates | 정확히 256/1024는 pass하지만 더 큰 graph가 success를 보고 | query max+1과 analysis 전 reject | Task 3 boundary test 재개방 |
+| NoAuth URI reaches remote host | hostname/userinfo/scheme matrix가 예상 밖으로 pass | driver 전 strict parsed loopback Bolt validation | Task 5 config test/security lens 재개방 |
+| Cleanup failure follows successful output | stdout event가 close보다 앞서거나 close error에도 JSON 출력 | buffer, explicit close, 그다음 checked stdout write | Tasks 4-5 lifecycle test 재개방 |
+| Two processes race on fixed namespace | inconsistent vertices/edges 또는 missing endpoint | explicit single-run boundary, test의 unique namespace | concurrent run 중단, Task 6 serial 재실행 |
+| Docker host contention creates flaky CI | readiness timeout 또는 retry-only pass | serial container 하나, connectivity proof, bounded cleanup | 진단, isolated rerun, 이후 full Task 9 gate |
+| Diagram arrows pass scripts but render reversed/colliding | PNG가 intended receiver 또는 bend와 다름 | PNG를 authoritative로 보고 port/bend 이동 후 one-asset loop 재실행 | owning Task 8 asset으로 복귀 |
+| Scope grows into graph abstraction or Memgraph | map 밖의 new package/interface/dependency | 중단하고 new scope 요청, issue #50 boundary 보존 | task-owned drift만 revert |
 
 ## Repository Hazard Decisions
 
-- New module/CI/Nightly/Kover/BOM/catalog: N/A; this is an example directory in
-  the existing Go module and current workflows discover `./...`.
-- Dependency change: triggered and pinned to upstream v0.18.0 versions; Task 1
-  plus `tidy-check`, license/source review, and no-extra-dependency diff prove it.
-- HTTP/auth/TLS: no HTTP server; strict local NoAuth Bolt configuration is
-  intentionally narrow and documented as non-production.
-- Testcontainers: triggered; one Neo4j container at a time with connectivity,
-  cancellation, scoped cleanup, normal and race evidence.
-- README locales and diagrams: triggered; Tasks 7-8 own parity and visual
-  ledgers.
-- Benchmark: N/A; no throughput claim, fixed tiny fixture, bounded operations,
-  and this issue is a teaching example rather than performance evidence.
-- Release/changelog: N/A; workshop delivery is issue/README/PR based and does
-  not publish a library artifact.
+- New module/CI/Nightly/Kover/BOM/catalog: N/A. existing Go module 안의 example directory이며 current workflow가 `./...`를 discover한다.
+- Dependency change: trigger됨. upstream v0.18.0 version에 pin한다. Task 1과 `tidy-check`, license/source review, no-extra-dependency diff가 이를 증명한다.
+- HTTP/auth/TLS: HTTP server 없음. strict local NoAuth Bolt configuration은 의도적으로 좁고 non-production으로 문서화한다.
+- Testcontainers: trigger됨. 한 번에 Neo4j container 하나를 사용하고 connectivity, cancellation, scoped cleanup, normal/race evidence를 남긴다.
+- README locales and diagrams: trigger됨. Tasks 7-8이 parity와 visual ledger를 소유한다.
+- Benchmark: N/A. throughput claim이 없고 fixed tiny fixture와 bounded operation만 있으며, 이 issue는 performance evidence가 아니라 teaching example이다.
+- Release/changelog: N/A. workshop delivery는 issue/README/PR 기반이며 library artifact를 publish하지 않는다.
