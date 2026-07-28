@@ -1,4 +1,4 @@
-// Package routing applies evidence-backed language routing policy to support requests.
+// Package routing 은 증거 기반 언어 라우팅 정책을 지원 요청에 적용한다.
 package routing
 
 import (
@@ -12,48 +12,48 @@ import (
 )
 
 const (
-	// RouteModeration sends supported English and Korean requests to moderation.
+	// RouteModeration 은 지원되는 영어와 한국어 요청을 moderation 경로로 보낸다.
 	RouteModeration = "moderation"
-	// RouteJapaneseTokenization sends confident Japanese requests to tokenization.
+	// RouteJapaneseTokenization 은 신뢰도 높은 일본어 요청을 tokenization 경로로 보낸다.
 	RouteJapaneseTokenization = "japanese-tokenization"
-	// RouteManualReview sends uncertain or unsupported requests to a reviewer.
+	// RouteManualReview 는 불확실하거나 지원되지 않는 요청을 검토자에게 보낸다.
 	RouteManualReview = "manual-review"
 
-	// ReviewTextTooShort identifies input below the configured rune threshold.
+	// ReviewTextTooShort 는 설정된 rune 임계값보다 짧은 입력을 식별한다.
 	ReviewTextTooShort = "text-too-short"
-	// ReviewLanguageUnknown identifies input without a detected language.
+	// ReviewLanguageUnknown 은 감지된 언어가 없는 입력을 식별한다.
 	ReviewLanguageUnknown = "language-unknown"
-	// ReviewLowConfidence identifies a detection below the configured confidence.
+	// ReviewLowConfidence 는 설정된 신뢰도보다 낮은 감지 결과를 식별한다.
 	ReviewLowConfidence = "low-confidence"
-	// ReviewMixedLanguage identifies multiple detected non-unknown language sections.
+	// ReviewMixedLanguage 는 unknown 이 아닌 감지 언어 구간이 여러 개인 입력을 식별한다.
 	ReviewMixedLanguage = "mixed-language"
-	// ReviewAmbiguousCJKScript identifies Japanese detection without Kana evidence.
+	// ReviewAmbiguousCJKScript 는 Kana 증거 없이 일본어로 감지된 입력을 식별한다.
 	ReviewAmbiguousCJKScript = "ambiguous-cjk-script"
-	// ReviewUnsupportedLanguage identifies a detected language without an automated route.
+	// ReviewUnsupportedLanguage 는 자동 라우트가 없는 감지 언어를 식별한다.
 	ReviewUnsupportedLanguage = "unsupported-language"
 )
 
 var (
-	// ErrInvalidConfig identifies invalid router construction or use.
+	// ErrInvalidConfig 는 라우터 생성 또는 사용 정책이 유효하지 않음을 식별한다.
 	ErrInvalidConfig = errors.New("routing: invalid config")
-	// ErrInvalidRequest identifies a request without valid required input.
+	// ErrInvalidRequest 는 유효한 필수 입력이 없는 요청을 식별한다.
 	ErrInvalidRequest = errors.New("routing: invalid request")
 )
 
-// Config owns application-level detector and routing thresholds.
+// Config 는 애플리케이션 수준 감지기와 라우팅 임계값을 소유한다.
 type Config struct {
 	MinimumConfidence float64 `json:"minimum_confidence"`
 	MinimumRunes      int     `json:"minimum_runes"`
 	PreloadModels     bool    `json:"preload_models"`
 }
 
-// Request contains caller-owned routing input.
+// Request 는 호출자가 소유한 라우팅 입력을 담는다.
 type Request struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 }
 
-// Confidence projects one detector confidence with stable language metadata.
+// Confidence 는 안정적인 언어 메타데이터와 함께 하나의 감지기 신뢰도를 표현한다.
 type Confidence struct {
 	Language string  `json:"language"`
 	Value    float64 `json:"value"`
@@ -61,7 +61,7 @@ type Confidence struct {
 	ISO6393  string  `json:"iso_639_3"`
 }
 
-// Section projects one detector section with original UTF-8 byte offsets.
+// Section 은 원본 UTF-8 바이트 오프셋을 포함하는 하나의 감지기 구간을 표현한다.
 type Section struct {
 	Language string `json:"language"`
 	Start    int    `json:"start"`
@@ -71,7 +71,7 @@ type Section struct {
 	ISO6393  string `json:"iso_639_3"`
 }
 
-// Decision contains detector evidence and the resulting application route.
+// Decision 은 감지기 증거와 그 결과로 선택된 애플리케이션 라우트를 담는다.
 type Decision struct {
 	ID            string       `json:"id"`
 	Text          string       `json:"text"`
@@ -87,18 +87,18 @@ type Decision struct {
 	ReviewReasons []string     `json:"review_reasons"`
 }
 
-// Router reuses one language detector with immutable application policy.
+// Router 는 변경 불가능한 애플리케이션 정책과 하나의 언어 감지기를 재사용한다.
 type Router struct {
 	detector *language.Detector
 	config   Config
 }
 
-// DefaultConfig returns the lazy detector policy used by the example.
+// DefaultConfig 는 예제가 사용하는 지연 로딩 감지기 정책을 반환한다.
 func DefaultConfig() Config {
 	return Config{MinimumConfidence: 0.70, MinimumRunes: 8}
 }
 
-// NewRouter validates policy and constructs a four-language detector.
+// NewRouter 는 정책을 검증하고 네 개 언어 감지기를 구성한다.
 func NewRouter(config Config) (*Router, error) {
 	if math.IsNaN(config.MinimumConfidence) || config.MinimumConfidence < 0 || config.MinimumConfidence > 1 || config.MinimumRunes <= 0 {
 		return nil, fmt.Errorf("%w: confidence must be in [0,1] and minimum runes must be positive", ErrInvalidConfig)
@@ -120,7 +120,7 @@ func NewRouter(config Config) (*Router, error) {
 	return &Router{detector: detector, config: config}, nil
 }
 
-// Route returns detector evidence and the resulting application route.
+// Route 는 감지기 증거와 그 결과로 선택된 애플리케이션 라우트를 반환한다.
 func (r *Router) Route(request Request) (Decision, error) {
 	if r == nil || r.detector == nil {
 		return Decision{}, fmt.Errorf("%w: router is nil", ErrInvalidConfig)

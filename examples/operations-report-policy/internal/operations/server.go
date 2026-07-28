@@ -1,4 +1,4 @@
-// Package operations exposes a small Gin API for workreport failure policies.
+// Package operations 는 workreport 실패 정책을 위한 작은 Gin API를 노출한다.
 package operations
 
 import (
@@ -18,9 +18,9 @@ const (
 )
 
 var (
-	// ErrProductValidation reports that the product validation step failed.
+	// ErrProductValidation 은 상품 검증 단계가 실패했음을 나타낸다.
 	ErrProductValidation = errors.New("product validation failed")
-	// ErrPartnerNotification reports that a partner notification attempt failed.
+	// ErrPartnerNotification 은 파트너 알림 시도가 실패했음을 나타낸다.
 	ErrPartnerNotification = errors.New("partner notification failed")
 
 	errInvalidRunID        = errors.New("run_id is required")
@@ -28,15 +28,15 @@ var (
 	errMissingProductsFlag = errors.New("products_valid is required")
 )
 
-// Options configures the operations report policy API server.
+// Options 는 운영 리포트 정책 API 서버를 설정한다.
 type Options struct{}
 
-// Server exposes operations report aggregation over HTTP.
+// Server 는 운영 리포트 집계를 HTTP로 노출한다.
 type Server struct {
 	router *gin.Engine
 }
 
-// RunRequest describes one operations report scenario.
+// RunRequest 는 하나의 운영 리포트 시나리오를 설명한다.
 type RunRequest struct {
 	RunID                    string `json:"run_id"`
 	Policy                   string `json:"policy"`
@@ -87,7 +87,7 @@ type operationsRun struct {
 	policy  workreport.FailurePolicy
 }
 
-// NewServer creates the operations report policy API.
+// NewServer 는 운영 리포트 정책 API를 생성한다.
 func NewServer(Options) (*Server, error) {
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -99,7 +99,7 @@ func NewServer(Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the Gin router.
+// ServeHTTP 는 요청을 Gin 라우터로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

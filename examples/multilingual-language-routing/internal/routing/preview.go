@@ -2,7 +2,7 @@ package routing
 
 import "fmt"
 
-// Preview contains deterministic routing evidence and lifecycle notes.
+// Preview 는 결정적인 라우팅 증거와 수명주기 메모를 담는다.
 type Preview struct {
 	Scenario              string      `json:"scenario"`
 	Config                Config      `json:"config"`
@@ -14,13 +14,13 @@ type Preview struct {
 	TestCommands          []string    `json:"test_commands"`
 }
 
-// PolicyCheck records an explicit policy configuration and its decision.
+// PolicyCheck 는 명시적인 정책 설정과 그 결정을 기록한다.
 type PolicyCheck struct {
 	Config   Config   `json:"config"`
 	Decision Decision `json:"decision"`
 }
 
-// NewPreview routes fixed requests with lazy or preloaded detector models.
+// NewPreview 는 지연 로딩 또는 사전 로딩 감지기 모델로 고정 요청을 라우팅한다.
 func NewPreview(preload bool) (Preview, error) {
 	config := DefaultConfig()
 	config.PreloadModels = preload

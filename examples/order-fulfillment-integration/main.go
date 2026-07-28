@@ -1,4 +1,4 @@
-// Package main starts the order fulfillment integration HTTP example.
+// Package main 은 주문 이행 통합 HTTP 예제를 시작한다.
 package main
 
 import (

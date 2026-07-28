@@ -1,4 +1,4 @@
-// Package main prints the multilingual language routing preview.
+// Package main 은 다국어 언어 라우팅 미리보기를 출력한다.
 package main
 
 import (

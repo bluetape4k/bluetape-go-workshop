@@ -1,4 +1,4 @@
-// Package orderfulfillment exposes an integrated order fulfillment workflow over Gin.
+// Package orderfulfillment 는 통합 주문 이행 워크플로를 Gin으로 노출한다.
 package orderfulfillment
 
 import (
@@ -15,65 +15,65 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// OrderState is the current lifecycle state for one fulfillment run.
+// OrderState 는 하나의 이행 실행에 대한 현재 수명주기 상태다.
 type OrderState string
 
 const (
-	// StateDraft is the initial order state before submission.
+	// StateDraft 는 제출 전 초기 주문 상태다.
 	StateDraft OrderState = "draft"
-	// StateSubmitted means inventory and payment work can start.
+	// StateSubmitted 는 재고와 결제 작업을 시작할 수 있음을 의미한다.
 	StateSubmitted OrderState = "submitted"
-	// StatePaid means payment authorization succeeded.
+	// StatePaid 는 결제 승인이 성공했음을 의미한다.
 	StatePaid OrderState = "paid"
-	// StatePacked means the order is ready for shipment.
+	// StatePacked 는 주문이 배송 준비를 마쳤음을 의미한다.
 	StatePacked OrderState = "packed"
-	// StateShipped is the successful terminal state.
+	// StateShipped 는 성공적인 종료 상태다.
 	StateShipped OrderState = "shipped"
-	// StateCancelled is the failure terminal state.
+	// StateCancelled 는 실패 종료 상태다.
 	StateCancelled OrderState = "cancelled"
 )
 
-// OrderEvent is a lifecycle command accepted by the state machine.
+// OrderEvent 는 상태 머신이 받는 수명주기 명령이다.
 type OrderEvent string
 
 const (
-	// EventSubmit moves a draft order to submitted.
+	// EventSubmit 은 초안 주문을 제출됨 상태로 이동시킨다.
 	EventSubmit OrderEvent = "submit"
-	// EventPay moves a submitted order to paid.
+	// EventPay 는 제출된 주문을 결제됨 상태로 이동시킨다.
 	EventPay OrderEvent = "pay"
-	// EventPack moves a paid order to packed.
+	// EventPack 은 결제된 주문을 포장됨 상태로 이동시킨다.
 	EventPack OrderEvent = "pack"
-	// EventShip moves a packed order to shipped.
+	// EventShip 은 포장된 주문을 배송됨 상태로 이동시킨다.
 	EventShip OrderEvent = "ship"
-	// EventCancel moves a cancellable order to cancelled.
+	// EventCancel 은 취소 가능한 주문을 취소됨 상태로 이동시킨다.
 	EventCancel OrderEvent = "cancel"
 )
 
 var (
-	// ErrInventoryUnavailable reports that stock reservation cannot proceed.
+	// ErrInventoryUnavailable 은 재고 예약을 진행할 수 없음을 나타낸다.
 	ErrInventoryUnavailable = errors.New("inventory is unavailable")
-	// ErrPaymentDeclined reports that payment authorization failed.
+	// ErrPaymentDeclined 는 결제 승인이 실패했음을 나타낸다.
 	ErrPaymentDeclined = errors.New("payment authorization declined")
-	// ErrShipmentProviderUnavailable reports that shipment creation cannot proceed.
+	// ErrShipmentProviderUnavailable 은 배송 생성 작업을 진행할 수 없음을 나타낸다.
 	ErrShipmentProviderUnavailable = errors.New("shipment provider is unavailable")
-	// ErrPaymentVoidFailed reports that payment compensation failed.
+	// ErrPaymentVoidFailed 는 결제 보상 작업이 실패했음을 나타낸다.
 	ErrPaymentVoidFailed = errors.New("payment void failed")
-	// ErrInventoryReleaseFailed reports that inventory compensation failed.
+	// ErrInventoryReleaseFailed 는 재고 보상 작업이 실패했음을 나타낸다.
 	ErrInventoryReleaseFailed = errors.New("inventory release failed")
 
 	errInvalidOrderID = errors.New("order_id is required")
 	errInvalidTotal   = errors.New("total_cents must be positive")
 )
 
-// Options configures the order fulfillment integration API server.
+// Options 는 주문 이행 통합 API 서버를 설정한다.
 type Options struct{}
 
-// Server exposes order fulfillment integration over HTTP.
+// Server 는 주문 이행 통합 흐름을 HTTP로 노출한다.
 type Server struct {
 	router *gin.Engine
 }
 
-// FulfillmentRequest describes one integrated order fulfillment scenario.
+// FulfillmentRequest 는 하나의 통합 주문 이행 시나리오를 설명한다.
 type FulfillmentRequest struct {
 	OrderID                   string `json:"order_id" binding:"required"`
 	TotalCents                int    `json:"total_cents"`
@@ -145,7 +145,7 @@ type orderRun struct {
 	afterReserve  func()
 }
 
-// NewServer creates the order fulfillment integration API.
+// NewServer 는 주문 이행 통합 API를 생성한다.
 func NewServer(Options) (*Server, error) {
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -157,7 +157,7 @@ func NewServer(Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the Gin router.
+// ServeHTTP 는 요청을 Gin 라우터로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

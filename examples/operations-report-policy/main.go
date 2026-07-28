@@ -1,4 +1,4 @@
-// Package main runs the operations report policy example.
+// Package main 은 운영 리포트 정책 예제를 실행한다.
 package main
 
 import (
