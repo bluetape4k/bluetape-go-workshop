@@ -431,43 +431,39 @@ marker color parity가 visible해야 한다. 마지막 coordinate change 뒤 fin
 bend clearance, label/line overlap, frame padding, cancellation branch를 inspect한다.
 SVG-only 또는 contact-sheet evidence는 invalid하다.
 
-## Task 8: Write bilingual READMEs and root navigation
+## Task 8: bilingual README 및 root navigation 작성
 
-**Complexity:** Medium. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-writer`, `bluetape-diagram`. **Write scope:** example and root README locale pairs.
+**Complexity:** Medium. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-writer`, `bluetape-diagram`. **Write scope:** example 및 root README locale pair.
 
-- [x] **Step 1: Write the English README from verified behavior**
+- [x] **Step 1: verified behavior에서 English README 작성**
 
-Include language switch, both diagrams, pinned PostgreSQL/Redis container
-prerequisites matching v0.18.0 fixtures, readiness, environment variables,
-exact run command, expected
-JSON and all Redis fields, focused/race commands, rerun with new identities,
-and production boundaries.
+language switch, 두 diagram, v0.18.0 fixture와 일치하는 pinned PostgreSQL/Redis container prerequisite,
+readiness, environment variable, exact run command, expected JSON, 모든 Redis field, focused/race command,
+새 identity로 rerun하는 방법, production boundary를 포함한다.
 
-State that SQL atomicity ends at commit; Redis is asynchronous; delivery is
-at-least-once; consumers deduplicate with stable identity; replay can duplicate;
-poison-message replay, retention, trimming, consumer groups, authorization,
-TLS, and exactly-once are not implemented.
+SQL atomicity는 commit에서 끝나고 Redis는 asynchronous이며 delivery는 at-least-once라고 명시한다.
+consumer는 stable identity로 deduplicate해야 하고 replay는 duplicate를 만들 수 있다.
+poison-message replay, retention, trimming, consumer group, authorization, TLS, exactly-once는 구현하지 않았다고 밝힌다.
 
-Use these exact disposable images and commands:
+다음 disposable image와 command를 그대로 사용한다.
 
 ```bash
 docker run --rm -d --name workshop-outbox-postgres -e POSTGRES_DB=bluetape -e POSTGRES_USER=bluetape -e POSTGRES_PASSWORD=bluetape -p 5432:5432 postgres:16-alpine
 docker run --rm -d --name workshop-outbox-redis -p 6379:6379 redis:7.4-alpine
 ```
 
-- [x] **Step 2: Produce natural Korean source parity**
+- [x] **Step 2: 자연스러운 Korean source parity 작성**
 
-Use `bluetape-writer`. Preserve every command, field, warning, diagram embed,
-and ownership boundary. Share the English-label assets and add the required
-language switch.
+`bluetape-writer`를 사용한다. 모든 command, field, warning, diagram embed, ownership boundary를 보존한다.
+English-label asset을 공유하고 필요한 language switch를 추가한다.
 
-- [x] **Step 3: Add root navigation/run parity**
+- [x] **Step 3: root navigation/run parity 추가**
 
-Add an audit/outbox-adjacent row in both root tables with packages
-`audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`,
-and `testcontainers/redis`. Add matched English/Korean run/test sections.
+두 root table에 `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`,
+`testcontainers/redis` package를 담은 audit/outbox-adjacent row를 추가한다.
+English/Korean run/test section을 맞춰 추가한다.
 
-- [x] **Step 4: Verify docs and diagram exposure**
+- [x] **Step 4: docs 및 diagram exposure 검증**
 
 ```bash
 rg -n 'transactional-outbox-publisher|at-least-once|event_id|idempotency_key|go run ./examples/transactional-outbox-publisher' README.md README.ko.md examples/transactional-outbox-publisher/README*.md
@@ -476,14 +472,13 @@ test -f docs/images/readme-diagrams/transactional-outbox-publisher-architecture.
 test -f docs/images/readme-diagrams/transactional-outbox-publisher-sequence.svg
 ```
 
-Expected: both locales expose both diagrams and equivalent commands, fields,
-delivery caveats, and navigation.
+기대값: 두 locale이 두 diagram, equivalent command, field, delivery caveat, navigation을 모두 노출한다.
 
-## Task 9: Verify spec/plan, review, and capture lessons
+## Task 9: spec/plan 검증, review, lesson 기록
 
-**Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-go-patterns`, `bluetape-diagram`. **Write scope:** repairs, review artifact, lesson.
+**Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-go-patterns`, `bluetape-diagram`. **Write scope:** repair, review artifact, lesson.
 
-- [x] **Step 1: Run fresh proof in order**
+- [x] **Step 1: fresh proof를 순서대로 실행**
 
 ```bash
 gofmt -w examples/transactional-outbox-publisher/*.go examples/transactional-outbox-publisher/internal/orderoutbox/*.go
@@ -497,145 +492,137 @@ make lint
 make ci
 ```
 
-Expected: every command exits 0 with fresh observed output. Lost handles,
-truncated output without exit status, and retry-only PASS are not evidence.
+기대값: 모든 command가 fresh observed output과 함께 exit 0으로 끝난다.
+lost handle, exit status 없는 truncated output, retry-only PASS는 evidence가 아니다.
 
-- [x] **Step 2: Complete performance/stability and Type A verification**
+- [x] **Step 2: performance/stability 및 Type A verification 완료**
 
-Inspect unbounded Redis reads, retry/poll loops, DB round trips, context/timer/
-goroutine ownership, client closure, readiness, provider error exposure, and
-container startup. Map the exact spec and plan to the final diff, tests, locale
-pair, navigation, and both PNGs. Repair all P0/P1 and rerun affected proof.
+unbounded Redis read, retry/poll loop, DB round trip, context/timer/goroutine ownership,
+client closure, readiness, provider error exposure, container startup을 inspect한다.
+exact spec과 plan을 final diff, test, locale pair, navigation, 두 PNG에 mapping한다.
+모든 P0/P1을 repair하고 affected proof를 rerun한다.
 
-- [x] **Step 3: Converge six review perspectives**
+- [x] **Step 3: six review perspective 수렴**
 
-Review performance, stability, security, Ops, developer/API, and user/caller,
-then integrate in the main session. Write
-`docs/review/2026-07-14-issue-57-transactional-outbox-publisher.md` only at
-P0=0/P1=0. Diagram rows record commands, nonzero counts, PNG dimensions,
-reference paths, and full-size inspection notes rather than “passed”.
+performance, stability, security, Ops, developer/API, user/caller를 review한 뒤 main session에서 integrate한다.
+P0=0/P1=0일 때만 `docs/review/2026-07-14-issue-57-transactional-outbox-publisher.md`를 작성한다.
+diagram row는 "passed" 대신 command, nonzero count, PNG dimension, reference path, full-size inspection note를 기록한다.
 
-- [x] **Step 4: Commit the durable lesson before PR**
+- [x] **Step 4: PR 전에 durable lesson commit**
 
-Create `docs/lessons/2026-07-14-issue-57-transactional-outbox-publisher.md`
-covering transaction ownership, deterministic retry clock, ambiguous duplicate
-delivery, claimed-record cancellation, container proof, arrowhead/bend review
-misses, commands, and future guards. Commit only issue #57 files; branch clean.
+transaction ownership, deterministic retry clock, ambiguous duplicate delivery, claimed-record cancellation,
+container proof, arrowhead/bend review miss, command, future guard를 다루는
+`docs/lessons/2026-07-14-issue-57-transactional-outbox-publisher.md`를 만든다.
+issue #57 file만 commit하고 branch는 clean해야 한다.
 
-## Task 10: Create PR, reach green CI, and stop for merge approval
+## Task 10: PR 생성, green CI 도달, merge approval 전 중지
 
-**Complexity:** Medium. **Depends on:** Task 9. **Pattern skills:** `bluetape-workflow`, `finishing-a-development-branch`. **Write scope:** GitHub PR metadata/body only.
+**Complexity:** Medium. **Depends on:** Task 9. **Pattern skills:** `bluetape-workflow`, `finishing-a-development-branch`. **Write scope:** GitHub PR metadata/body만 포함한다.
 
-- [ ] **Step 1: Push and create the PR**
+- [ ] **Step 1: push 및 PR 생성**
 
-Push `feat/issue-57-transactional-outbox-publisher`. Create an English PR with
-`Closes #57`, assignee `debop`, milestone `0.9.0`, labels
-`enhancement,examples`, why/what before validation, diagram evidence, and final
-H2 `## DoD Status`.
+`feat/issue-57-transactional-outbox-publisher`를 push한다. `Closes #57`, assignee `debop`,
+milestone `0.9.0`, label `enhancement,examples`, validation 앞의 why/what, diagram evidence,
+final H2 `## DoD Status`를 담은 English PR을 만든다.
 
-- [ ] **Step 2: Verify live PR and post-PR review**
+- [ ] **Step 2: live PR 및 post-PR review 검증**
 
-Re-read head/base SHA, assignee, milestone, labels, final H2, reviews, comments,
-and unresolved threads. Rerun six perspectives against the actual PR diff and
-refresh DoD after repairs.
+head/base SHA, assignee, milestone, label, final H2, review, comment, unresolved thread를 다시 읽는다.
+actual PR diff 대상으로 six perspective를 rerun하고 repair 뒤 DoD를 refresh한다.
 
-- [ ] **Step 3: Wait for required CI success**
+- [ ] **Step 3: required CI success 대기**
 
-Use the repo CI helper or `gh pr checks --watch`. Required checks must reach
-`SUCCESS`; pending, missing, stale, unexplained skipped, or lost output blocks.
+repo CI helper 또는 `gh pr checks --watch`를 사용한다. required check는 `SUCCESS`에 도달해야 한다.
+pending, missing, stale, unexplained skipped, lost output은 block한다.
 
-- [ ] **Step 4: Stop before merge**
+- [ ] **Step 4: merge 전 중지**
 
-Report PR URL/head SHA, CI conclusions, P0/P1 and review/thread counts, worktree
-state, and residual at-least-once risk. Request explicit approval. Do not merge
-or delete branch/worktree state.
+PR URL/head SHA, CI conclusion, P0/P1 및 review/thread count, worktree state, residual at-least-once risk를 보고한다.
+explicit approval을 요청한다. branch/worktree state를 merge하거나 delete하지 않는다.
 
-## Task 11: Merge, sync, and clean only after new explicit approval
+## Task 11: 새 explicit approval 뒤에만 merge, sync, cleanup 수행
 
-**Complexity:** Low. **Depends on:** Task 10 plus explicit merge approval. **Write scope:** GitHub merge and owned git/worktree state.
+**Complexity:** Low. **Depends on:** Task 10 및 explicit merge approval. **Write scope:** GitHub merge 및 owned git/worktree state.
 
-- [ ] **Step 1: Re-read the hold point**
+- [ ] **Step 1: hold point 다시 읽기**
 
-Verify unchanged head SHA, successful required CI, clean mergeability, no newer
-review/thread blocker, and clean main/feature worktrees.
+unchanged head SHA, successful required CI, clean mergeability, newer review/thread blocker 없음,
+clean main/feature worktree를 verify한다.
 
-- [ ] **Step 2: Rebase merge with head protection**
+- [ ] **Step 2: head protection을 적용해 rebase merge**
 
-Use `gh pr merge --rebase --match-head-commit <verified-sha>`, verify live
-`MERGED`, and record the resulting commit.
+`gh pr merge --rebase --match-head-commit <verified-sha>`를 사용하고 live `MERGED`를 verify한 뒤 resulting commit을 기록한다.
 
-- [ ] **Step 3: Synchronize and clean owned state**
+- [ ] **Step 3: owned state synchronize 및 cleanup**
 
-Fast-forward local `develop`, verify it equals `origin/develop`, remove/prune
-the issue worktree, and delete the merged local/remote feature branch. Never
-delete dirty or unmerged state.
+local `develop`을 fast-forward하고 `origin/develop`과 같은지 verify한다.
+issue worktree를 remove/prune하고 merged local/remote feature branch를 delete한다.
+dirty 또는 unmerged state는 절대 delete하지 않는다.
 
-- [ ] **Step 4: Update roadmap completion metadata**
+- [ ] **Step 4: roadmap completion metadata 업데이트**
 
-Verify #57 closed. Update issue #35 and epic #27 only where their live
-checklists require #57 completion, leaving #68 open as the next audit/outbox
-work. Verify main checkout clean.
+#57 close를 verify한다. live checklist가 #57 completion을 요구하는 부분에서만 issue #35와 epic #27을 update하고,
+#68은 next audit/outbox work로 open 상태를 유지한다. main checkout clean을 verify한다.
 
-## Risk Prediction
+## 위험 예측
 
-| Risk | Signal | Mitigation and rerun point |
+| 위험 | 신호 | 완화 및 rerun 지점 |
 |---|---|---|
-| Order/outbox atomicity breaks | table counts diverge | Same `*sql.Tx`; rerun outbox-conflict rollback before relay work. |
-| Retry relies on sleeps | timing drift or incorrect claim count | Shared injected clock, pre-advance zero claim, exact 250 ms advance; rerun Task 3/race. |
-| Cancellation mutates retry state or leaks | claimed status changes or join timeout | Context-returning `PublisherFunc`, channel join; rerun cancellation/race. |
-| Duplicate delivery is called exactly-once | docs/tests expect one physical message | Stable logical identity plus explicit duplicate warning; rerun caller/security review. |
-| CLI reports stale pending event | stream event ID differs from command | Claim one, compare identity, fail closed, use disposable state/new IDs. |
-| Redis read/batch is unbounded | `XRange` or default claim size | `XRangeN`/`XRevRangeN`, claim limit 1, performance review. |
-| Containers are flaky/leaking | first fail then retry pass, readiness/close gap | Serialize, real Ping, bounded context/cleanup; diagnose and rerun Task 4. |
-| Endpoint/payload leaks | config value or `entry_json` in output | No endpoint interpolation, bounded output; rerun security tests/review. |
-| Rendered arrowheads/bends are wrong | backward/crowded head or sharp PNG corner | One-asset loop, fixed sizes, move bends, rerender and full-size inspect. |
-| README locales drift | missing field/command/embed | Parity search and writer/diagram exposure rerun. |
+| Order/outbox atomicity break | table count가 diverge | 같은 `*sql.Tx`; relay work 전에 outbox-conflict rollback을 rerun한다. |
+| Retry가 sleep에 의존 | timing drift 또는 incorrect claim count | shared injected clock, pre-advance zero claim, exact 250 ms advance를 사용한다. Task 3/race를 rerun한다. |
+| Cancellation이 retry state를 mutate하거나 leak | claimed status 변경 또는 join timeout | context-returning `PublisherFunc`, channel join을 사용한다. cancellation/race를 rerun한다. |
+| Duplicate delivery를 exactly-once라고 부름 | docs/test가 physical message 하나를 기대 | stable logical identity와 explicit duplicate warning을 둔다. caller/security review를 rerun한다. |
+| CLI가 stale pending event를 report | stream event ID가 command와 다름 | 하나만 claim하고 identity를 compare하며 fail closed한다. disposable state/new ID를 사용한다. |
+| Redis read/batch가 unbounded | `XRange` 또는 default claim size | `XRangeN`/`XRevRangeN`, claim limit 1, performance review를 사용한다. |
+| Container가 flaky/leaking | first fail then retry pass, readiness/close gap | serialize, real Ping, bounded context/cleanup을 적용한다. Task 4를 diagnose하고 rerun한다. |
+| Endpoint/payload leak | config value 또는 `entry_json`이 output에 포함 | endpoint interpolation 없음, bounded output을 유지한다. security test/review를 rerun한다. |
+| Rendered arrowhead/bend가 잘못됨 | backward/crowded head 또는 sharp PNG corner | one-asset loop, fixed size, bend 이동 후 rerender하고 full-size inspect한다. |
+| README locale drift | field/command/embed 누락 | parity search와 writer/diagram exposure를 rerun한다. |
 
-## Acceptance Traceability
+## 인수 추적성
 
-| Spec requirement | Plan task | Proof |
+| spec requirement | plan task | proof |
 |---|---|---|
-| Service/config/schema contract | 1 | constructor, validation, schema tests |
-| Atomic order/outbox commit/rollback | 2 | real PostgreSQL counts and identity |
-| Success, retry, duplicate, stable identity, dead letter | 3 | deterministic attempts/status |
-| Cancellation and joined shutdown | 3 | `PublisherFunc`, channel join, race |
-| Official Redis adapter and all fields | 4 | dual-container integration, decoded entry |
-| App-owned clients/timeouts/output/closure | 5 | main tests and configured execution |
-| Architecture geometry/ownership | 6 | SVG/PNG audits and full-size ledger |
-| Retry/cancellation sequence | 7 | sequence audit and full-size ledger |
-| Bilingual delivery/replay docs/navigation | 8 | locale parity/exposure commands |
-| Focused/race/static/repository quality | 9 | fresh commands through `make ci` |
-| Review convergence and lessons | 9 | review artifact and lesson commit |
-| PR metadata and green CI | 10 | live GitHub evidence, pre-merge stop |
-| Merge/sync/cleanup | 11 | only after explicit approval |
+| Service/config/schema contract | 1 | constructor, validation, schema test |
+| Atomic order/outbox commit/rollback | 2 | real PostgreSQL count 및 identity |
+| Success, retry, duplicate, stable identity, dead letter | 3 | deterministic attempt/status |
+| Cancellation 및 joined shutdown | 3 | `PublisherFunc`, channel join, race |
+| Official Redis adapter 및 모든 field | 4 | dual-container integration, decoded entry |
+| App-owned client/timeout/output/closure | 5 | main test 및 configured execution |
+| Architecture geometry/ownership | 6 | SVG/PNG audit 및 full-size ledger |
+| Retry/cancellation sequence | 7 | sequence audit 및 full-size ledger |
+| Bilingual delivery/replay docs/navigation | 8 | locale parity/exposure command |
+| Focused/race/static/repository quality | 9 | `make ci`까지의 fresh command |
+| Review convergence 및 lesson | 9 | review artifact 및 lesson commit |
+| PR metadata 및 green CI | 10 | live GitHub evidence, pre-merge stop |
+| Merge/sync/cleanup | 11 | explicit approval 뒤에만 수행 |
 
-## Repository Hazard Decisions
+## repository hazard decision
 
-| Hazard | Decision and evidence |
+| hazard | decision 및 evidence |
 |---|---|
-| Dependency/version | N/A: all packages exist in current `go.mod`; `tidy-check` must stay clean. |
-| Module/BOM/catalog | N/A: one package tree in the existing Go module. |
-| Workflow/CI/Nightly/coverage | N/A unless existing fixture execution proves insufficient; workflow edits require reapproval. |
-| Public API/KDoc/changelog | N/A: workshop `internal` and main packages only. |
-| Production migration | N/A: example-prefixed idempotent DDL; partial startup DDL recovers on rerun. |
-| HTTP/auth | N/A: no listener or request input. |
-| Benchmark | N/A: no throughput claim; production batch tuning deferred. |
-| Diagram | Triggered: architecture and sequence checklists mandatory per asset. |
-| Testcontainers | Triggered: PostgreSQL/Redis serialized with readiness/cleanup proof. |
+| Dependency/version | N/A: 모든 package가 current `go.mod`에 있다. `tidy-check`는 clean해야 한다. |
+| Module/BOM/catalog | N/A: existing Go module 안의 package tree 하나다. |
+| Workflow/CI/Nightly/coverage | N/A: existing fixture execution이 부족하다고 증명되기 전까지는 제외한다. workflow edit는 reapproval이 필요하다. |
+| Public API/KDoc/changelog | N/A: workshop `internal` 및 main package만 포함한다. |
+| Production migration | N/A: example-prefixed idempotent DDL이다. partial startup DDL은 rerun으로 recover한다. |
+| HTTP/auth | N/A: listener 또는 request input이 없다. |
+| Benchmark | N/A: throughput claim이 없다. production batch tuning은 deferred 상태다. |
+| Diagram | Triggered: asset별 architecture 및 sequence checklist가 mandatory다. |
+| Testcontainers | Triggered: PostgreSQL/Redis는 readiness/cleanup proof와 함께 serialize한다. |
 
-## Plan Review Record
+## plan review record
 
-The active subagent interface still lacks the required `agent_type` field, so
-the main session performed six isolated plan reviews and integrated them against
-the approved spec, Step 3-R checklist, v0.18.0 source/docs, Makefile, issue #57,
-and repository rules.
+active subagent interface에는 아직 required `agent_type` field가 없다.
+따라서 main session이 six isolated plan review를 수행하고 approved spec, Step 3-R checklist,
+v0.18.0 source/docs, Makefile, issue #57, repository rule을 기준으로 integrate했다.
 
-| Lens | Result | Resolution |
+| lens | result | resolution |
 |---|---|---|
-| Performance | P0=0, P1=0 after repair | Added exact 12-record/four-worker stress with 10 repetitions, bounded claim/Redis reads, shared-container subtests, and no throughput claim. |
-| Stability | P0=0, P1=0 after repair | Added shared-clock retry eligibility, cancellation status assertions, channel-joined `Run`, partial-open cleanup, owned client close proof, sequential readiness, and failure rerun points. |
-| Security | P0=0, P1=0 | Tasks bound identifiers/author/stream/time input, use parameterized SQL, avoid endpoint interpolation, keep fixed payloads, and document sensitive diagnostic stderr. |
-| Operator/Ops | P0=0, P1=0 | Pinned disposable services, readiness, partial-DDL recovery, dead-letter/replay limits, exact success/nonzero failure, rollback, and pre-merge hold are assigned. |
-| Developer/API | P0=0, P1=0 | Every spec API/error/ownership contract maps to an ordered RED/GREEN task; workshop code reuses released store, relay, publisher, and fixtures without new abstractions or dependencies. |
-| User/caller | P0=0, P1=0 after repair | Added exact container images, run/output/field evidence, rerun identities, bilingual parity, diagram exposure, and exactly-once/poison/replay warnings. |
-| Main integration | P0=0, P1=0 | All acceptance rows map to earlier artifacts and concrete commands; no task depends on later code, #68 scope remains excluded, and merge remains explicitly gated. |
+| Performance | P0=0, P1=0 after repair | 10회 반복하는 exact 12-record/four-worker stress, bounded claim/Redis read, shared-container subtest, throughput claim 없음 을 추가했다. |
+| Stability | P0=0, P1=0 after repair | shared-clock retry eligibility, cancellation status assertion, channel-joined `Run`, partial-open cleanup, owned client close proof, sequential readiness, failure rerun point를 추가했다. |
+| Security | P0=0, P1=0 | task는 identifier/author/stream/time input을 bound하고 parameterized SQL을 사용하며, endpoint interpolation을 피하고 fixed payload를 유지하며 sensitive diagnostic stderr를 document한다. |
+| Operator/Ops | P0=0, P1=0 | pinned disposable service, readiness, partial-DDL recovery, dead-letter/replay limit, exact success/nonzero failure, rollback, pre-merge hold를 배정했다. |
+| Developer/API | P0=0, P1=0 | 모든 spec API/error/ownership contract가 ordered RED/GREEN task로 mapping된다. workshop code는 새 abstraction/dependency 없이 released store, relay, publisher, fixture를 재사용한다. |
+| User/caller | P0=0, P1=0 after repair | exact container image, run/output/field evidence, rerun identity, bilingual parity, diagram exposure, exactly-once/poison/replay warning을 추가했다. |
+| Main integration | P0=0, P1=0 | 모든 acceptance row가 earlier artifact 및 concrete command로 mapping된다. 어떤 task도 later code에 depend하지 않고 #68 scope는 excluded 상태이며 merge는 explicit gate를 유지한다. |
