@@ -174,7 +174,7 @@ accepted command마다 `Place`는 다음을 만든다.
 
 ## Relay and Delivery Contract
 
-The application constructs the relay with explicit bounded options:
+application은 명시적인 bounded option으로 relay를 구성한다.
 
 ```go
 sqloutbox.RelayOptions{
@@ -185,68 +185,56 @@ sqloutbox.RelayOptions{
 }
 ```
 
-The runnable path calls `RunOnce` under a bounded operation context. The
-deterministic path uses `RecordingPublisher` with one injected failure to prove
-that the first attempt is recorded, retry state is persisted, the next eligible
-attempt carries the same `EventID` and `IdempotencyKey`, and the second attempt
-publishes successfully. Time is injected into the store and relay so the test
-advances retry eligibility without sleeping.
+runnable path는 bounded operation context 아래에서 `RunOnce`를 호출한다. deterministic path는 한 번의
+injected failure를 가진 `RecordingPublisher`를 사용해 첫 attempt가 기록되고 retry state가 persist되며,
+다음 eligible attempt가 같은 `EventID`와 `IdempotencyKey`를 가지고, 두 번째 attempt가 성공적으로
+publish됨을 증명한다. test가 sleep 없이 retry eligibility를 진행할 수 있도록 time을 store와 relay에 주입한다.
 
-The CLI requires the clean single-record batch result
-`Claimed=1, Published=1, Failed=0, DeadLettered=0` before printing success. A
-pre-existing pending record in the example table is processed according to
-outbox order and causes the sample identity check to fail closed rather than
-reporting the wrong event as the newly published order. Production relays should
-tune a larger claim limit from measured throughput and downstream capacity.
+CLI는 success를 출력하기 전에 clean single-record batch result인
+`Claimed=1, Published=1, Failed=0, DeadLettered=0`을 요구한다. example table에 이미 존재하는
+pending record는 outbox order에 따라 처리되며, 잘못된 event를 newly published order로 보고하는 대신 sample
+identity check를 fail closed하게 만든다. production relay는 measured throughput과 downstream capacity에 맞춰 더
+큰 claim limit을 조정해야 한다.
 
-`PublisherFunc` proves cancellation at the publish boundary. If the caller
-context is cancelled, `RunOnce` returns the cancellation and does not mark the
-record failed or dead-lettered. The record may remain claimed until its lease is
-eligible for reclaim; shutdown does not pretend it was successfully delivered.
+`PublisherFunc`는 publish boundary에서 cancellation을 증명한다. caller context가 cancelled되면
+`RunOnce`는 cancellation을 반환하고 record를 failed 또는 dead-lettered로 표시하지 않는다. record는 lease가
+reclaim eligible이 될 때까지 claimed 상태로 남을 수 있다. shutdown은 성공적으로 delivered된 것처럼 가장하지
+않는다.
 
-The Redis path constructs exactly one `redisstreams.Publisher` with a
-caller-owned `go-redis` client and trusted application stream configuration.
-The integration test reads Redis with bounded `XRangeN` only to verify the
-documented provider output; the CLI reads one latest candidate with bounded
-`XRevRangeN`. Production publishing never calls `XAdd` outside the released
-adapter.
+Redis path는 caller-owned `go-redis` client와 trusted application stream configuration으로 정확히 하나의
+`redisstreams.Publisher`를 구성한다. integration test는 documented provider output을 검증하기 위해서만
+bounded `XRangeN`으로 Redis를 읽는다. CLI는 bounded `XRevRangeN`으로 latest candidate 하나를 읽는다.
+production publishing은 released adapter 밖에서 `XAdd`를 호출하지 않는다.
 
-Delivery is at-least-once. A successful Redis append followed by a failed SQL
-completion, an expired claim lease, or an ambiguous Redis client failure may
-publish the same logical event again. Consumers must deduplicate by `event_id`
-or `idempotency_key`; `attempts` is diagnostics, not identity. Ordering is
-preserved per aggregate by the SQL outbox claim contract, not globally across
-all aggregates.
+delivery는 at-least-once다. 성공한 Redis append 뒤에 SQL completion 실패, expired claim lease,
+ambiguous Redis client failure가 이어지면 같은 logical event가 다시 publish될 수 있다. consumer는
+`event_id` 또는 `idempotency_key`로 deduplicate해야 한다. `attempts`는 diagnostic이지 identity가 아니다.
+ordering은 모든 aggregate 전체가 아니라 SQL outbox claim contract에 의해 aggregate별로 보존된다.
 
 ## Runtime and Shutdown Contract
 
-The command requires `DATABASE_URL` and `REDIS_ADDR`; it does not start Docker
-or silently fall back to in-memory infrastructure. Optional `REDIS_STREAM`,
-`ORDER_ID`, `CUSTOMER_ID`, `COMMAND_ID`, and `ORDER_CREATED_AT` values remain
-bounded application configuration. The created-at value must be RFC3339 when
-present and defaults to the service clock. `REDIS_STREAM` must be valid UTF-8,
-non-blank, and at most 256 bytes; when omitted, the provider's
-`audit:sqloutbox` default is used. Required endpoint values are non-blank;
-configuration parsing never echoes their contents in an error.
+command는 `DATABASE_URL`과 `REDIS_ADDR`를 요구한다. Docker를 시작하지 않고 in-memory infrastructure로
+조용히 fallback하지 않는다. optional `REDIS_STREAM`, `ORDER_ID`, `CUSTOMER_ID`, `COMMAND_ID`,
+`ORDER_CREATED_AT` 값은 bounded application configuration으로 남는다. created-at 값은 존재하면 RFC3339여야
+하며 service clock을 기본값으로 사용한다. `REDIS_STREAM`은 valid UTF-8, non-blank, 최대 256 byte여야 한다.
+생략하면 provider의 `audit:sqloutbox` default를 사용한다. required endpoint value는 non-blank다.
+configuration parsing은 error 안에 그 내용을 echo하지 않는다.
 
-`main` opens PostgreSQL and Redis clients, verifies both with bounded `Ping`
-calls, creates schemas, places the order, runs one bounded relay batch, reads
-the demonstration entry, and closes both clients on every exit path. It uses a
-signal-derived root context and shorter operation contexts. Raw database URLs,
-Redis addresses, credentials, payloads, and provider errors are not printed in
-successful output. Failure output names the failed stage and wraps the provider
-error without interpolating the supplied endpoint value; operators must still
-treat diagnostic stderr as sensitive.
+`main`은 PostgreSQL 및 Redis client를 열고 bounded `Ping` 호출로 둘 다 검증하며, schema를 만들고
+order를 place하고 하나의 bounded relay batch를 실행한 뒤 demonstration entry를 읽는다. 모든 exit path에서
+두 client를 닫는다. signal-derived root context와 더 짧은 operation context를 사용한다. successful output에는
+raw database URL, Redis address, credential, payload, provider error를 출력하지 않는다. failure output은
+failed stage 이름을 표시하고 supplied endpoint value를 보간하지 않은 채 provider error를 wrap한다. operator는
+그래도 diagnostic stderr를 sensitive로 취급해야 한다.
 
-Continuous relay lifecycle is a supported library path but not the default CLI
-mode. Its test starts `Relay.Run`, cancels the caller context, waits for the
-goroutine, requires `context.Canceled`, and proves no late publish or leaked
-goroutine. The application owns restart policy; it does not retry caller
-cancellation.
+continuous relay lifecycle은 supported library path지만 default CLI mode는 아니다. 해당 test는
+`Relay.Run`을 시작하고 caller context를 cancel하며 goroutine을 기다리고 `context.Canceled`를 요구한다.
+또한 late publish 또는 leaked goroutine이 없음을 증명한다. application은 restart policy를 소유하며 caller
+cancellation을 retry하지 않는다.
 
 ## Redis Stream Evidence
 
-The integration test verifies the released provider's documented fields:
+integration test는 released provider의 documented field를 검증한다.
 
 ```text
 record_id, status, aggregate_type, aggregate_id, revision,
@@ -254,74 +242,60 @@ event_id, idempotency_key, event_type, occurred_at, recorded_at,
 schema_version, attempts, entry_json
 ```
 
-It parses `entry_json` as a validated `audit.Entry` and checks identity parity
-with the scalar fields. It verifies PostgreSQL and Redis readiness through real
-commands after both fixtures start. Container-backed tests do not use
-`t.Parallel`, use bounded contexts, register deterministic client cleanup, and
-run PostgreSQL plus Redis sequentially.
+`entry_json`을 validated `audit.Entry`로 parse하고 scalar field와 identity parity를 확인한다. 두 fixture가
+시작된 뒤 real command로 PostgreSQL 및 Redis readiness를 검증한다. container-backed test는 `t.Parallel`을
+사용하지 않고, bounded context를 사용하며, deterministic client cleanup을 등록하고 PostgreSQL과 Redis를
+순차적으로 실행한다.
 
 ## Failure Modes
 
-1. Order insert, audit construction, or outbox enqueue failure rolls back both
-   order and outbox state. A failed transaction never produces a relay record.
-2. A non-cancellation publisher failure persists bounded retry state. After
-   `MaxAttempts`, the record becomes dead-lettered and is not reported as
-   published. This example documents inspection/replay boundaries but does not
-   add an automated dead-letter replay command.
-3. Caller cancellation during publish stops the relay without converting the
-   record to retry/dead-letter state. A claimed record becomes reclaimable only
-   through the store's lease behavior.
-4. Redis may accept `XADD` before a client or completion error is observed. A
-   later retry can append a duplicate with the same stable identity; consumers
-   and operator replay must tolerate it.
-5. PostgreSQL or Redis readiness, schema creation, placement, publish, or stream
-   verification failure exits the command nonzero after owned resources are
-   closed. There is no ambiguous success log.
-6. Duplicate order, event ID, or idempotency key conflicts fail closed. The
-   example does not silently generate replacement identities or mutate the
-   existing order.
+1. order insert, audit construction, outbox enqueue failure는 order와 outbox state를 모두 rollback한다.
+   실패한 transaction은 relay record를 만들지 않는다.
+2. non-cancellation publisher failure는 bounded retry state를 persist한다. `MaxAttempts` 이후 record는
+   dead-lettered가 되며 published로 보고되지 않는다. 이 예제는 inspection/replay boundary를 문서화하지만
+   automated dead-letter replay command를 추가하지 않는다.
+3. publish 중 caller cancellation은 record를 retry/dead-letter state로 변환하지 않고 relay를 중단한다.
+   claimed record는 store의 lease behavior를 통해서만 reclaimable해진다.
+4. client 또는 completion error가 관찰되기 전에 Redis가 `XADD`를 accept할 수 있다. 이후 retry는 같은 stable
+   identity로 duplicate를 append할 수 있다. consumer와 operator replay는 이를 tolerate해야 한다.
+5. PostgreSQL 또는 Redis readiness, schema creation, placement, publish, stream verification failure는
+   owned resource가 닫힌 뒤 command를 nonzero로 종료한다. ambiguous success log는 없다.
+6. duplicate order, event ID, idempotency key conflict는 fail closed한다. 예제는 replacement identity를
+   조용히 생성하거나 기존 order를 mutate하지 않는다.
 
 ## Security and Operations Boundaries
 
-Database and Redis endpoints are trusted deployment configuration, not request
-input. The example has no HTTP listener, authentication, authorization,
-multi-tenancy, secrets manager, TLS setup, or dynamic stream selection. Real
-deployments must obtain credentials securely, enforce TLS/network policy,
-separate tenant namespaces, and restrict Redis stream access.
+database 및 Redis endpoint는 request input이 아니라 trusted deployment configuration이다. 예제에는 HTTP
+listener, authentication, authorization, multi-tenancy, secrets manager, TLS setup, dynamic stream
+selection이 없다. real deployment는 credential을 안전하게 얻고, TLS/network policy를 강제하며, tenant
+namespace를 분리하고, Redis stream access를 제한해야 한다.
 
-Audit payloads can contain sensitive data. This example uses fixed non-sensitive
-fields and warns that payload classification/redaction must happen before
-enqueue when SQL and Redis retention or readership differ. Raw provider errors
-may contain endpoint details; the CLI wraps failures for stderr but does not
-emit configuration or full audit payloads.
+audit payload는 sensitive data를 포함할 수 있다. 이 예제는 fixed non-sensitive field를 사용하고, SQL과
+Redis retention 또는 readership가 다를 때 payload classification/redaction이 enqueue 전에 일어나야 한다고
+경고한다. raw provider error는 endpoint detail을 포함할 수 있다. CLI는 stderr용 failure를 wrap하지만
+configuration 또는 full audit payload를 emit하지 않는다.
 
-The SQL outbox is the durable source of truth. Redis retention, trimming,
-consumer groups, pending-entry recovery, consumer acknowledgement, poison
-message handling, and replay authorization are explicitly out of scope.
-Operators may inspect and requeue failed records only through a separately
-approved operational tool; manual SQL mutation is not presented as a safe
-workshop procedure.
+SQL outbox가 durable source of truth다. Redis retention, trimming, consumer group,
+pending-entry recovery, consumer acknowledgement, poison message handling, replay authorization은
+명시적으로 scope 밖이다. operator는 별도로 승인된 operational tool을 통해서만 failed record를 inspect하고
+requeue할 수 있다. manual SQL mutation은 safe workshop procedure로 제시하지 않는다.
 
 ## Diagrams
 
-The English and Korean README files share two English-label SVG/PNG pairs:
+English 및 Korean README file은 두 쌍의 English-label SVG/PNG를 공유한다.
 
-1. A static architecture diagram answers “who owns the transaction, relay,
-   clients, durable state, and transport?” It separates application ownership,
-   PostgreSQL order/outbox state, relay, and Redis Streams. It uses direct
-   horizontal connectors where possible and rounded orthogonal routes only
-   where required.
-2. A chronological sequence diagram answers “how can one stable event be
-   attempted more than once?” It shows transaction commit, claim, first publish
-   failure/ambiguous outcome, retry, duplicate-capable append, completion, and
-   cancellation as an explicit alternate path.
+1. static architecture diagram은 “transaction, relay, client, durable state, transport는 누가
+   소유하는가?”에 답한다. application ownership, PostgreSQL order/outbox state, relay, Redis
+   Streams를 분리한다. 가능한 곳에서는 direct horizontal connector를 사용하고 필요한 곳에서만 rounded
+   orthogonal route를 사용한다.
+2. chronological sequence diagram은 “하나의 stable event가 어떻게 한 번 넘게 attempt될 수 있는가?”에
+   답한다. transaction commit, claim, first publish failure/ambiguous outcome, retry,
+   duplicate-capable append, completion, cancellation을 explicit alternate path로 보여준다.
 
-Both assets follow `bluetape-diagram` architecture/sequence rules. Each SVG is
-parsed, rendered with CairoSVG at scale 2, audited for connectors, geometry,
-endpoints, mixed corners, marker color/size/direction, and inspected as a
-full-size PNG after the final coordinate change. Arrowhead clearance is included
-in bend placement; a syntactic `Q` segment alone is not accepted as visual
-proof.
+두 asset은 `bluetape-diagram` architecture/sequence rule을 따른다. 각 SVG는 parse되고 CairoSVG scale 2로
+render되며 connector, geometry, endpoint, mixed corner, marker color/size/direction을 audit한다. 최종
+coordinate 변경 후 full-size PNG로 inspect한다. arrowhead clearance는 bend placement에 포함된다. syntactic
+`Q` segment만으로는 visual proof로 인정하지 않는다.
 
 ## Testing
 
