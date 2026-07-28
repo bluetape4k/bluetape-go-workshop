@@ -1,36 +1,36 @@
-# Issue 14 Payment Authorization Guard Spec Review
+# Issue 14 Payment Authorization Guard 명세 리뷰
 
-## Scope
+## 범위
 
-- Spec:
+- 명세:
   `docs/superpowers/specs/2026-06-06-issue-14-payment-authorization-guard-design.md`
-- Issue: GitHub issue #14, v0.2.0 payment authorization guard example.
-- Review gate: `bluetape4k-full-feature` Step 2-R.
+- 이슈: GitHub issue #14, v0.2.0 payment authorization guard 예제.
+- review gate: `bluetape4k-full-feature` Step 2-R.
 
-## Iteration Log
+## 반복 기록
 
-### Iteration 1
+### 반복 1
 
 | Lane | Finding | Severity | Resolution |
 | --- | --- | --- | --- |
-| User/caller | Zero-value `Options` behavior was not explicit enough for a Go example API. | P1 | Added concrete defaults for `FailureThreshold`, `OpenTimeout`, and `MaxConcurrent`; negative values are configuration errors. |
-| Security | The payment domain did not explicitly rule out PAN, token, or customer identity modeling. | P2 | Added a non-sensitive metadata constraint to the spec. |
-| Documentation | Diagram handling was optional but not tied to the implementation plan decision. | P3 | Clarified that a payment-specific diagram must follow full `bluetape4k-diagram` rules if the plan adopts it. |
+| User/caller | Go example API에서 zero-value `Options` 동작이 충분히 명시적이지 않았다. | P1 | `FailureThreshold`, `OpenTimeout`, `MaxConcurrent`의 구체적인 default를 추가했다. negative value는 configuration error다. |
+| Security | payment domain이 PAN, token, customer identity modeling을 명시적으로 배제하지 않았다. | P2 | spec에 non-sensitive metadata constraint를 추가했다. |
+| Documentation | diagram handling이 선택 사항이었지만 implementation plan decision과 연결되어 있지 않았다. | P3 | plan이 payment-specific diagram을 채택하면 전체 `bluetape4k-diagram` 규칙을 따라야 한다고 명확히 했다. |
 
-### Iteration 2
+### 반복 2
 
-Re-reviewed the edited spec. No remaining P0/P1 findings.
+수정된 spec을 다시 검토했다. 남은 P0/P1 finding은 없다.
 
-## Four-Perspective Review
+## 네 관점 리뷰
 
 | Perspective | P0 | P1 | P2 | P3 | Evidence |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Developer | 0 | 0 | 0 | 0 | API is a small Go package, uses `context.Context`, narrow `Gateway`, and `resilience.Run(ctx, operation, breaker, bulkhead)`. |
-| Security | 0 | 0 | 0 | 0 | Spec now forbids PAN, card token, customer identity, and payment secrets in the request model. |
-| Ops/SRE | 0 | 0 | 0 | 0 | Spec requires deterministic tests through `Now`, synchronous events, and no logging/metrics dependency growth. |
-| User/caller | 0 | 0 | 0 | 0 | Spec now defines zero-value defaults, invalid negative options, request validation, and nil gateway behavior. |
+| Developer | 0 | 0 | 0 | 0 | API는 작은 Go package이며 `context.Context`, 좁은 `Gateway`, `resilience.Run(ctx, operation, breaker, bulkhead)`를 사용한다. |
+| Security | 0 | 0 | 0 | 0 | spec은 이제 request model에서 PAN, card token, customer identity, payment secret을 금지한다. |
+| Ops/SRE | 0 | 0 | 0 | 0 | spec은 `Now`를 통한 deterministic test, synchronous event, logging/metrics dependency growth 금지를 요구한다. |
+| User/caller | 0 | 0 | 0 | 0 | spec은 이제 zero-value default, invalid negative option, request validation, nil gateway behavior를 정의한다. |
 
-## Local 7-Tier Risk Review
+## Local 7-Tier 위험 리뷰
 
 | Tier | Scope | P0 | P1 | P2 | P3 | Verdict |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -46,15 +46,14 @@ Re-reviewed the edited spec. No remaining P0/P1 findings.
 
 | Severity | Count | Status |
 | --- | ---: | --- |
-| P0 | 0 | Clear |
-| P1 | 0 | Clear |
-| P2 | 0 | Clear after sensitive-data constraint was added |
-| P3 | 0 | Clear after diagram decision wording was added |
+| P0 | 0 | clear |
+| P1 | 0 | clear |
+| P2 | 0 | sensitive-data constraint 추가 뒤 clear |
+| P3 | 0 | diagram decision wording 추가 뒤 clear |
 
-Required spec edits were applied in this gate. There are no open user questions
-and no rejected requirements beyond the spec's recorded rejection of embedded
-gateway state and HTTP service scope.
+이 gate에서 필요한 spec edit를 적용했다. 남은 user question은 없고, spec에 기록된
+embedded gateway state와 HTTP service scope 거부 외에 거부된 requirement는 없다.
 
-## Step 2-R Verdict
+## Step 2-R 판정
 
-PASS. The spec is implementation-ready for Step 3 planning with `P0=0 P1=0`.
+PASS. spec은 `P0=0 P1=0` 상태로 Step 3 planning을 진행할 준비가 되었다.

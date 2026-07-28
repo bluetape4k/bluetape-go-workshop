@@ -1,36 +1,36 @@
-# Issue 14 Payment Authorization Guard Plan Review
+# Issue 14 Payment Authorization Guard 계획 리뷰
 
-## Scope
+## 범위
 
-- Plan:
+- 계획:
   `docs/superpowers/plans/2026-06-06-issue-14-payment-authorization-guard-plan.md`
-- Spec:
+- 명세:
   `docs/superpowers/specs/2026-06-06-issue-14-payment-authorization-guard-design.md`
-- Review gate: `bluetape4k-full-feature` Step 3-R.
+- review gate: `bluetape4k-full-feature` Step 3-R.
 
-## Iteration Log
+## 반복 기록
 
-### Iteration 1
+### 반복 1
 
 | Lane | Finding | Severity | Resolution |
 | --- | --- | --- | --- |
-| Delivery | Remaining `bluetape4k-full-feature` gates were collapsed into the final PR task and did not explicitly preserve Step 4 through Step 9 order. | P1 | Added an ordered gate map covering Step 4, Step 4-T, Step 5, Step 6, Step 6-R, Step 7, Step 7-P, Step 7-R, Step 8, and Step 9. |
-| Evidence | The planning commit task omitted the Step 3-R review artifact from expected files. | P2 | Added the plan review artifact to the planning commit file list. |
+| Delivery | 남은 `bluetape4k-full-feature` gate가 최종 PR task에 합쳐져 Step 4부터 Step 9까지의 순서를 명시적으로 보존하지 않았다. | P1 | Step 4, Step 4-T, Step 5, Step 6, Step 6-R, Step 7, Step 7-P, Step 7-R, Step 8, Step 9를 포함하는 ordered gate map을 추가했다. |
+| Evidence | planning commit task가 expected file에서 Step 3-R review artifact를 빠뜨렸다. | P2 | planning commit file list에 plan review artifact를 추가했다. |
 
-### Iteration 2
+### 반복 2
 
-Re-reviewed the edited plan. No remaining P0/P1 findings.
+수정된 plan을 다시 검토했다. 남은 P0/P1 finding은 없다.
 
-## Four-Perspective Review
+## 네 관점 리뷰
 
 | Perspective | P0 | P1 | P2 | P3 | Evidence |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Implementer | 0 | 0 | 0 | 0 | Tasks are ordered from planning commit to code, tests, diagram, README, validation, review, PR. |
-| Test engineer | 0 | 0 | 0 | 0 | Success, failure, open-circuit, bulkhead overflow, event, invalid input, nil dependency, and race validation are assigned. |
-| Architect | 0 | 0 | 0 | 0 | New code is contained in one example internal package; no shared dependency or module registration risk is introduced. |
-| Delivery | 0 | 0 | 0 | 0 | EN/KO example README, root README pair, diagram assets, PR body, PR review, and CI gates are assigned. |
+| Implementer | 0 | 0 | 0 | 0 | task는 planning commit에서 code, test, diagram, README, validation, review, PR 순서로 정렬되어 있다. |
+| Test engineer | 0 | 0 | 0 | 0 | success, failure, open-circuit, bulkhead overflow, event, invalid input, nil dependency, race validation이 배정되어 있다. |
+| Architect | 0 | 0 | 0 | 0 | 새 코드는 하나의 example internal package에 포함된다. shared dependency나 module registration risk는 도입하지 않는다. |
+| Delivery | 0 | 0 | 0 | 0 | EN/KO example README, root README pair, diagram asset, PR body, PR review, CI gate가 배정되어 있다. |
 
-## Local 7-Tier Risk Review
+## Local 7-Tier 위험 리뷰
 
 | Tier | Scope | P0 | P1 | P2 | P3 | Verdict |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -46,15 +46,14 @@ Re-reviewed the edited plan. No remaining P0/P1 findings.
 
 | Severity | Count | Status |
 | --- | ---: | --- |
-| P0 | 0 | Clear |
-| P1 | 0 | Clear after full-feature gate ordering was added |
-| P2 | 0 | Clear after plan review artifact was added to the planning commit file list |
-| P3 | 0 | Clear |
+| P0 | 0 | clear |
+| P1 | 0 | full-feature gate ordering 추가 뒤 clear |
+| P2 | 0 | planning commit file list에 plan review artifact를 추가한 뒤 clear |
+| P3 | 0 | clear |
 
-No open user questions remain. The plan is scoped to issue #14 and rejects HTTP
-or reusable abstraction expansion by inheriting the spec decision.
+남은 user question은 없다. plan은 #14로 범위가 좁혀져 있으며, spec decision을
+상속해 HTTP 또는 reusable abstraction 확장을 거부한다.
 
-## Step 3-R Verdict
+## Step 3-R 판정
 
-PASS. The plan is ready for Step 4 only after the planning artifacts are
-committed.
+PASS. planning artifact가 commit된 뒤에만 plan은 Step 4로 넘어갈 준비가 된다.
