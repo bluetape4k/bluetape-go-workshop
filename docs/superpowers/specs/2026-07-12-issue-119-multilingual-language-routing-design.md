@@ -1,31 +1,30 @@
-# Issue #119 Multilingual Language Routing Design
+# Issue #119 Multilingual Language Routing 설계
 
-## Status
+## 상태
 
-Approved design for Issue #119, based on bluetape-go v0.18.0. Implementation
-planning remains blocked until the Type A spec review converges at P0=0/P1=0
-and the user reviews this committed artifact.
+bluetape-go v0.18.0 기반 Issue #119 승인 설계. Type A spec review가 P0=0/P1=0으로
+수렴하고 사용자가 이 committed artifact를 review하기 전까지 implementation
+planning은 blocked 상태로 유지한다.
 
-## Goal
+## 목표
 
-Add an application-shaped command that turns language detector evidence into a
-small, deterministic content-routing decision. The example must make English
-and Korean share a moderation route, route confident Japanese text with Kana to
-a Japanese-tokenization route, and expose unsupported or uncertain input as a
-manual-review decision rather than an internal error.
+Language detector evidence를 작고 deterministic한 content-routing decision으로
+바꾸는 application-shaped command를 추가한다. 예제는 English와 Korean이 moderation
+route를 공유하게 하고, Kana가 있는 confident Japanese text를 Japanese-tokenization
+route로 보내며, unsupported 또는 uncertain input을 internal error가 아니라
+manual-review decision으로 노출해야 한다.
 
-The lesson is routing policy and detector lifecycle. It does not execute a
-moderator or tokenizer and does not make security, compliance, or certainty
-claims from language detection.
+Lesson은 routing policy와 detector lifecycle이다. Moderator나 tokenizer를 실행하지
+않으며 language detection에서 security, compliance, certainty claim을 만들지 않는다.
 
-## Context and Current Evidence
+## 맥락 및 현재 근거
 
-Issue #55 established feasibility for English, Korean, and Japanese detection
-and Japanese tokenization. Issue #118 then isolated Japanese search preparation.
-Issue #119 must not repeat either token projection or search behavior; it owns
-the decision layer that a later Gin integration in Issue #67 can borrow.
+Issue #55는 English, Korean, Japanese detection과 Japanese tokenization의
+feasibility를 세웠다. 이후 Issue #118은 Japanese search preparation을 분리했다.
+Issue #119는 token projection이나 search behavior를 반복하면 안 된다. 대신 이후
+Issue #67의 Gin integration이 빌릴 수 있는 decision layer를 소유한다.
 
-The relevant bluetape-go v0.18.0 surfaces are:
+관련 bluetape-go v0.18.0 surface:
 
 - `language.NewDetector` with an explicit language subset;
 - `language.WithPreloadedLanguageModels` for an opt-in startup lifecycle;
@@ -33,55 +32,54 @@ The relevant bluetape-go v0.18.0 surfaces are:
 - `Detector.Languages` for inspecting the configured subset;
 - `language.ContainsLatin`, `ContainsKorean`, `ContainsJapanese`, and
   `ContainsChinese` for Latin, Hangul, Kana, and Han script hints;
-- `language.MaxTextLength`, `ErrBlankText`, and `ErrTextTooLong` for the
-  upstream validation boundary.
+- upstream validation boundary를 위한 `language.MaxTextLength`, `ErrBlankText`,
+  `ErrTextTooLong`.
 
-`Confidences` already returns descending values and ISO codes. Mixed-language
-sections already preserve start-inclusive/end-exclusive UTF-8 byte offsets and
-text slices. The workshop will expose those contracts rather than reproduce
-detector logic.
+`Confidences`는 이미 descending value와 ISO code를 반환한다. Mixed-language section은
+start-inclusive/end-exclusive UTF-8 byte offset과 text slice를 이미 보존한다.
+Workshop은 detector logic을 재구현하지 않고 이 contract를 노출한다.
 
-## Chosen Approach
+## 선택한 접근
 
-Use one framework-independent `Router` that owns one reusable detector. The
-constructor selects English, Korean, Japanese, and Chinese and applies either
-lazy or preloaded model initialization. Each request gathers detection,
-confidence, section, and script evidence into call-local values before applying
-one explicit routing matrix.
+Reusable detector 하나를 소유하는 framework-independent `Router` 하나를 사용한다.
+Constructor는 English, Korean, Japanese, Chinese를 선택하고 lazy 또는 preloaded
+model initialization 중 하나를 적용한다. 각 request는 하나의 explicit routing
+matrix를 적용하기 전에 detection, confidence, section, script evidence를 call-local
+값으로 모은다.
 
-This keeps lifecycle and policy together without creating a reusable workshop
-framework. The CLI offers `--preload` so the same fixtures can demonstrate both
-construction modes while producing identical routing decisions.
+이 방식은 reusable workshop framework를 만들지 않고 lifecycle과 policy를 함께
+유지한다. CLI는 `--preload`를 제공하므로 같은 fixture가 두 construction mode를 모두
+보여주면서 동일한 routing decision을 생성할 수 있다.
 
-## Rejected Alternatives
+## 기각한 대안
 
-### Route directly from the top detected language
+### Top detected language에서 직접 route
 
-Rejected because Han-only text can be classified as Japanese or Chinese
-without enough script evidence to select a Japanese tokenizer safely. It also
-hides low confidence and mixed sections from the caller.
+Han-only text는 Japanese tokenizer를 안전하게 선택할 충분한 script evidence 없이도
+Japanese 또는 Chinese로 분류될 수 있으므로 기각한다. 또한 low confidence와 mixed
+section을 caller에게 숨긴다.
 
-### Execute moderation and Japanese tokenization inside the router
+### Router 내부에서 moderation 및 Japanese tokenization 실행
 
-Rejected because Issue #119 teaches selection, not processor behavior. It
-would duplicate Issue #55/#118, couple unrelated lifecycle costs, and make the
-future Gin example depend on a workshop-internal pipeline.
+Issue #119는 processor behavior가 아니라 selection을 설명하므로 기각한다. 이는
+Issue #55/#118을 중복하고 관련 없는 lifecycle cost를 결합하며, future Gin example이
+workshop-internal pipeline에 의존하게 만든다.
 
-### Build separate routers for lazy and preloaded models
+### Lazy 및 preloaded model용 router 분리
 
-Rejected because model loading is a detector construction choice, not a
-routing-policy variant. Two router implementations would allow route behavior
-to drift and would obscure the lifecycle comparison.
+Model loading은 routing-policy variant가 아니라 detector construction 선택이므로
+기각한다. 두 router implementation은 route behavior drift를 허용하고 lifecycle
+comparison을 흐린다.
 
-### Add another detector or script library
+### 다른 detector 또는 script library 추가
 
-Rejected because bluetape-go v0.18.0 already exposes the required confidence,
-section, ISO-code, and script-hint APIs. Another dependency would not improve
-the lesson and would add competing semantics.
+bluetape-go v0.18.0이 필요한 confidence, section, ISO-code, script-hint API를 이미
+노출하므로 기각한다. 다른 의존성은 lesson을 개선하지 않고 competing semantics를
+추가한다.
 
-## Package and Files
+## Package 및 파일
 
-The implementation will live under:
+구현은 다음 위치에 둔다.
 
 ```text
 examples/multilingual-language-routing/
@@ -94,12 +92,12 @@ examples/multilingual-language-routing/
     router_test.go
 ```
 
-The root `README.md` and `README.ko.md` will link the new example. No dependency,
-workflow, module, container, database, or HTTP registration change is required.
+Root `README.md`와 `README.ko.md`는 새 예제를 link한다. Dependency, workflow,
+module, container, database, HTTP registration 변경은 필요하지 않다.
 
-## Configuration and Lifecycle
+## Configuration 및 Lifecycle
 
-`Config` owns application policy:
+`Config`는 application policy를 소유한다.
 
 ```go
 type Config struct {
@@ -109,57 +107,56 @@ type Config struct {
 }
 ```
 
-The default is minimum confidence `0.70`, minimum length `8` runes, and lazy
-model loading. `PreloadModels=true` adds
-`language.WithPreloadedLanguageModels()` but does not change the selected
-language subset or routing rules.
+기본값은 minimum confidence `0.70`, minimum length `8` rune, lazy model loading이다.
+`PreloadModels=true`는 `language.WithPreloadedLanguageModels()`를 추가하지만 선택된
+language subset이나 routing rule은 바꾸지 않는다.
 
-`NewRouter` constructs exactly one detector for English, Korean, Japanese, and
-Chinese. The router has no per-call mutable state, goroutines, channels, I/O,
-timers, shutdown method, or context contract. The command constructs one router
-and reuses it. Lazy loading is the default; `--preload` pays construction cost
-up front. Documentation describes this qualitative tradeoff without universal
-startup-time or memory numbers.
+`NewRouter`는 English, Korean, Japanese, Chinese용 detector를 정확히 하나
+construct한다. Router에는 per-call mutable state, goroutine, channel, I/O, timer,
+shutdown method, context contract가 없다. Command는 router 하나를 만들고 reuse한다.
+Lazy loading이 기본값이며, `--preload`는 construction cost를 upfront로 지불한다.
+Documentation은 universal startup-time 또는 memory number 없이 이 qualitative
+tradeoff를 설명한다.
 
-## Domain Contract
+## Domain 계약
 
-### Inputs
+### 입력
 
-`Request` contains a required caller-owned ID and text. Blank IDs return a local
-invalid-request error. The router trims surrounding ID whitespace and returns
-that canonical ID; it never trims or rewrites text because section offsets must
-slice the original bytes. Blank text and text over the upstream maximum
-preserve the bluetape-go sentinel through `%w`. A nonblank input shorter than
-`MinimumRunes` is a valid manual-review decision, not an error.
+`Request`는 필수 caller-owned ID와 text를 포함한다. Blank ID는 local invalid-request
+error를 반환한다. Router는 ID 주변 whitespace를 trim하고 canonical ID를 반환하지만,
+section offset이 원본 byte를 slice해야 하므로 text는 trim하거나 rewrite하지 않는다.
+Blank text와 upstream maximum을 초과한 text는 `%w`를 통해 bluetape-go sentinel을
+보존한다. `MinimumRunes`보다 짧은 nonblank input은 error가 아니라 valid manual-review
+decision이다.
 
-### Output
+### 출력
 
-`Decision` contains:
+`Decision`은 다음을 포함한다.
 
-- request ID and original text;
-- detected language name, ISO 639-1/639-3 codes, and top confidence;
-- all four configured language confidences in descending order;
-- detector-reported sections with language, ISO codes, original byte spans,
-  and exact text slices;
-- ordered script hints from `latin`, `hangul`, `kana`, and `han`;
-- selected route;
-- `manual_review` and an ordered, non-nil `review_reasons` slice.
+- request ID와 original text
+- detected language name, ISO 639-1/639-3 code, top confidence
+- 네 개 configured language confidence 전체를 descending order로
+- language, ISO code, original byte span, exact text slice를 가진 detector-reported
+  section
+- `latin`, `hangul`, `kana`, `han`에서 나온 ordered script hint
+- selected route
+- `manual_review` 및 ordered non-nil `review_reasons` slice
 
-Unknown detection uses an explicit `unknown` language value and empty ISO
-codes. Successful slices are non-nil even when empty so the JSON shape remains
-stable. The detector owns confidence ordering; the example verifies but does
-not re-rank or synthesize probabilities.
+Unknown detection은 명시적인 `unknown` language value와 empty ISO code를 사용한다.
+JSON shape가 안정적으로 유지되도록 성공 slice는 비어 있어도 non-nil이다. Confidence
+ordering은 detector가 소유한다. 예제는 이를 verify하지만 probability를 re-rank하거나
+synthesize하지 않는다.
 
-### Routes
+### Route
 
-The route values are:
+Route 값:
 
-- `moderation` for confident, non-mixed English or Korean;
-- `japanese-tokenization` for confident, non-mixed Japanese with a Kana hint;
-- `manual-review` whenever any review reason exists.
+- confident non-mixed English 또는 Korean에는 `moderation`
+- Kana hint가 있는 confident non-mixed Japanese에는 `japanese-tokenization`
+- review reason이 하나라도 있으면 `manual-review`
 
-Chinese is deliberately present in the detector subset so Han-only input is
-visible, but no Chinese processor is supported by this example.
+Han-only input이 보이도록 Chinese를 detector subset에 의도적으로 포함하지만, 이 예제는
+Chinese processor를 지원하지 않는다.
 
 | Evidence | Route | Review reason |
 |---|---|---|
@@ -170,38 +167,37 @@ visible, but no Chinese processor is supported by this example.
 | Japanese detection without Kana and with Han | `manual-review` | `ambiguous-cjk-script` |
 | Short, unknown, low-confidence, or mixed input | `manual-review` | corresponding ordered reasons |
 
-Route names describe downstream destinations only. The command does not call a
-moderator, tokenizer, queue, or HTTP service.
+Route name은 downstream destination만 설명한다. Command는 moderator, tokenizer,
+queue, HTTP service를 호출하지 않는다.
 
 ## Decision Flow
 
-For every request, `Route` performs these steps in order:
+모든 request에 대해 `Route`는 다음 단계를 순서대로 수행한다.
 
-1. Validate router construction, ID, blank text, and upstream length.
-2. Collect script hints in fixed order: Latin, Hangul, Kana, Han.
-3. Call `Detect`, `Confidences`, and `DetectMultiple` on the shared detector.
-4. Mark input mixed when detector sections contain at least two distinct
-   non-`Unknown` languages. An `Unknown` section remains evidence but does not
-   create a second language decision. Script hints remain evidence and do not
-   independently redefine detector sections.
-5. Append review reasons in this exact order:
+1. Router construction, ID, blank text, upstream length를 검증한다.
+2. Latin, Hangul, Kana, Han의 고정 순서로 script hint를 수집한다.
+3. Shared detector에서 `Detect`, `Confidences`, `DetectMultiple`을 호출한다.
+4. Detector section에 서로 다른 non-`Unknown` language가 둘 이상 있으면 input을
+   mixed로 표시한다. `Unknown` section은 evidence로 남지만 두 번째 language
+   decision을 만들지 않는다. Script hint는 evidence로 남으며 detector section을
+   독립적으로 재정의하지 않는다.
+5. Review reason을 다음 정확한 순서로 append한다.
    `text-too-short`, `language-unknown`, `low-confidence`, `mixed-language`,
    `ambiguous-cjk-script`, `unsupported-language`.
-6. If any reason exists, choose `manual-review`; otherwise apply the confident
-   English/Korean/Japanese route matrix.
+6. Reason이 하나라도 있으면 `manual-review`를 선택한다. 그렇지 않으면 confident
+   English/Korean/Japanese route matrix를 적용한다.
 
-`language-unknown` applies when no language was detected; `low-confidence`
-applies only to a detected language below the threshold, so unknown input does
-not receive two names for the same uncertainty. The Japanese guard requires
-Kana. Any Japanese result without Kana is treated as ambiguous CJK evidence
-rather than permission to invoke a Japanese processor; Han is retained as a
-separate observable script hint. A Chinese result produces
-`unsupported-language`. Reasons are deduplicated and stable even when one
-fixture triggers multiple independent guards.
+`language-unknown`은 language가 감지되지 않았을 때 적용한다. `low-confidence`는
+threshold 아래의 detected language에만 적용하므로 unknown input이 같은 uncertainty에
+대해 두 이름을 받지 않는다. Japanese guard는 Kana를 요구한다. Kana 없는 Japanese
+result는 Japanese processor를 호출할 permission이 아니라 ambiguous CJK evidence로
+취급한다. Han은 별도의 observable script hint로 유지한다. Chinese result는
+`unsupported-language`를 만든다. 하나의 fixture가 여러 independent guard를 trigger해도
+reason은 deduplicate되고 안정적이다.
 
 ## Go API Shape
 
-The internal package exposes constructor-only use:
+Internal package는 constructor-only 사용을 노출한다.
 
 ```go
 func DefaultConfig() Config
@@ -210,55 +206,53 @@ func (r *Router) Route(request Request) (Decision, error)
 func NewPreview(preload bool) (Preview, error)
 ```
 
-The zero value is intentionally unusable. Calling `Route` on a nil or
-uninitialized router fails closed with `ErrInvalidConfig` instead of panicking.
-All returned slices are caller-owned copies.
+Zero value는 의도적으로 사용할 수 없다. Nil 또는 uninitialized router에서 `Route`를
+호출하면 panic 대신 `ErrInvalidConfig`로 fail closed한다. 반환되는 모든 slice는
+caller-owned copy다.
 
-`Preview` includes a scenario name, default configuration, a `model_loading`
-value of `lazy` or `preloaded`, qualitative lifecycle notes, heuristic
-boundaries, fixed default-policy decisions, one explicit low-confidence policy
-check, and validation commands. The lifecycle field is the only intentional
-difference in lesson behavior between equivalent lazy and preloaded previews;
-the serialized `preload_models` configuration field also reflects the selected
-mode. Both the default request decisions and low-confidence policy check must
-compare equal across model-loading modes.
+`Preview`는 scenario name, default configuration, `lazy` 또는 `preloaded`
+`model_loading` 값, qualitative lifecycle note, heuristic boundary, fixed
+default-policy decision, 명시적인 low-confidence policy check 하나, validation
+command를 포함한다. Lifecycle field는 동등한 lazy/preloaded preview 사이에서 lesson
+behavior가 의도적으로 다른 유일한 부분이다. Serialized `preload_models`
+configuration field도 선택된 mode를 반영한다. Default request decision과
+low-confidence policy check는 model-loading mode 사이에서 같아야 한다.
 
-The dedicated low-confidence check uses the same detector subset and lifecycle
-but raises `MinimumConfidence` to `1.0` for the fixed multilingual-script fixture
-`support 문의 订单 delivery`. Under pinned v0.18.0 its detected confidence is
-below `1.0`, so the check produces `low-confidence` without changing the
-default `0.70` policy. The exact confidence is test evidence, not a documented
-accuracy guarantee.
+Dedicated low-confidence check는 같은 detector subset과 lifecycle을 사용하지만 fixed
+multilingual-script fixture `support 문의 订单 delivery`에 대해 `MinimumConfidence`를
+`1.0`으로 올린다. Pin된 v0.18.0에서 detected confidence는 `1.0`보다 낮으므로, 이
+check는 default `0.70` policy를 바꾸지 않고 `low-confidence`를 만든다. 정확한
+confidence는 test evidence이며 문서화된 accuracy guarantee가 아니다.
 
-## Errors
+## Error
 
-The package defines:
+Package는 다음을 정의한다.
 
-- `ErrInvalidConfig` for confidence outside `[0,1]`, non-positive minimum
-  runes, or nil/uninitialized router use;
-- `ErrInvalidRequest` for a blank request ID.
+- `[0,1]` 밖의 confidence, non-positive minimum rune, nil/uninitialized router
+  use에 대한 `ErrInvalidConfig`
+- blank request ID에 대한 `ErrInvalidRequest`
 
-Detector construction and request operations wrap their causes with `%w`.
-`language.ErrBlankText` and `language.ErrTextTooLong` remain discoverable with
-`errors.Is`. Unknown, short, low-confidence, mixed, ambiguous-CJK, and
-unsupported-language outcomes are valid `Decision` values and never errors.
+Detector construction과 request operation은 cause를 `%w`로 wrap한다.
+`language.ErrBlankText`와 `language.ErrTextTooLong`은 `errors.Is`로 찾을 수 있어야
+한다. Unknown, short, low-confidence, mixed, ambiguous-CJK,
+unsupported-language outcome은 valid `Decision` 값이며 error가 아니다.
 
-No partial decision is returned for invalid input or detector failure.
+Invalid input 또는 detector failure에서는 partial decision을 반환하지 않는다.
 
-## Concurrency Contract
+## Concurrency 계약
 
-One `Router` and its detector are safe to reuse concurrently. All request
-results, reason slices, confidence projections, and section projections are
-call-local. Tests will use a worker pool with capacity six, dispatch six requests
-per round, and run three rounds for exactly 18 route calls. A bounded entry gate
-proves all six goroutines are ready before releasing each round. Exact outcomes,
-cross-round determinism, and the race detector prove safe reuse; the test does
-not claim to instrument overlap inside the upstream detector. A focused test
-process exercises a fresh lazy router before any route call. The same gate also
-completes under `GOMAXPROCS=1` without relying on scheduler parallelism.
+하나의 `Router`와 그 detector는 concurrent reuse에 안전하다. 모든 request result,
+reason slice, confidence projection, section projection은 call-local이다. 테스트는
+capacity 6 worker pool을 사용하고 round마다 request 6개를 dispatch하며, 3 round를
+실행해 정확히 18 route call을 만든다. Bounded entry gate는 각 round를 release하기
+전에 6 goroutine이 모두 준비되었음을 증명한다. Exact outcome, cross-round
+determinism, race detector가 safe reuse를 증명한다. 이 테스트는 upstream detector
+내부 overlap을 계측한다고 주장하지 않는다. Focused test process는 route call 전에
+fresh lazy router를 exercise한다. 같은 gate는 scheduler parallelism에 의존하지 않고
+`GOMAXPROCS=1`에서도 완료된다.
 
-The same test runs under focused normal and race commands. It does not create
-unbounded goroutines, sleep for correctness, or publish latency claims.
+같은 테스트는 focused normal 및 race command에서 실행한다. Unbounded goroutine을
+만들지 않고, correctness를 위해 sleep하지 않으며, latency claim을 publish하지 않는다.
 
 ## Command Output
 
