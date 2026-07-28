@@ -56,7 +56,7 @@ func TestIntegrationPostgreSQLThenRedis(t *testing.T) {
 		t.Fatalf("Transition() = (%+v, %v, %v)", confirmed, replayed, err)
 	}
 
-	// Reconstruct every application object over the same PostgreSQL database before Redis exists.
+	// Redis가 존재하기 전에 동일한 PostgreSQL 데이터베이스 위에서 모든 애플리케이션 객체를 재구성한다.
 	restartedOutbox := newClockedWorkflowOutbox(t, func() time.Time { return now })
 	restartedHistory, err := NewHistoryStore(db)
 	if err != nil {
@@ -80,7 +80,7 @@ func TestIntegrationPostgreSQLThenRedis(t *testing.T) {
 		t.Fatalf("MaxOpenConnections = %d", db.Stats().MaxOpenConnections)
 	}
 
-	// Redis starts only after the durable PostgreSQL and restart assertions above.
+	// 위의 영속 PostgreSQL 및 재시작 검증이 끝난 뒤에만 Redis를 시작한다.
 	redisAddress := redistestcontainer.Start(ctx, t)
 	client := redis.NewClient(NewRedisOptions(redisAddress))
 	t.Cleanup(func() { _ = client.Close() })

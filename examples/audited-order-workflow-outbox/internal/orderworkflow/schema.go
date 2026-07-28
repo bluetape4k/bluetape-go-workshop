@@ -43,7 +43,7 @@ create index if not exists audited_order_workflow_audit_entries_aggregate_time_i
 on audited_order_workflow_audit_entries
 (aggregate_type, aggregate_id, recorded_at, revision)`
 
-// CreateSchema bootstraps the fixed workshop schema and rejects incompatible tables.
+// CreateSchema는 고정된 워크숍 스키마를 준비하고 호환되지 않는 테이블을 거부한다.
 func CreateSchema(ctx context.Context, db sqlkit.Session, outbox *sqloutbox.Store) error {
 	if db == nil || outbox == nil {
 		return ErrInvalidConfig

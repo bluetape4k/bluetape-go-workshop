@@ -15,12 +15,12 @@ import (
 
 const maxEntryBytes = 1 << 20
 
-// HistoryStore persists immutable audit entries and implements audit.HistoryReader.
+// HistoryStore는 불변 감사 엔트리를 영속화하고 audit.HistoryReader를 구현한다.
 type HistoryStore struct {
 	db *sql.DB
 }
 
-// DeliveryStatus summarizes outbox state without exposing event contents.
+// DeliveryStatus는 이벤트 내용을 노출하지 않고 outbox 상태를 집계한다.
 type DeliveryStatus struct {
 	Pending              int64 `json:"pending"`
 	Retrying             int64 `json:"retrying"`
@@ -32,7 +32,7 @@ type DeliveryStatus struct {
 
 var _ audit.HistoryReader = (*HistoryStore)(nil)
 
-// NewHistoryStore binds durable history reads to db.
+// NewHistoryStore는 영속 이력 조회를 db에 바인딩한다.
 func NewHistoryStore(db *sql.DB) (*HistoryStore, error) {
 	if db == nil {
 		return nil, ErrInvalidConfig
@@ -40,7 +40,7 @@ func NewHistoryStore(db *sql.DB) (*HistoryStore, error) {
 	return &HistoryStore{db: db}, nil
 }
 
-// Insert writes entry through the caller-owned transaction or session.
+// Insert는 호출자가 소유한 트랜잭션 또는 세션을 통해 entry를 기록한다.
 func (s *HistoryStore) Insert(ctx context.Context, db sqlkit.Execer, entry audit.Entry) error {
 	if s == nil || s.db == nil || db == nil {
 		return ErrInvalidConfig
@@ -74,7 +74,7 @@ insert into audited_order_workflow_audit_entries (
 	return nil
 }
 
-// Find returns entries in stable revision or global position order.
+// Find는 안정적인 revision 순서 또는 전역 position 순서로 엔트리를 반환한다.
 func (s *HistoryStore) Find(ctx context.Context, query audit.Query) ([]audit.Entry, error) {
 	if s == nil || s.db == nil {
 		return nil, ErrInvalidConfig
@@ -104,7 +104,7 @@ func (s *HistoryStore) Find(ctx context.Context, query audit.Query) ([]audit.Ent
 	return entries, nil
 }
 
-// FindByCommandID resolves a canonical event or idempotency identity.
+// FindByCommandID는 표준 이벤트 ID 또는 idempotency identity에 해당하는 엔트리를 찾는다.
 func (s *HistoryStore) FindByCommandID(ctx context.Context, db sqlkit.QueryRower, commandID string) (audit.Entry, bool, error) {
 	if s == nil || s.db == nil || db == nil {
 		return audit.Entry{}, false, ErrInvalidConfig
@@ -130,7 +130,7 @@ limit 1`, commandID)
 	return entry, true, nil
 }
 
-// DeliveryStatus returns bounded aggregate outbox diagnostics under a short timeout.
+// DeliveryStatus는 짧은 제한 시간 안에서 outbox 집계 진단값을 반환한다.
 func (s *HistoryStore) DeliveryStatus(ctx context.Context, now time.Time) (DeliveryStatus, error) {
 	if s == nil || s.db == nil {
 		return DeliveryStatus{}, ErrInvalidConfig
@@ -159,7 +159,7 @@ from audited_order_workflow_outbox_records`, normalizeTimestamp(now)).Scan(
 	return status, nil
 }
 
-// LoadHistory reconstructs validated history for aggregate.
+// LoadHistory는 aggregate의 검증된 감사 이력을 재구성한다.
 func (s *HistoryStore) LoadHistory(ctx context.Context, aggregate audit.AggregateID) (audit.History, bool, error) {
 	if err := aggregate.Validate(); err != nil {
 		return audit.History{}, false, fmt.Errorf("%w: aggregate: %w", audit.ErrInvalidQuery, err)
@@ -178,7 +178,7 @@ func (s *HistoryStore) LoadHistory(ctx context.Context, aggregate audit.Aggregat
 	return history, true, nil
 }
 
-// Latest returns the highest durable revision for aggregate.
+// Latest는 aggregate에 대해 영속화된 가장 높은 revision 엔트리를 반환한다.
 func (s *HistoryStore) Latest(ctx context.Context, aggregate audit.AggregateID) (audit.Entry, bool, error) {
 	if err := aggregate.Validate(); err != nil {
 		return audit.Entry{}, false, fmt.Errorf("%w: aggregate: %w", audit.ErrInvalidQuery, err)
@@ -193,12 +193,12 @@ func (s *HistoryStore) Latest(ctx context.Context, aggregate audit.AggregateID) 
 	return entries[0], true, nil
 }
 
-// LatestSnapshot returns the newest snapshot entry when one exists.
+// LatestSnapshot은 스냅샷 엔트리가 있으면 가장 최신 항목을 반환한다.
 func (s *HistoryStore) LatestSnapshot(ctx context.Context, aggregate audit.AggregateID) (audit.Entry, bool, error) {
 	return s.findSnapshot(ctx, aggregate, 0)
 }
 
-// PreviousSnapshot returns the newest snapshot before the exclusive revision bound.
+// PreviousSnapshot은 제외 상한 revision 이전의 가장 최신 스냅샷을 반환한다.
 func (s *HistoryStore) PreviousSnapshot(ctx context.Context, aggregate audit.AggregateID, before audit.Revision) (audit.Entry, bool, error) {
 	if err := before.Validate(); err != nil {
 		return audit.Entry{}, false, fmt.Errorf("%w: before: %w", audit.ErrInvalidQuery, err)

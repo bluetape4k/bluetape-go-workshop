@@ -29,45 +29,45 @@ var (
 	requestSequence               atomic.Uint64
 )
 
-// HTTPConfig bounds request size, duration, and in-flight concurrency.
+// HTTPConfig는 요청 크기, 처리 시간, 동시 실행 요청 수의 상한을 정의한다.
 type HTTPConfig struct {
 	MaximumBodyBytes  int64
 	OperationTimeout  time.Duration
 	MaximumConcurrent int
 }
 
-// DefaultHTTPConfig returns conservative settings for the loopback workshop server.
+// DefaultHTTPConfig는 루프백 워크숍 서버에 맞춘 보수적인 설정을 반환한다.
 func DefaultHTTPConfig() HTTPConfig {
 	return HTTPConfig{MaximumBodyBytes: 32 << 10, OperationTimeout: 2 * time.Second, MaximumConcurrent: 32}
 }
 
-// CommandService applies validated order commands and reports canonical replay.
+// CommandService는 검증된 주문 명령을 적용하고 표준 replay 여부를 보고한다.
 type CommandService interface {
 	Create(context.Context, CreateCommand) (Order, bool, error)
 	Transition(context.Context, TransitionCommand) (Order, bool, error)
 }
 
-// Readiness separates durable command availability from Redis delivery health.
+// Readiness는 영속 명령 처리 가능 여부와 Redis 전달 상태를 분리해 표현한다.
 type Readiness struct {
 	DatabaseReady bool
 	RelayRunning  bool
 	RedisReady    bool
 }
 
-// DeliverySnapshot contains bounded operational delivery counters and states.
+// DeliverySnapshot은 제한된 운영용 전달 카운터와 상태를 담는다.
 type DeliverySnapshot struct {
 	RedisState string
 	RelayState string
 	Delivery   DeliveryStatus
 }
 
-// HealthReader supplies readiness and redacted delivery diagnostics.
+// HealthReader는 readiness와 민감 정보가 제거된 전달 진단값을 제공한다.
 type HealthReader interface {
 	Readiness(context.Context) (Readiness, error)
 	Status(context.Context) (DeliverySnapshot, error)
 }
 
-// NewEngine constructs the strict JSON command, audit, and health routes.
+// NewEngine은 엄격한 JSON 명령, 감사, 상태 점검 라우트를 구성한다.
 func NewEngine(service CommandService, reader audit.HistoryReader, health HealthReader, config HTTPConfig, logger *slog.Logger) (*gin.Engine, error) {
 	if service == nil || isNilInterface(service) || reader == nil || isNilInterface(reader) ||
 		health == nil || isNilInterface(health) || logger == nil || config.MaximumBodyBytes <= 0 ||
