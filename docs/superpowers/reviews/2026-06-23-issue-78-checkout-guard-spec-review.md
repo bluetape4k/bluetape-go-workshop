@@ -1,31 +1,29 @@
-# Issue #78 Spec Review
+# Issue #78 명세 리뷰
 
-## Verdict
+## 판정
 
-Proceed with implementation. The scope is correctly integration-shaped while
-keeping each package's lesson narrow and avoiding a new checkout framework.
+implementation을 진행한다. scope는 각 package의 lesson을 좁게 유지하고 새 checkout framework를
+피하면서도 올바르게 integration-shaped다.
 
-## Six-Lane Review
+## Six-Lane 리뷰
 
-| Lane | Concern | Decision |
+| Lane | 관심사 | 결정 |
 |---|---|---|
-| Correctness | Money arithmetic | Keep one settlement currency per checkout and reject mismatched line currencies. |
-| Domain | Dedupe semantics | Name Bloom output `probably_seen` and document durable idempotency as a production requirement. |
-| Security | JWT boundary | Require `token_use`, issuer, audience, role, scope, and session ID before any checkout response. |
-| Stability | Shared state | Guard Bloom admission and deterministic test IDs for concurrent duplicate tests. |
-| Developer/API | Reuse | Use first-party `id`, `jwt`, `money`, and `probabilistic` APIs directly; do not import sibling `internal` examples. |
-| User/Docs | Composition story | README should show how focused examples compose, not introduce a broad framework. |
+| Correctness | money arithmetic | checkout마다 하나의 settlement currency를 유지하고 mismatched line currency를 거부한다. |
+| Domain | dedupe semantic | Bloom output 이름을 `probably_seen`으로 지정하고 durable idempotency를 production requirement로 문서화한다. |
+| Security | JWT boundary | checkout response 전에 `token_use`, issuer, audience, role, scope, session ID를 요구한다. |
+| Stability | shared state | concurrent duplicate test를 위해 Bloom admission과 deterministic test ID를 guard한다. |
+| Developer/API | reuse | first-party `id`, `jwt`, `money`, `probabilistic` API를 직접 사용하고 sibling `internal` example은 import하지 않는다. |
+| User/Docs | composition story | README는 broad framework를 도입하지 않고 focused example이 조합되는 방식을 보여야 한다. |
 
-## Required Adjustments
+## 필요한 조정
 
-- Place the example at `examples/checkout-guard-integration` so the route is
-  short and clearly integration-focused.
-- Return `409` for duplicate submissions, but explain that a Bloom match can be
-  a false positive.
-- Add both service-level and HTTP-level tests for public error mapping.
-- Include a race run for the new package because the example owns shared
-  admission state.
+- route가 짧고 integration-focused임이 명확하도록 example을
+  `examples/checkout-guard-integration`에 둔다.
+- duplicate submission에는 `409`를 반환하되 Bloom match가 false positive일 수 있음을 설명한다.
+- public error mapping에 대한 service-level test와 HTTP-level test를 모두 추가한다.
+- example이 shared admission state를 소유하므로 새 package에 race run을 포함한다.
 
-## Blockers
+## blocker
 
 None.
