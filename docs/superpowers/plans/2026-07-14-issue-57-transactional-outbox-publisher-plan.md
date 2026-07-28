@@ -1,12 +1,12 @@
 # Issue #57 Transactional Outbox Publisher Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Build a runnable order example that commits an order and SQL outbox entry atomically, then publishes the committed audit record through the released Redis Streams adapter with explicit at-least-once, retry, cancellation, and shutdown proof.
+**Goal:** order와 SQL outbox entry를 atomic하게 commit한 뒤, committed audit record를 released Redis Streams adapter로 publish하는 runnable order example을 만든다. at-least-once, retry, cancellation, shutdown proof를 명시한다.
 
-**Architecture:** `orderoutbox.Service` owns validation and one `sqlkit.WithTx` boundary over an order insert plus `sqloutbox.Store.Enqueue`. A caller-owned `sqloutbox.Relay` runs after commit; deterministic tests use `sqloutboxtest`, while the runnable integration uses `redisstreams.New`. `main` owns PostgreSQL/Redis readiness, timeouts, resource closure, one bounded relay batch, and JSON output.
+**Architecture:** `orderoutbox.Service`는 validation과 order insert 및 `sqloutbox.Store.Enqueue`를 감싸는 `sqlkit.WithTx` boundary 하나를 소유한다. caller-owned `sqloutbox.Relay`는 commit 이후 실행된다. deterministic test는 `sqloutboxtest`를 사용하고 runnable integration은 `redisstreams.New`를 사용한다. `main`은 PostgreSQL/Redis readiness, timeout, resource closure, bounded relay batch 하나, JSON output을 소유한다.
 
-**Tech Stack:** Go 1.26.3, bluetape-go v0.18.0 `audit/sqloutbox`, `audit/sqloutbox/sqloutboxtest`, `audit/sqloutbox/redisstreams`, `sqlkit`, pgx v5, go-redis v9, repository PostgreSQL/Redis Testcontainers fixtures, CairoSVG.
+**Tech Stack:** Go 1.26.3, bluetape-go v0.18.0 `audit/sqloutbox`, `audit/sqloutbox/sqloutboxtest`, `audit/sqloutbox/redisstreams`, `sqlkit`, pgx v5, go-redis v9, repository PostgreSQL/Redis Testcontainers fixture, CairoSVG를 사용한다.
 
 ---
 
@@ -14,33 +14,32 @@
 
 | File | Responsibility |
 |---|---|
-| `examples/transactional-outbox-publisher/internal/orderoutbox/model.go` | Domain values, stable errors, validation, audit entry construction. |
-| `examples/transactional-outbox-publisher/internal/orderoutbox/schema.go` | Example order schema and `sqloutbox.Store.CreateSchema` delegation. |
-| `examples/transactional-outbox-publisher/internal/orderoutbox/service.go` | Constructor and atomic order/outbox transaction. |
-| `examples/transactional-outbox-publisher/internal/orderoutbox/service_test.go` | Constructor, validation, PostgreSQL atomicity, rollback, cancellation. |
-| `examples/transactional-outbox-publisher/internal/orderoutbox/relay_test.go` | Relay success, retry, duplicate, dead-letter, cancellation, shutdown. |
-| `examples/transactional-outbox-publisher/internal/orderoutbox/integration_test.go` | Sequential PostgreSQL/Redis adapter and stream-field proof. |
-| `examples/transactional-outbox-publisher/main.go` | Configuration, client readiness/closure, relay batch, JSON output. |
-| `examples/transactional-outbox-publisher/main_test.go` | Configuration, output, error, and runtime proof. |
-| `examples/transactional-outbox-publisher/README.md`, `README.ko.md` | Bilingual lesson and operational boundaries. |
-| `README.md`, `README.ko.md` | Root navigation and run section. |
-| `docs/images/readme-diagrams/transactional-outbox-publisher-architecture.{svg,png}` | Static ownership architecture. |
-| `docs/images/readme-diagrams/transactional-outbox-publisher-sequence.{svg,png}` | Transaction/retry/cancellation sequence. |
-| `docs/review/2026-07-14-issue-57-transactional-outbox-publisher.md` | Final verification/review evidence. |
-| `docs/lessons/2026-07-14-issue-57-transactional-outbox-publisher.md` | Durable implementation/diagram lessons. |
+| `examples/transactional-outbox-publisher/internal/orderoutbox/model.go` | domain value, stable error, validation, audit entry construction |
+| `examples/transactional-outbox-publisher/internal/orderoutbox/schema.go` | example order schema와 `sqloutbox.Store.CreateSchema` delegation |
+| `examples/transactional-outbox-publisher/internal/orderoutbox/service.go` | constructor 및 atomic order/outbox transaction |
+| `examples/transactional-outbox-publisher/internal/orderoutbox/service_test.go` | constructor, validation, PostgreSQL atomicity, rollback, cancellation |
+| `examples/transactional-outbox-publisher/internal/orderoutbox/relay_test.go` | relay success, retry, duplicate, dead-letter, cancellation, shutdown |
+| `examples/transactional-outbox-publisher/internal/orderoutbox/integration_test.go` | sequential PostgreSQL/Redis adapter 및 stream-field proof |
+| `examples/transactional-outbox-publisher/main.go` | configuration, client readiness/closure, relay batch, JSON output |
+| `examples/transactional-outbox-publisher/main_test.go` | configuration, output, error, runtime proof |
+| `examples/transactional-outbox-publisher/README.md`, `README.ko.md` | bilingual lesson 및 operational boundary |
+| `README.md`, `README.ko.md` | root navigation 및 run section |
+| `docs/images/readme-diagrams/transactional-outbox-publisher-architecture.{svg,png}` | static ownership architecture |
+| `docs/images/readme-diagrams/transactional-outbox-publisher-sequence.{svg,png}` | transaction/retry/cancellation sequence |
+| `docs/review/2026-07-14-issue-57-transactional-outbox-publisher.md` | final verification/review evidence |
+| `docs/lessons/2026-07-14-issue-57-transactional-outbox-publisher.md` | durable implementation/diagram lesson |
 
-No `go.mod`, `go.sum`, workflow, module registration, public bluetape-go API,
-or changelog edit is planned. Any such diff stops the task for reapproval.
+`go.mod`, `go.sum`, workflow, module registration, public bluetape-go API, changelog edit는 계획하지 않는다.
+이런 diff가 생기면 reapproval을 위해 task를 중단한다.
 
-## Task 1: Define domain, configuration, and schema contracts
+## Task 1: domain, configuration, schema contract 정의
 
-**Complexity:** Medium. **Depends on:** approved spec. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `model.go`, `schema.go`, `service_test.go`, then `service.go`.
+**Complexity:** Medium. **Depends on:** approved spec. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `model.go`, `schema.go`, `service_test.go`, 그다음 `service.go`.
 
-- [x] **Step 1: Write constructor and validation tests first**
+- [x] **Step 1: constructor 및 validation test를 먼저 작성**
 
-Create table tests for nil store, blank/invalid/oversized author, nil clock,
-zero-value/nil service, nil database/context, pre-cancelled context,
-blank/invalid/oversized IDs, non-positive totals, and zero `CreatedAt`.
+nil store, blank/invalid/oversized author, nil clock, zero-value/nil service, nil database/context,
+pre-cancelled context, blank/invalid/oversized ID, non-positive total, zero `CreatedAt`에 대한 table test를 만든다.
 
 ```go
 func TestNewServiceRejectsInvalidConfiguration(t *testing.T) {
@@ -66,13 +65,13 @@ func TestNewServiceRejectsInvalidConfiguration(t *testing.T) {
 }
 ```
 
-- [x] **Step 2: Run RED**
+- [x] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox`
+실행: `go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox`
 
-Expected: FAIL because the package and constructor contracts do not exist.
+기대값: package와 constructor contract가 없으므로 FAIL한다.
 
-- [x] **Step 3: Implement minimal values and constructor**
+- [x] **Step 3: minimal value 및 constructor 구현**
 
 ```go
 const (
@@ -102,14 +101,12 @@ type Order struct {
 }
 ```
 
-Trim and bound author to 1..128 valid UTF-8 runes, default `Now` to UTC
-`time.Now`, preserve caller identifiers after trimming, and make nil/zero-value
-methods fail closed with `%w`-wrapped sentinels.
+author를 trim하고 1..128 valid UTF-8 rune으로 bound한다. `Now`는 UTC `time.Now`로 default한다.
+caller identifier는 trim 뒤 보존하고 nil/zero-value method는 `%w`-wrapped sentinel로 fail closed하게 만든다.
 
-- [x] **Step 4: Add schema creation and command validation**
+- [x] **Step 4: schema creation 및 command validation 추가**
 
-`Service.CreateSchema` executes fixed, parameter-free example DDL and delegates
-to its configured `sqloutbox.Store`:
+`Service.CreateSchema`는 fixed, parameter-free example DDL을 실행하고 configured `sqloutbox.Store`에 delegate한다.
 
 ```sql
 create table if not exists transactional_outbox_orders (
@@ -121,32 +118,29 @@ create table if not exists transactional_outbox_orders (
 )
 ```
 
-Normalize nil context to `context.Background`, preserve cancellation, validate
-IDs as valid UTF-8 with 1..128 runes, require positive total, and normalize
-`CreatedAt` to UTC before opening a transaction.
+nil context는 `context.Background`로 normalize한다. cancellation을 보존하고, ID를 1..128 rune의 valid UTF-8로 validate하며,
+positive total을 요구하고, transaction을 열기 전에 `CreatedAt`을 UTC로 normalize한다.
 
-- [x] **Step 5: Run GREEN and format**
+- [x] **Step 5: GREEN 및 format 실행**
 
 ```bash
 gofmt -w examples/transactional-outbox-publisher/internal/orderoutbox/*.go
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'Test(NewService|ServiceValidation|ServiceCreateSchema)'
 ```
 
-Expected: PASS and `git diff --check` clean.
+기대값: PASS하고 `git diff --check`가 clean하다.
 
-## Task 2: Commit the order and outbox entry atomically
+## Task 2: order 및 outbox entry를 atomic하게 commit
 
-**Complexity:** High. **Depends on:** Task 1. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `service_test.go`, then `model.go` and `service.go`.
+**Complexity:** High. **Depends on:** Task 1. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `service_test.go`, 그다음 `model.go`와 `service.go`.
 
-- [x] **Step 1: Write PostgreSQL atomicity tests**
+- [x] **Step 1: PostgreSQL atomicity test 작성**
 
-Use one `TestServicePlacePostgreSQL` with sequential subtests sharing one
-`postgrestestcontainer.Start` instance under a 90-second context, pgx
-`sql.Open`, real `PingContext`, table reset between subtests, and `t.Cleanup`.
-Never use `t.Parallel`. Prove successful
-one-order/one-outbox commit, duplicate-order rollback, an outbox identity
-conflict after the order insert, pre-cancel rollback, UTC timestamps, and stable
-event/idempotency identity.
+90-second context 아래에서 `postgrestestcontainer.Start` instance 하나를 공유하는 sequential subtest를 가진
+`TestServicePlacePostgreSQL` 하나를 사용한다. pgx `sql.Open`, real `PingContext`, subtest 간 table reset,
+`t.Cleanup`을 사용한다. `t.Parallel`은 절대 사용하지 않는다. successful one-order/one-outbox commit,
+duplicate-order rollback, order insert 뒤 outbox identity conflict, pre-cancel rollback, UTC timestamp,
+stable event/idempotency identity를 증명한다.
 
 ```go
 placed, err := service.Place(ctx, db, PlaceOrderCommand{
@@ -160,21 +154,20 @@ assertTableCount(ctx, t, db, ordersTable, 1)
 assertTableCount(ctx, t, db, outboxTable, 1)
 ```
 
-- [x] **Step 2: Run RED**
+- [x] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestServicePlace'`
+실행: `go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestServicePlace'`
 
-Expected: FAIL because `Place` and audit entry construction are absent.
+기대값: `Place`와 audit entry construction이 없으므로 FAIL한다.
 
-- [x] **Step 3: Build one released-contract audit entry**
+- [x] **Step 3: released-contract audit entry 하나 생성**
 
-Marshal only customer ID, status, and total cents. Call
-`audit.NewAggregateID`, `audit.NewDomainEvent`, and `audit.NewEntry` with initial
-revision, event type `order.placed`, caller command ID for both identity fields,
-`OccurredAt=CreatedAt`, and `RecordedAt=service clock`. Wrap all errors with
-`%w`; do not add caller JSON, metadata, snapshots, or generated IDs.
+customer ID, status, total cents만 marshal한다. initial revision, event type `order.placed`,
+두 identity field에 caller command ID, `OccurredAt=CreatedAt`, `RecordedAt=service clock`을 사용해
+`audit.NewAggregateID`, `audit.NewDomainEvent`, `audit.NewEntry`를 호출한다.
+모든 error는 `%w`로 wrap한다. caller JSON, metadata, snapshot, generated ID는 추가하지 않는다.
 
-- [x] **Step 4: Implement one transaction**
+- [x] **Step 4: transaction 하나 구현**
 
 ```go
 err = sqlkit.WithTx(ctx, db, nil, func(ctx context.Context, tx *sql.Tx) error {
@@ -194,29 +187,27 @@ err = sqlkit.WithTx(ctx, db, nil, func(ctx context.Context, tx *sql.Tx) error {
 })
 ```
 
-Return `Order` only after commit. Never call Redis, publisher, or relay inside
-the transaction.
+commit 뒤에만 `Order`를 반환한다. transaction 안에서는 Redis, publisher, relay를 절대 호출하지 않는다.
 
-- [x] **Step 5: Run GREEN and focused race**
+- [x] **Step 5: GREEN 및 focused race 실행**
 
 ```bash
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestServicePlace'
 go test -race -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestServicePlace'
 ```
 
-Expected: exact table counts and rollback assertions PASS; race is clean.
+기대값: exact table count와 rollback assertion이 PASS하고 race가 clean하다.
 
-## Task 3: Prove relay retry, duplicate, dead-letter, and shutdown
+## Task 3: relay retry, duplicate, dead-letter, shutdown 증명
 
-**Complexity:** High. **Depends on:** Task 2. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `relay_test.go` and shared test helpers only.
+**Complexity:** High. **Depends on:** Task 2. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `relay_test.go`와 shared test helper만 포함한다.
 
-- [x] **Step 1: Write deterministic success/retry tests**
+- [x] **Step 1: deterministic success/retry test 작성**
 
-Use the same mutable clock in `sqloutbox.Options.Now` and `RelayOptions.Now`.
-Configure `RecordingPublisher` to fail `command-retry` once. Assert first
-`RunOnce` is claimed/failed with attempt 1, the pre-retry call claims zero,
-advancing exactly 250 ms makes the second call publish attempt 2, and both
-attempts retain identical event/idempotency identity.
+`sqloutbox.Options.Now`와 `RelayOptions.Now`에 같은 mutable clock을 사용한다.
+`RecordingPublisher`가 `command-retry`를 한 번 fail하도록 구성한다. 첫 `RunOnce`는 attempt 1로 claimed/failed되고,
+pre-retry call은 0개를 claim하며, 정확히 250 ms를 advance하면 두 번째 call이 attempt 2로 publish하는지 assert한다.
+두 attempt는 동일한 event/idempotency identity를 보존해야 한다.
 
 ```go
 publisher := sqloutboxtest.NewRecordingPublisher(
@@ -231,18 +222,17 @@ relay, err := sqloutbox.NewRelay(store, publisher, sqloutbox.RelayOptions{
 })
 ```
 
-- [x] **Step 2: Add dead-letter and cancellation tests**
+- [x] **Step 2: dead-letter 및 cancellation test 추가**
 
-Fail three eligible attempts and assert final `dead_letter`, attempts 3, and no
-published result. For cancellation, a `PublisherFunc` cancels the caller and
-returns `ctx.Err()`; assert `context.Canceled`, status remains `claimed`,
-attempts 1, and no retry/dead-letter write.
+eligible attempt 세 개를 fail시키고 final `dead_letter`, attempts 3, published result 없음 을 assert한다.
+cancellation에서는 `PublisherFunc`가 caller를 cancel하고 `ctx.Err()`를 반환한다.
+`context.Canceled`, status가 `claimed`로 남음, attempts 1, retry/dead-letter write 없음 을 assert한다.
 
-- [x] **Step 3: Prove continuous `Run` joins without sleeps**
+- [x] **Step 3: sleep 없이 continuous `Run` join 증명**
 
-A `PublisherFunc` closes `started`, waits on `ctx.Done`, and returns the context
-error. Start `Relay.Run`, wait for `started`, cancel, and join through a bounded
-channel. Require `context.Canceled`, exactly one invocation, and no late call.
+`PublisherFunc`는 `started`를 close하고 `ctx.Done`을 기다린 뒤 context error를 반환한다.
+`Relay.Run`을 시작하고 `started`를 기다린 다음 cancel하고 bounded channel로 join한다.
+`context.Canceled`, 정확히 한 번의 invocation, late call 없음 을 요구한다.
 
 ```go
 select {
@@ -253,15 +243,14 @@ case <-time.After(5 * time.Second):
 }
 ```
 
-- [x] **Step 4: Add bounded concurrent `RunOnce` stress proof**
+- [x] **Step 4: bounded concurrent `RunOnce` stress proof 추가**
 
-Enqueue 12 independent aggregate records, start four `RunOnce` workers from a
-closed barrier channel, and use concurrent-safe `RecordingPublisher`. Across all
-worker results require exactly 12 claimed, 12 published, zero failed/dead-letter,
-12 unique event IDs, and all 12 SQL rows `published`. Repeat the normal test 10
-times; no goroutine may poll after its one call returns.
+independent aggregate record 12개를 enqueue하고 closed barrier channel에서 `RunOnce` worker 네 개를 시작한다.
+concurrent-safe `RecordingPublisher`를 사용한다. 모든 worker result 전체에서 정확히 12 claimed, 12 published,
+failed/dead-letter 0개, unique event ID 12개, SQL row 12개 모두 `published`를 요구한다.
+normal test를 10번 반복한다. 어떤 goroutine도 한 call이 return한 뒤 poll하면 안 된다.
 
-- [x] **Step 5: Run RED then GREEN/race**
+- [x] **Step 5: RED 후 GREEN/race 실행**
 
 ```bash
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestRelay'
@@ -269,8 +258,8 @@ go test -count=10 ./examples/transactional-outbox-publisher/internal/orderoutbox
 go test -race -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run 'TestRelay'
 ```
 
-Expected: exact results/status/attempt counts PASS, shutdown joins, race clean.
-Do not reimplement relay/store behavior in workshop code.
+기대값: exact result/status/attempt count가 PASS하고 shutdown이 join되며 race가 clean하다.
+workshop code에서 relay/store behavior를 재구현하지 않는다.
 
 ## Task 4: Integrate the official Redis Streams publisher
 
