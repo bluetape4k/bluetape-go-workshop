@@ -122,7 +122,7 @@ Demo flow에는 눈에 보이는 두 실행이 있다.
    쓰인 boundary customer를 idempotent no-op으로 처리하고, 남은 작업을 끝낸 뒤
    final checkpoint를 보고한다.
 
-## Domain Model
+## 도메인 모델
 
 Customer source:
 
@@ -166,34 +166,35 @@ type DeadLetter struct {
 }
 ```
 
-## Batch Engine Contract
+## Batch Engine 계약
 
-- `RunBatch(ctx, options)` creates a `batch.Step[CustomerRecord, MigratedCustomer]`
-  and wraps it in a `batch.Job`.
-- Reader implements `batch.CheckpointReader`.
-- Processor validates records, normalizes email/segment, retries only
-  `ErrTransientCustomer`, and dead-letters only `ErrPermanentCustomer`.
-- Writer stores migrated customers idempotently by customer ID and can simulate
-  a crash after a configured count of new writes.
-- Duplicate writes at a replay boundary are deterministic no-ops, not fatal
-  duplicate errors. The response records duplicate skip counts separately so
-  restart behavior is visible without failing the batch.
-- Checkpoint store is replaceable through `batch.CheckpointStore`; the example
-  uses an in-memory recording store.
-- `batch.Step` is configured with `ChunkSize: 2`. Tests must prove this
-  default because the checkpoint/replay scenario depends on it.
-- All reader, processor, writer, store, scheduler, and handler paths check or
-  propagate `context.Context`.
-- Caller-owned `context.Canceled` and `context.DeadlineExceeded` are not
-  retried.
-- Retry policy is fixed at `batch.RetryErrors(3, errors.Is(err, ErrTransientCustomer))`.
-  No backoff or sleeping is used in this workshop example; cancellation before
-  or during processor work returns `batch.StatusCancelled` and is not retried.
-- Skip policy is fixed at `batch.SkipErrors(2, errors.Is(err, ErrPermanentCustomer))`.
-  Skip exhaustion fails the run and exposes a stable `permanent_customer`
-  diagnostic code.
+- `RunBatch(ctx, options)`는 `batch.Step[CustomerRecord, MigratedCustomer]`를
+  만들고 이를 `batch.Job`으로 wrap한다.
+- Reader는 `batch.CheckpointReader`를 구현한다.
+- Processor는 record를 검증하고 email/segment를 정규화하며
+  `ErrTransientCustomer`만 retry하고 `ErrPermanentCustomer`만 dead-letter 처리한다.
+- Writer는 migrated customer를 customer ID 기준으로 idempotent하게 저장하고,
+  설정된 new write count 이후 crash를 simulation할 수 있다.
+- Replay boundary의 duplicate write는 치명적인 duplicate error가 아니라
+  결정적 no-op이다. 응답은 duplicate skip count를 별도로 기록하므로 batch를
+  실패시키지 않고 restart 동작을 보여줄 수 있다.
+- Checkpoint store는 `batch.CheckpointStore`를 통해 교체 가능하다. 예제는
+  in-memory recording store를 사용한다.
+- `batch.Step`은 `ChunkSize: 2`로 설정한다. Checkpoint/replay 시나리오가 이
+  값에 의존하므로 테스트가 기본값을 증명해야 한다.
+- 모든 reader, processor, writer, store, scheduler, handler 경로는
+  `context.Context`를 확인하거나 전파한다.
+- Caller-owned `context.Canceled`와 `context.DeadlineExceeded`는 retry하지
+  않는다.
+- Retry policy는 `batch.RetryErrors(3, errors.Is(err, ErrTransientCustomer))`로
+  고정한다. 이 워크숍 예제에서는 backoff나 sleep을 사용하지 않는다. Processor
+  작업 전 또는 중 cancellation은 `batch.StatusCancelled`를 반환하고 retry하지
+  않는다.
+- Skip policy는 `batch.SkipErrors(2, errors.Is(err, ErrPermanentCustomer))`로
+  고정한다. Skip exhaustion은 run을 실패시키고 안정적인 `permanent_customer`
+  diagnostic code를 노출한다.
 
-Sentinel errors:
+Sentinel error:
 
 - `ErrInvalidCustomer`
 - `ErrTransientCustomer`
@@ -206,45 +207,44 @@ Sentinel errors:
 - `ErrInvalidRunID`
 - `ErrInvalidCrashAfter`
 
-Errors returned from domain logic wrap sentinels with `%w` for `errors.Is`.
+Domain logic에서 반환하는 error는 `errors.Is`를 위해 sentinel을 `%w`로 wrap한다.
 
-## Operations Service State Contract
+## Operations Service State 계약
 
-`Service` owns the run lifecycle and all public snapshots:
+`Service`는 run lifecycle과 모든 public snapshot을 소유한다.
 
 - `mu sync.Mutex`
 - `active bool`
-- shared checkpoint store with its own lock and snapshot API
-- migrated-customer sink with its own lock and snapshot API
-- dead-letter store with its own lock and snapshot API
+- 자체 lock과 snapshot API를 가진 shared checkpoint store
+- 자체 lock과 snapshot API를 가진 migrated-customer sink
+- 자체 lock과 snapshot API를 가진 dead-letter store
 - latest run response
 - latest report projection
-- active run cancel function, when a run is in progress
+- run 진행 중의 active run cancel function
 
-Run entrypoints (`StartManual` and `RunScheduledTick`) acquire `mu`, reject when
-`active` is true, create a run-scoped cancelable context, set `active=true`,
-store the cancel function, then release the lock while executing the batch. A
-`defer` reacquires `mu`, stores defensive-copy snapshots, clears the cancel
-function, sets `active=false`, and records the latest report even on
-cancellation or failure.
+Run entrypoint(`StartManual`, `RunScheduledTick`)는 `mu`를 획득하고, `active`가
+true이면 거부한다. 그런 다음 run-scoped cancelable context를 만들고
+`active=true`로 설정하며 cancel function을 저장한 뒤, batch 실행 동안 lock을
+해제한다. `defer`는 다시 `mu`를 획득해 defensive-copy snapshot을 저장하고,
+cancel function을 지우며, `active=false`로 설정하고, cancellation 또는 failure
+상황에서도 latest report를 기록한다.
 
-Read entrypoints (`Status` and `Report`) acquire `mu` only long enough to return
-defensive copies of immutable latest projections and high-level active state.
-They must not read live store internals while a batch is mutating them unless
-they use the stores' locked snapshot APIs. HTTP DTOs never expose aliased
-slices, maps, checkpoint values, dead-letter values, or migrated-customer
-values.
+Read entrypoint(`Status`, `Report`)는 immutable latest projection과 high-level
+active state의 defensive copy를 반환하는 데 필요한 시간 동안만 `mu`를 획득한다.
+Store의 locked snapshot API를 사용하지 않는 한, batch가 store를 변경하는 동안
+live store internal을 읽으면 안 된다. HTTP DTO는 aliased slice, map, checkpoint
+값, dead-letter 값, migrated-customer 값을 절대 노출하지 않는다.
 
-`CancelActiveRun` cancels the currently active manual or scheduled run and
-returns a stable cancellation response. If no run is active it returns
-`404 Not Found` with a dedicated `no_active_run` error for cancel requests.
+`CancelActiveRun`은 현재 active manual run 또는 scheduled run을 취소하고 안정적인
+cancellation response를 반환한다. Active run이 없으면 cancel 요청 전용
+`no_active_run` error와 함께 `404 Not Found`를 반환한다.
 
-Tests must use a latchable writer or runner hook so concurrent manual start,
-scheduled tick, status, and report requests overlap deterministically. Add a
-bounded stress test with at least 8 goroutines and 25 iterations per goroutine
-that repeats mixed manual start, scheduled tick, status, report, and cancel
-access, proves at most one run is active, proves public snapshots are valid, and
-then reruns the same package under `go test -race`.
+테스트는 concurrent manual start, scheduled tick, status, report request가
+결정적으로 겹치도록 latchable writer 또는 runner hook을 사용해야 한다. 최소
+8 goroutine과 goroutine당 25 iteration으로 bounded stress test를 추가해 mixed
+manual start, scheduled tick, status, report, cancel access를 반복하고, active
+run이 최대 하나임을 증명하며, public snapshot이 유효함을 증명한 뒤 같은 package를
+`go test -race`로 다시 실행한다.
 
 ## Operations API Contract
 
