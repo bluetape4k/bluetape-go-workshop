@@ -88,4 +88,4 @@ audit record가 있는 authorized replay, stable event identity 기반 consumer 
 예제를 확장하기 전에는 다음 regression guard를 보존한다. atomic rollback,
 same/different-payload replay, concurrent command serialization, relay lease recovery, Redis
 degradation, unexpected relay exit, cancellation-ignoring relay shutdown, actual-app HTTP
-smoke, bilingual contract parity, rendered diagram inspection.
+smoke, 이중 언어 계약 parity, 렌더링된 다이어그램 검사를 보존한다.

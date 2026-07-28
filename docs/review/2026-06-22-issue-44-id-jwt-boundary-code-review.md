@@ -77,7 +77,7 @@ rg -n "context\\.TODO\\(|httptest\\.NewRequest\\(|X-Forwarded-For|RealIP|ListenA
 결과: intentional hit만 있었다.
 
 - `main.go`: owned `ListenAndServe` lifecycle과 loopback bind validation.
-- `service.go`: fixed HMAC demo secret, token issue/parse code, allowlisted public token error.
+- `service.go`: 고정 HMAC 데모 secret, token 발급/parse 코드, allowlist 처리된 공개 token 오류.
 - `service_test.go`: context-aware `httptest.NewRequestWithContext`, test token, leak assertion.
 - README files: demo secret은 production material이 아니고 JWT claim은 encrypted data가 아니라는
   explicit warning.

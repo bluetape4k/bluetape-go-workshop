@@ -14,14 +14,14 @@ import (
 	"github.com/bluetape4k/bluetape-go/sqlkit"
 )
 
-// Service owns the transaction that persists an order and enqueues its audit event.
+// Service 는 주문 저장과 감사 이벤트 enqueue 를 함께 수행하는 트랜잭션을 소유한다.
 type Service struct {
 	store  *sqloutbox.Store
 	author string
 	now    func() time.Time
 }
 
-// NewService validates dependencies and returns an order outbox service.
+// NewService 는 의존성을 검증하고 주문 outbox 서비스를 반환한다.
 func NewService(store *sqloutbox.Store, config Config) (*Service, error) {
 	if store == nil {
 		return nil, fmt.Errorf("%w: outbox store is required", ErrInvalidConfig)
@@ -41,7 +41,7 @@ func NewService(store *sqloutbox.Store, config Config) (*Service, error) {
 	return &Service{store: store, author: author, now: now}, nil
 }
 
-// Place persists an order and its outbox entry in one SQL transaction.
+// Place 는 하나의 SQL 트랜잭션에서 주문과 outbox 항목을 함께 저장한다.
 func (s *Service) Place(ctx context.Context, db *sql.DB, command PlaceOrderCommand) (Order, error) {
 	if s == nil || s.store == nil || s.now == nil || s.author == "" {
 		return Order{}, fmt.Errorf("%w: initialized service is required", ErrInvalidConfig)

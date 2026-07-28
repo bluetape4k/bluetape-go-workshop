@@ -23,8 +23,8 @@ dependency가 되지 않는다.
   sibling example이 여기에 의존하지 못하게 하는 것이 맞다.
 - full order-service integration. repository, transaction, HTTP service behavior를
   조합하는 #65에 속한다.
-- auth, pagination token, optimistic versioning, production migration orchestration.
-  #64는 HTTP/SQL boundary가 주제이므로 README가 이를 production follow-up으로 문서화한다.
+- 인증, 페이지네이션 토큰, 낙관적 버전 관리, production 마이그레이션 오케스트레이션.
+  #64는 HTTP/SQL boundary가 주제이므로 README가 이를 production 후속 과제로 문서화한다.
 
 ## 검증
 

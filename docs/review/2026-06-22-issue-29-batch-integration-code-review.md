@@ -87,8 +87,8 @@ rg -n "context\\.TODO\\(|context\\.Background\\(|go func|time\\.Tick\\(|http\\.L
 
 - `main.go:38` 및 `main.go:66`: process root와 shutdown context.
 - `main.go:45` 및 `main.go:52`: owned scheduler와 HTTP server goroutine.
-- `engine.go:735`: nil context normalization fallback.
-- test files: standard test root, goroutine overlap harness, bounded stress test.
+- `engine.go:735`: nil context 정규화 fallback.
+- 테스트 파일: 표준 test root, goroutine overlap harness, 제한된 stress test.
 
 ## 검증 Evidence
 
