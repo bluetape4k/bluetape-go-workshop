@@ -9,7 +9,7 @@ var errNilMarshalIndent = errors.New("graph abuse cluster: JSON marshaler unavai
 
 type marshalIndentFunc func(any, string, string) ([]byte, error)
 
-// EncodeReport returns the complete indented JSON report with one trailing newline.
+// EncodeReport 는 trailing newline 하나가 붙은 완전한 indented JSON report를 반환한다.
 func EncodeReport(report Report) ([]byte, error) {
 	return encodeReport(report, json.MarshalIndent)
 }

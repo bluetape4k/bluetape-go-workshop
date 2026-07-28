@@ -8,13 +8,13 @@ import (
 	"github.com/bluetape4k/bluetape-go/graph"
 )
 
-// WorkflowBackend provides the two persistence operations required by Execute.
+// WorkflowBackend 는 Execute에 필요한 두 persistence operation을 제공한다.
 type WorkflowBackend interface {
 	ReplaceFixture(context.Context, Fixture) error
 	LoadFixture(context.Context, string) ([]graph.Vertex, []graph.Edge, error)
 }
 
-// Execute replaces, reloads, and analyzes one validated fixture.
+// Execute 는 검증된 fixture 하나를 교체, 재로딩, 분석한다.
 func Execute(ctx context.Context, backend WorkflowBackend, fixture Fixture) (Report, error) {
 	if isNilWorkflowBackend(backend) {
 		return Report{}, ErrBackend

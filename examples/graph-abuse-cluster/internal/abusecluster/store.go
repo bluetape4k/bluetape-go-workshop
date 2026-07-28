@@ -32,12 +32,12 @@ CREATE (user)-[:USES_IDENTIFIER {opaque_id: edge.opaque_id, fixture_id: $fixture
 	edgeReadLimit   = MaxEdges + 1
 )
 
-// Store persists one bounded graph fixture namespace in Neo4j.
+// Store 는 제한된 graph fixture namespace 하나를 Neo4j에 영속화한다.
 type Store struct {
 	client *neo4jgraph.Client
 }
 
-// NewStore creates a Store around a caller-owned Neo4j client.
+// NewStore 는 호출자 소유 Neo4j client를 감싸는 Store를 만든다.
 func NewStore(client *neo4jgraph.Client) (*Store, error) {
 	if client == nil {
 		return nil, ErrBackend
@@ -45,7 +45,7 @@ func NewStore(client *neo4jgraph.Client) (*Store, error) {
 	return &Store{client: client}, nil
 }
 
-// ReplaceFixture atomically replaces the fixture namespace with validated values.
+// ReplaceFixture 는 fixture namespace를 검증된 값으로 원자적으로 교체한다.
 func (s *Store) ReplaceFixture(ctx context.Context, fixture Fixture) error {
 	if s == nil || s.client == nil {
 		return ErrBackend
@@ -57,7 +57,7 @@ func (s *Store) ReplaceFixture(ctx context.Context, fixture Fixture) error {
 	return storeError(s.client.ExecuteWrite(ctx, replaceFixtureCypher, params))
 }
 
-// LoadFixture reads and validates one bounded fixture namespace.
+// LoadFixture 는 제한된 fixture namespace 하나를 읽고 검증한다.
 func (s *Store) LoadFixture(ctx context.Context, fixtureID string) ([]graph.Vertex, []graph.Edge, error) {
 	if s == nil || s.client == nil {
 		return nil, nil, ErrBackend

@@ -1,4 +1,4 @@
-// Package main runs the graph abuse-cluster example against a loopback Neo4j instance.
+// Package main 은 loopback Neo4j instance에 대해 graph abuse-cluster 예제를 실행한다.
 package main
 
 import (

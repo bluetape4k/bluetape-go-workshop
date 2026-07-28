@@ -1,4 +1,4 @@
-// Package catalogprep prepares a Japanese product catalog for deterministic search and masking.
+// Package catalogprep 은 deterministic search와 masking을 위해 Japanese product catalog를 준비한다.
 package catalogprep
 
 import (
@@ -13,38 +13,38 @@ import (
 )
 
 var (
-	// ErrInvalidService reports an uninitialized service receiver.
+	// ErrInvalidService 는 초기화되지 않은 service receiver를 나타낸다.
 	ErrInvalidService = errors.New("catalogprep: invalid service")
-	// ErrInvalidProduct reports missing or invalid product input.
+	// ErrInvalidProduct 는 누락되었거나 유효하지 않은 product 입력을 나타낸다.
 	ErrInvalidProduct = errors.New("catalogprep: invalid product")
-	// ErrInvalidQuery reports a query that cannot produce searchable terms.
+	// ErrInvalidQuery 는 searchable term을 만들 수 없는 query를 나타낸다.
 	ErrInvalidQuery = errors.New("catalogprep: invalid query")
 )
 
-// ProductInput contains the source fields prepared for catalog search.
+// ProductInput 은 catalog search를 위해 준비할 source field를 담는다.
 type ProductInput struct {
 	SKU         string `json:"sku"`
 	Title       string `json:"title"`
 	SupportText string `json:"support_text"`
 }
 
-// MaskPolicy configures blockword matching and replacement text.
+// MaskPolicy 는 blockword matching과 replacement text를 설정한다.
 type MaskPolicy struct {
 	Entries []textsearch.BlockwordEntry
 	Mask    string
 }
 
-// Field identifies the product field that produced a token.
+// Field 는 token을 만든 product field를 식별한다.
 type Field string
 
 const (
-	// FieldTitle identifies text from a product title.
+	// FieldTitle 은 product title의 text를 식별한다.
 	FieldTitle Field = "title"
-	// FieldSupportText identifies text from product support content.
+	// FieldSupportText 는 product support content의 text를 식별한다.
 	FieldSupportText Field = "support_text"
 )
 
-// PreparedToken records a normalized token and its original byte span.
+// PreparedToken 은 정규화된 token과 원본 byte span을 기록한다.
 type PreparedToken struct {
 	Field      Field             `json:"field"`
 	Text       string            `json:"text"`
@@ -57,7 +57,7 @@ type PreparedToken struct {
 	Metadata   map[string]string `json:"metadata"`
 }
 
-// MaskMatch records a blockword match in the original support text.
+// MaskMatch 는 원본 support text 안의 blockword match를 기록한다.
 type MaskMatch struct {
 	ID    string `json:"id"`
 	Text  string `json:"text"`
@@ -65,7 +65,7 @@ type MaskMatch struct {
 	End   int    `json:"end"`
 }
 
-// PreparedProduct contains source text, masked text, tokens, and index terms.
+// PreparedProduct 는 source text, masked text, token, index term을 담는다.
 type PreparedProduct struct {
 	SKU               string          `json:"sku"`
 	Title             string          `json:"title"`
@@ -77,25 +77,25 @@ type PreparedProduct struct {
 	IndexText         string          `json:"index_text"`
 }
 
-// SearchRequest contains a query to prepare and match against the catalog.
+// SearchRequest 는 catalog와 matching하기 위해 준비할 query를 담는다.
 type SearchRequest struct {
 	Query string `json:"query"`
 }
 
-// SearchHit identifies a matching product and the terms matched for it.
+// SearchHit 은 matching된 product와 해당 product에 일치한 term을 식별한다.
 type SearchHit struct {
 	SKU          string   `json:"sku"`
 	MatchedTerms []string `json:"matched_terms"`
 }
 
-// SearchResult contains prepared query terms and matching products.
+// SearchResult 는 준비된 query term과 matching product를 담는다.
 type SearchResult struct {
 	Query      string      `json:"query"`
 	QueryTerms []string    `json:"query_terms"`
 	Hits       []SearchHit `json:"hits"`
 }
 
-// Preview contains the deterministic example payload and operating notes.
+// Preview 는 결정적인 example payload와 operating note를 담는다.
 type Preview struct {
 	Scenario       string            `json:"scenario"`
 	Tokenizer      string            `json:"tokenizer"`
@@ -106,7 +106,7 @@ type Preview struct {
 	Commands       []string          `json:"commands"`
 }
 
-// Service prepares products and searches a reusable Japanese-tokenized catalog.
+// Service 는 product를 준비하고 재사용 가능한 Japanese-tokenized catalog를 검색한다.
 type Service struct {
 	tokenizer  *japanese.Tokenizer
 	dictionary *textsearch.BlockwordDictionary
@@ -114,7 +114,7 @@ type Service struct {
 	products   []PreparedProduct
 }
 
-// NewPreview builds the deterministic catalog preparation payload printed by the example command.
+// NewPreview 는 예제 command가 출력하는 결정적인 catalog preparation payload를 만든다.
 func NewPreview() (Preview, error) {
 	service, err := NewService(DefaultProducts(), DefaultMaskPolicy())
 	if err != nil {
@@ -152,7 +152,7 @@ func NewPreview() (Preview, error) {
 	}, nil
 }
 
-// NewService validates and prepares products with a reusable tokenizer and mask policy.
+// NewService 는 재사용 가능한 tokenizer와 mask policy로 product를 검증하고 준비한다.
 func NewService(products []ProductInput, policy MaskPolicy) (*Service, error) {
 	if len(products) == 0 {
 		return nil, fmt.Errorf("%w: products are required", ErrInvalidProduct)
@@ -194,7 +194,7 @@ func NewService(products []ProductInput, policy MaskPolicy) (*Service, error) {
 	return service, nil
 }
 
-// Products returns a deep copy of the prepared catalog.
+// Products 는 준비된 catalog의 deep copy를 반환한다.
 func (s *Service) Products() []PreparedProduct {
 	if !s.valid() {
 		return nil
@@ -213,7 +213,7 @@ func (s *Service) Products() []PreparedProduct {
 	return copied
 }
 
-// Search returns products containing every prepared query term.
+// Search 는 준비된 모든 query term을 포함하는 product를 반환한다.
 func (s *Service) Search(request SearchRequest) (SearchResult, error) {
 	if !s.valid() {
 		return SearchResult{}, ErrInvalidService
@@ -381,7 +381,7 @@ func byteSpansOverlap(firstStart, firstEnd, secondStart, secondEnd int) bool {
 	return firstStart < secondEnd && secondStart < firstEnd
 }
 
-// excludeOverlappingTokens sweeps tokens and matches ordered by byte position.
+// excludeOverlappingTokens 는 byte position 순서의 token과 match를 sweep한다.
 func excludeOverlappingTokens(tokens []PreparedToken, matches []MaskMatch) {
 	matchIndex := 0
 	for i := range tokens {
@@ -398,7 +398,7 @@ func excludeOverlappingTokens(tokens []PreparedToken, matches []MaskMatch) {
 	}
 }
 
-// DefaultProducts returns the deterministic product fixtures used by the example.
+// DefaultProducts 는 예제에서 사용하는 결정적인 product fixture를 반환한다.
 func DefaultProducts() []ProductInput {
 	return []ProductInput{
 		{
@@ -419,7 +419,7 @@ func DefaultProducts() []ProductInput {
 	}
 }
 
-// DefaultMaskPolicy returns the blockword policy used by the example.
+// DefaultMaskPolicy 는 예제에서 사용하는 blockword policy를 반환한다.
 func DefaultMaskPolicy() MaskPolicy {
 	return MaskPolicy{
 		Entries: []textsearch.BlockwordEntry{{ID: "counterfeit", Text: "偽物", Severity: textsearch.SeverityHigh}},

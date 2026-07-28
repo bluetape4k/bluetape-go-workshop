@@ -1,4 +1,4 @@
-// Package main runs the Gin text search service example.
+// Package main 은 Gin text search service 예제를 실행한다.
 package main
 
 import (

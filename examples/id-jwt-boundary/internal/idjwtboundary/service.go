@@ -1,4 +1,4 @@
-// Package idjwtboundary implements the ID/JWT trust-boundary workshop example.
+// Package idjwtboundary 는 ID/JWT trust-boundary 워크숍 예제를 구현한다.
 package idjwtboundary
 
 import (
@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	// DefaultIssuer is the demo issuer expected by the order boundary.
+	// DefaultIssuer 는 order boundary가 기대하는 데모 issuer다.
 	DefaultIssuer = "id-jwt-boundary"
-	// DefaultAudience is the demo audience expected by the order boundary.
+	// DefaultAudience 는 order boundary가 기대하는 데모 audience다.
 	DefaultAudience = "orders-api"
 
 	defaultRole     = "customer"
@@ -26,15 +26,15 @@ const (
 )
 
 var (
-	// ErrMissingToken reports a missing bearer token.
+	// ErrMissingToken 은 bearer token이 누락되었음을 나타낸다.
 	ErrMissingToken = errors.New("idjwtboundary: missing token")
-	// ErrInvalidToken reports a malformed or unverifiable bearer token.
+	// ErrInvalidToken 은 형식이 잘못되었거나 검증할 수 없는 bearer token을 나타낸다.
 	ErrInvalidToken = errors.New("idjwtboundary: invalid token")
-	// ErrExpiredToken reports a verified token that is past expiration.
+	// ErrExpiredToken 은 검증은 되었지만 만료 시간이 지난 token을 나타낸다.
 	ErrExpiredToken = errors.New("idjwtboundary: expired token")
-	// ErrForbidden reports a verified token without the required role or scope.
+	// ErrForbidden 은 필수 role 또는 scope가 없는 검증된 token을 나타낸다.
 	ErrForbidden = errors.New("idjwtboundary: forbidden")
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 field가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("idjwtboundary: invalid request")
 
 	errInjectedIDFailure = errors.New("injected id failure")
@@ -44,7 +44,7 @@ type stringGenerator interface {
 	NextString() (string, error)
 }
 
-// Config holds service wiring for the demo boundary.
+// Config 는 데모 boundary를 구성하는 service wiring을 보관한다.
 type Config struct {
 	issuer        string
 	audience      string
@@ -55,10 +55,10 @@ type Config struct {
 	idGenerator   stringGenerator
 }
 
-// Option customizes Config before the service is constructed.
+// Option 은 service 생성 전에 Config를 조정한다.
 type Option func(*Config)
 
-// WithClock sets the service clock used for token issue and parse checks.
+// WithClock 은 token 발급과 parse 검증에 사용할 service clock을 설정한다.
 func WithClock(clock func() time.Time) Option {
 	return func(cfg *Config) {
 		if clock != nil {
@@ -67,14 +67,14 @@ func WithClock(clock func() time.Time) Option {
 	}
 }
 
-// WithSecret sets the fixed HMAC demo secret.
+// WithSecret 은 고정 HMAC 데모 secret을 설정한다.
 func WithSecret(secret []byte) Option {
 	return func(cfg *Config) {
 		cfg.secret = append([]byte(nil), secret...)
 	}
 }
 
-// WithIDGenerator sets the ID generator used for internal order/request IDs.
+// WithIDGenerator 는 내부 order/request ID에 사용할 ID generator를 설정한다.
 func WithIDGenerator(generator stringGenerator) Option {
 	return func(cfg *Config) {
 		if generator != nil {
@@ -83,7 +83,7 @@ func WithIDGenerator(generator stringGenerator) Option {
 	}
 }
 
-// Service owns token issue, token verification, and internal ID generation.
+// Service 는 token 발급, token 검증, 내부 ID 생성을 소유한다.
 type Service struct {
 	provider      *btjwt.Provider
 	idGenerator   stringGenerator
@@ -94,7 +94,7 @@ type Service struct {
 	requiredScope string
 }
 
-// TokenRequest is the local demo token issue request.
+// TokenRequest 는 로컬 데모 token 발급 요청이다.
 type TokenRequest struct {
 	Subject    string   `json:"subject"`
 	Role       string   `json:"role"`
@@ -102,20 +102,20 @@ type TokenRequest struct {
 	TTLSeconds int      `json:"ttl_seconds"`
 }
 
-// TokenResponse is the local demo token issue response.
+// TokenResponse 는 로컬 데모 token 발급 응답이다.
 type TokenResponse struct {
 	TokenType        string `json:"token_type"`
 	ExpiresInSeconds int    `json:"expires_in_seconds"`
 	Token            string `json:"token"`
 }
 
-// OrderRequest is the protected order intake request.
+// OrderRequest 는 보호되는 order intake 요청이다.
 type OrderRequest struct {
 	SKU      string `json:"sku"`
 	Quantity int    `json:"quantity"`
 }
 
-// OrderResponse is the accepted order projection returned to callers.
+// OrderResponse 는 호출자에게 반환되는 accepted order projection이다.
 type OrderResponse struct {
 	OrderID   string `json:"order_id"`
 	RequestID string `json:"request_id"`
@@ -126,7 +126,7 @@ type OrderResponse struct {
 	Quantity  int    `json:"quantity"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적인 공개 오류 형식이다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
@@ -138,7 +138,7 @@ type tokenClaims struct {
 	scope   string
 }
 
-// NewService builds the demo service with deterministic local JWT defaults.
+// NewService 는 결정적인 local JWT 기본값으로 데모 service를 만든다.
 func NewService(options ...Option) (*Service, error) {
 	cfg, err := defaultConfig()
 	if err != nil {
@@ -188,7 +188,7 @@ func defaultConfig() (Config, error) {
 	}, nil
 }
 
-// IssueToken signs a short-lived local demo token.
+// IssueToken 은 짧게 살아 있는 local demo token에 서명한다.
 func (s *Service) IssueToken(request TokenRequest) (TokenResponse, error) {
 	if err := validateTokenRequest(request); err != nil {
 		return TokenResponse{}, err
@@ -212,7 +212,7 @@ func (s *Service) IssueToken(request TokenRequest) (TokenResponse, error) {
 	}, nil
 }
 
-// CreateOrder verifies the bearer token and generates internal order IDs.
+// CreateOrder 는 bearer token을 검증하고 내부 order ID를 생성한다.
 func (s *Service) CreateOrder(authorization string, request OrderRequest) (OrderResponse, error) {
 	claims, err := s.verifyAuthorization(authorization)
 	if err != nil {
@@ -274,7 +274,7 @@ func (s *Service) verifyAuthorization(authorization string) (tokenClaims, error)
 	return claims, nil
 }
 
-// NewRouter creates the Gin router for the ID/JWT boundary API.
+// NewRouter 는 ID/JWT boundary API용 Gin router를 만든다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

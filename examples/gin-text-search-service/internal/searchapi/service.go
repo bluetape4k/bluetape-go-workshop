@@ -1,4 +1,4 @@
-// Package searchapi exposes a thin Gin boundary over deterministic textsearch.
+// Package searchapi 는 deterministic textsearch 위에 얇은 Gin boundary를 노출한다.
 package searchapi
 
 import (
@@ -16,11 +16,11 @@ import (
 const maxSearchTextRunes = 8_000
 
 var (
-	// ErrInvalidRequest reports malformed HTTP or domain input.
+	// ErrInvalidRequest 는 형식이 잘못된 HTTP 또는 domain 입력을 나타낸다.
 	ErrInvalidRequest = errors.New("searchapi: invalid request")
 )
 
-// Policy describes the caller-owned text search dictionary.
+// Policy 는 호출자가 소유하는 text search dictionary를 설명한다.
 type Policy struct {
 	Patterns      []PolicyPattern
 	NormalizeMode textsearch.NormalizeMode
@@ -28,33 +28,33 @@ type Policy struct {
 	Overlap       textsearch.OverlapMode
 }
 
-// PolicyPattern is one configured exact-search phrase.
+// PolicyPattern 은 설정된 exact-search phrase 하나다.
 type PolicyPattern struct {
 	ID       string `json:"id"`
 	Text     string `json:"text"`
 	Category string `json:"category"`
 }
 
-// Service owns reusable search and masking behavior without a Gin dependency.
+// Service 는 Gin 의존성 없이 재사용 가능한 search와 masking 동작을 소유한다.
 type Service struct {
 	matcher  *textsearch.Matcher
 	patterns map[string]PolicyPattern
 }
 
-// Server exposes the search service through Gin.
+// Server 는 Gin을 통해 search service를 노출한다.
 type Server struct {
 	router  *gin.Engine
 	service *Service
 }
 
-// SearchMaskRequest is the POST /text/search-mask request body.
+// SearchMaskRequest 는 POST /text/search-mask 요청 본문이다.
 type SearchMaskRequest struct {
 	RequestID string `json:"request_id"`
 	Text      string `json:"text"`
 	Mask      string `json:"mask,omitempty"`
 }
 
-// SearchMaskResult is the stable API response for one search request.
+// SearchMaskResult 는 search 요청 하나에 대한 안정적인 API 응답이다.
 type SearchMaskResult struct {
 	RequestID      string        `json:"request_id"`
 	OriginalText   string        `json:"original_text"`
@@ -65,7 +65,7 @@ type SearchMaskResult struct {
 	Commands       []string      `json:"commands,omitempty"`
 }
 
-// SearchMatch describes one exact phrase occurrence in the original text.
+// SearchMatch 는 원본 text에서 exact phrase occurrence 하나를 설명한다.
 type SearchMatch struct {
 	PatternID string `json:"pattern_id"`
 	Pattern   string `json:"pattern"`
@@ -75,19 +75,19 @@ type SearchMatch struct {
 	End       int    `json:"end"`
 }
 
-// SearchSummary keeps count fields explicit for HTTP clients.
+// SearchSummary 는 HTTP client가 count field를 명확히 읽도록 유지한다.
 type SearchSummary struct {
 	TotalMatches int `json:"total_matches"`
 	PatternsHit  int `json:"patterns_hit"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적인 공개 오류 형식이다.
 type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
-// Preview is printed by the command and documented in the README.
+// Preview 는 command가 출력하고 README에 문서화되는 값이다.
 type Preview struct {
 	Scenario       string           `json:"scenario"`
 	Endpoint       string           `json:"endpoint"`
@@ -100,7 +100,7 @@ type Preview struct {
 	TestCommands   []string         `json:"test_commands"`
 }
 
-// DefaultPolicy returns the static workshop search policy.
+// DefaultPolicy 는 정적 워크숍 search policy를 반환한다.
 func DefaultPolicy() Policy {
 	return Policy{
 		Patterns: []PolicyPattern{
@@ -116,7 +116,7 @@ func DefaultPolicy() Policy {
 	}
 }
 
-// NewService compiles a policy into a reusable search service.
+// NewService 는 policy를 재사용 가능한 search service로 compile한다.
 func NewService(policy Policy) (*Service, error) {
 	patterns := make([]textsearch.Pattern, len(policy.Patterns))
 	lookup := make(map[string]PolicyPattern, len(policy.Patterns))
@@ -139,7 +139,7 @@ func NewService(policy Policy) (*Service, error) {
 	return &Service{matcher: matcher, patterns: lookup}, nil
 }
 
-// SearchMask searches configured phrases and masks the exact accepted spans.
+// SearchMask 는 설정된 phrase를 검색하고 정확히 허용된 span을 masking한다.
 func (s *Service) SearchMask(request SearchMaskRequest) (SearchMaskResult, error) {
 	request.RequestID = strings.TrimSpace(request.RequestID)
 	if request.RequestID == "" {
@@ -170,7 +170,7 @@ func (s *Service) SearchMask(request SearchMaskRequest) (SearchMaskResult, error
 	}, nil
 }
 
-// NewServer creates the Gin HTTP boundary for the search service.
+// NewServer 는 search service용 Gin HTTP boundary를 만든다.
 func NewServer(service *Service) (*Server, error) {
 	if service == nil {
 		return nil, fmt.Errorf("%w: service is required", ErrInvalidRequest)
@@ -186,12 +186,12 @@ func NewServer(service *Service) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to Gin.
+// ServeHTTP 는 요청을 Gin으로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-// NewPreview returns the no-server example payload printed by main.
+// NewPreview 는 main이 출력하는 no-server example payload를 반환한다.
 func NewPreview() (Preview, error) {
 	service, err := NewService(DefaultPolicy())
 	if err != nil {

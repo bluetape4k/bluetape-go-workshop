@@ -1,4 +1,4 @@
-// Package invites demonstrates practical string codec usage.
+// Package invites 는 실용적인 string codec 사용법을 보여준다.
 package invites
 
 import (
@@ -10,13 +10,13 @@ import (
 	"github.com/bluetape4k/bluetape-go/core"
 )
 
-// InvitationLink is a user-facing team invitation URL fragment.
+// InvitationLink 는 사용자에게 노출되는 team invitation URL fragment다.
 type InvitationLink struct {
 	URL   string
 	Token string
 }
 
-// NewInvitationLink creates a short URL-safe invitation link.
+// NewInvitationLink 는 짧고 URL-safe한 invitation link를 만든다.
 func NewInvitationLink(baseURL string) (InvitationLink, error) {
 	if err := core.RequireNotBlank("baseURL", baseURL); err != nil {
 		return InvitationLink{}, err
@@ -32,7 +32,7 @@ func NewInvitationLink(baseURL string) (InvitationLink, error) {
 	}, nil
 }
 
-// EncodeCallbackState encodes non-secret callback state for URLs.
+// EncodeCallbackState 는 URL에 넣을 non-secret callback state를 encode한다.
 func EncodeCallbackState(tenant, redirect string) (string, error) {
 	if err := core.RequireNotBlank("tenant", tenant); err != nil {
 		return "", err
@@ -41,7 +41,7 @@ func EncodeCallbackState(tenant, redirect string) (string, error) {
 	return codec.EncodeBase64URL([]byte(payload)), nil
 }
 
-// DecodeCallbackState decodes callback state and validates its shape.
+// DecodeCallbackState 는 callback state를 decode하고 shape를 검증한다.
 func DecodeCallbackState(value string) (string, string, error) {
 	decoded, err := codec.DecodeBase64URL(value)
 	if err != nil {
@@ -54,7 +54,7 @@ func DecodeCallbackState(value string) (string, string, error) {
 	return parts[0], parts[1], nil
 }
 
-// ExternalReference creates a support-friendly reconciliation reference.
+// ExternalReference 는 support-friendly reconciliation reference를 만든다.
 func ExternalReference(system string, id string) (string, error) {
 	if err := core.RequireNotBlank("system", system); err != nil {
 		return "", err
