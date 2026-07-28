@@ -1,12 +1,12 @@
 # Issue #50 Graph Abuse Cluster Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Build a runnable Neo4j-only CLI that validates an opaque abuse graph with `bluetape-go`, persists and reads it through `graph/neo4j`, calculates deterministic clusters in Go, and prints the approved JSON report.
+**Goal:** opaque abuse graph를 `bluetape-go`로 validate하고, `graph/neo4j`를 통해 persist/read하며, Go에서 deterministic cluster를 계산하고 approved JSON report를 출력하는 runnable Neo4j-only CLI를 만든다.
 
-**Architecture:** A fixture builder owns logical graph validation, a narrow Neo4j store owns one atomic scoped reset/seed plus two bounded reads, and an analyzer owns connected components, evidence, scoring, and ordering. The CLI owns strict loopback configuration, the caller-owned driver lifecycle, buffered JSON output, and redacted errors; reusable repository, Cypher DSL, Memgraph, HTTP, and production fraud behavior remain out of scope.
+**Architecture:** fixture builder가 logical graph validation을 소유하고, 좁은 Neo4j store가 atomic scoped reset/seed 하나와 bounded read 두 개를 소유한다. analyzer는 connected component, evidence, scoring, ordering을 소유한다. CLI는 strict loopback configuration, caller-owned driver lifecycle, buffered JSON output, redacted error를 소유한다. reusable repository, Cypher DSL, Memgraph, HTTP, production fraud behavior는 scope 밖이다.
 
-**Tech Stack:** Go 1.26.3, `bluetape-go v0.18.0`, official Neo4j Go driver v6.1.0, Testcontainers Neo4j v0.42.0, standard library JSON/context/signal handling, SVG plus CairoSVG PNG rendering.
+**Tech Stack:** Go 1.26.3, `bluetape-go v0.18.0`, official Neo4j Go driver v6.1.0, Testcontainers Neo4j v0.42.0, standard library JSON/context/signal handling, SVG 및 CairoSVG PNG rendering을 사용한다.
 
 ---
 
@@ -20,43 +20,42 @@
 - Branch: `feat/issue-50-graph-abuse-cluster`
 - GitHub: issue #50, parent #36, roadmap #27, milestone `0.10.0`, assignee
   `debop`, labels `enhancement` and `examples`
-- External effects authorized by the approved workflow: commits, push, and PR
-  after local convergence. Merge remains a separate explicit user decision.
+- approved workflow가 허용한 external effect: local convergence 이후 commit, push, PR.
+  merge는 별도의 명시적 사용자 결정으로 남는다.
 
 ## File Responsibility Map
 
 | Path | Responsibility |
 |---|---|
-| `examples/graph-abuse-cluster/internal/abusecluster/doc.go` | Package lesson and boundary documentation |
-| `examples/graph-abuse-cluster/internal/abusecluster/errors.go` | Stable internal sentinel categories and redacted operation errors |
-| `examples/graph-abuse-cluster/internal/abusecluster/model.go` | Identifier kinds, fixture/report/evidence/cluster values, constants and limits |
-| `examples/graph-abuse-cluster/internal/abusecluster/fixture.go` | Exact checked-in fixture and pre-persistence graph validation |
-| `examples/graph-abuse-cluster/internal/abusecluster/analyzer.go` | Graph adaptation, connected components, evidence, score and deterministic sort |
-| `examples/graph-abuse-cluster/internal/abusecluster/store.go` | Atomic parameterized Neo4j reset/seed and bounded adapter reads |
-| `examples/graph-abuse-cluster/internal/abusecluster/workflow.go` | Ordered store -> analyze application use case behind a narrow test seam |
-| `examples/graph-abuse-cluster/internal/abusecluster/output.go` | Deterministic indented JSON encoding to memory |
-| Matching `*_test.go` files | Table-driven RED/GREEN proof for each responsibility |
-| `examples/graph-abuse-cluster/main.go` | Loopback config, signal/deadline, driver/client ownership, cleanup-before-output |
+| `examples/graph-abuse-cluster/internal/abusecluster/doc.go` | package lesson과 boundary documentation |
+| `examples/graph-abuse-cluster/internal/abusecluster/errors.go` | stable internal sentinel category와 redacted operation error |
+| `examples/graph-abuse-cluster/internal/abusecluster/model.go` | identifier kind, fixture/report/evidence/cluster value, constant, limit |
+| `examples/graph-abuse-cluster/internal/abusecluster/fixture.go` | exact checked-in fixture와 pre-persistence graph validation |
+| `examples/graph-abuse-cluster/internal/abusecluster/analyzer.go` | graph adaptation, connected component, evidence, score, deterministic sort |
+| `examples/graph-abuse-cluster/internal/abusecluster/store.go` | atomic parameterized Neo4j reset/seed와 bounded adapter read |
+| `examples/graph-abuse-cluster/internal/abusecluster/workflow.go` | narrow test seam 뒤 ordered store -> analyze application use case |
+| `examples/graph-abuse-cluster/internal/abusecluster/output.go` | memory로 deterministic indented JSON encoding |
+| Matching `*_test.go` files | 각 responsibility의 table-driven RED/GREEN proof |
+| `examples/graph-abuse-cluster/main.go` | loopback config, signal/deadline, driver/client ownership, cleanup-before-output |
 | `examples/graph-abuse-cluster/main_test.go` | URI rejection, redaction, cleanup/output ordering, exit behavior |
-| `examples/graph-abuse-cluster/integration_test.go` | One serial real-Neo4j fixture round trip, cancellation, idempotence and cleanup |
-| `examples/graph-abuse-cluster/README.md` | English lesson, commands, exact output, caveats |
-| `examples/graph-abuse-cluster/README.ko.md` | Source-equivalent natural Korean lesson |
-| `docs/images/readme-diagrams/graph-abuse-cluster-architecture.{svg,png}` | Static component/ownership view |
-| `docs/images/readme-diagrams/graph-abuse-cluster-sequence.{svg,png}` | Ordered lifecycle view |
-| `README.md`, `README.ko.md` | Root example table and runnable section |
-| `docs/review/2026-07-14-issue-50-graph-abuse-cluster.md` | Integrated Type A and diagram evidence |
-| `docs/lessons/2026-07-14-issue-50-graph-abuse-cluster.md` | Durable decisions, misses and future guards |
-| `go.mod`, `go.sum` | Approved direct Neo4j runtime/test dependencies only |
+| `examples/graph-abuse-cluster/integration_test.go` | serial real-Neo4j fixture round trip 하나, cancellation, idempotence, cleanup |
+| `examples/graph-abuse-cluster/README.md` | English lesson, command, exact output, caveat |
+| `examples/graph-abuse-cluster/README.ko.md` | source-equivalent natural Korean lesson |
+| `docs/images/readme-diagrams/graph-abuse-cluster-architecture.{svg,png}` | static component/ownership view |
+| `docs/images/readme-diagrams/graph-abuse-cluster-sequence.{svg,png}` | ordered lifecycle view |
+| `README.md`, `README.ko.md` | root example table 및 runnable section |
+| `docs/review/2026-07-14-issue-50-graph-abuse-cluster.md` | integrated Type A 및 diagram evidence |
+| `docs/lessons/2026-07-14-issue-50-graph-abuse-cluster.md` | durable decision, miss, future guard |
+| `go.mod`, `go.sum` | approved direct Neo4j runtime/test dependency만 포함 |
 
-## Task 1: Lock Dependencies, Errors, and the Validated Fixture
+## Task 1: Dependencies, Errors, Validated Fixture 고정
 
 **Complexity:** Medium. **Depends on:** approved plan. **Skills:**
-`test-driven-development`, `bluetape-go-patterns`. **Write scope:** dependency
-files plus fixture/model package files.
+`test-driven-development`, `bluetape-go-patterns`. **Write scope:** dependency file과 fixture/model package file.
 
-- [ ] **Step 1: Add only the approved dependency versions**
+- [ ] **Step 1: approved dependency version만 추가**
 
-Run:
+실행한다.
 
 ```bash
 go get github.com/neo4j/neo4j-go-driver/v6@v6.1.0
@@ -64,13 +63,12 @@ go get github.com/testcontainers/testcontainers-go/modules/neo4j@v0.42.0
 go mod tidy
 ```
 
-Expected: `go.mod` directly requires the driver and Neo4j Testcontainers
-module at the same versions used by `bluetape-go v0.18.0`; no graph algorithm,
-CLI, logging, or alternative-driver dependency appears.
+기대값: `go.mod`가 `bluetape-go v0.18.0`에서 사용하는 같은 version의 driver와 Neo4j Testcontainers module을 direct require한다.
+graph algorithm, CLI, logging, alternative-driver dependency는 나타나지 않는다.
 
-- [ ] **Step 2: Write fixture validation tests first**
+- [ ] **Step 2: fixture validation test를 먼저 작성**
 
-Create `fixture_test.go` with tables that call the planned signatures:
+planned signature를 호출하는 table로 `fixture_test.go`를 만든다.
 
 ```go
 func NewFixture(fixtureID string) (Fixture, error)
@@ -78,7 +76,7 @@ func DefaultFixture() (Fixture, error)
 func ValidateFixture(Fixture) error
 ```
 
-Required cases:
+필수 case:
 
 ```go
 tests := []struct {
@@ -95,16 +93,12 @@ tests := []struct {
 }
 ```
 
-The happy-path assertion requires 6 `User` vertices, 6 `Identifier` vertices,
-10 `USES_IDENTIFIER` edges, and a defensive copy unaffected by caller mutation.
-Add exact-boundary fixtures proving 256 vertices and 1024 edges are accepted
-before the max+1 cases fail.
-`NewFixture("test-namespace")` must rebuild the same logical graph with that
-namespace on the fixture and every vertex/edge property; blank/whitespace IDs
-return `ErrInvalidFixture`. `DefaultFixture` delegates to
-`NewFixture(FixtureID)` so integration tests do not mutate shared fixture data.
+happy-path assertion은 `User` vertex 6개, `Identifier` vertex 6개, `USES_IDENTIFIER` edge 10개,
+caller mutation의 영향을 받지 않는 defensive copy를 요구한다. max+1 case가 fail하기 전에 256 vertex와 1024 edge가 accept됨을 증명하는 exact-boundary fixture를 추가한다.
+`NewFixture("test-namespace")`는 fixture와 모든 vertex/edge property에 해당 namespace를 가진 같은 logical graph를 rebuild해야 한다.
+blank/whitespace ID는 `ErrInvalidFixture`를 반환한다. integration test가 shared fixture data를 mutate하지 않도록 `DefaultFixture`는 `NewFixture(FixtureID)`에 delegate한다.
 
-- [ ] **Step 3: Observe RED**
+- [ ] **Step 3: RED 확인**
 
 Run:
 
@@ -112,13 +106,11 @@ Run:
 go test -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'Test(NewFixture|DefaultFixture|ValidateFixture)'
 ```
 
-Expected: FAIL to compile because `Fixture`, `NewFixture`, `DefaultFixture`,
-and error values do not exist.
+기대값: `Fixture`, `NewFixture`, `DefaultFixture`, error value가 없으므로 compile FAIL한다.
 
-- [ ] **Step 4: Implement the minimum fixture contract**
+- [ ] **Step 4: minimum fixture contract 구현**
 
-Create `doc.go`, `errors.go`, `model.go`, and `fixture.go`. Use these core
-shapes consistently in later tasks:
+`doc.go`, `errors.go`, `model.go`, `fixture.go`를 만든다. 이후 task에서 다음 core shape를 일관되게 사용한다.
 
 ```go
 type IdentifierKind string
@@ -147,14 +139,12 @@ var (
 )
 ```
 
-Build every vertex with `graph.ParseVertex` and every edge with
-`graph.ParseEdge`. `NewFixture` reconstructs all graph values for its supplied
-namespace rather than mutating returned property maps. Validate IDs, exact
-labels, required string properties, allowed kinds, duplicate logical IDs/edges,
-and endpoint existence. Wrap safe sentinel causes with `%w`; rendered error
-text must not retain property values or opaque IDs.
+모든 vertex는 `graph.ParseVertex`로 만들고 모든 edge는 `graph.ParseEdge`로 만든다.
+`NewFixture`는 returned property map을 mutate하지 말고 supplied namespace에 대한 모든 graph value를 reconstruct한다.
+ID, exact label, required string property, allowed kind, duplicate logical ID/edge, endpoint existence를 validate한다.
+safe sentinel cause는 `%w`로 wrap한다. rendered error text는 property value나 opaque ID를 보존하면 안 된다.
 
-- [ ] **Step 5: Observe GREEN and lint the package surface**
+- [ ] **Step 5: GREEN 확인 및 package surface lint**
 
 Run:
 
@@ -164,33 +154,31 @@ go test -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'Test
 go vet ./examples/graph-abuse-cluster/internal/abusecluster
 ```
 
-Expected: PASS, with no exported-symbol documentation warning in the touched
-package.
+기대값: touched package에 exported-symbol documentation warning 없이 PASS한다.
 
-- [ ] **Step 6: Commit Task 1**
+- [ ] **Step 6: Task 1 commit**
 
 ```bash
 git add go.mod go.sum examples/graph-abuse-cluster/internal/abusecluster
 git commit -m "feat: add validated graph abuse fixture"
 ```
 
-Expected: one commit containing only dependency and fixture/model ownership.
+기대값: dependency와 fixture/model ownership만 포함한 commit 하나.
 
-## Task 2: Implement Deterministic Cluster Analysis
+## Task 2: Deterministic Cluster Analysis 구현
 
 **Complexity:** High. **Depends on:** Task 1. **Skills:**
-`test-driven-development`, `bluetape-go-patterns`. **Write scope:** analyzer and
-its tests.
+`test-driven-development`, `bluetape-go-patterns`. **Write scope:** analyzer와 해당 test.
 
-- [ ] **Step 1: Write RED tests for the approved report**
+- [ ] **Step 1: approved report에 대한 RED test 작성**
 
-Create `analyzer_test.go` against:
+다음을 대상으로 `analyzer_test.go`를 만든다.
 
 ```go
 func Analyze(vertices []graph.Vertex, edges []graph.Edge) (Report, error)
 ```
 
-Use explicit report values:
+explicit report value를 사용한다.
 
 ```go
 want := Report{
@@ -218,23 +206,21 @@ want := Report{
 }
 ```
 
-Add table cases for transitive linkage, shared payment-token weight 5, unique
-identifiers excluded from evidence, reversed/shuffled records, equal
-score/user-count smallest-ID tie-break, duplicate read edge, wrong direction,
-unknown endpoint, wrong label, missing/typed-wrong property, and empty graph.
+transitive linkage, shared payment-token weight 5, evidence에서 제외되는 unique identifier,
+reversed/shuffled record, equal score/user-count smallest-ID tie-break, duplicate read edge,
+wrong direction, unknown endpoint, wrong label, missing/typed-wrong property, empty graph에 대한 table case를 추가한다.
 
-- [ ] **Step 2: Observe RED**
+- [ ] **Step 2: RED 확인**
 
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'TestAnalyze'
 ```
 
-Expected: FAIL because `Analyze`, `Report`, `Cluster`, and `Evidence` are not
-implemented.
+기대값: `Analyze`, `Report`, `Cluster`, `Evidence`가 구현되지 않았으므로 FAIL한다.
 
-- [ ] **Step 3: Implement the minimum analyzer**
+- [ ] **Step 3: minimum analyzer 구현**
 
-Add the report types to `model.go` with exact JSON tags:
+exact JSON tag와 함께 report type을 `model.go`에 추가한다.
 
 ```go
 type Evidence struct {
@@ -257,14 +243,12 @@ type Report struct {
 }
 ```
 
-In `analyzer.go`, map backend `graph.ElementID` to validated user/identifier
-nodes, validate every relationship as `USES_IDENTIFIER` from User to
-Identifier, reject duplicate logical relationships, build both adjacency
-directions, run iterative BFS per sorted user ID, count distinct shared
-identifiers, apply weights 5/3/1, and sort exactly as the spec requires. Return
-non-nil empty slices for an empty valid graph so JSON emits `[]`, not `null`.
+`analyzer.go`에서 backend `graph.ElementID`를 validated user/identifier node로 map한다.
+모든 relationship이 User에서 Identifier로 향하는 `USES_IDENTIFIER`인지 validate하고 duplicate logical relationship을 reject한다.
+양방향 adjacency를 만들고 sorted user ID마다 iterative BFS를 실행한다. distinct shared identifier를 count하고 weight 5/3/1을 적용하며 spec이 요구한 대로 정확히 sort한다.
+empty valid graph에는 non-nil empty slice를 반환해 JSON이 `null`이 아니라 `[]`를 emit하게 한다.
 
-- [ ] **Step 4: Observe GREEN and prove input-order independence repeatedly**
+- [ ] **Step 4: GREEN 확인 및 input-order independence 반복 증명**
 
 ```bash
 gofmt -w examples/graph-abuse-cluster/internal/abusecluster
@@ -272,9 +256,9 @@ go test -count=10 ./examples/graph-abuse-cluster/internal/abusecluster -run 'Tes
 go test -race -count=1 ./examples/graph-abuse-cluster/internal/abusecluster -run 'TestAnalyze'
 ```
 
-Expected: exact report passes for every ordering; race reports no findings.
+기대값: 모든 ordering에서 exact report가 pass하고 race가 finding을 보고하지 않는다.
 
-- [ ] **Step 5: Commit Task 2**
+- [ ] **Step 5: Task 2 commit**
 
 ```bash
 git add examples/graph-abuse-cluster/internal/abusecluster/model.go examples/graph-abuse-cluster/internal/abusecluster/analyzer.go examples/graph-abuse-cluster/internal/abusecluster/analyzer_test.go
