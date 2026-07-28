@@ -246,15 +246,15 @@ manual start, scheduled tick, status, report, cancel access를 반복하고, act
 run이 최대 하나임을 증명하며, public snapshot이 유효함을 증명한 뒤 같은 package를
 `go test -race`로 다시 실행한다.
 
-## Operations API Contract
+## Operations API 계약
 
 ### `GET /healthz`
 
-Returns `200 OK` with `{"status":"ok"}`.
+`{"status":"ok"}`와 함께 `200 OK`를 반환한다.
 
 ### `POST /batch/start`
 
-Request:
+요청:
 
 ```json
 {
@@ -263,24 +263,23 @@ Request:
 }
 ```
 
-Behavior:
+동작:
 
-- Validates `run_id` as 1..64 characters of `A-Z`, `a-z`, `0-9`, `_`, `.`, and
-  `-` after trimming whitespace.
-- `crash_after_new_writes` is optional. Omitted or zero means no crash. Positive
-  values must be in `1..len(default records)`. Negative or out-of-range values
-  return `400 Bad Request`.
-- Rejects a second active run with `409 Conflict`.
-- Starts and completes the local batch synchronously for deterministic workshop
-  output.
-- Returns status `200 OK` for completed runs, `409 Conflict` for failed runs,
-  and `408 Request Timeout` for caller cancellation.
-- All JSON POST handlers share one capped decoder path. They cap request bodies
-  at 8 KiB and return `413 Request Entity Too Large` for oversized requests.
+- 공백 trim 이후 `run_id`를 `A-Z`, `a-z`, `0-9`, `_`, `.`, `-`로 이루어진
+  1..64자 값으로 검증한다.
+- `crash_after_new_writes`는 선택 사항이다. 생략하거나 0이면 crash가 없다.
+  양수 값은 `1..len(default records)` 안에 있어야 한다. 음수 또는 범위 밖 값은
+  `400 Bad Request`를 반환한다.
+- 두 번째 active run은 `409 Conflict`로 거부한다.
+- 결정적인 워크숍 출력을 위해 local batch를 동기적으로 시작하고 완료한다.
+- Completed run은 `200 OK`, failed run은 `409 Conflict`, caller cancellation은
+  `408 Request Timeout` status를 반환한다.
+- 모든 JSON POST handler는 하나의 capped decoder path를 공유한다. Request body는
+  8 KiB로 제한하며, 초과 요청은 `413 Request Entity Too Large`를 반환한다.
 
 ### `POST /batch/schedule/tick`
 
-Request:
+요청:
 
 ```json
 {
@@ -288,21 +287,21 @@ Request:
 }
 ```
 
-Behavior:
+동작:
 
-- Checks leadership through the configured leader gate before running.
-- If leadership is held, starts one batch run and returns the same response
-  shape as `/batch/start`.
-- If leadership is missing, returns `409 Conflict` with a stable
-  `not_leader` error body.
-- Does not loop or sleep; tests and README curls trigger exactly one
-  deterministic tick.
-- Uses the same 8 KiB capped JSON decoder and oversized-body error mapping as
-  `/batch/start`.
+- 실행 전에 설정된 leader gate를 통해 leadership을 확인한다.
+- Leadership이 held 상태이면 batch run 하나를 시작하고 `/batch/start`와 같은
+  response shape를 반환한다.
+- Leadership이 없으면 안정적인 `not_leader` error body와 함께 `409 Conflict`를
+  반환한다.
+- Loop 또는 sleep하지 않는다. 테스트와 README curl은 정확히 하나의 deterministic
+  tick을 trigger한다.
+- `/batch/start`와 같은 8 KiB capped JSON decoder 및 oversized-body error
+  mapping을 사용한다.
 
 ### `POST /batch/cancel`
 
-Request:
+요청:
 
 ```json
 {
@@ -310,29 +309,29 @@ Request:
 }
 ```
 
-Behavior:
+동작:
 
-- Cancels the active run, if one exists.
-- Returns `202 Accepted` as a successful cancellation-request acknowledgement
-  with `status="cancel_requested"` and no `error_code`.
-- Returns `404 Not Found` with `no_active_run` when no run is active.
-- Uses the same 8 KiB capped JSON decoder and oversized-body error mapping as
-  the other POST handlers.
+- Active run이 있으면 취소한다.
+- 성공적인 cancellation-request acknowledgement로 `status="cancel_requested"`와
+  `error_code` 없이 `202 Accepted`를 반환한다.
+- Active run이 없으면 `no_active_run`과 함께 `404 Not Found`를 반환한다.
+- 다른 POST handler와 같은 8 KiB capped JSON decoder 및 oversized-body error
+  mapping을 사용한다.
 
 ### `GET /batch/status`
 
-Returns latest run status, checkpoint, migrated customer IDs, dead letters,
-leader state, rejection code, and whether a run is currently active.
+Latest run status, checkpoint, migrated customer ID, dead letter, leader state,
+rejection code, 현재 active run 여부를 반환한다.
 
 ### `GET /batch/report`
 
-Returns the latest timestamp-free batch report projection. If no run exists,
-returns `404 Not Found`.
+Latest timestamp-free batch report projection을 반환한다. Run이 없으면
+`404 Not Found`를 반환한다.
 
-## Scheduler and Leader Contract
+## Scheduler 및 Leader 계약
 
-The example uses a tiny acquisition-oriented `LeaderGate` interface around the
-existing `leader.Elector` shape:
+예제는 기존 `leader.Elector` 형태 주변에 작은 acquisition-oriented `LeaderGate`
+interface를 사용한다.
 
 ```go
 type LeaderGate interface {
@@ -341,70 +340,69 @@ type LeaderGate interface {
 }
 ```
 
-The production-shaped adapter can wrap `leader.Elector` by calling
-`Campaign(ctx)`, running the callback only while leadership is held, and
-resigning with a bounded cleanup context, such as `context.WithTimeout` with a
-small fixed timeout over `context.WithoutCancel(ctx)` or an equivalent bounded
-cleanup context that survives caller cancellation. `leader.ErrAlreadyLeader` is
-treated as held leadership and runs the callback without taking ownership of a
-newly acquired leadership lease; the adapter resigns only when this call
-successfully acquired leadership. Resign failure is recorded in the response
-diagnostics but does not hide the original batch result. Tests use a
-deterministic in-memory gate that records campaign and resign counts and reports
-held/missing state through `LeaderHeld`.
+Production-shaped adapter는 `Campaign(ctx)`를 호출하고, leadership이 held인 동안만
+callback을 실행하며, caller cancellation 이후에도 살아남는 bounded cleanup
+context로 resign함으로써 `leader.Elector`를 wrap할 수 있다. 예를 들어
+`context.WithoutCancel(ctx)` 위에 작은 고정 timeout의 `context.WithTimeout`을
+사용하거나 동등한 bounded cleanup context를 사용할 수 있다.
+`leader.ErrAlreadyLeader`는 held leadership으로 취급하고 새로 획득한 leadership
+lease ownership 없이 callback을 실행한다. Adapter는 이 호출이 leadership을
+성공적으로 획득했을 때만 resign한다. Resign failure는 response diagnostic에
+기록하지만 원래 batch result를 숨기지 않는다. 테스트는 campaign 및 resign count를
+기록하고 `LeaderHeld`로 held/missing state를 보고하는 결정적 in-memory gate를
+사용한다.
 
-The scheduler owns a tiny injectable ticker loop for the runnable demo. It
-executes one leader-guarded tick per interval until its context is canceled, and
-tests use a manual ticker channel to avoid sleeps. The scheduler owns no durable
-queue semantics. The explicit `/batch/schedule/tick` endpoint remains for
-deterministic curl and test control.
+Scheduler는 실행 가능한 demo를 위한 작은 injectable ticker loop를 소유한다.
+Context가 취소될 때까지 interval마다 leader-guarded tick 하나를 실행하며, 테스트는
+sleep을 피하기 위해 manual ticker channel을 사용한다. Scheduler는 durable queue
+semantics를 소유하지 않는다. 명시적인 `/batch/schedule/tick` endpoint는 결정적
+curl과 테스트 제어를 위해 유지한다.
 
-Required tests:
+필수 테스트:
 
-- held leadership runs one tick;
-- `leader.ErrAlreadyLeader` is treated as a runnable held-leadership path
-  without an extra resign;
-- missing leadership returns `ErrNotLeader` without mutating checkpoint, sink,
-  or dead-letter state;
-- campaign cancellation preserves `context.Canceled` or
-  `context.DeadlineExceeded`, maps HTTP to `408 Request Timeout` with
-  `request_cancelled`, does not set `not_leader`, and does not run the batch;
-- resign cleanup is bounded, cannot hang indefinitely, and records cleanup
-  failure without hiding the batch result;
-- request cancellation after leadership acquisition still attempts bounded
-  resign cleanup;
-- scheduler loop stops on context cancellation and does not sleep in tests.
+- held leadership이 tick 하나를 실행한다.
+- `leader.ErrAlreadyLeader`는 추가 resign 없는 runnable held-leadership 경로로
+  취급된다.
+- missing leadership은 checkpoint, sink, dead-letter state를 변경하지 않고
+  `ErrNotLeader`를 반환한다.
+- campaign cancellation은 `context.Canceled` 또는 `context.DeadlineExceeded`를
+  보존하고, HTTP를 `request_cancelled`와 함께 `408 Request Timeout`으로 mapping하며,
+  `not_leader`를 설정하지 않고 batch를 실행하지 않는다.
+- resign cleanup은 bounded이고 무한히 hang될 수 없으며, batch result를 숨기지
+  않고 cleanup failure를 기록한다.
+- leadership acquisition 이후 request cancellation이 발생해도 bounded resign
+  cleanup을 시도한다.
+- scheduler loop는 context cancellation에서 멈추고 테스트에서 sleep하지 않는다.
 
-`GET /batch/status` includes `leader_held` and `last_rejection_code` so the
-workshop user can distinguish idle, active, not-leader, and failed-run states.
-The runnable `main.go` exposes a deterministic `LEADER_MODE=held|missing`
-setting so README users can reproduce both successful scheduled runs and
-`not_leader` responses.
+`GET /batch/status`는 `leader_held`와 `last_rejection_code`를 포함하므로 워크숍
+사용자는 idle, active, not-leader, failed-run 상태를 구분할 수 있다. 실행 가능한
+`main.go`는 결정적인 `LEADER_MODE=held|missing` 설정을 노출해 README 사용자가
+성공한 scheduled run과 `not_leader` 응답을 모두 재현할 수 있게 한다.
 
-## HTTP Trust Boundary and Server Contract
+## HTTP Trust Boundary 및 Server 계약
 
-This is a local workshop server, not an authenticated operations plane.
+이것은 local workshop server이며 authenticated operations plane이 아니다.
 
-- `main.go` binds to `127.0.0.1:8095` by default.
-- `HTTP_ADDR` may override the address only to another loopback bind.
-  Non-loopback binds such as `:8095` or `0.0.0.0:8095` are rejected by default
-  because the operations API is unauthenticated.
-- README files must state that widening the bind address requires an explicit
-  trusted-network or authentication boundary.
-- The Gin router must call and check `SetTrustedProxies(nil)` and must not trust
-  forwarded headers for any security decision.
-- The runnable `http.Server` must set `ReadHeaderTimeout`, `ReadTimeout`,
-  `WriteTimeout`, and `IdleTimeout`.
-- `main.go` must handle SIGINT/SIGTERM and call `Shutdown` with a bounded
-  context.
-- Tests cover request cancellation at handler level; smoke validation covers
-  `go run` startup and graceful termination.
+- `main.go`는 기본적으로 `127.0.0.1:8095`에 bind한다.
+- `HTTP_ADDR`는 다른 loopback bind로만 주소를 override할 수 있다.
+  Operations API가 unauthenticated이므로 `:8095` 또는 `0.0.0.0:8095` 같은
+  non-loopback bind는 기본적으로 거부한다.
+- README 파일은 bind address 확장에 명시적인 trusted-network 또는 authentication
+  boundary가 필요하다고 설명해야 한다.
+- Gin router는 `SetTrustedProxies(nil)`을 호출하고 확인해야 하며, 어떤 security
+  decision에서도 forwarded header를 신뢰하면 안 된다.
+- 실행 가능한 `http.Server`는 `ReadHeaderTimeout`, `ReadTimeout`,
+  `WriteTimeout`, `IdleTimeout`을 설정해야 한다.
+- `main.go`는 SIGINT/SIGTERM을 처리하고 bounded context로 `Shutdown`을 호출해야
+  한다.
+- 테스트는 handler level request cancellation을 다룬다. Smoke validation은
+  `go run` startup과 graceful termination을 다룬다.
 
-## HTTP Status and Response Shape
+## HTTP Status 및 Response Shape
 
-Successful and failed batch runs return a stable `runResponse`. HTTP responses
-also include `error_code`, `error_message`, and `failed_phase` when the run did
-not complete.
+Successful 및 failed batch run은 안정적인 `runResponse`를 반환한다. Run이 완료되지
+않았을 때 HTTP response에는 `error_code`, `error_message`, `failed_phase`도
+포함된다.
 
 ```json
 {
@@ -431,20 +429,20 @@ not complete.
 }
 ```
 
-Report projection must omit runtime timestamps.
+Report projection은 runtime timestamp를 생략해야 한다.
 
-`summary.write_count` follows the upstream `batch.Report.WriteCount` for items
-accepted by successful writer calls. `new_written_ids` is the smaller domain
-delta for newly inserted customers, and `duplicate_skip_count` explains replayed
-boundary records that were accepted as idempotent no-ops.
+`summary.write_count`는 성공한 writer call이 accept한 item에 대한 upstream
+`batch.Report.WriteCount`를 따른다. `new_written_ids`는 새로 insert된 customer에
+대한 더 작은 domain delta이며, `duplicate_skip_count`는 idempotent no-op으로
+accept된 replayed boundary record를 설명한다.
 
-HTTP DTOs expose customer IDs and counts, not customer email values. Email is
-kept inside the internal domain sink and CLI demo output only. Tests assert that
-all public HTTP responses, including failed runs and error bodies, do not
-include fixture email strings. Public `error_message` values are allowlisted
-and must not be raw domain errors.
+HTTP DTO는 customer email 값이 아니라 customer ID와 count를 노출한다. Email은
+internal domain sink와 CLI demo output 안에만 유지한다. 테스트는 failed run과
+error body를 포함한 모든 public HTTP response가 fixture email string을 포함하지
+않음을 assert한다. Public `error_message` 값은 allowlist되어야 하며 raw domain
+error이면 안 된다.
 
-Stable API error codes:
+안정적인 API error code:
 
 | Condition | HTTP status | Code |
 |---|---:|---|
