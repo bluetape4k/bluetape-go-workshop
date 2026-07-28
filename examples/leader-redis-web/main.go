@@ -1,4 +1,4 @@
-// Package main runs the Redis leader election web example.
+// Package main 은 Redis 리더 선출 웹 예제를 실행한다.
 package main
 
 import (

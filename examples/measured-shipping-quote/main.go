@@ -1,4 +1,4 @@
-// Package main runs the measured shipping quote example service.
+// Package main 은 계측 기반 배송 견적 예제 서비스를 실행한다.
 package main
 
 import (

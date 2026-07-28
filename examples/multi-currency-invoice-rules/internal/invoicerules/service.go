@@ -1,4 +1,4 @@
-// Package invoicerules implements the multi-currency invoice rule workshop example.
+// Package invoicerules 는 다중 통화 인보이스 규칙 워크숍 예제를 구현한다.
 package invoicerules
 
 import (
@@ -16,26 +16,26 @@ import (
 const maxJSONBodySize = 8 << 10
 
 var (
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("invoicerules: invalid request")
-	// ErrInvalidMoney reports invalid currency or decimal money input.
+	// ErrInvalidMoney 는 통화 또는 십진 금액 입력이 유효하지 않음을 나타낸다.
 	ErrInvalidMoney = errors.New("invoicerules: invalid money")
 )
 
-// RuleStatus is the public status for an invoice rule decision.
+// RuleStatus 는 인보이스 규칙 판단의 공개 상태 값이다.
 type RuleStatus string
 
 const (
-	// RuleAccepted means the rule applied and affected the invoice.
+	// RuleAccepted 는 규칙이 적용되어 인보이스에 영향을 주었음을 의미한다.
 	RuleAccepted RuleStatus = "accepted"
-	// RuleSkipped means the rule was evaluated and did not match.
+	// RuleSkipped 는 규칙을 평가했지만 조건과 일치하지 않았음을 의미한다.
 	RuleSkipped RuleStatus = "skipped"
 )
 
-// Service evaluates invoice requests with decimal-backed money values.
+// Service 는 십진 금액 값을 사용해 인보이스 요청을 평가한다.
 type Service struct{}
 
-// InvoiceRequest is the HTTP and service request for one invoice evaluation.
+// InvoiceRequest 는 하나의 인보이스 평가를 위한 HTTP 및 서비스 요청이다.
 type InvoiceRequest struct {
 	InvoiceID    string            `json:"invoice_id"`
 	CustomerTier string            `json:"customer_tier"`
@@ -43,7 +43,7 @@ type InvoiceRequest struct {
 	Lines        []LineItemRequest `json:"lines"`
 }
 
-// LineItemRequest is one invoice line in caller-provided string money form.
+// LineItemRequest 는 호출자가 문자열 금액 형태로 제공하는 인보이스 한 줄이다.
 type LineItemRequest struct {
 	LineID      string `json:"line_id"`
 	Description string `json:"description,omitempty"`
@@ -53,7 +53,7 @@ type LineItemRequest struct {
 	Category    string `json:"category"`
 }
 
-// InvoiceResponse is the stable public invoice evaluation projection.
+// InvoiceResponse 는 안정적으로 공개되는 인보이스 평가 응답 표현이다.
 type InvoiceResponse struct {
 	InvoiceID         string          `json:"invoice_id"`
 	TotalsByCurrency  []CurrencyTotal `json:"totals_by_currency"`
@@ -62,7 +62,7 @@ type InvoiceResponse struct {
 	ConversionApplied bool            `json:"conversion_applied"`
 }
 
-// CurrencyTotal is the rounded aggregate for one currency.
+// CurrencyTotal 은 하나의 통화에 대해 반올림된 합계다.
 type CurrencyTotal struct {
 	Currency      string     `json:"currency"`
 	Subtotal      MoneyValue `json:"subtotal"`
@@ -71,7 +71,7 @@ type CurrencyTotal struct {
 	Total         MoneyValue `json:"total"`
 }
 
-// LineItemQuote is a priced invoice line.
+// LineItemQuote 는 가격이 계산된 인보이스 한 줄이다.
 type LineItemQuote struct {
 	LineID      string     `json:"line_id"`
 	Description string     `json:"description,omitempty"`
@@ -81,7 +81,7 @@ type LineItemQuote struct {
 	LineTotal   MoneyValue `json:"line_total"`
 }
 
-// RuleDecision records how one invoice rule evaluated for one line.
+// RuleDecision 은 한 줄에 대해 하나의 인보이스 규칙이 어떻게 평가됐는지 기록한다.
 type RuleDecision struct {
 	Name     string      `json:"name"`
 	LineID   string      `json:"line_id"`
@@ -91,13 +91,13 @@ type RuleDecision struct {
 	Reason   string      `json:"reason,omitempty"`
 }
 
-// MoneyValue is the example's stable JSON money shape.
+// MoneyValue 는 예제가 공개하는 안정적인 JSON 금액 형태다.
 type MoneyValue struct {
 	Amount   string `json:"amount"`
 	Currency string `json:"currency"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적으로 공개되는 오류 응답 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
@@ -110,12 +110,12 @@ type currencyAccumulator struct {
 	tax      money.Money
 }
 
-// NewService creates an invoice evaluation service.
+// NewService 는 인보이스 평가 서비스를 생성한다.
 func NewService() *Service {
 	return &Service{}
 }
 
-// Evaluate evaluates one invoice with deterministic local invoice rules.
+// Evaluate 는 결정적인 로컬 인보이스 규칙으로 하나의 인보이스를 평가한다.
 func (s *Service) Evaluate(request InvoiceRequest) (InvoiceResponse, error) {
 	if s == nil {
 		return InvoiceResponse{}, fmt.Errorf("%w: service is nil", ErrInvalidRequest)
@@ -369,7 +369,7 @@ func totalsByCurrency(accumulators map[string]*currencyAccumulator) ([]CurrencyT
 	return totals, nil
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

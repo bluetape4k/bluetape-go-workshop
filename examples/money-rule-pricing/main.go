@@ -1,4 +1,4 @@
-// Package main runs the money and rule based pricing example service.
+// Package main 은 금액과 규칙 기반 가격 산정 예제 서비스를 실행한다.
 package main
 
 import (
