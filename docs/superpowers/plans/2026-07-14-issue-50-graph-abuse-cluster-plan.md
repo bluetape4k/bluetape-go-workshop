@@ -603,19 +603,17 @@ git add examples/graph-abuse-cluster
 git commit -m "test: verify graph abuse cluster with neo4j"
 ```
 
-## Task 7: Write the Bilingual Runnable Lesson and Root Navigation
+## Task 7: Bilingual Runnable Lesson 및 Root Navigation 작성
 
 **Complexity:** Medium. **Depends on:** Task 6. **Skills:**
-`bluetape-writer`, `bluetape-go-patterns`. **Write scope:** README pair and
-root navigation only.
+`bluetape-writer`, `bluetape-go-patterns`. **Write scope:** README pair와 root navigation만 포함한다.
 
-- [ ] **Step 1: Write `README.md` from verified source behavior**
+- [ ] **Step 1: verified source behavior 기준으로 `README.md` 작성**
 
-Include the language switch, lesson, component boundary, vertex/edge schema,
-exact score table, exact JSON output, atomic reset/seed versus non-atomic
-delivery non-applicability, loopback trust boundary, unsupported concurrent CLI
-runs, production non-goals, and these runnable commands. Label the long-running
-container command as Terminal 1 and the CLI/test commands as Terminal 2:
+language switch, lesson, component boundary, vertex/edge schema, exact score table, exact JSON output,
+atomic reset/seed와 non-atomic delivery non-applicability의 차이, loopback trust boundary,
+unsupported concurrent CLI run, production non-goal, 다음 runnable command를 포함한다.
+long-running container command는 Terminal 1로, CLI/test command는 Terminal 2로 label한다.
 
 ```bash
 docker run --rm --name graph-abuse-cluster-neo4j \
@@ -630,30 +628,28 @@ go test -count=1 ./examples/graph-abuse-cluster/...
 go test -p 1 -race -count=1 ./examples/graph-abuse-cluster/...
 ```
 
-State that the risk score is illustrative, identifiers are synthetic opaque
-fixtures, the process supports one run per fixed namespace, and production
-auth/TLS/authorization/retention/fraud policy are absent.
+risk score는 illustrative이며 identifier는 synthetic opaque fixture라고 명시한다. process는 fixed namespace마다 한 run만 지원하고,
+production auth/TLS/authorization/retention/fraud policy는 없다고 쓴다.
 
-- [ ] **Step 2: Write natural source-equivalent `README.ko.md`**
+- [ ] **Step 2: 자연스러운 source-equivalent `README.ko.md` 작성**
 
-Keep terms, numbers, commands, output, diagrams, caveats, and section order
-aligned. Use practical Korean engineering prose, not literal English sentence
-structure. The current locale is plain text in each language switch.
+term, number, command, output, diagram, caveat, section order를 aligned로 유지한다.
+literal English sentence structure가 아니라 실용적인 한국어 engineering prose를 사용한다.
+각 language switch에서 현재 locale은 plain text로 표시한다.
 
-- [ ] **Step 3: Update both root README files**
+- [ ] **Step 3: 두 root README file 업데이트**
 
-Add one row after the audit/outbox track and one run section before the next
-unrelated service family. Both root files link their matching locale and name
-`graph`, `graph/neo4j`, and Neo4j Testcontainers without claiming Memgraph.
+audit/outbox track 뒤에 row 하나를 추가하고, 다음 unrelated service family 앞에 run section 하나를 추가한다.
+두 root file은 matching locale로 link하고, Memgraph를 claim하지 않으면서 `graph`, `graph/neo4j`,
+Neo4j Testcontainers를 명명한다.
 
-- [ ] **Step 4: Add README parity tests**
+- [ ] **Step 4: README parity test 추가**
 
-Add `documentation_test.go` in the example package. Parse both README sources
-and require exact presence/parity for `NEO4J_URI`, `NEO4J_AUTH=none`, loopback
-publish, the 5/3/1 weights, 256/1024 limits, fixed namespace concurrency caveat,
-expected cluster IDs, test commands, and both future diagram paths.
+example package에 `documentation_test.go`를 추가한다. 두 README source를 parse하고 `NEO4J_URI`,
+`NEO4J_AUTH=none`, loopback publish, 5/3/1 weight, 256/1024 limit, fixed namespace concurrency caveat,
+expected cluster ID, test command, 두 future diagram path의 exact presence/parity를 요구한다.
 
-- [ ] **Step 5: Validate and commit prose**
+- [ ] **Step 5: prose 검증 및 commit**
 
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster -run '^TestDocumentationParity$'
@@ -663,30 +659,29 @@ git add README.md README.ko.md examples/graph-abuse-cluster/README.md examples/g
 git commit -m "docs: explain graph abuse cluster example"
 ```
 
-Expected: locale contracts are source-equivalent, root navigation works, and
-Memgraph appears only as explicitly excluded scope if mentioned at all.
+기대값: locale contract가 source-equivalent이고 root navigation이 동작한다.
+Memgraph가 언급된다면 explicitly excluded scope로만 나타난다.
 
-## Task 8: Create Architecture and Sequence Diagrams One at a Time
+## Task 8: Architecture 및 Sequence Diagram을 하나씩 생성
 
 **Complexity:** High. **Depends on:** Task 7 and verified source. **Skills:**
-`bluetape-diagram`. **Write scope:** four canonical assets, README embeds,
-diagram evidence ledger. **Rule:** complete the full one-asset loop before
-editing the second SVG.
+`bluetape-diagram`. **Write scope:** canonical asset 네 개, README embed, diagram evidence ledger.
+**Rule:** 두 번째 SVG를 편집하기 전에 첫 asset의 full loop를 완료한다.
 
-- [ ] **Step 1: Pin diagram sources and references**
+- [ ] **Step 1: diagram source 및 reference 고정**
 
-Read the final source and both example READMEs. Open at original size:
+final source와 두 example README를 읽는다. original size로 연다.
 
 - `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/graph-graph-core-architecture-01.png`;
 - `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/sequence-workflow-sample.png`;
 - `/Users/debop/work/bluetape4k/bluetape-go-workshop/.worktrees/feat-issue-50-graph-abuse-cluster/docs/images/readme-diagrams/audited-order-workflow-outbox-architecture.png`;
 - `/Users/debop/work/bluetape4k/bluetape-go-workshop/.worktrees/feat-issue-50-graph-abuse-cluster/docs/images/readme-diagrams/audited-order-workflow-outbox-sequence.png`.
 
-Record exact reference paths. Architecture answers ownership/responsibility;
-sequence answers time-ordered lifecycle. Use catalog Neo4j/database icon only
-if an exact verified icon exists; otherwise use a text-only Neo4j card.
+exact reference path를 기록한다. Architecture는 ownership/responsibility에 답하고,
+sequence는 time-ordered lifecycle에 답한다. exact verified icon이 있을 때만 catalog Neo4j/database icon을 사용하고,
+그렇지 않으면 text-only Neo4j card를 사용한다.
 
-- [ ] **Step 2: Complete the architecture SVG -> PNG loop**
+- [ ] **Step 2: architecture SVG -> PNG loop 완료**
 
 Create:
 
@@ -695,17 +690,14 @@ docs/images/readme-diagrams/graph-abuse-cluster-architecture.svg
 docs/images/readme-diagrams/graph-abuse-cluster-architecture.png
 ```
 
-Show fixed fixture validation, caller-owned driver plus released adapter,
-atomic reset/seed, Neo4j, two bounded reads, Go analyzer, and JSON report as
-static responsibilities. Use orthogonal rounded connectors, 14x14 primary
-arrowheads, perpendicular ports, corner/marker clearance, no unexplained
-colors, and balanced whitespace.
+fixed fixture validation, caller-owned driver와 released adapter, atomic reset/seed, Neo4j,
+bounded read 두 개, Go analyzer, JSON report를 static responsibility로 보여준다.
+orthogonal rounded connector, 14x14 primary arrowhead, perpendicular port, corner/marker clearance,
+설명 없는 color 없음, balanced whitespace를 사용한다.
 
-Run XML, CairoSVG scale-2 render, connector, geometry with `--fail-diagonal`,
-endpoint, and mixed-corner audits. Require meaningful nonzero card/connector
-counts and failures=0. Open the final PNG at original size and inspect every
-arrowhead direction, bend clearance, line/card intrusion, label, icon, and
-canvas edge after the last coordinate change.
+XML, CairoSVG scale-2 render, connector, `--fail-diagonal` geometry, endpoint, mixed-corner audit를 실행한다.
+의미 있는 nonzero card/connector count와 failures=0을 요구한다. 마지막 coordinate 변경 뒤 final PNG를 original size로 열고
+모든 arrowhead direction, bend clearance, line/card intrusion, label, icon, canvas edge를 검사한다.
 
 ```bash
 ARCH=docs/images/readme-diagrams/graph-abuse-cluster-architecture
@@ -717,7 +709,7 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-end
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-mixed-corner-audit.py" "$ARCH.svg"
 ```
 
-- [ ] **Step 3: Complete the sequence SVG -> PNG loop**
+- [ ] **Step 3: sequence SVG -> PNG loop 완료**
 
 Create:
 
@@ -726,18 +718,15 @@ docs/images/readme-diagrams/graph-abuse-cluster-sequence.svg
 docs/images/readme-diagrams/graph-abuse-cluster-sequence.png
 ```
 
-Participants: CLI, Fixture Validator, `graph/neo4j`, Neo4j, Go Analyzer, JSON
-Output. Number every visible message with the approved 34px pill and 13px
-semantic-color circular badge. Show config validation, connectivity, atomic
-reset/seed, vertex read, edge read, limit validation, analysis, encode, close,
-and output, plus transparent error/cancellation branch frames. Use 16x16
-message arrowheads and 6-12px label-to-line gaps.
+participant는 CLI, Fixture Validator, `graph/neo4j`, Neo4j, Go Analyzer, JSON Output이다.
+approved 34px pill과 13px semantic-color circular badge로 모든 visible message에 번호를 붙인다.
+config validation, connectivity, atomic reset/seed, vertex read, edge read, limit validation,
+analysis, encode, close, output, transparent error/cancellation branch frame을 보여준다.
+16x16 message arrowhead와 6-12px label-to-line gap을 사용한다.
 
-Run the common audits plus `diagram-sequence-style-audit.py`. Require numbered
-label count to match the source-ledger message count, palette/marker parity,
-transparent branch frames, deterministic rerender, and original-size PNG eye
-inspection. Explicitly compare call-number style against the best-practices
-reference rather than older inline-number repo assets.
+common audit와 `diagram-sequence-style-audit.py`를 실행한다. numbered label count는 source-ledger message count와 맞아야 한다.
+palette/marker parity, transparent branch frame, deterministic rerender, original-size PNG eye inspection을 요구한다.
+call-number style은 오래된 inline-number repo asset이 아니라 best-practices reference와 명시적으로 비교한다.
 
 ```bash
 SEQ=docs/images/readme-diagrams/graph-abuse-cluster-sequence
@@ -750,11 +739,10 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-mix
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-sequence-style-audit.py" "$SEQ.svg"
 ```
 
-- [ ] **Step 4: Prove deterministic rendering and README exposure**
+- [ ] **Step 4: deterministic rendering 및 README exposure 증명**
 
-For each asset rerender to `/tmp`, require `cmp` exit 0, record dimensions and
-SHA-256, embed the PNG in both locale READMEs, and verify canonical SVG/PNG
-paths. Run:
+각 asset을 `/tmp`에 rerender하고 `cmp` exit 0을 요구한다. dimension과 SHA-256을 기록하고,
+PNG를 두 locale README에 embed하며 canonical SVG/PNG path를 검증한다. 실행한다.
 
 ```bash
 ARCH=docs/images/readme-diagrams/graph-abuse-cluster-architecture
@@ -777,7 +765,7 @@ git diff --check -- \
   examples/graph-abuse-cluster/README.ko.md
 ```
 
-- [ ] **Step 5: Commit diagrams**
+- [ ] **Step 5: diagram commit**
 
 ```bash
 git add docs/images/readme-diagrams/graph-abuse-cluster-* examples/graph-abuse-cluster/README.md examples/graph-abuse-cluster/README.ko.md
