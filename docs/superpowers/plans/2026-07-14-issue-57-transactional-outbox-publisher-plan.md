@@ -261,14 +261,14 @@ go test -race -count=1 ./examples/transactional-outbox-publisher/internal/ordero
 기대값: exact result/status/attempt count가 PASS하고 shutdown이 join되며 race가 clean하다.
 workshop code에서 relay/store behavior를 재구현하지 않는다.
 
-## Task 4: Integrate the official Redis Streams publisher
+## Task 4: official Redis Streams publisher 통합
 
-**Complexity:** High. **Depends on:** Tasks 2-3. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `integration_test.go` only unless a source-backed application gap appears.
+**Complexity:** High. **Depends on:** Tasks 2-3. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** source-backed application gap이 드러나지 않는 한 `integration_test.go`만 포함한다.
 
-- [x] **Step 1: Write one sequential dual-container test**
+- [x] **Step 1: sequential dual-container test 하나 작성**
 
-Start PostgreSQL then Redis with released fixtures under one 120-second context.
-Open/ping both clients and register cleanup. Do not use `t.Parallel`.
+120-second context 하나 아래에서 released fixture로 PostgreSQL을 먼저 시작한 뒤 Redis를 시작한다.
+두 client를 open/ping하고 cleanup을 등록한다. `t.Parallel`은 사용하지 않는다.
 
 ```go
 postgresURL := postgrestestcontainer.Start(ctx, t)
@@ -279,43 +279,37 @@ if err := db.PingContext(ctx); err != nil { t.Fatal(err) }
 if err := client.Ping(ctx).Err(); err != nil { t.Fatal(err) }
 ```
 
-Place one order and construct only `redisstreams.New`, then one
-`Relay.RunOnce` with claim limit 1.
+order 하나를 place하고 `redisstreams.New`만 construct한 뒤 claim limit 1로 `Relay.RunOnce`를 한 번 실행한다.
 
-- [x] **Step 2: Verify every documented Redis field**
+- [x] **Step 2: documented Redis field 전체 검증**
 
-Read at most two entries using `XRangeN(ctx, stream, "-", "+", 2)`. Require
-exactly one message and exact values for `record_id`, `status`,
-`aggregate_type`, `aggregate_id`, `revision`, `event_id`, `idempotency_key`,
-`event_type`, `occurred_at`, `recorded_at`, `schema_version`, `attempts`, and
-`entry_json`. Decode `entry_json` with `audit.DecodeEntryJSON` and require scalar
-parity. Query PostgreSQL for `published` and attempts 1.
+`XRangeN(ctx, stream, "-", "+", 2)`로 entry를 최대 두 개 읽는다. 정확히 message 하나만 있어야 하며
+`record_id`, `status`, `aggregate_type`, `aggregate_id`, `revision`, `event_id`, `idempotency_key`,
+`event_type`, `occurred_at`, `recorded_at`, `schema_version`, `attempts`, `entry_json` 값이 정확해야 한다.
+`entry_json`은 `audit.DecodeEntryJSON`으로 decode하고 scalar parity를 요구한다. PostgreSQL에서는 `published`와 attempts 1을 query한다.
 
-- [x] **Step 3: Run integration and race sequentially**
+- [x] **Step 3: integration 및 race를 순차 실행**
 
 ```bash
 go test -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run '^TestRedisStreamsIntegration$'
 go test -race -count=1 ./examples/transactional-outbox-publisher/internal/orderoutbox -run '^TestRedisStreamsIntegration$'
 ```
 
-Expected: both PASS with command readiness. A first-fail/retry-pass result is
-diagnosed, not dismissed as container noise.
+기대값: command readiness와 함께 두 명령이 모두 PASS한다.
+first-fail/retry-pass 결과는 container noise로 넘기지 말고 진단한다.
 
-## Task 5: Build the bounded runnable command
+## Task 5: bounded runnable command 작성
 
-**Complexity:** High. **Depends on:** Task 4. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `main_test.go`, then `main.go`.
+**Complexity:** High. **Depends on:** Task 4. **Pattern skills:** `bluetape-go-patterns`, `test-driven-development`. **Write scope:** `main_test.go`, 그다음 `main.go`.
 
-- [x] **Step 1: Write configuration and output tests**
+- [x] **Step 1: configuration 및 output test 작성**
 
-Define unexported `appConfig`, `loadConfig(getenv, now)`, `openDependencies`,
-`dependencies.Close`, `execute(ctx, db, redisClient, config, output)`, and
-`run(ctx, config, output)` boundaries. Use a
-map-backed environment reader. Prove missing endpoints name only the variable,
-IDs use 1..128-rune rules, `REDIS_STREAM` defaults through the provider or is
-valid UTF-8 at most 256 bytes, `ORDER_CREATED_AT` is RFC3339 or the injected
-clock, config errors do not echo values, and JSON is newline-terminated. One
-sequential fixture-backed `TestDependenciesClose` proves both clients are ready
-before close and reject Ping after the owned close.
+unexported `appConfig`, `loadConfig(getenv, now)`, `openDependencies`, `dependencies.Close`,
+`execute(ctx, db, redisClient, config, output)`, `run(ctx, config, output)` boundary를 정의한다.
+map-backed environment reader를 사용한다. missing endpoint는 variable name만 노출하고, ID는 1..128-rune rule을 따르며,
+`REDIS_STREAM`은 provider default를 사용하거나 최대 256 byte의 valid UTF-8이어야 한다. `ORDER_CREATED_AT`은 RFC3339이거나 injected clock을 사용해야 한다.
+config error는 값을 echo하지 않고 JSON은 newline-terminated여야 한다. fixture-backed sequential `TestDependenciesClose` 하나로
+두 client가 close 전에 ready이고 owned close 뒤 Ping을 거부하는지 증명한다.
 
 ```go
 type runOutput struct {
@@ -327,37 +321,32 @@ type runOutput struct {
 }
 ```
 
-- [x] **Step 2: Run RED**
+- [x] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/transactional-outbox-publisher -run 'Test(LoadConfig|Execute|Run)'`
+실행: `go test -count=1 ./examples/transactional-outbox-publisher -run 'Test(LoadConfig|Execute|Run)'`
 
-Expected: FAIL because main-package runtime boundaries do not exist.
+기대값: main-package runtime boundary가 없으므로 FAIL한다.
 
-- [x] **Step 3: Implement client ownership, readiness, and batch execution**
+- [x] **Step 3: client ownership, readiness, batch execution 구현**
 
-`run` opens pgx and go-redis clients, immediately defers close, uses bounded
-child contexts for both Pings, and joins close errors with the return error.
-`main` uses `signal.NotifyContext`, prints one stage-wrapped error, and exits
-nonzero without interpolating endpoint values.
+`run`은 pgx 및 go-redis client를 열고 즉시 close를 defer하며, 두 Ping 모두에 bounded child context를 사용하고,
+close error를 return error와 join한다. `main`은 `signal.NotifyContext`를 사용하고 stage-wrapped error 하나를 출력한 뒤,
+endpoint 값을 보간하지 않고 nonzero로 종료한다.
 
-`dependencies.Close` invokes both close functions exactly once and returns
-`errors.Join(postgresErr, redisErr)`. `run` installs the defer immediately after
-successful construction. A partial open failure closes the already-created
-client before returning.
+`dependencies.Close`는 두 close function을 정확히 한 번씩 호출하고 `errors.Join(postgresErr, redisErr)`를 반환한다.
+`run`은 성공적으로 construct한 직후 defer를 설치한다. partial open failure는 return 전에 이미 만든 client를 close한다.
 
-`execute` constructs the example-table store and service, creates schema,
-places the order, constructs `redisstreams.New`, and runs one claim. Accept
-success only for:
+`execute`는 example-table store와 service를 construct하고 schema를 만든 뒤 order를 place하고,
+`redisstreams.New`를 construct한 다음 claim을 한 번 실행한다. success는 다음 값일 때만 accept한다.
 
 ```go
 result == (sqloutbox.RelayResult{Claimed: 1, Published: 1})
 ```
 
-Read one candidate with `XRevRangeN`, require its `event_id` and
-`idempotency_key` equal the command ID, then render JSON. Never call `XAdd` from
-workshop code.
+`XRevRangeN`으로 candidate 하나를 읽고 `event_id`와 `idempotency_key`가 command ID와 같은지 요구한 뒤 JSON을 render한다.
+workshop code에서 `XAdd`는 절대 호출하지 않는다.
 
-- [x] **Step 4: Run GREEN and focused race**
+- [x] **Step 4: GREEN 및 focused race 실행**
 
 ```bash
 gofmt -w examples/transactional-outbox-publisher/*.go
@@ -365,27 +354,24 @@ go test -count=1 ./examples/transactional-outbox-publisher/...
 go test -race -count=1 ./examples/transactional-outbox-publisher/...
 ```
 
-Expected: PASS. The final validation pass also runs the documented command
-against disposable PostgreSQL and Redis endpoints and requires JSON exit 0.
+기대값: PASS한다. final validation pass는 disposable PostgreSQL 및 Redis endpoint를 대상으로 documented command도 실행하고 JSON exit 0을 요구한다.
 
-## Task 6: Create and visually verify the architecture diagram
+## Task 6: architecture diagram 생성 및 시각 검증
 
-**Complexity:** High. **Depends on:** Tasks 2-5. **Pattern skill:** `bluetape-diagram` with `common.md` and `architecture.md`. **Write scope:** architecture SVG/PNG only.
+**Complexity:** High. **Depends on:** Tasks 2-5. **Pattern skill:** `common.md`와 `architecture.md`를 포함한 `bluetape-diagram`. **Write scope:** architecture SVG/PNG만 포함한다.
 
-- [x] **Step 1: Open source and full-size references**
+- [x] **Step 1: source 및 full-size reference 열기**
 
-Use best-practice reference
+best-practice reference
 `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/external-redis-fast-architecture.png`
-and repo-local reference
+와 repo-local reference
 `docs/images/readme-diagrams/sql-transaction-boundary-architecture.png`.
-Record both paths. The reader question is who owns transaction, clients, relay,
-durable rows, and Redis transport.
+두 path를 모두 기록한다. reader question은 transaction, client, relay, durable row, Redis transport를 누가 소유하는지다.
 
-- [x] **Step 2: Draw the static ownership asset**
+- [x] **Step 2: static ownership asset 그리기**
 
-Create `transactional-outbox-publisher-architecture.svg` with Architects
-Daughter/Comic Mono, catalog database/Redis icons, and separate application,
-PostgreSQL, and Redis regions. Show:
+Architects Daughter/Comic Mono, catalog database/Redis icon, 분리된 application/PostgreSQL/Redis region으로
+`transactional-outbox-publisher-architecture.svg`를 만든다. 다음을 표시한다.
 
 ```text
 Command -> Service -> one SQL transaction -> Order row + Outbox row
@@ -394,11 +380,11 @@ Relay -> official redisstreams Publisher -> Redis Stream
 Application -> caller-owned PostgreSQL/Redis clients and shutdown
 ```
 
-Prefer straight horizontal links. Rounded orthogonal bends use separate ports,
-at least `max(8px, rx/2)` corner clearance, and a terminal segment long enough
-for a 14x14 primary arrowhead. No connector may hug or enter a card.
+straight horizontal link를 우선한다. rounded orthogonal bend는 separate port,
+최소 `max(8px, rx/2)` corner clearance, 14x14 primary arrowhead를 수용할 terminal segment를 사용한다.
+connector가 card에 붙거나 card 안으로 들어가면 안 된다.
 
-- [x] **Step 3: Parse, render, audit, then inspect at full size**
+- [x] **Step 3: parse, render, audit 후 full size로 inspect**
 
 ```bash
 xmllint --noout docs/images/readme-diagrams/transactional-outbox-publisher-architecture.svg
@@ -409,47 +395,41 @@ python3 "$HOME/.codex/skills/bluetape-diagram/scripts/diagram-endpoint-audit.py"
 python3 "$HOME/.codex/skills/bluetape-diagram/scripts/diagram-mixed-corner-audit.py" docs/images/readme-diagrams/transactional-outbox-publisher-architecture.svg
 ```
 
-Expected: meaningful nonzero connector/card/path counts and zero diagonal,
-endpoint, intrusion, crossing, and mixed-corner failures. After the final
-coordinate change, open the PNG at full size and inspect arrow direction,
-size/color, bend clearance, labels, icons, margins, and bottom whitespace. PNG
-evidence overrides scripts.
+기대값: meaningful nonzero connector/card/path count가 있고 diagonal, endpoint, intrusion, crossing, mixed-corner failure가 0이다.
+final coordinate change 뒤 PNG를 full size로 열어 arrow direction, size/color, bend clearance, label, icon, margin, bottom whitespace를 inspect한다.
+PNG evidence가 script보다 우선한다.
 
-## Task 7: Create and visually verify the retry sequence diagram
+## Task 7: retry sequence diagram 생성 및 시각 검증
 
-**Complexity:** High. **Depends on:** Task 6 and final relay behavior. **Pattern skill:** `bluetape-diagram` with `common.md` and `sequence.md`. **Write scope:** sequence SVG/PNG only.
+**Complexity:** High. **Depends on:** Task 6 및 final relay behavior. **Pattern skill:** `common.md`와 `sequence.md`를 포함한 `bluetape-diagram`. **Write scope:** sequence SVG/PNG만 포함한다.
 
-- [x] **Step 1: Open both sequence references at full size**
+- [x] **Step 1: 두 sequence reference를 full size로 열기**
 
-Use best-practice reference
+best-practice reference
 `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/leader-core-sequence-03.png`
-and repo-local reference
+와 repo-local reference
 `docs/images/readme-diagrams/sql-transaction-boundary-sequence.png`.
-The reader question is how one stable event is attempted twice while the SQL
-commit remains atomic.
+reader question은 SQL commit이 atomic하게 유지되는 동안 stable event 하나가 어떻게 두 번 attempt되는지다.
 
-- [x] **Step 2: Draw the chronological asset**
+- [x] **Step 2: chronological asset 그리기**
 
-Participants are Application, Service, PostgreSQL, Relay, Redis Publisher, and
-Redis Stream. Add lifelines, activation bars, visible numbered pills, and
-transparent frames for order/outbox commit, claim attempt 1, ambiguous/failing
-publish plus retry scheduling, attempt 2 with unchanged identity, append plus
-published completion, and alternate caller cancellation without retry/dead
-letter. Use explicit per-color 16x16 arrowheads and continuous message lines.
+participant는 Application, Service, PostgreSQL, Relay, Redis Publisher, Redis Stream이다.
+lifeline, activation bar, visible numbered pill, transparent frame을 추가해 order/outbox commit, claim attempt 1,
+ambiguous/failing publish와 retry scheduling, unchanged identity를 가진 attempt 2, append와 published completion,
+retry/dead-letter 없는 alternate caller cancellation을 보여준다. explicit per-color 16x16 arrowhead와 continuous message line을 사용한다.
 
-- [x] **Step 3: Run common and sequence-specific proof**
+- [x] **Step 3: common 및 sequence-specific proof 실행**
 
-Run all Task 6 common commands against the sequence asset plus:
+sequence asset에 Task 6의 common command 전체를 실행하고 다음 명령을 추가한다.
 
 ```bash
 python3 "$HOME/.codex/skills/bluetape-diagram/scripts/diagram-sequence-style-audit.py" docs/images/readme-diagrams/transactional-outbox-publisher-sequence.svg
 ```
 
-Expected: common failures zero; visible ordered labels, participant/lifeline/
-activation counts, transparent frames, and marker color parity. Open the final
-PNG at full size after the last coordinate change and inspect every arrowhead
-direction, bend clearance, label/line overlap, frame padding, and cancellation
-branch. SVG-only or contact-sheet evidence is invalid.
+기대값: common failure가 0이고 ordered label, participant/lifeline/activation count, transparent frame,
+marker color parity가 visible해야 한다. 마지막 coordinate change 뒤 final PNG를 full size로 열어 모든 arrowhead direction,
+bend clearance, label/line overlap, frame padding, cancellation branch를 inspect한다.
+SVG-only 또는 contact-sheet evidence는 invalid하다.
 
 ## Task 8: Write bilingual READMEs and root navigation
 
