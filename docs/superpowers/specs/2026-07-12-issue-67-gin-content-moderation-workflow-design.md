@@ -253,89 +253,85 @@ cancellation이다. Canceled 또는 expired operation은 record를 만들 수 �
 
 ## Domain Model
 
-Each immutable returned `Record` contains:
+반환되는 각 불변 `Record`는 다음 값을 포함한다.
 
-- canonical content ID, original content, display text, and copied metadata;
-- `allowed`, `masked`, or `manual-review` outcome;
-- detected language and ISO codes, top confidence, confidence list, detector
-  sections, script hints, and ordered review reasons;
-- moderation findings with original UTF-8 byte spans and matched terms;
-- Japanese Search-mode terms with token text, normalized term, and original
-  UTF-8 byte spans when the Japanese route is selected; and
-- one UTC creation timestamp supplied by an injected clock.
+- 정규화된 content ID, 원문 content, 표시용 text, 복사된 metadata
+- `allowed`, `masked`, `manual-review` 중 하나의 outcome
+- 감지된 언어와 ISO 코드, 최상위 confidence, confidence 목록, detector
+  section, script hint, 정렬된 review reason
+- 원본 UTF-8 byte span과 일치한 term을 포함한 moderation finding
+- 일본어 경로가 선택된 경우 token text, 정규화된 term, 원본 UTF-8 byte span을
+  담은 Japanese Search-mode term
+- 주입된 clock이 제공한 UTC 생성 timestamp
 
-All maps and slices returned by create, get, and search are deep copies. Store
-entries are never exposed for caller mutation.
+create, get, search가 반환하는 모든 map과 slice는 깊은 복사본이다. 저장소
+entry는 호출자가 변경할 수 있도록 노출되지 않는다.
 
 ## Workflow and Policy
 
-`Create` performs these steps in order:
+`Create`는 다음 단계를 순서대로 수행한다.
 
-1. Check context and validate/canonicalize the request without rewriting text.
-2. Collect script hints and call the shared detector for top language,
-   confidences, and multilingual sections.
-3. Apply the Issue #119 policy: confident non-mixed English or Korean selects
-   moderation; confident non-mixed Japanese with Kana selects Japanese
-   preparation plus moderation; Chinese, Han-only ambiguity, unknown, short,
-   low-confidence, or mixed input selects manual review.
-4. For a supported route, run the moderation matcher. A match creates a masked
-   display text and the `masked` outcome; no match preserves content as display
-   text and creates `allowed`.
-5. Prepare the searchable term set: project Search-mode terms and byte spans
-   from the shared Japanese tokenizer for the Japanese route, or normalized
-   Unicode-word terms from bluetape-go's simple tokenizer for English/Korean.
-   Tokenization failure returns an error and no record.
-6. Build the unstamped candidate, check context, acquire the write lock, check
-   context again, reject duplicate content ID, enforce store capacity, stamp it
-   with the non-blocking injected clock, check context once more, and commit the
-   immutable value atomically. No detector, tokenizer, or matcher call occurs
-   while holding the store lock. The clock is serialized by that lock and is
-   never called for duplicate or over-capacity requests.
+1. context를 확인하고 text를 다시 쓰지 않은 채 request를 검증하고 정규화한다.
+2. script hint를 수집한 뒤 공유 detector를 호출해 최상위 언어, confidence,
+   다국어 section을 얻는다.
+3. Issue #119 정책을 적용한다. 확신도 높은 비혼합 English 또는 Korean 입력은
+   moderation을 선택한다. Kana가 포함된 확신도 높은 비혼합 Japanese 입력은
+   Japanese preparation과 moderation을 선택한다. Chinese, Han-only 모호성,
+   unknown, 짧은 입력, 낮은 confidence, 혼합 입력은 manual review를 선택한다.
+4. 지원되는 경로에서는 moderation matcher를 실행한다. 일치 항목이 있으면 마스킹된
+   표시 text와 `masked` outcome을 만든다. 일치 항목이 없으면 content를 표시
+   text로 유지하고 `allowed`를 만든다.
+5. 검색 가능한 term 집합을 준비한다. Japanese 경로에서는 공유 Japanese tokenizer가
+   만든 project Search-mode term과 byte span을 사용하고, English/Korean에서는
+   bluetape-go simple tokenizer가 만든 정규화된 Unicode-word term을 사용한다.
+   tokenization 실패는 오류를 반환하며 record를 만들지 않는다.
+6. timestamp가 없는 후보 값을 만들고, context를 확인한 뒤 write lock을 획득한다.
+   lock 안에서 context를 다시 확인하고, 중복 content ID를 거부하며, 저장소 capacity를
+   강제한다. 이후 non-blocking 주입 clock으로 timestamp를 찍고, context를 한 번 더
+   확인한 뒤 불변 값을 원자적으로 commit한다. 저장소 lock을 잡고 있는 동안 detector,
+   tokenizer, matcher 호출은 발생하지 않는다. clock 호출은 해당 lock으로 직렬화되며,
+   중복 또는 capacity 초과 request에는 호출되지 않는다.
 
-Manual-review is a successful stored outcome, not an HTTP or service error. Its
-display text is a fixed non-sensitive placeholder rather than the unreviewed
-original. It retains evidence for the inspectable by-ID endpoint but is
-excluded from search.
+Manual-review는 HTTP 또는 service 오류가 아니라 성공적으로 저장된 outcome이다.
+표시 text는 검토되지 않은 원문 대신 고정된 비민감 placeholder를 사용한다. by-ID
+endpoint에서 검사 가능한 evidence는 유지하지만 search에서는 제외한다.
 
-The fixed teaching moderation policy compiles the Issue #53 entries `bad`,
-`bad wolf`, `scam`, `욕설`, and `무료 돈` with their existing IDs, severities,
-and category metadata. It uses `IgnoreCase`, NFC normalization,
-`BoundaryUnicodeWord`, minimum middle severity, and the `*` mask, then calls
-`BlockwordDictionary.Process` so match selection and multibyte masking remain
-library-owned. This integration deliberately omits Issue #53's application-
-specific allowlist subtraction instead of copying that example algorithm.
+고정된 교육용 moderation 정책은 Issue #53 entry인 `bad`, `bad wolf`, `scam`,
+`욕설`, `무료 돈`을 기존 ID, severity, category metadata와 함께 compile한다.
+이 정책은 `IgnoreCase`, NFC normalization, `BoundaryUnicodeWord`, 최소 middle
+severity, `*` mask를 사용한 뒤 `BlockwordDictionary.Process`를 호출한다. 따라서
+match 선택과 multibyte masking은 계속 library가 소유한다. 이 통합은 예제 algorithm을
+복사하지 않기 위해 Issue #53의 application-specific allowlist subtraction을 의도적으로
+포함하지 않는다.
 
 ## Search Semantics
 
-The service prepares the query once outside the read lock. Japanese preparation
-is selected from query script evidence, not from each record. Queries with Kana
-use the Japanese tokenizer; other queries use bluetape-go's simple tokenizer
-with the same normalization options used at record creation. Empty prepared
-terms are invalid. The example does not implement a second Unicode scanner or
-normalization algorithm.
+service는 read lock 밖에서 query를 한 번 준비한다. Japanese preparation은 각 record가
+아니라 query의 script evidence로 선택한다. Kana가 있는 query는 Japanese tokenizer를
+사용하고, 그 밖의 query는 record 생성 때와 같은 normalization option으로
+bluetape-go simple tokenizer를 사용한다. 준비된 term이 비어 있으면 유효하지 않다.
+이 예제는 두 번째 Unicode scanner나 normalization algorithm을 구현하지 않는다.
 
-Under a short read lock, the service snapshots pointers to immutable stored
-records and releases the lock. It then checks context at least every 32 records,
-selects accepted records whose metadata matches and whose prepared-term set
-contains every distinct query term, sorts matches by content ID, and copies at
-most the effective limit into search projections. The 1,000-record capacity
-bounds snapshot allocation, scan work, and sorting. The implementation does not
-build a durable or inverted index; bounded linear scanning is explicit and
-appropriate to the lifecycle lesson.
+service는 짧은 read lock 안에서 불변 저장 record pointer의 snapshot을 만든 뒤 lock을
+해제한다. 그런 다음 적어도 32개 record마다 context를 확인하고, metadata가 일치하며
+prepared-term set이 모든 고유 query term을 포함하는 accepted record를 선택한다. match는
+content ID로 정렬하고, effective limit까지만 search projection으로 복사한다. 1,000개
+record capacity는 snapshot allocation, scan 작업, sorting 비용을 제한한다. 구현은
+영속 index나 inverted index를 만들지 않는다. 제한된 선형 scan은 명시적이며 lifecycle
+lesson에 적합하다.
 
-Term preparation is one shared helper used by record creation and search. For
-English/Korean it calls `textsearch.NewSimpleTokenizer()` with
-`TokenizeOptions{Normalize: textsearch.NormalizeNFC}` and omitted whitespace,
-keeps `POSWord` and `POSNumber`, applies `strings.ToLower` to each normalized
-term, drops empty values, and deduplicates while preserving first occurrence.
-For Japanese it uses the Issue #118 projection: Search-mode tokens, noun/verb
-selection, NFC-normalized base form when present and token text otherwise, and
-the same stable deduplication. Matching treats the resulting slices as sets;
-stable order exists for evidence and deterministic JSON only.
+term preparation은 record 생성과 search가 함께 사용하는 하나의 helper다. English/Korean의
+경우 `TokenizeOptions{Normalize: textsearch.NormalizeNFC}`와 생략된 whitespace option으로
+`textsearch.NewSimpleTokenizer()`를 호출한다. `POSWord`와 `POSNumber`만 유지하고, 각
+정규화 term에 `strings.ToLower`를 적용하며, 빈 값을 버리고 첫 출현 순서를 보존해
+deduplication한다. Japanese의 경우 Issue #118 projection을 사용한다. 즉 Search-mode
+token, noun/verb selection, 값이 있을 때의 NFC-normalized base form과 그 밖의 token
+text, 동일한 stable deduplication을 사용한다. matching은 결과 slice를 set처럼 다룬다.
+stable order는 evidence와 deterministic JSON을 위한 것이다.
 
 ## Go API Shape
 
-The internal package uses these constructor-only contracts:
+internal package는 다음 constructor-only contract를 사용한다.
 
 ```go
 func DefaultConfig() AppConfig
@@ -357,33 +353,31 @@ func NewHTTPServer(address string, handler http.Handler) *http.Server
 func RunServer(ctx context.Context, server HTTPServer, logger *log.Logger) error
 ```
 
-`CreateRequest` contains content ID, content, and metadata. `SearchRequest`
-contains query, metadata, limit, and the optional exclusive content-ID cursor.
-`SearchResponse` contains a non-nil hit slice, `Truncated`, and the next cursor.
-The handler-facing `Workflow` is the only production interface;
-detector/tokenizer/matcher interfaces are not invented. `HTTPServer` is a narrow
-lifecycle test seam with `ListenAndServe`, `Shutdown`, and `Close`. `main`
-supplies a `signal.NotifyContext` for `SIGINT`/`SIGTERM` to `RunServer`.
+`CreateRequest`는 content ID, content, metadata를 포함한다. `SearchRequest`는
+query, metadata, limit, 선택적인 exclusive content-ID cursor를 포함한다.
+`SearchResponse`는 nil이 아닌 hit slice, `Truncated`, next cursor를 포함한다.
+handler가 보는 `Workflow`가 유일한 production interface다. detector/tokenizer/matcher
+interface는 새로 만들지 않는다. `HTTPServer`는 `ListenAndServe`, `Shutdown`, `Close`를
+갖는 좁은 lifecycle test seam이다. `main`은 `SIGINT`/`SIGTERM`용
+`signal.NotifyContext`를 `RunServer`에 제공한다.
 
-The default clock is `time.Now`; a nil injected clock, nil workflow, nil logger,
-zero-value service, or invalid configuration fails closed rather than
-panicking. Each method accepts the request context from Gin unchanged; the
-adapter adds its timeout before calling the workflow. `context.Canceled` and
-`context.DeadlineExceeded` remain discoverable through `errors.Is` across every
-service boundary.
+기본 clock은 `time.Now`다. nil 주입 clock, nil workflow, nil logger, zero-value
+service, 유효하지 않은 configuration은 panic이 아니라 fail closed로 처리한다. 각 method는
+Gin에서 받은 request context를 그대로 받아들이며, adapter가 workflow 호출 전에 timeout을
+추가한다. `context.Canceled`와 `context.DeadlineExceeded`는 모든 service boundary에서
+`errors.Is`로 계속 식별 가능해야 한다.
 
 ## Errors
 
-The package defines `ErrInvalidConfig`, `ErrInvalidRequest`,
-`ErrDuplicateContentID`, `ErrRecordNotFound`, `ErrStoreCapacity`, and
-`ErrWorkflow` sentinels. Input field details use a private typed error that
-unwraps to `ErrInvalidRequest`; clients never receive those details. Unexpected
-detector/tokenizer failures wrap `ErrWorkflow` and preserve the library cause
-through multiple `%w` operands. Callers use `errors.Is`; no exported concrete
-error type is required. Context cancellation and deadline errors take
-precedence over `ErrWorkflow` whenever observed.
+package는 `ErrInvalidConfig`, `ErrInvalidRequest`, `ErrDuplicateContentID`,
+`ErrRecordNotFound`, `ErrStoreCapacity`, `ErrWorkflow` sentinel을 정의한다.
+입력 field detail은 `ErrInvalidRequest`로 unwrap되는 private typed error를 사용한다.
+client는 이 detail을 받지 않는다. 예기치 않은 detector/tokenizer 실패는 `ErrWorkflow`를
+wrap하고 여러 `%w` operand를 통해 library cause를 보존한다. caller는 `errors.Is`를
+사용하며, export된 concrete error type은 필요하지 않다. context cancellation과 deadline
+오류가 관찰되면 항상 `ErrWorkflow`보다 우선한다.
 
-The Gin adapter always returns:
+Gin adapter는 항상 다음 형태를 반환한다.
 
 ```json
 {
@@ -394,35 +388,33 @@ The Gin adapter always returns:
 }
 ```
 
-The stable mapping is:
+안정적인 mapping은 다음과 같다.
 
 | Condition | HTTP | Code |
 |---|---:|---|
-| malformed/unknown/trailing JSON or invalid fields | 400 | `invalid_request` |
-| missing or unsupported JSON media type | 415 | `unsupported_media_type` |
-| unsupported request content encoding | 415 | `unsupported_content_encoding` |
-| request body over 64 KiB | 413 | `request_too_large` |
-| handler deadline exceeded | 408 | `request_timeout` |
-| duplicate content ID | 409 | `duplicate_content_id` |
-| missing record | 404 | `record_not_found` |
-| teaching store at capacity | 503 | `store_capacity_reached` |
-| unexpected detector/tokenizer/service failure | 500 | `internal_error` |
+| malformed/unknown/trailing JSON 또는 유효하지 않은 field | 400 | `invalid_request` |
+| 누락되었거나 지원하지 않는 JSON media type | 415 | `unsupported_media_type` |
+| 지원하지 않는 request content encoding | 415 | `unsupported_content_encoding` |
+| request body가 64 KiB 초과 | 413 | `request_too_large` |
+| handler deadline 초과 | 408 | `request_timeout` |
+| 중복 content ID | 409 | `duplicate_content_id` |
+| 누락된 record | 404 | `record_not_found` |
+| 교육용 store capacity 도달 | 503 | `store_capacity_reached` |
+| 예기치 않은 detector/tokenizer/service 실패 | 500 | `internal_error` |
 
-Responses never expose wrapped causes, input content, findings, or stack
-details. Method/path misses use Gin's normal 404/405 behavior and are outside
-the domain error envelope.
+response는 wrapped cause, 입력 content, finding, stack detail을 절대 노출하지 않는다.
+method/path miss는 Gin의 일반 404/405 동작을 사용하며 domain error envelope 밖에 있다.
 
 ## Diagnostics
 
-The example writes structured, single-line operational events to the standard
-logger on stderr. Events cover startup, shutdown start/completion/failure,
-forced close, internal workflow failure, and capacity rejection. Request events
-may contain only the route pattern, HTTP method, status, stable error code, and
-elapsed duration. Startup events may contain the configured listen address and
-timeout values. Logs never contain content IDs, content/display text, metadata
-keys or values, findings, tokens, language sections, request bodies, or wrapped
-request-processing causes. Tests inject a logger and assert that sentinel
-secrets do not appear in internal-error and capacity paths.
+예제는 구조화된 single-line operational event를 stderr의 표준 logger에 기록한다. event는
+startup, shutdown 시작/완료/실패, forced close, internal workflow failure, capacity
+rejection을 포함한다. request event에는 route pattern, HTTP method, status, 안정적인
+error code, elapsed duration만 포함할 수 있다. startup event에는 설정된 listen address와
+timeout 값을 포함할 수 있다. log에는 content ID, content/display text, metadata key 또는
+value, finding, token, language section, request body, wrapped request-processing cause가
+절대 포함되지 않는다. test는 logger를 주입하고 internal-error 및 capacity path에서 sentinel
+secret이 나타나지 않는지 assert한다.
 
 ## Release and Rollback
 
