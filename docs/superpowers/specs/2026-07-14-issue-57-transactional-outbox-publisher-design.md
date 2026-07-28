@@ -1,105 +1,85 @@
-# Issue #57 Transactional Outbox Publisher Design
+# Issue #57 Transactional Outbox Publisher 설계
 
 ## Status
 
-User-approved design for Issue #57, planned against bluetape-go v0.18.0.
-The Type A specification review converged at P0=0/P1=0 on 2026-07-14.
+Issue #57에 대한 user-approved design이며 bluetape-go v0.18.0 기준으로 계획되었다. Type A
+specification review는 2026-07-14에 P0=0/P1=0으로 수렴했다.
 
 ## Goal
 
-Add a runnable, application-shaped order example that commits an order row and
-its audit outbox entry in one PostgreSQL transaction, then publishes the claimed
-record through the released Redis Streams adapter. The example must make
-at-least-once delivery, stable event identity, bounded retry, cancellation,
-shutdown, duplicate handling, and operator replay boundaries visible without
-claiming exactly-once behavior.
+하나의 PostgreSQL transaction에서 order row와 audit outbox entry를 commit한 뒤, claimed record를
+released Redis Streams adapter로 publish하는 실행 가능한 application-shaped order example을 추가한다.
+이 예제는 exactly-once behavior를 주장하지 않으면서 at-least-once delivery, stable event identity,
+bounded retry, cancellation, shutdown, duplicate handling, operator replay boundary를 보이게 해야 한다.
 
 ## Context and Current Evidence
 
-Issue #57 is the third dependency in milestone track #35 after the completed
-audit history (#56) and Gin audit query (#58) examples. It precedes the broader
-audited order workflow integration (#68). The current stable workshop dependency
-is bluetape-go v0.18.0, release commit
-`26fe037eb4146f35328c9a549a3adb1207758f50`.
+Issue #57은 완료된 audit history (#56)와 Gin audit query (#58) example 뒤에 오는 milestone track
+#35의 세 번째 dependency다. 더 넓은 audited order workflow integration (#68)보다 앞선다. 현재 stable
+workshop dependency는 bluetape-go v0.18.0이며 release commit은
+`26fe037eb4146f35328c9a549a3adb1207758f50`이다.
 
-The released `audit/sqloutbox` package provides a caller-session `Store`,
-`CreateSchema`, `Enqueue`, claim/retry/completion transitions, and `Relay` with
-`RunOnce` and continuous `Run`. `Enqueue` accepts `sqlkit.Execer`, so the
-application can pass the same `*sql.Tx` that writes the order. `Relay` documents
-at-least-once delivery and preserves caller cancellation without converting it
-to retry or dead-letter state.
+released `audit/sqloutbox` package는 caller-session `Store`, `CreateSchema`, `Enqueue`,
+claim/retry/completion transition, `RunOnce`와 continuous `Run`을 가진 `Relay`를 제공한다.
+`Enqueue`는 `sqlkit.Execer`를 받으므로 application은 order를 write하는 동일한 `*sql.Tx`를 넘길 수
+있다. `Relay`는 at-least-once delivery를 문서화하고 caller cancellation을 retry 또는 dead-letter state로
+변환하지 않고 보존한다.
 
-The released `audit/sqloutbox/sqloutboxtest` package provides a concurrent-safe
-`RecordingPublisher`, deterministic per-event failure injection, and
-`PublisherFunc`. The released `audit/sqloutbox/redisstreams` package accepts a
-caller-owned Redis appender and writes the documented stable envelope with one
-`XADD` per publish attempt. Its README explicitly warns that an accepted Redis
-write followed by an ambiguous client failure can produce a duplicate entry on
-retry.
+released `audit/sqloutbox/sqloutboxtest` package는 concurrent-safe `RecordingPublisher`,
+deterministic per-event failure injection, `PublisherFunc`를 제공한다. released
+`audit/sqloutbox/redisstreams` package는 caller-owned Redis appender를 받고 publish attempt마다 하나의
+`XADD`로 문서화된 stable envelope를 write한다. README는 accepted Redis write 이후 ambiguous client
+failure가 발생하면 retry에서 duplicate entry가 생길 수 있다고 명시적으로 경고한다.
 
-The existing `sql-transaction-boundary` workshop example is the local source for
-`sqlkit.WithTx` ownership, deterministic SQL behavior, rollback tests, and
-PostgreSQL fixture usage. This example borrows those boundaries but does not
-extend or import its `internal` package. The existing
-`order-pipeline-testcontainers` example proves that the released PostgreSQL and
-Redis fixtures can be started sequentially in one test.
+기존 `sql-transaction-boundary` workshop example은 `sqlkit.WithTx` ownership, deterministic SQL
+behavior, rollback test, PostgreSQL fixture usage의 local source다. 이 예제는 해당 boundary를
+빌리지만 그 `internal` package를 확장하거나 import하지 않는다. 기존 `order-pipeline-testcontainers`
+example은 released PostgreSQL 및 Redis fixture를 하나의 test에서 순차적으로 시작할 수 있음을 증명한다.
 
-GNO evidence for bluetape-go issue #533 and PR #574 confirms that the Redis
-Streams adapter is intentionally narrow: the SQL outbox remains the durable
-source of truth, the Redis client remains caller-owned, retries append duplicate
-stream entries, and consumer idempotency remains outside the provider.
+bluetape-go issue #533 및 PR #574에 대한 GNO evidence는 Redis Streams adapter가 의도적으로 좁다는 점을
+확인한다. SQL outbox는 durable source of truth로 남고, Redis client는 caller-owned로 남으며, retry는
+duplicate stream entry를 append하고, consumer idempotency는 provider 밖에 남는다.
 
 ## Chosen Approach
 
-Create a new `transactional-outbox-publisher` example with three explicit
-boundaries:
+세 explicit boundary를 가진 새 `transactional-outbox-publisher` example을 만든다.
 
-1. `orderoutbox.Service` validates one order command, builds one immutable audit
-   entry, and uses `sqlkit.WithTx` to insert the order and call
-   `Store.Enqueue(ctx, tx, entry)` before commit. It performs no Redis or other
-   network publish while the transaction is open.
-2. A caller-owned `sqloutbox.Relay` claims and publishes committed records after
-   the transaction. Deterministic tests use `RecordingPublisher` and
-   `PublisherFunc`; the runnable and integration path use
-   `redisstreams.New` directly.
-3. `main` owns PostgreSQL and Redis client creation, readiness checks, operation
-   timeouts, relay construction, cancellation, and client closure. A bounded
-   `RunOnce` invocation publishes the sample and lets the command exit cleanly.
-   Continuous `Relay.Run` shutdown is proved separately with a cancellation test
-   because an indefinitely running CLI would obscure the workshop output.
+1. `orderoutbox.Service`는 하나의 order command를 검증하고 하나의 immutable audit entry를 만든다.
+   그런 뒤 `sqlkit.WithTx`로 order를 insert하고 commit 전에 `Store.Enqueue(ctx, tx, entry)`를
+   호출한다. transaction이 열려 있는 동안 Redis 또는 다른 network publish를 수행하지 않는다.
+2. caller-owned `sqloutbox.Relay`는 transaction 이후 committed record를 claim하고 publish한다.
+   deterministic test는 `RecordingPublisher`와 `PublisherFunc`를 사용한다. runnable 및 integration
+   path는 `redisstreams.New`를 직접 사용한다.
+3. `main`은 PostgreSQL 및 Redis client creation, readiness check, operation timeout, relay
+   construction, cancellation, client closure를 소유한다. bounded `RunOnce` invocation은 sample을
+   publish하고 command가 clean하게 exit하도록 한다. indefinitely running CLI는 workshop output을 흐리게
+   하므로 continuous `Relay.Run` shutdown은 cancellation test로 별도 증명한다.
 
-The runnable command creates idempotent schemas, places a caller-selected order,
-runs one relay batch, reads the resulting Redis stream entry for demonstration,
-and prints deterministic-shaped JSON containing the committed order identity,
-relay counts, stream key, and stable event/idempotency fields. The timestamp and
-order identifiers may be supplied through environment variables for repeatable
-documentation; defaults are workshop-safe but a duplicate rerun is reported as
-a conflict rather than silently rewritten.
+runnable command는 idempotent schema를 만들고 caller-selected order를 place하며, 하나의 relay batch를
+실행하고 demonstration을 위해 resulting Redis stream entry를 읽는다. 그리고 committed order identity,
+relay count, stream key, stable event/idempotency field를 포함한 deterministic-shaped JSON을 출력한다.
+timestamp와 order identifier는 repeatable documentation을 위해 environment variable로 제공할 수 있다.
+default는 workshop-safe지만 duplicate rerun은 조용히 rewrite되지 않고 conflict로 보고된다.
 
 ## Alternatives
 
 ### Extend `sql-transaction-boundary`
 
-Adding outbox and Redis behavior to the existing transaction example would
-reuse code, but it would turn a focused commit/rollback lesson into a
-multi-backend delivery application and make its current “outbox comes next”
-boundary false. Rejected; source patterns are borrowed into an independent
-example instead.
+기존 transaction example에 outbox와 Redis behavior를 추가하면 code를 reuse할 수 있다. 하지만 focused
+commit/rollback lesson을 multi-backend delivery application으로 바꾸고 현재의 “outbox comes next”
+boundary를 거짓으로 만든다. 거부한다. 대신 source pattern을 독립 example로 빌린다.
 
 ### Split deterministic relay and Redis into separate examples
 
-One example could use `RecordingPublisher` and another could use Redis Streams.
-That makes each smaller, but it separates failure semantics from the real
-adapter and overlaps the broader integration owned by issue #68. Rejected; one
-example uses deterministic publishers as tests and the Redis adapter as the
-runnable integration.
+한 example은 `RecordingPublisher`를 쓰고 다른 example은 Redis Streams를 쓸 수도 있다. 각각은 작아지지만
+failure semantic을 real adapter에서 분리하고 issue #68이 소유하는 더 넓은 integration과 겹친다. 거부한다.
+하나의 example이 deterministic publisher는 test로, Redis adapter는 runnable integration으로 사용한다.
 
 ### Publish directly with Redis `XADD`
 
-A hand-written mapping would be short and visually direct, but it would duplicate
-the released provider, drift from its field contract, and hide the exact
-at-least-once behavior issue #57 is meant to teach. Rejected; only
-`redisstreams.New` may own Redis field encoding.
+hand-written mapping은 짧고 시각적으로 직접적일 수 있지만 released provider를 중복하고 field contract에서
+drift하며, issue #57이 가르치려는 정확한 at-least-once behavior를 숨긴다. 거부한다. Redis field
+encoding은 `redisstreams.New`만 소유할 수 있다.
 
 ## Package and Files
 
@@ -118,8 +98,8 @@ examples/transactional-outbox-publisher/
     integration_test.go
 ```
 
-The root `README.md` and `README.ko.md` will link the example. Diagram sources
-and renders will use the repository's canonical paths:
+root `README.md`와 `README.ko.md`는 example을 link한다. diagram source와 render는 repository의
+canonical path를 사용한다.
 
 ```text
 docs/images/readme-diagrams/
@@ -129,13 +109,12 @@ docs/images/readme-diagrams/
   transactional-outbox-publisher-sequence.png
 ```
 
-The Type A plan, review, and lesson artifacts remain under the existing `docs`
-paths. No new module, dependency, workflow, public bluetape-go API, changelog,
-or consumer-group implementation is required.
+Type A plan, review, lesson artifact는 기존 `docs` path 아래에 남는다. 새 module, dependency, workflow,
+public bluetape-go API, changelog, consumer-group implementation은 필요하지 않다.
 
 ## Domain and Service Contract
 
-The internal package uses the following teaching surface:
+internal package는 다음 teaching surface를 사용한다.
 
 ```go
 type Config struct {
@@ -164,40 +143,34 @@ func (s *Service) CreateSchema(context.Context, sqlkit.Execer) error
 func (s *Service) Place(context.Context, *sql.DB, PlaceOrderCommand) (Order, error)
 ```
 
-`NewService` rejects a nil store and an author that is blank, invalid UTF-8, or
-longer than 128 runes. A nil clock defaults to `time.Now().UTC`. A zero-value or
-nil service fails closed with `ErrInvalidConfig`. `Place` rejects a nil database,
-blank or oversized IDs, invalid UTF-8, non-positive totals, and zero timestamps
-before opening a transaction. IDs are trimmed and limited to 128 runes; they are
-not otherwise normalized or rewritten. A nil context is normalized to
-`context.Background`; caller cancellation and deadlines are preserved.
+`NewService`는 nil store와 blank, invalid UTF-8, 128 rune 초과 author를 거부한다. nil clock은
+`time.Now().UTC`를 기본값으로 사용한다. zero-value 또는 nil service는 `ErrInvalidConfig`로 fail
+closed한다. `Place`는 transaction을 열기 전에 nil database, blank 또는 oversized ID, invalid UTF-8,
+non-positive total, zero timestamp를 거부한다. ID는 trim되고 128 rune으로 제한되며 그 밖의 normalization
+또는 rewrite는 하지 않는다. nil context는 `context.Background`로 정규화한다. caller cancellation과
+deadline은 보존한다.
 
-The order table is `transactional_outbox_orders` with `order_id` as its primary
-key, a bounded customer ID, `status = 'placed'`, positive total cents, and UTC
-creation time. The application constructs the released store with table
-`transactional_outbox_records` so it does not share the generic default table
-with unrelated examples. `Service.CreateSchema` creates the order table and
-delegates outbox schema creation to that store. Schema creation is an idempotent
-application startup operation and never runs inside an order transaction; a
-partial DDL failure is retried on the next startup rather than hidden.
+order table은 `transactional_outbox_orders`이며 `order_id`를 primary key로 사용하고 bounded customer
+ID, `status = 'placed'`, positive total cents, UTC creation time을 가진다. application은
+unrelated example과 generic default table을 공유하지 않도록 table `transactional_outbox_records`로
+released store를 구성한다. `Service.CreateSchema`는 order table을 만들고 outbox schema creation을 해당
+store에 위임한다. schema creation은 idempotent application startup operation이며 order transaction 안에서
+실행되지 않는다. partial DDL failure는 숨겨지지 않고 다음 startup에서 retry된다.
 
-For every accepted command, `Place` builds:
+accepted command마다 `Place`는 다음을 만든다.
 
-- aggregate type `order` and aggregate ID equal to `OrderID`;
-- revision `audit.InitialRevision()`;
-- event ID and idempotency key equal to the caller-owned `CommandID`;
-- event type `order.placed`;
-- `OccurredAt` from the caller's UTC-normalized `CreatedAt` and `RecordedAt`
-  from the service clock;
-- a fixed JSON payload with customer ID, status, and total cents;
-- the configured author; and
-- schema version from `audit.NewEntry`.
+- aggregate type `order`와 `OrderID`와 같은 aggregate ID
+- revision `audit.InitialRevision()`
+- caller-owned `CommandID`와 같은 event ID 및 idempotency key
+- event type `order.placed`
+- caller의 UTC-normalized `CreatedAt`에서 온 `OccurredAt`과 service clock에서 온 `RecordedAt`
+- customer ID, status, total cents를 가진 fixed JSON payload
+- configured author
+- `audit.NewEntry`에서 온 schema version
 
-Inside one `sqlkit.WithTx`, `Place` inserts the order row and calls
-`Store.Enqueue` with the same `*sql.Tx`. The returned `Order` becomes observable
-only after `WithTx` commits. SQL uniqueness errors remain inspectable through
-`%w`; the example does not translate all PostgreSQL codes into a new public
-error taxonomy.
+하나의 `sqlkit.WithTx` 안에서 `Place`는 order row를 insert하고 같은 `*sql.Tx`로 `Store.Enqueue`를
+호출한다. 반환된 `Order`는 `WithTx` commit 이후에만 observable해진다. SQL uniqueness error는 `%w`를
+통해 inspect 가능하게 남는다. 예제는 모든 PostgreSQL code를 새 public error taxonomy로 번역하지 않는다.
 
 ## Relay and Delivery Contract
 
