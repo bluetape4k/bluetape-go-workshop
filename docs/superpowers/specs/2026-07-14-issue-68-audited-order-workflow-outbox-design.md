@@ -240,7 +240,7 @@ released reader semantic에 따라 `found=false`를 반환한다.
 
 ## HTTP API
 
-The server uses Gin without debug mode and exposes:
+server는 debug mode 없이 Gin을 사용하고 다음을 노출한다.
 
 ```text
 POST /orders
@@ -252,13 +252,12 @@ GET  /readyz
 GET  /statusz
 ```
 
-All command and query bodies require `Content-Type: application/json`, are
-limited to 32 KiB before decoding, and reject compressed bodies, invalid UTF-8,
-unknown fields, duplicate object keys, trailing JSON values, non-object
-top-level values, and empty bodies. The decoder preserves integer precision.
-Metadata does not weaken these rules.
+모든 command 및 query body는 `Content-Type: application/json`을 요구하며 decoding 전에 32 KiB로 제한된다.
+compressed body, invalid UTF-8, unknown field, duplicate object key, trailing JSON value, non-object
+top-level value, empty body는 거부한다. decoder는 integer precision을 보존한다. metadata는 이 rule을 약화하지
+않는다.
 
-`POST /orders` accepts:
+`POST /orders`는 다음을 받는다.
 
 ```json
 {
@@ -268,7 +267,7 @@ Metadata does not weaken these rules.
 }
 ```
 
-`POST /orders/transitions` accepts:
+`POST /orders/transitions`는 다음을 받는다.
 
 ```json
 {
@@ -279,9 +278,8 @@ Metadata does not weaken these rules.
 }
 ```
 
-The create response is HTTP 201 for a new order and HTTP 200 for an idempotent
-replay. A new or replayed transition returns HTTP 200. Successful responses use
-this complete shape:
+create response는 new order일 때 HTTP 201이고 idempotent replay일 때 HTTP 200이다. new 또는 replayed
+transition은 HTTP 200을 반환한다. successful response는 다음 complete shape를 사용한다.
 
 ```json
 {
@@ -301,12 +299,11 @@ this complete shape:
 }
 ```
 
-An identical retry sets `replayed` to true and returns the original committed
-order projection even if the aggregate has since advanced. It creates no new
-revision or outbox record. The response confirms durable commit, not Redis
-publish.
+identical retry는 `replayed`를 true로 설정하고, aggregate가 이후 advance되었더라도 original committed
+order projection을 반환한다. 새 revision이나 outbox record를 만들지 않는다. response는 Redis publish가 아니라
+durable commit을 확인한다.
 
-`POST /audit/history/search` accepts this canonical shape:
+`POST /audit/history/search`는 다음 canonical shape를 받는다.
 
 ```json
 {
@@ -319,19 +316,17 @@ publish.
 }
 ```
 
-The four bounds may be omitted or null; present revisions must be positive and
-present times must be RFC3339 with an offset. Lower and upper bounds are
-inclusive, lower bounds must not exceed upper bounds, and `limit` is required
-from 1 through 100. A successful response contains `entries` in ascending
-revision order and nullable `next_from_revision`.
+네 bound는 생략하거나 null일 수 있다. 존재하는 revision은 positive여야 하고, 존재하는 time은 offset이 있는
+RFC3339여야 한다. lower 및 upper bound는 inclusive이고, lower bound는 upper bound를 초과할 수 없으며,
+`limit`은 1부터 100까지의 값으로 필수다. successful response는 ascending revision order의 `entries`와
+nullable `next_from_revision`을 포함한다.
 
-The cursor is the first revision fetched but not returned. For revisions 1 and
-2 with `limit: 1`, page one supplies `from_revision: 1`, returns revision 1 and
-`next_from_revision: 2`; page two supplies `from_revision: 2`, returns revision
-2 and a null cursor. Because the next cursor identifies the first unreturned
-entry and the lower bound is inclusive, neither revision repeats or skips.
+cursor는 fetch되었지만 반환되지 않은 첫 revision이다. revision 1과 2가 있고 `limit: 1`이면 page one은
+`from_revision: 1`을 제공하고 revision 1과 `next_from_revision: 2`를 반환한다. page two는
+`from_revision: 2`를 제공하고 revision 2와 null cursor를 반환한다. next cursor가 첫 unreturned entry를
+가리키고 lower bound가 inclusive이므로 revision은 반복되거나 건너뛰지 않는다.
 
-`POST /audit/history/detail` accepts:
+`POST /audit/history/detail`은 다음을 받는다.
 
 ```json
 {
@@ -340,23 +335,19 @@ entry and the lower bound is inclusive, neither revision repeats or skips.
 }
 ```
 
-Revision must be positive. Both audit endpoints read PostgreSQL history only
-and remain correct when the relay is stopped.
+revision은 positive여야 한다. 두 audit endpoint는 PostgreSQL history만 읽으며 relay가 stopped 상태여도
+correct하게 동작한다.
 
-Transport errors use
-`{"request_id":"req-...","error":{"code":"...","message":"..."}}` with a
-non-sensitive code and message. Invalid JSON and validation failures return 400,
-oversized bodies return 413, and unsupported media type or content encoding
-returns 415. Missing orders or audit revisions return 404. Duplicate order
-identities, conflicting command reuse, and invalid transitions return 409. A
-server-side operation deadline returns 408 when caused by the request context.
-Concurrency-cap rejection returns 429 with code `too_many_requests`,
-`Retry-After: 1`, `Connection: close`, and a closed request body; retry is safe
-when the caller reuses the same command ID because no handler ran. Unexpected
-storage errors return 500 without endpoint values, SQL text, credentials, entry
-payloads, or raw provider messages. Publisher failures are asynchronous and
-appear only through relay retry, dead-letter state, delivery status, and safe
-logs; they have no per-request HTTP mapping.
+transport error는 non-sensitive code와 message를 가진
+`{"request_id":"req-...","error":{"code":"...","message":"..."}}`를 사용한다. invalid JSON과 validation
+failure는 400을 반환하고, oversized body는 413을 반환하며, unsupported media type 또는 content encoding은
+415를 반환한다. missing order 또는 audit revision은 404를 반환한다. duplicate order identity, conflicting
+command reuse, invalid transition은 409를 반환한다. server-side operation deadline이 request context 때문에
+발생하면 408을 반환한다. concurrency-cap rejection은 code `too_many_requests`, `Retry-After: 1`,
+`Connection: close`, closed request body와 함께 429를 반환한다. handler가 실행되지 않았으므로 caller가 같은
+command ID를 재사용하면 retry가 안전하다. unexpected storage error는 endpoint value, SQL text, credential,
+entry payload, raw provider message 없이 500을 반환한다. publisher failure는 asynchronous이며 relay retry,
+dead-letter state, delivery status, safe log로만 나타난다. per-request HTTP mapping은 없다.
 
 ## Runtime, Relay, and Shutdown
 
