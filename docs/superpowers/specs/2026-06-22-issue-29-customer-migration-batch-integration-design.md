@@ -459,78 +459,78 @@ error이면 안 된다.
 | cancel without active run | 404 | `no_active_run` |
 | caller cancellation/deadline or canceled run result | 408 | `request_cancelled` |
 
-## Documentation
+## 문서
 
-Add English and Korean README files with:
+영어 및 한국어 README 파일에 다음을 추가한다.
 
-- example scenario;
-- run command and curl smoke commands for manual crash, status, report,
-  leader-held scheduled restart, active-run cancel, not-leader rejection,
-  malformed JSON, blank run ID, and oversized body;
-- checkpoint key and chunk size;
-- API endpoint table;
-- leader-guarded scheduler explanation;
-- retry/dead-letter policy table;
-- restart contract and duplicate boundary behavior;
-- relationship to focused examples #41, #73, and #74;
-- local runbook notes for Ctrl-C shutdown, port collision, and state reset by
-  restarting the in-memory demo process;
-- `HTTP_ADDR` loopback-only override and `LEADER_MODE=held|missing` demo
-  controls;
-- `/healthz` as process liveness only, with `/batch/status` as the operator
-  diagnosis/readiness surface for active state, leadership state, checkpoint,
-  latest failure, and rejection code;
-- production hardening notes for durable checkpoint stores, queues, schedulers,
-  database upserts, idempotency keys, auth/trusted-network boundaries, metrics,
-  structured run lifecycle logs, and dead-letter replay.
+- example scenario
+- manual crash, status, report, leader-held scheduled restart, active-run
+  cancel, not-leader rejection, malformed JSON, blank run ID, oversized body를
+  위한 run command 및 curl smoke command
+- checkpoint key와 chunk size
+- API endpoint table
+- leader-guarded scheduler 설명
+- retry/dead-letter policy table
+- restart contract 및 duplicate boundary 동작
+- focused example #41, #73, #74와의 관계
+- Ctrl-C shutdown, port collision, in-memory demo process 재시작을 통한 state
+  reset에 대한 local runbook note
+- `HTTP_ADDR` loopback-only override 및 `LEADER_MODE=held|missing` demo control
+- `/healthz`는 process liveness 전용이며, `/batch/status`는 active state,
+  leadership state, checkpoint, latest failure, rejection code에 대한 operator
+  diagnosis/readiness surface라는 설명
+- durable checkpoint store, queue, scheduler, database upsert, idempotency key,
+  auth/trusted-network boundary, metric, structured run lifecycle log,
+  dead-letter replay에 대한 production hardening note
 
-Update root `README.md` and `README.ko.md`:
+루트 `README.md`와 `README.ko.md`를 갱신한다.
 
-- example table row;
-- 0.5.0 run section;
-- roadmap wording if needed.
+- example table row
+- 0.5.0 run section
+- 필요한 경우 roadmap wording
 
-No new diagrams are required for this pass; the current work closes the
-functional milestone gap. Existing root map imagery can be refreshed in a
-follow-up if the project wants diagram parity for the new example.
+이번 pass에는 새 다이어그램이 필요하지 않다. 현재 작업은 functional milestone
+gap을 닫는다. Project가 새 예제에 대한 diagram parity를 원하면 기존 root map
+이미지는 follow-up에서 refresh할 수 있다.
 
-## Tests
+## 테스트
 
-Focused tests must cover:
+집중 테스트는 다음을 다뤄야 한다.
 
-- health endpoint;
-- manual start fails on simulated writer crash and leaves checkpoint at the
-  previous successful chunk;
-- default chunk size is `2`;
-- scheduled tick under leadership restarts from checkpoint and completes;
-- tiny scheduler loop triggers a leader-guarded run and stops on cancellation
-  without long sleeps;
-- completed first chunk is not reprocessed on restart;
-- transient customer retry increments retry count and succeeds;
-- permanent customer records exactly one dead letter and increments skip count;
-- missing leadership rejects scheduled tick without mutating checkpoint or
-  migrated customers;
-- status and report endpoints return stable latest-run projections;
-- malformed JSON, blank/invalid run IDs, invalid crash counters, and oversized
-  request bodies on both POST endpoints return deterministic error responses;
-- active-run cancellation endpoint cancels work, clears active state, and maps
-  repeated/no-active cancellation to `no_active_run`;
-- caller cancellation maps to `408 Request Timeout`;
-- cancellation releases the active-run guard;
-- concurrent manual start, scheduled tick, cancel, status, and report requests
-  allow at most one active run, return defensive snapshots, and never race;
-- bounded shared-state stress repeats concurrent manual start, scheduled tick,
-  cancel, status, and report access under normal tests and then under the race
-  detector;
-- all public HTTP response bodies, including status/report, failed runs, and
-  error responses, do not expose fixture email values;
-- `main.go` constructs an `http.Server` with bounded timeouts and graceful
-  shutdown;
-- `HTTP_ADDR` accepts loopback binds and rejects non-loopback binds;
-- Gin trusted proxies are disabled with `SetTrustedProxies(nil)`;
+- health endpoint
+- manual start가 simulated writer crash에서 실패하고 checkpoint를 이전 성공
+  chunk에 남기는지
+- 기본 chunk size가 `2`인지
+- leadership 아래 scheduled tick이 checkpoint에서 restart하고 완료되는지
+- 작은 scheduler loop가 leader-guarded run을 trigger하고 긴 sleep 없이
+  cancellation에서 멈추는지
+- 완료된 첫 chunk가 restart에서 다시 처리되지 않는지
+- transient customer retry가 retry count를 증가시키고 성공하는지
+- permanent customer가 dead letter 하나를 정확히 기록하고 skip count를
+  증가시키는지
+- missing leadership이 checkpoint 또는 migrated customer를 변경하지 않고
+  scheduled tick을 거부하는지
+- status 및 report endpoint가 안정적인 latest-run projection을 반환하는지
+- 두 POST endpoint에서 malformed JSON, blank/invalid run ID, invalid crash
+  counter, oversized request body가 결정적 error response를 반환하는지
+- active-run cancellation endpoint가 work를 취소하고 active state를 지우며,
+  repeated/no-active cancellation을 `no_active_run`으로 mapping하는지
+- caller cancellation이 `408 Request Timeout`으로 mapping되는지
+- cancellation이 active-run guard를 release하는지
+- concurrent manual start, scheduled tick, cancel, status, report request가
+  active run을 최대 하나만 허용하고 defensive snapshot을 반환하며 race하지
+  않는지
+- bounded shared-state stress가 normal test와 race detector 아래에서 concurrent
+  manual start, scheduled tick, cancel, status, report access를 반복하는지
+- status/report, failed run, error response를 포함한 모든 public HTTP response
+  body가 fixture email 값을 노출하지 않는지
+- `main.go`가 bounded timeout과 graceful shutdown을 갖춘 `http.Server`를
+  구성하는지
+- `HTTP_ADDR`가 loopback bind를 허용하고 non-loopback bind를 거부하는지
+- Gin trusted proxy가 `SetTrustedProxies(nil)`로 비활성화되는지
 - `go test -race -count=1 ./examples/customer-migration-batch-integration/...`.
 
-## Validation
+## 검증
 
 - `go test -count=1 ./examples/customer-migration-batch-integration/...`
 - `go test -race -count=1 ./examples/customer-migration-batch-integration/...`
@@ -546,16 +546,16 @@ Focused tests must cover:
 - `GOFLAGS=-p=1 make ci`
 - `git diff --check`
 
-## Step 2 Checklist Completion Report
+## Step 2 Checklist 완료 보고
 
-| Item | Status | Notes |
+| 항목 | 상태 | 메모 |
 |---|---|---|
-| Architecture pre-design ran or skipped | Done | Local pre-design selected one integrated example after comparing three approaches. |
-| Step 1-R research incorporated | Done | Issue, GNO, current examples, `go doc`, and root README evidence are listed above. |
-| Current-behavior claims cite evidence | Done | Each major dependency and existing pattern cites current files or command evidence. |
-| Spec path confirmed inside worktree | Done | This file lives under `.worktrees/feat-issue-29-batch-integration/docs/superpowers/specs/`. |
-| Risks/failure modes included | Done | Cancellation, retry/dead-letter, checkpoint replay, leader missing, and active-run conflict are explicit. |
-| Approach comparison included | Done | Approaches A/B/C compared and B/C rejected with repository rationale. |
-| Brainstorming process | Done | User gave concrete "작업하자" execution direction and AGENTS autonomy forbids permission handoff; material design is captured here instead of stopping for approval. |
-| Go pattern compliance | Done | Context, sentinel errors, race/stress, Gin boundaries, and README impact are specified. |
-| Open questions resolved | Done | No blocking ambiguity remains; durable infrastructure and diagrams are explicitly out of scope. |
+| Architecture pre-design ran or skipped | 완료 | 세 가지 접근을 비교한 뒤 local pre-design에서 하나의 integrated example을 선택했다. |
+| Step 1-R research incorporated | 완료 | Issue, GNO, current example, `go doc`, root README 근거를 위에 나열했다. |
+| Current-behavior claims cite evidence | 완료 | 각 주요 dependency와 기존 pattern은 current file 또는 command evidence를 인용한다. |
+| Spec path confirmed inside worktree | 완료 | 이 파일은 `.worktrees/feat-issue-29-batch-integration/docs/superpowers/specs/` 아래에 있다. |
+| Risks/failure modes included | 완료 | Cancellation, retry/dead-letter, checkpoint replay, leader missing, active-run conflict를 명시했다. |
+| Approach comparison included | 완료 | Approach A/B/C를 비교했고 B/C는 repository rationale로 기각했다. |
+| Brainstorming process | 완료 | 사용자가 구체적인 "작업하자" 실행 방향을 주었고 AGENTS autonomy가 permission handoff를 금지하므로, 승인을 기다리는 대신 material design을 여기에 기록했다. |
+| Go pattern compliance | 완료 | Context, sentinel error, race/stress, Gin boundary, README impact를 명시했다. |
+| Open questions resolved | 완료 | Blocking ambiguity는 남아 있지 않으며 durable infrastructure와 diagram은 명시적으로 scope 밖이다. |
