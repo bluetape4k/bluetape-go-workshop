@@ -1,4 +1,4 @@
-// Package main runs the payment authorization state example.
+// Package main 은 결제 승인 상태 예제를 실행한다.
 package main
 
 import (

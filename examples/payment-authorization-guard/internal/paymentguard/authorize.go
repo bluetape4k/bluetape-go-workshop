@@ -1,5 +1,4 @@
-// Package paymentguard demonstrates circuit breaker and bulkhead protection for
-// a payment authorization gateway.
+// Package paymentguard 는 결제 승인 게이트웨이에 circuit breaker 와 bulkhead 보호를 적용하는 방법을 보여준다.
 package paymentguard
 
 import (
@@ -16,24 +15,24 @@ const (
 	defaultMaxConcurrent    = 1
 )
 
-// Request describes the non-sensitive order metadata needed for authorization.
+// Request 는 승인에 필요한 비민감 주문 메타데이터를 설명한다.
 type Request struct {
 	MerchantID  string
 	OrderID     string
 	AmountCents int
 }
 
-// Authorization is the gateway response returned to the order workflow.
+// Authorization 은 주문 워크플로로 반환되는 게이트웨이 응답이다.
 type Authorization struct {
 	OrderID     string
 	Approved    bool
 	ProviderRef string
 }
 
-// Gateway authorizes a payment request with an upstream payment provider.
+// Gateway 는 업스트림 결제 provider 로 결제 요청을 승인한다.
 type Gateway func(context.Context, Request) (Authorization, error)
 
-// Options configures the payment authorization guard policies.
+// Options 는 결제 승인 보호 정책을 설정한다.
 type Options struct {
 	FailureThreshold int
 	OpenTimeout      time.Duration
@@ -42,14 +41,13 @@ type Options struct {
 	Now              func() time.Time
 }
 
-// Authorizer protects payment authorization calls with a circuit breaker and a
-// bulkhead.
+// Authorizer 는 circuit breaker 와 bulkhead 로 결제 승인 호출을 보호한다.
 type Authorizer struct {
 	breaker  *resilience.CircuitBreakerPolicy[Authorization]
 	bulkhead *resilience.BulkheadPolicy[Authorization]
 }
 
-// New creates a payment authorizer with zero-value friendly defaults.
+// New 는 zero-value 친화적인 기본값으로 결제 승인기를 생성한다.
 func New(options Options) (*Authorizer, error) {
 	failureThreshold := options.FailureThreshold
 	if failureThreshold == 0 {
@@ -99,7 +97,7 @@ func New(options Options) (*Authorizer, error) {
 	return &Authorizer{breaker: breaker, bulkhead: bulkhead}, nil
 }
 
-// Authorize sends one payment authorization request through the guard.
+// Authorize 는 하나의 결제 승인 요청을 보호 계층을 통해 전송한다.
 func (a *Authorizer) Authorize(ctx context.Context, request Request, gateway Gateway) (Authorization, error) {
 	if a == nil {
 		return Authorization{}, fmt.Errorf("authorizer must not be nil")

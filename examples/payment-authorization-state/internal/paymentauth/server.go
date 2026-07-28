@@ -1,4 +1,4 @@
-// Package paymentauth exposes a payment authorization state machine over Gin.
+// Package paymentauth 는 결제 승인 상태 머신을 Gin으로 노출한다.
 package paymentauth
 
 import (
@@ -13,38 +13,38 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PaymentState is the current lifecycle state for the example payment.
+// PaymentState 는 예제 결제의 현재 수명주기 상태다.
 type PaymentState string
 
 const (
-	// StateRequested is the initial authorization request state.
+	// StateRequested 는 최초 승인 요청 상태다.
 	StateRequested PaymentState = "requested"
-	// StateAuthorized means the payment authorization hold was approved.
+	// StateAuthorized 는 결제 승인 hold 가 승인됐음을 의미한다.
 	StateAuthorized PaymentState = "authorized"
-	// StateCaptured is a final successful payment state.
+	// StateCaptured 는 성공으로 끝난 최종 결제 상태다.
 	StateCaptured PaymentState = "captured"
-	// StateFailed is a final failed payment state.
+	// StateFailed 는 실패로 끝난 최종 결제 상태다.
 	StateFailed PaymentState = "failed"
-	// StateCancelled is a final cancelled payment state.
+	// StateCancelled 는 취소로 끝난 최종 결제 상태다.
 	StateCancelled PaymentState = "cancelled"
 )
 
-// PaymentEvent is the command accepted by the payment state machine.
+// PaymentEvent 는 결제 상태 머신이 받는 명령이다.
 type PaymentEvent string
 
 const (
-	// EventAuthorize moves a requested payment to authorized.
+	// EventAuthorize 는 요청된 결제를 승인됨 상태로 이동시킨다.
 	EventAuthorize PaymentEvent = "authorize"
-	// EventCapture moves an authorized payment to captured.
+	// EventCapture 는 승인된 결제를 캡처됨 상태로 이동시킨다.
 	EventCapture PaymentEvent = "capture"
-	// EventFail moves a requested or authorized payment to failed.
+	// EventFail 은 요청됨 또는 승인됨 결제를 실패 상태로 이동시킨다.
 	EventFail PaymentEvent = "fail"
-	// EventCancel moves a requested or authorized payment to cancelled.
+	// EventCancel 은 요청됨 또는 승인됨 결제를 취소 상태로 이동시킨다.
 	EventCancel PaymentEvent = "cancel"
 )
 
 var (
-	// ErrNonPositiveAmount rejects authorization when the amount is not positive.
+	// ErrNonPositiveAmount 는 금액이 양수가 아닐 때 승인을 거부한다.
 	ErrNonPositiveAmount = errors.New("payment amount must be positive before authorization")
 
 	errUnknownEvent         = errors.New("unknown payment event")
@@ -54,13 +54,13 @@ var (
 	errInvalidPaymentAmount = errors.New("payment amount must not be negative")
 )
 
-// Options configures the payment authorization API server.
+// Options 는 결제 승인 API 서버를 설정한다.
 type Options struct {
 	PaymentID   string
 	AmountCents int
 }
 
-// Server exposes one in-memory payment authorization over HTTP.
+// Server 는 하나의 인메모리 결제 승인 흐름을 HTTP로 노출한다.
 type Server struct {
 	router *gin.Engine
 
@@ -71,7 +71,7 @@ type Server struct {
 	idempotency *idempotencyStore
 }
 
-// PaymentSnapshot is the stable response shape for reading the current payment.
+// PaymentSnapshot 은 현재 결제를 읽기 위한 안정적인 응답 형태다.
 type PaymentSnapshot struct {
 	PaymentID     string         `json:"payment_id"`
 	State         PaymentState   `json:"state"`
@@ -114,7 +114,7 @@ type idempotencyEntry struct {
 	response transitionResponse
 }
 
-// NewServer creates the in-memory payment authorization API.
+// NewServer 는 인메모리 결제 승인 API를 생성한다.
 func NewServer(options Options) (*Server, error) {
 	paymentID := strings.TrimSpace(options.PaymentID)
 	if paymentID == "" {
@@ -148,7 +148,7 @@ func NewServer(options Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the Gin router.
+// ServeHTTP 는 요청을 Gin 라우터로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

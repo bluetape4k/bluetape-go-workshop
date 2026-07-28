@@ -18,7 +18,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// Server exposes an HTTP resilience workshop API.
+// Server 는 HTTP 회복성 워크숍 API를 노출한다.
 type Server struct {
 	router chi.Router
 
@@ -31,13 +31,13 @@ type Server struct {
 	bulkhead *resilience.BulkheadPolicy[struct{}]
 }
 
-// Options configures the resilience workshop server.
+// Options 는 회복성 워크숍 서버를 설정한다.
 type Options struct {
 	CatalogURL string
 	Client     *http.Client
 }
 
-// NewServer creates a server that protects outbound and inbound HTTP paths.
+// NewServer 는 outbound 와 inbound HTTP 경로를 보호하는 서버를 생성한다.
 func NewServer(options Options) (*Server, error) {
 	catalogURL, err := normalizeCatalogURL(options.CatalogURL)
 	if err != nil {
@@ -129,7 +129,7 @@ func NewServer(options Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the workshop API.
+// ServeHTTP 는 요청을 워크숍 API로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
