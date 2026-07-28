@@ -526,33 +526,31 @@ Run:
 
 기대값: actual checked-in request body를 사용해 fresh exit 0으로 PASS한다.
 
-## Task 8: Create and visually verify architecture and sequence diagrams
+## Task 8: architecture 및 sequence diagram 생성/시각 검증
 
-**Complexity:** High. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-diagram`. **Write scope:** four canonical image assets and README image references.
+**Complexity:** High. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-diagram`. **Write scope:** canonical image asset 네 개와 README image reference.
 
-- [ ] **Step 1: Load the diagram checklist and best-practice references**
+- [ ] **Step 1: diagram checklist 및 best-practice reference load**
 
-Follow `bluetape-diagram` completely. Reuse repository visual grammar and draw
-generated SVG directly; Mermaid is not a final artifact. Architecture must show
-routes, service, one transaction, three PostgreSQL tables, supervised relay,
-Redis, and the history-query bypass. Sequence must show validate/lock, three
-writes, commit, response, later relay, replay, and query.
+`bluetape-diagram`을 완전히 따른다. repository visual grammar를 재사용하고 generated SVG를 직접 그린다.
+Mermaid는 final artifact가 아니다. Architecture는 route, service, transaction 하나, PostgreSQL table 세 개,
+supervised relay, Redis, history-query bypass를 보여줘야 한다.
+Sequence는 validate/lock, write 세 번, commit, response, later relay, replay, query를 보여줘야 한다.
 
-- [ ] **Step 2: Render SVG to PNG and run automated diagram audits**
+- [ ] **Step 2: SVG를 PNG로 render하고 automated diagram audit 실행**
 
-Use the skill-provided rendering/audit commands. Require connector endpoint,
-intrusion, crossing, mixed-corner, sequence-style, clipping, and text checks to
-pass for both diagrams. Re-render twice and require deterministic PNG hashes.
+skill-provided rendering/audit command를 사용한다. 두 diagram 모두 connector endpoint, intrusion, crossing,
+mixed-corner, sequence-style, clipping, text check가 pass해야 한다.
+두 번 re-render하고 deterministic PNG hash를 요구한다.
 
-- [ ] **Step 3: Perform mandatory SVG and PNG eye inspection**
+- [ ] **Step 3: mandatory SVG 및 PNG eye inspection 수행**
 
-Open all four files at original detail. Explicitly verify arrowhead direction
-after SVG-to-PNG conversion, arrowhead size/clearance at bends and card edges,
-horizontal routing opportunities, no connector through text/cards, no clipping,
-legible labels, and SVG/PNG correspondence. Adjust bend coordinates rather than
-accepting a technically valid but visually wrong render.
+네 file 모두 original detail로 연다. SVG-to-PNG conversion 뒤 arrowhead direction,
+bend와 card edge에서 arrowhead size/clearance, horizontal routing opportunity,
+text/card를 통과하는 connector 없음, clipping 없음, 읽을 수 있는 label, SVG/PNG correspondence를 명시적으로 verify한다.
+기술적으로 valid하지만 visually wrong인 render를 accept하지 말고 bend coordinate를 조정한다.
 
-- [ ] **Step 4: Link both diagrams in both locale READMEs and commit**
+- [ ] **Step 4: 두 locale README에 두 diagram link 후 commit**
 
 ```bash
 git diff --check
@@ -560,14 +558,14 @@ git add docs/images/readme-diagrams/audited-order-workflow-outbox-* examples/aud
 git commit -m "docs: diagram audited workflow integration"
 ```
 
-Expected: four assets are tracked, audits PASS, manual inspection is recorded,
-and both locale READMEs reference the PNG renders.
+기대값: 네 asset이 tracked되고 audit이 PASS하며 manual inspection이 기록된다.
+두 locale README는 PNG render를 reference한다.
 
-## Task 9: Run risk gates, full verification, review, and lessons
+## Task 9: risk gate, full verification, review, lesson 실행
 
-**Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-full-feature`, `bluetape-go-patterns`. **Write scope:** fixes within prior scopes, review artifact, lesson artifact.
+**Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-full-feature`, `bluetape-go-patterns`. **Write scope:** prior scope 안의 fix, review artifact, lesson artifact.
 
-- [ ] **Step 1: Run targeted and resource-bounded gates from scratch**
+- [ ] **Step 1: targeted 및 resource-bounded gate를 처음부터 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/...
@@ -584,37 +582,31 @@ make ci
 git diff --check origin/develop
 ```
 
-Expected: every command has a fresh observed exit 0. If full parallel Docker
-tests time out, preserve raw evidence, diagnose container/resource state, rerun
-the isolated failing package, and repair the cause; an isolated retry does not
-replace the required final fresh `make ci` pass.
+기대값: 모든 command가 fresh observed exit 0을 가진다. full parallel Docker test가 timeout되면 raw evidence를 보존하고
+container/resource state를 diagnose하며 isolated failing package를 rerun하고 원인을 repair한다.
+isolated retry는 required final fresh `make ci` pass를 대체하지 않는다.
 
-- [ ] **Step 2: Execute the triggered performance/stability scan**
+- [ ] **Step 2: triggered performance/stability scan 실행**
 
-Inspect request allocation/body bounds, query plans, row-lock duration, pool
-contention, relay polling/backlog, goroutine ownership, cancellation, leases,
-Testcontainers cleanup, and shutdown. Fix P0/P1 and rerun every affected focused
-and broad gate.
+request allocation/body bound, query plan, row-lock duration, pool contention, relay polling/backlog,
+goroutine ownership, cancellation, lease, Testcontainers cleanup, shutdown을 inspect한다.
+P0/P1을 fix하고 affected focused/broad gate를 모두 rerun한다.
 
-- [ ] **Step 3: Verify every approved spec and plan item**
+- [ ] **Step 3: approved spec 및 plan item 전체 verify**
 
-Use the Step 5 verifier checklist against the exact spec, this plan, branch
-diff, tests, READMEs, HTTP file, and four diagrams. Record a traceable PASS or
-return to the owning task; do not reinterpret a missing item as optional.
+exact spec, 이 plan, branch diff, test, README, HTTP file, 네 diagram을 대상으로 Step 5 verifier checklist를 사용한다.
+traceable PASS를 기록하거나 owning task로 돌아간다. missing item을 optional로 reinterpret하지 않는다.
 
-- [ ] **Step 4: Run six pre-PR review lenses and integrate findings**
+- [ ] **Step 4: six pre-PR review lens 실행 및 finding integrate**
 
-Review performance, stability, security, operator/Ops, developer/API, and
-user/caller independently. Fix P0/P1, resolve/defer P2/P3 with rationale, rerun
-affected tests and lanes, and write
-`docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md` only after the
-latest result is P0=0/P1=0.
+performance, stability, security, operator/Ops, developer/API, user/caller를 independent하게 review한다.
+P0/P1을 fix하고 P2/P3는 rationale과 함께 resolve/defer하며 affected test와 lane을 rerun한다.
+latest result가 P0=0/P1=0이 된 뒤에만 `docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md`를 작성한다.
 
-- [ ] **Step 5: Commit the review artifact and durable lesson**
+- [ ] **Step 5: review artifact 및 durable lesson commit**
 
-The lesson records context, chosen history/outbox split, replay and readiness
-decisions, Docker baseline contention, relay/diagram surprises, proof, review
-misses, and future guards.
+lesson은 context, chosen history/outbox split, replay 및 readiness decision,
+Docker baseline contention, relay/diagram surprise, proof, review miss, future guard를 기록한다.
 
 ```bash
 git add docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md docs/lessons/2026-07-14-issue-68-audited-order-workflow-outbox.md
@@ -622,89 +614,79 @@ git commit -m "docs: record audited workflow verification lessons"
 git status --short
 ```
 
-Expected: worktree clean and the lesson is committed before PR creation.
+기대값: worktree가 clean하고 lesson은 PR creation 전에 commit되어 있다.
 
-## Task 10: Create the PR and stop at the merge approval gate
+## Task 10: PR 생성 후 merge approval gate에서 중지
 
-**Complexity:** Medium. **Depends on:** Task 9. **Pattern skills:** `bluetape-workflow`. **Write scope:** no repository files unless live review requires an approved repair. **External effects:** push and PR are authorized by the approved workflow; merge is not.
+**Complexity:** Medium. **Depends on:** Task 9. **Pattern skills:** `bluetape-workflow`. **Write scope:** live review가 approved repair를 요구하지 않는 한 repository file 없음. **External effects:** push와 PR은 approved workflow로 authorized되지만 merge는 아니다.
 
-- [ ] **Step 1: Re-read issue #68 metadata and push the feature branch**
+- [ ] **Step 1: issue #68 metadata를 다시 읽고 feature branch push**
 
-Confirm assignee `debop`, milestone `0.9.0`, labels, dependencies, and issue
-state. Push only the clean feature branch.
+assignee `debop`, milestone `0.9.0`, label, dependency, issue state를 confirm한다.
+clean feature branch만 push한다.
 
-- [ ] **Step 2: Create and verify the English PR**
+- [ ] **Step 2: English PR 생성 및 verify**
 
-Use the central template, explain why before what, include complete validation
-and diagram eye-inspection evidence, close #68, and end with `## DoD Status`.
-Assign `debop`, mirror milestone and labels, then verify live metadata with
-`gh pr view`.
+central template을 사용하고 what보다 why를 먼저 설명한다. complete validation 및 diagram eye-inspection evidence를 포함하고,
+#68을 close하며 `## DoD Status`로 끝낸다. `debop`을 assign하고 milestone/label을 mirror한 뒤 `gh pr view`로 live metadata를 verify한다.
 
-- [ ] **Step 3: Run the live PR review and CI gate**
+- [ ] **Step 3: live PR review 및 CI gate 실행**
 
-Review the actual PR diff through all six perspectives, resolve threads, and
-wait in bounded intervals until every required check is successful. Never treat
-pending, skipped, stale, or missing checks as green.
+actual PR diff를 six perspective 전체로 review하고 thread를 resolve하며 모든 required check가 successful이 될 때까지 bounded interval로 wait한다.
+pending, skipped, stale, missing check를 green으로 취급하지 않는다.
 
-- [ ] **Step 4: Report the exact merge-ready state and stop**
+- [ ] **Step 4: exact merge-ready state 보고 후 중지**
 
-Report PR URL, head/base SHAs, review convergence, required checks X/Y, clean
-local state, and remaining risks. Do not merge, delete the worktree, or sync
-`develop` until the user explicitly approves merge.
+PR URL, head/base SHA, review convergence, required check X/Y, clean local state, remaining risk를 보고한다.
+user가 merge를 명시적으로 approve하기 전까지 merge, worktree delete, `develop` sync를 하지 않는다.
 
-## Plan Review Convergence
+## plan review convergence
 
 | Perspective | Result | Resolved focus |
 |---|---|---|
-| Performance | P0=0, P1=0 | Hot-aggregate plan evidence, pool contention metrics, and deterministic lock timeout/recovery are ordered. |
-| Stability | P0=0, P1=0 | Same-order create races, post-commit error injection, replay, lease recovery, and lifecycle reruns are explicit. |
-| Security | P0=0, P1=0 | Loopback/stream validation, all-stage redaction, slow-client/pool limits, and lossless JSON negatives precede implementation. |
-| Operator/Ops | P0=0, P1=0 | All three schemas, readiness/status, recovery/runbook, and non-destructive compatibility failure are owned. |
-| Developer/API | P0=0, P1=0 | v0.18.0 `Relay.Run`, reader signatures, seven routes, commands, and task dependencies are implementable. |
-| User/caller | P0=0, P1=0 | Exact envelopes, request-file smoke, bilingual structural parity, replay, cursor, overload, and 409 paths are executable. |
+| Performance | P0=0, P1=0 | hot-aggregate plan evidence, pool contention metric, deterministic lock timeout/recovery가 ordered 상태다. |
+| Stability | P0=0, P1=0 | same-order create race, post-commit error injection, replay, lease recovery, lifecycle rerun이 explicit하다. |
+| Security | P0=0, P1=0 | loopback/stream validation, all-stage redaction, slow-client/pool limit, lossless JSON negative가 implementation보다 앞선다. |
+| Operator/Ops | P0=0, P1=0 | schema 세 개, readiness/status, recovery/runbook, non-destructive compatibility failure를 소유한다. |
+| Developer/API | P0=0, P1=0 | v0.18.0 `Relay.Run`, reader signature, route 일곱 개, command, task dependency가 implementable하다. |
+| User/caller | P0=0, P1=0 | exact envelope, request-file smoke, bilingual structural parity, replay, cursor, overload, 409 path가 executable하다. |
 
-Every review finding was fixed in this plan or the non-material v0.18.0
-observability correction in the approved specification. Each affected lane was
-rerun against the integrated artifacts and returned clear; no P2/P3 item is
-deferred.
+모든 review finding은 이 plan 또는 approved specification의 non-material v0.18.0 observability correction에서 fix했다.
+affected lane은 integrated artifact를 대상으로 rerun했고 clear로 돌아왔다. deferred P2/P3 item은 없다.
 
-## Acceptance Traceability
+## 인수 추적성
 
-| Spec acceptance | Owning task | Fresh evidence |
+| spec acceptance | owning task | fresh evidence |
 |---|---|---|
-| Atomic order/history/outbox commit | Tasks 2-3 | PostgreSQL rollback, parity, and concurrency tests |
-| Durable history independent of transport | Tasks 2, 4 | Full reader contract and Redis-free query tests |
-| Official continuous SQL outbox to Redis | Tasks 5-6 | Deterministic relay plus real 13-field stream proof |
-| Strict POST JSON for user operations | Task 4 | Decoder, route, cursor, detail, status, and overload tests |
-| Complete curl and HTTP request scenario | Task 7 | Locale/request marker parity and smoke execution |
-| Bilingual architecture/sequence diagrams | Task 8 | Automated audits, deterministic renders, four-file eye check |
-| Issue #57 language switch correction | Task 7 | Focused two-line diff inspection |
-| Targeted/race/integration/full gates | Task 9 | Fresh exit 0 for every listed command |
-| PR metadata, green CI, merge approval stop | Task 10 | Live `gh` evidence and no merge side effect |
+| Atomic order/history/outbox commit | Tasks 2-3 | PostgreSQL rollback, parity, concurrency test |
+| Durable history independent of transport | Tasks 2, 4 | full reader contract 및 Redis-free query test |
+| Official continuous SQL outbox to Redis | Tasks 5-6 | deterministic relay 및 real 13-field stream proof |
+| Strict POST JSON for user operations | Task 4 | decoder, route, cursor, detail, status, overload test |
+| Complete curl and HTTP request scenario | Task 7 | locale/request marker parity 및 smoke execution |
+| Bilingual architecture/sequence diagrams | Task 8 | automated audit, deterministic render, four-file eye check |
+| Issue #57 language switch correction | Task 7 | focused two-line diff inspection |
+| Targeted/race/integration/full gates | Task 9 | listed command별 fresh exit 0 |
+| PR metadata, green CI, merge approval stop | Task 10 | live `gh` evidence 및 merge side effect 없음 |
 
-## Risk Prediction and Rerun Points
+## 위험 예측 및 rerun 지점
 
-| Risk | Signal | Mitigation | Rollback or rerun point |
+| risk | signal | mitigation | rollback 또는 rerun 지점 |
 |---|---|---|---|
-| Partial dual-write despite intended atomicity | Table counts or identities diverge after injected failure | One `sqlkit.WithTx`, same entry value, failure-after-each-write tests | Revert Task 3 commit or rerun Tasks 2-3 from RED |
-| Duplicate command race returns wrong state | Replay differs from original projection or adds revision | Lock-before-state-check, fresh post-rollback lookup, canonical payload intent | Reopen Task 3 and rerun concurrency/race tests |
-| PostgreSQL time precision corrupts parity | Normal entry fails scalar/JSON comparison | Normalize one UTC microsecond clock value before all writes | Reopen Tasks 1-2 and run sub-microsecond test |
-| Redis outage defeats outbox availability | `/readyz` returns 503 only for Redis | Treat Redis as degraded delivery; DB/relay remain hard readiness | Reopen Task 5 readiness/lifecycle tests |
-| Relay dies while HTTP stays ready | Relay result arrives without server stop | Supervised result channel, readiness transition, bounded shutdown | Reopen Task 5 unexpected-exit test |
-| Backlog/pool contention starves requests | Deadline miss, pool exceeds 8, backlog fails to drain | Fixed pools, request cap, bounded batch/poll, concurrent-writer test | Reopen Tasks 5-6 and rerun race/backlog proof |
-| Container host contention produces flaky full gate | PostgreSQL wait strategy times out under package parallelism | Sequential example fixture and `go test -p 1`; diagnose before retry | Rerun isolated package, then resource-bounded suite and fresh `make ci` |
-| Diagram arrowheads reverse or collide after PNG render | Eye check differs from SVG intent | Follow `bluetape-diagram`, adjust bend/endpoint coordinates, inspect all four | Return to Task 8; rerender and re-audit both formats |
-| Scope drifts into library/dependency/workflow changes | Diff includes go.mod, workflow, or bluetape-go API | Stop and request scope approval | Reset only new task-owned changes; preserve prior commits |
+| intended atomicity에도 partial dual-write 발생 | injected failure 뒤 table count 또는 identity가 diverge | `sqlkit.WithTx` 하나, 같은 entry value, failure-after-each-write test | Task 3 commit revert 또는 Tasks 2-3을 RED부터 rerun |
+| duplicate command race가 wrong state 반환 | replay가 original projection과 다르거나 revision을 추가 | lock-before-state-check, fresh post-rollback lookup, canonical payload intent | Task 3 reopen 후 concurrency/race test rerun |
+| PostgreSQL time precision이 parity 손상 | normal entry가 scalar/JSON comparison 실패 | 모든 write 전에 UTC microsecond clock value 하나로 normalize | Tasks 1-2 reopen 후 sub-microsecond test 실행 |
+| Redis outage가 outbox availability 저해 | `/readyz`가 Redis만으로 503 반환 | Redis는 degraded delivery로 취급하고 DB/relay는 hard readiness로 유지 | Task 5 readiness/lifecycle test reopen |
+| HTTP ready 중 relay 사망 | server stop 없이 relay result 도착 | supervised result channel, readiness transition, bounded shutdown | Task 5 unexpected-exit test reopen |
+| backlog/pool contention이 request를 starve | deadline miss, pool 8 초과, backlog drain 실패 | fixed pool, request cap, bounded batch/poll, concurrent-writer test | Tasks 5-6 reopen 후 race/backlog proof rerun |
+| container host contention으로 flaky full gate 발생 | package parallelism 아래 PostgreSQL wait strategy timeout | sequential example fixture 및 `go test -p 1`; retry 전 diagnose | isolated package rerun 뒤 resource-bounded suite와 fresh `make ci` |
+| PNG render 뒤 diagram arrowhead reverse/collision | eye check가 SVG intent와 다름 | `bluetape-diagram`을 따르고 bend/endpoint coordinate를 조정하며 네 file 모두 inspect | Task 8로 돌아가 rerender 및 두 format re-audit |
+| scope가 library/dependency/workflow change로 drift | diff에 go.mod, workflow, bluetape-go API 포함 | stop하고 scope approval 요청 | new task-owned change만 reset하고 prior commit 보존 |
 
-## Repository Hazard Decisions
+## repository hazard decision
 
-- New module/catalog/BOM/coverage registration: N/A; this is a package inside
-  the existing workshop module.
-- Dependency and `go.mod`/`go.sum`: N/A; every required package already exists.
-- Workflow/nightly changes: N/A; `make ci` and existing `go test ./...` discover
-  the example automatically.
-- Changelog/release note: N/A; workshop examples use README navigation and issue
-  closure rather than a published library changelog.
-- Testcontainers: triggered; PostgreSQL and Redis start sequentially and the
-  repository-wide resource-bounded lane runs before the authoritative full gate.
-- README locales and diagrams: triggered and owned by Tasks 7-8.
+- New module/catalog/BOM/coverage registration: N/A; existing workshop module 안의 package다.
+- Dependency 및 `go.mod`/`go.sum`: N/A; required package는 모두 이미 존재한다.
+- Workflow/nightly change: N/A; `make ci`와 existing `go test ./...`가 example을 자동으로 discover한다.
+- Changelog/release note: N/A; workshop example은 published library changelog가 아니라 README navigation과 issue closure를 사용한다.
+- Testcontainers: triggered; PostgreSQL과 Redis는 sequential하게 시작하고 repository-wide resource-bounded lane은 authoritative full gate 전에 실행한다.
+- README locale 및 diagram: triggered이며 Tasks 7-8이 소유한다.
