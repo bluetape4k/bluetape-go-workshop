@@ -1,94 +1,88 @@
 # Issue #15 Catalog Near-Cache Redis Example Design
 
-## Problem
+## 문제
 
-`bluetape-go` v0.3.0 adds cache coordination packages, but the workshop does
-not yet have an application-shaped example that demonstrates how a caller would
-combine process-local cache, Redis Pub/Sub invalidation, and Redis-based
-stampede coordination.
+`bluetape-go` v0.3.0은 cache coordination package를 추가했지만, workshop에는 caller가
+process-local cache, Redis Pub/Sub invalidation, Redis-based stampede coordination을 어떻게 조합하는지 보여주는
+application-shaped example이 아직 없다.
 
-Issue #15 requires a new `examples/catalog-near-cache-redis` scenario where two
-catalog service peers share Redis invalidation and coordinate a cold-miss burst.
+issue #15는 catalog service peer 두 개가 Redis invalidation을 공유하고 cold-miss burst를 coordinate하는
+새 `examples/catalog-near-cache-redis` scenario를 요구한다.
 
 ## Scope
 
-In scope:
+범위 포함:
 
 - Add `examples/catalog-near-cache-redis`.
 - Compose:
   - `cache.NewMemory[string, Product]`
   - `redisnear.NewPubSub[Product]`
   - `rediscoord.NewStampedeCache[Product]`
-- Model two catalog peers that read and write an authoritative product store.
-- Use `github.com/bluetape4k/bluetape-go/testcontainers/redis`.
-- Add tests for peer invalidation and cross-peer cold-miss load coordination.
-- Add English and Korean README files.
-- Add scenario, architecture, and sequence/flow diagrams with PNG embeds,
-  matching SVG sources, and Graphviz evidence.
-- Update root `README.md` and `README.ko.md` example tables.
+- authoritative product store를 read/write하는 catalog peer 두 개를 model한다.
+- `github.com/bluetape4k/bluetape-go/testcontainers/redis`를 사용한다.
+- peer invalidation 및 cross-peer cold-miss load coordination test를 추가한다.
+- English 및 Korean README file을 추가한다.
+- PNG embed, matching SVG source, Graphviz evidence를 가진 scenario, architecture, sequence/flow diagram을 추가한다.
+- root `README.md`와 `README.ko.md` example table을 update한다.
 
-Out of scope:
+범위 제외:
 
-- New reusable cache helpers in the workshop repository.
-- Durable Redis L2 cache behavior.
-- HTTP service or CLI wrapper.
-- New dependencies.
-- Production observability adapters beyond README guidance.
+- workshop repository의 새 reusable cache helper.
+- durable Redis L2 cache behavior.
+- HTTP service 또는 CLI wrapper.
+- 새 dependency.
+- README guidance 범위를 넘는 production observability adapter는 제외한다.
 
-## Evidence
+## 근거
 
-Research note:
+research note:
 
 - `docs/superpowers/research/2026-06-06-issue-15-catalog-near-cache-redis-research.md`
 
-Current source evidence:
+current source evidence:
 
-- `go.mod` pins `github.com/bluetape4k/bluetape-go v0.3.0`.
-- `cache.NewMemory[K,V]` is a process-local `LoadingCache`.
-- `redisnear.NewPubSub[V]` wraps a local `LoadingCache[string,V]` and publishes
-  invalidation on `Set`, `Delete`, and `Clear`.
-- `rediscoord.NewStampedeCache[V]` wraps a `LoadingCache[string,V]` and shares
-  a short-lived Redis owner-token result envelope during cold misses.
-- `redistestcontainer.Start(ctx,t)` already owns Redis container lifecycle for
-  workshop tests.
+- `go.mod`는 `github.com/bluetape4k/bluetape-go v0.3.0`을 pin한다.
+- `cache.NewMemory[K,V]`는 process-local `LoadingCache`다.
+- `redisnear.NewPubSub[V]`는 local `LoadingCache[string,V]`를 wrap하고
+  `Set`, `Delete`, `Clear`에서 invalidation을 publish한다.
+- `rediscoord.NewStampedeCache[V]`는 `LoadingCache[string,V]`를 wrap하고
+  cold miss 동안 short-lived Redis owner-token result envelope를 공유한다.
+- `redistestcontainer.Start(ctx,t)`는 workshop test용 Redis container lifecycle을 이미 소유한다.
 
-Prior lessons:
+prior lesson:
 
-- Keep examples scenario-first and thin.
-- Add `README.md` and `README.ko.md` together.
-- Use shared English-label PNG/SVG diagram assets for localized READMEs.
-- For coordination or concurrency behavior, include deterministic stress or
-  burst tests.
+- example은 scenario-first이고 thin하게 유지한다.
+- `README.md`와 `README.ko.md`를 함께 추가한다.
+- localized README에는 shared English-label PNG/SVG diagram asset을 사용한다.
+- coordination 또는 concurrency behavior에는 deterministic stress 또는 burst test를 포함한다.
 
 ## Architecture Pre-Design
 
-### Option A: Near-Cache Only
+### Option A: near-cache만 사용
 
-Use `cache.NewMemory` plus `redisnear.NewPubSub`. Peer writes publish
-invalidation, and peer reads reload from the authoritative store.
+`cache.NewMemory`와 `redisnear.NewPubSub`를 사용한다. peer write는 invalidation을 publish하고,
+peer read는 authoritative store에서 reload한다.
 
-Rejected because it does not demonstrate `rediscoord.NewStampedeCache` or prove
-cross-peer cold-miss stampede coordination.
+`rediscoord.NewStampedeCache`를 보여주지 못하고 cross-peer cold-miss stampede coordination을 증명하지 못하므로 거절한다.
 
-### Option B: Stampede Coordination Only
+### Option B: stampede coordination만 사용
 
-Use `cache.NewMemory` plus `rediscoord.NewStampedeCache`. Two peers can
-coordinate a cold-miss burst and run one loader.
+`cache.NewMemory`와 `rediscoord.NewStampedeCache`를 사용한다.
+두 peer는 cold-miss burst를 coordinate하고 loader 하나만 실행할 수 있다.
 
-Rejected because peer writes would not invalidate a different peer's local
-cache. That misses the near-cache requirement and roadmap wording.
+peer write가 다른 peer의 local cache를 invalidate하지 못하므로 거절한다.
+이는 near-cache requirement와 roadmap wording을 놓친다.
 
-### Option C: Near-Cache Wrapped By Stampede Coordination
+### Option C: stampede coordination으로 감싼 near-cache
 
-Each peer owns:
+각 peer는 다음 항목을 소유한다.
 
 1. `cache.NewMemory[string, Product]`
 2. `redisnear.NewPubSub[Product]` around the memory cache
 3. `rediscoord.NewStampedeCache[Product]` around the near-cache
 
-Accepted. This matches the `rediscoord` README behavior: waiters fill the
-wrapped near-cache through `GetOrLoad`, while writes use the near-cache `Set`
-path to publish invalidation to peers.
+채택한다. 이는 `rediscoord` README behavior와 맞다. waiter는 `GetOrLoad`를 통해 wrapped near-cache를 채우고,
+write는 near-cache `Set` path를 사용해 peer에 invalidation을 publish한다.
 
 ## Proposed Example Boundary
 
@@ -98,104 +92,101 @@ Package:
 examples/catalog-near-cache-redis/internal/catalogcache
 ```
 
-Domain model:
+domain model:
 
 - `Product`
   - `SKU string`
   - `Name string`
   - `Version int`
 - `Store`
-  - authoritative in-memory product source for tests and example code
+  - test 및 example code용 authoritative in-memory product source
   - concurrency-safe
 - `Peer`
   - `Name string`
-  - wraps a `cache.LoadingCache[string, Product]`
-  - reads through `GetProduct`
-  - writes through `PutProduct`
-  - closes near-cache subscriber through `Close`
+  - `cache.LoadingCache[string, Product]`를 wrap한다
+  - `GetProduct`로 read한다
+  - `PutProduct`로 write한다
+  - `Close`로 near-cache subscriber를 close한다
 
-Construction:
+construction:
 
-- `NewPeer(ctx, name, redisClient, namespace, store, options)` creates the
-  memory cache, near-cache, and stampede coordinator.
-- Options stay narrow:
+- `NewPeer(ctx, name, redisClient, namespace, store, options)`는 memory cache,
+  near-cache, stampede coordinator를 만든다.
+- option은 narrow하게 유지한다.
   - `TTL`
   - `LockTTL`
   - `ResultTTL`
   - `PollInterval`
-- Defaults keep tests fast but realistic.
+- default는 test를 빠르지만 realistic하게 유지한다.
 
 ## Behavioral Contract
 
 ### Read
 
-`Peer.GetProduct(ctx, sku)` calls the coordinated cache `GetOrLoad`. On miss,
-the loader reads the authoritative store and returns a `Product`.
+`Peer.GetProduct(ctx, sku)`는 coordinated cache `GetOrLoad`를 호출한다.
+miss에서는 loader가 authoritative store를 읽고 `Product`를 반환한다.
 
-Expected behavior:
+기대 behavior:
 
-- Hot local reads do not call the store again.
-- Cold cross-peer bursts for the same SKU run the backing loader once through
-  Redis coordination.
-- Missing SKU errors are returned and are not cached.
+- hot local read는 store를 다시 호출하지 않는다.
+- 같은 SKU에 대한 cold cross-peer burst는 Redis coordination으로 backing loader를 한 번만 실행한다.
+- missing SKU error는 반환되고 cache되지 않는다.
 
 ### Write
 
-`Peer.PutProduct(ctx, product)` writes the authoritative store, then updates the
-peer's near-cache via `Set`. The `Set` path publishes Redis invalidation.
+`Peer.PutProduct(ctx, product)`는 authoritative store에 write한 뒤 `Set`으로 peer의 near-cache를 update한다.
+`Set` path는 Redis invalidation을 publish한다.
 
-Expected behavior:
+기대 behavior:
 
-- The writer sees the fresh value locally.
-- Other peers delete their stale local entry.
-- The next peer read reloads the authoritative product.
+- writer는 fresh value를 local에서 본다.
+- 다른 peer는 stale local entry를 delete한다.
+- 다음 peer read는 authoritative product를 reload한다.
 
 ### Close
 
-`Peer.Close()` closes the near-cache subscriber and Redis Pub/Sub resources.
-Redis clients remain caller-owned and are closed by the test or application.
+`Peer.Close()`는 near-cache subscriber와 Redis Pub/Sub resource를 close한다.
+Redis client는 caller-owned로 남고 test 또는 application이 close한다.
 
-## Failure Modes And Risks
+## Failure Mode 및 Risk
 
 | Risk | Mitigation |
 |---|---|
-| Pub/Sub invalidation is asynchronous | Tests use bounded eventual assertions for peer cache miss/reload. |
-| Cold burst test becomes flaky | Use a blocking loader and wait until exactly one loader invocation is observed before releasing it. |
-| Goroutine/resource leak from near-cache subscribers | `Peer.Close` is idempotent and tests register cleanup for every peer. |
-| Redis client ownership is unclear | Peers do not close caller-owned Redis clients; tests close clients separately. |
-| Store errors are hidden by cache behavior | Missing SKU test verifies the sentinel/wrapped error path and no accidental cache fill. |
-| Diagram drift from source | Diagram nodes and routes are generated after implementation from actual `Peer`, store, cache, near-cache, coordinator, and Redis roles. |
+| Pub/Sub invalidation이 asynchronous | test는 peer cache miss/reload에 bounded eventual assertion을 사용한다. |
+| cold burst test가 flaky해짐 | blocking loader를 사용하고 정확히 loader invocation 하나가 관측될 때까지 기다린 뒤 release한다. |
+| near-cache subscriber의 goroutine/resource leak | `Peer.Close`는 idempotent이고 test는 모든 peer에 cleanup을 등록한다. |
+| Redis client ownership이 불명확 | peer는 caller-owned Redis client를 close하지 않는다. test가 client를 별도로 close한다. |
+| store error가 cache behavior에 가려짐 | missing SKU test가 sentinel/wrapped error path와 accidental cache fill 없음을 verify한다. |
+| source와 diagram drift | implementation 뒤 actual `Peer`, store, cache, near-cache, coordinator, Redis role에서 diagram node와 route를 생성한다. |
 
 ## Acceptance Criteria
 
-- `go test -count=1 ./examples/catalog-near-cache-redis/...` passes.
-- `go test -race -count=1 ./examples/catalog-near-cache-redis/...` passes.
-- Peer A write invalidates peer B's local cache.
-- Peer B reloads the authoritative product after invalidation.
-- A cold miss burst across two peers runs the backing loader exactly once.
-- Redis Testcontainers fixture is reused; no new container helper exists.
-- `go.mod` and `go.sum` do not gain new dependencies.
-- Root `README.md` and `README.ko.md` include the example row with
-  `English | 한국어` links.
-- Example `README.md` and `README.ko.md` both include scenario, architecture,
-  flow/sequence explanation, run command, and operational boundaries.
-- README diagrams embed PNG files only, with matching SVG, Graphviz DOT, plain,
-  Graphviz SVG, and Graphviz PNG evidence where node-and-connector diagrams are
-  added.
+- `go test -count=1 ./examples/catalog-near-cache-redis/...`가 pass한다.
+- `go test -race -count=1 ./examples/catalog-near-cache-redis/...`가 pass한다.
+- peer A write는 peer B의 local cache를 invalidate한다.
+- peer B는 invalidation 뒤 authoritative product를 reload한다.
+- 두 peer에 걸친 cold miss burst는 backing loader를 정확히 한 번 실행한다.
+- Redis Testcontainers fixture를 재사용하며 새 container helper는 없다.
+- `go.mod`와 `go.sum`에 새 dependency가 추가되지 않는다.
+- root `README.md`와 `README.ko.md`는 `English | 한국어` link가 있는 example row를 포함한다.
+- example `README.md`와 `README.ko.md`는 둘 다 scenario, architecture,
+  flow/sequence explanation, run command, operational boundary를 포함한다.
+- README diagram은 PNG file만 embed하고, node-and-connector diagram을 추가하는 경우 matching SVG,
+  Graphviz DOT, plain, Graphviz SVG, Graphviz PNG evidence를 가진다.
 
 ## DoD
 
 | Item | Status |
 |---|---|
-| Research note created | Planned |
-| Spec reviewed with P0=0/P1=0 | Planned |
-| Plan reviewed with P0=0/P1=0 | Planned |
-| Example implementation and tests added | Planned |
-| Targeted test and race test pass | Planned |
-| Full local validation passes or blocker recorded | Planned |
-| README locale set updated | Planned |
-| Diagram geometry gates and PNG inspections pass | Planned |
+| research note 생성 | Planned |
+| spec review P0=0/P1=0 | Planned |
+| plan review P0=0/P1=0 | Planned |
+| example implementation 및 test 추가 | Planned |
+| targeted test 및 race test pass | Planned |
+| full local validation pass 또는 blocker 기록 | Planned |
+| README locale set update | Planned |
+| diagram geometry gate 및 PNG inspection pass | Planned |
 | Step 6-R code review P0=0/P1=0 | Planned |
-| Lessons committed before PR | Planned |
-| PR body ends with `## DoD Status` | Planned |
-| GitHub CI passes | Planned |
+| PR 전 lesson commit | Planned |
+| PR body가 `## DoD Status`로 끝남 | Planned |
+| GitHub CI pass | Planned |
