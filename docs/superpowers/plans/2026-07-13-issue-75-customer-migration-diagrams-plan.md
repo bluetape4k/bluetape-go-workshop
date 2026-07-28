@@ -1,12 +1,12 @@
 # Issue #75 Customer Migration Diagrams Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Add three source-backed, bilingual README diagrams that explain the customer migration crash/restart scenario, runtime ownership, and chronological recovery sequence.
+**Goal:** customer migration crash/restart scenario, runtime ownership, chronological recovery sequence를 설명하는 source-backed bilingual README diagram 세 개를 추가한다.
 
-**Architecture:** The implementation changes documentation only. Each diagram is a hand-authored SVG in the canonical README asset directory, rendered to a paired 2x PNG with CairoSVG, audited independently, and embedded in the English and Korean README pair in identical order.
+**Architecture:** 구현은 documentation-only 변경이다. 각 diagram은 canonical README asset directory에 hand-authored SVG로 작성하고, CairoSVG로 paired 2x PNG를 렌더링하며, 독립 audit를 거친 뒤 English/Korean README pair에 같은 순서로 embed한다.
 
-**Tech Stack:** SVG, CairoSVG, XMLLint, bluetape-diagram audit scripts, Markdown, Go repository verification.
+**Tech Stack:** SVG, CairoSVG, XMLLint, bluetape-diagram audit script, Markdown, Go repository verification을 사용한다.
 
 ---
 
@@ -22,11 +22,11 @@
 - Modify: `examples/customer-migration-batch-integration/README.ko.md`
 - Modify: `docs/superpowers/specs/2026-07-13-issue-75-customer-migration-diagrams-design.md`
 
-## Task 1: Lock Source and Reference Evidence
+## Task 1: Source and Reference Evidence 고정
 
-- [ ] **Step 1: Confirm the approved source invariants**
+- [ ] **Step 1: 승인된 source invariant 확인**
 
-Read these files before drawing:
+그리기 전에 다음 file을 읽는다.
 
 ```bash
 sed -n '1,220p' examples/customer-migration-batch-integration/README.md
@@ -35,11 +35,11 @@ sed -n '1,620p' examples/customer-migration-batch-integration/internal/customerm
 sed -n '1,180p' examples/customer-migration-batch-integration/internal/customermigration/scheduler.go
 ```
 
-Expected evidence: manual run, `ChunkSize: 2`, checkpoint rollback to `NextIndex=2`, leader-held restart, duplicate no-op for `cust-1003`, retry/dead-letter behavior, and final `NextIndex=5` are present.
+기대 evidence: manual run, `ChunkSize: 2`, checkpoint rollback to `NextIndex=2`, leader-held restart, duplicate no-op for `cust-1003`, retry/dead-letter behavior, final `NextIndex=5`가 존재한다.
 
-- [ ] **Step 2: Open the authoritative visual references at full size**
+- [ ] **Step 2: authoritative visual reference를 full size로 열기**
 
-Open:
+연다.
 
 ```text
 /Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/workflow-image-upload.png
@@ -48,13 +48,13 @@ Open:
 docs/images/readme-diagrams/account-migration-checkpoint-restart-sequence.png
 ```
 
-Expected evidence: light canvas, handwritten title, readable cards, muted semantic palette, explicit same-color arrowheads, dashed lifelines, activation bars, visible numbered message pills, and transparent chronological frames.
+기대 evidence: light canvas와 handwritten title을 사용한다. card는 읽기 쉬워야 하고, muted semantic palette, same-color arrowhead, dashed lifeline, activation bar, numbered message pill, transparent chronological frame이 보여야 한다.
 
-## Task 2: Create and Prove the Scenario Diagram
+## Task 2: Scenario Diagram 생성 및 증명
 
-- [ ] **Step 1: Create the scenario SVG**
+- [ ] **Step 1: scenario SVG 생성**
 
-Create `customer-migration-batch-integration-scenario.svg` as a 1200x600 light-theme workflow with these numbered stages:
+`customer-migration-batch-integration-scenario.svg`를 1200x600 light-theme workflow로 생성하고 다음 numbered stage를 포함한다.
 
 1. `Manual Start` — `crash_after_new_writes=3`
 2. `Commit Chunk 1` — `cust-1001 + cust-1002`, `checkpoint = 2`
@@ -62,11 +62,11 @@ Create `customer-migration-batch-integration-scenario.svg` as a 1200x600 light-t
 4. `Leader-held Restart` — `restore index 2`, `cust-1003 duplicate no-op`
 5. `Finish Migration` — `cust-1004 dead letter`, `cust-1005 written`, `checkpoint = 5`
 
-Add a bottom outcome strip with `migrated: 1001, 1002, 1003, 1005`, `dead letter: 1004`, and `status: completed`. Use 14x14 primary progression heads, muted red for the crash branch, muted violet for restart, and muted olive for completion.
+bottom outcome strip에는 `migrated: 1001, 1002, 1003, 1005`, `dead letter: 1004`, `status: completed`를 추가한다. primary progression head는 14x14를 사용한다. crash branch에는 muted red, restart에는 muted violet, completion에는 muted olive를 사용한다.
 
-- [ ] **Step 2: Validate and render the scenario asset**
+- [ ] **Step 2: scenario asset 검증 및 렌더링**
 
-Run:
+실행한다.
 
 ```bash
 xmllint --noout docs/images/readme-diagrams/customer-migration-batch-integration-scenario.svg
@@ -77,56 +77,56 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-end
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-mixed-corner-audit.py" docs/images/readme-diagrams/customer-migration-batch-integration-scenario.svg
 ```
 
-Expected: XML/render success, five numbered cards, four primary progression connectors, zero diagonal failures, zero endpoint failures, and zero mixed-corner failures.
+기대값: XML/render success, numbered card 다섯 개, primary progression connector 네 개, diagonal failure 0개, endpoint failure 0개, mixed-corner failure 0개.
 
-- [ ] **Step 3: Inspect the full-size scenario PNG**
+- [ ] **Step 3: full-size scenario PNG 검사**
 
-Open the 2400x1200 rendered PNG at original detail. Verify all labels fit, the crash and restart distinction is immediate, arrows attach perpendicularly with matching heads, no line crosses a card, and bottom whitespace is balanced.
+2400x1200 rendered PNG를 original detail로 연다. 모든 label이 맞는지, crash와 restart 구분이 즉시 보이는지, arrow가 matching head로 perpendicular하게 붙는지, line이 card를 가로지르지 않는지, bottom whitespace가 균형적인지 확인한다.
 
-- [ ] **Step 4: Commit the scenario asset**
+- [ ] **Step 4: scenario asset commit**
 
 ```bash
 git add docs/images/readme-diagrams/customer-migration-batch-integration-scenario.svg docs/images/readme-diagrams/customer-migration-batch-integration-scenario.png
 git commit -m "docs: add customer migration scenario diagram"
 ```
 
-## Task 3: Create and Prove the Architecture Diagram
+## Task 3: Architecture Diagram 생성 및 증명
 
-- [ ] **Step 1: Create the architecture SVG**
+- [ ] **Step 1: architecture SVG 생성**
 
-Create `customer-migration-batch-integration-architecture.svg` as a 1400x900 static ownership view with four horizontal layers:
+`customer-migration-batch-integration-architecture.svg`를 1400x900 static ownership view로 생성하고 네 horizontal layer를 둔다.
 
 - `HTTP boundary`: Operator, Gin Router, bounded JSON/status mapping.
 - `Operations lifecycle`: Service, active-run guard/cancel/snapshots, Leader Gate.
-- `Batch execution`: Job + Step, Reader, Processor with retry/skip, Writer with idempotent sink behavior.
+- `Batch execution`: Job + Step, Reader, retry/skip을 수행하는 Processor, idempotent sink behavior를 가진 Writer.
 - `Process-local state`: Checkpoint Store, Customer Sink, Dead-Letter Store, latest report/status projection.
 
-Use solid blue ownership arrows and dashed violet scheduled-admission dependencies with an in-image legend. Keep all connectors orthogonal and connect concrete cards rather than lane borders.
+solid blue ownership arrow와 dashed violet scheduled-admission dependency를 사용하고 in-image legend를 넣는다. 모든 connector는 orthogonal이어야 하며 lane border가 아니라 concrete card에 연결한다.
 
-- [ ] **Step 2: Validate and render the architecture asset**
+- [ ] **Step 2: architecture asset 검증 및 렌더링**
 
-Run the XML, CairoSVG, connector, `--fail-diagonal` geometry, endpoint, and mixed-corner commands from Task 2 against the architecture SVG.
+Task 2의 XML, CairoSVG, connector, `--fail-diagonal` geometry, endpoint, mixed-corner command를 architecture SVG에 대해 실행한다.
 
-Expected: XML/render success, at least ten cards, meaningful nonzero connector/card/path counts, zero diagonal failures, zero endpoint failures, and zero mixed-corner failures.
+기대값: XML/render success, card 최소 10개, 의미 있는 nonzero connector/card/path count, diagonal failure 0개, endpoint failure 0개, mixed-corner failure 0개.
 
-- [ ] **Step 3: Inspect the full-size architecture PNG**
+- [ ] **Step 3: full-size architecture PNG 검사**
 
-Open the 2800x1800 PNG at original detail. Verify ownership and dependency legend parity, peer-card alignment, no connector runs along a layer title or card border, no card intrusion, and even outer margins.
+2800x1800 PNG를 original detail로 연다. ownership/dependency legend parity, peer-card alignment, layer title이나 card border를 타고 흐르는 connector 없음, card intrusion 없음, 균일한 outer margin을 확인한다.
 
-- [ ] **Step 4: Commit the architecture asset**
+- [ ] **Step 4: architecture asset commit**
 
 ```bash
 git add docs/images/readme-diagrams/customer-migration-batch-integration-architecture.svg docs/images/readme-diagrams/customer-migration-batch-integration-architecture.png
 git commit -m "docs: add customer migration architecture diagram"
 ```
 
-## Task 4: Create and Prove the Sequence Diagram
+## Task 4: Sequence Diagram 생성 및 증명
 
-- [ ] **Step 1: Create the sequence SVG**
+- [ ] **Step 1: sequence SVG 생성**
 
-Create `customer-migration-batch-integration-sequence.svg` as a 1600x1200 chronological diagram with participants `Operator`, `Gin + Service`, `Leader Gate + Batch`, `Writer + Sink`, and `Checkpoint + Dead Letters`.
+`customer-migration-batch-integration-sequence.svg`를 1600x1200 chronological diagram으로 생성하고 participant `Operator`, `Gin + Service`, `Leader Gate + Batch`, `Writer + Sink`, `Checkpoint + Dead Letters`를 둔다.
 
-Show visible numbered messages in this order:
+visible numbered message는 다음 순서를 따른다.
 
 1. `POST /batch/start`
 2. `load checkpoint: none`
@@ -145,42 +145,42 @@ Show visible numbered messages in this order:
 15. `save next_index=5`
 16. `200 completed report`
 
-Use transparent `alt writer crash` and `restart while leader` frames, five dashed lifelines, activation bars, the established 13x13 user-space per-color message markers with 10x10 filled triangles, and labels above continuous message lines.
+transparent `alt writer crash`와 `restart while leader` frame, dashed lifeline 다섯 개, activation bar, established 13x13 user-space per-color message marker와 10x10 filled triangle, continuous message line 위 label을 사용한다.
 
-- [ ] **Step 2: Validate and render the sequence asset**
+- [ ] **Step 2: sequence asset 검증 및 렌더링**
 
-Run the common XML/render/audit commands and:
+common XML/render/audit command와 다음을 실행한다.
 
 ```bash
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/bluetape-diagram/scripts/diagram-sequence-style-audit.py" docs/images/readme-diagrams/customer-migration-batch-integration-sequence.svg
 ```
 
-Expected: five participants, five lifelines, visible activation bars, sixteen numbered labels, two transparent chronological frames, explicit marker color parity, zero common audit failures, and a passing sequence-style audit.
+기대값: participant 다섯 개, lifeline 다섯 개, visible activation bar, numbered label 16개, transparent chronological frame 두 개, explicit marker color parity, common audit failure 0개, sequence-style audit PASS.
 
-- [ ] **Step 3: Inspect the full-size sequence PNG**
+- [ ] **Step 3: full-size sequence PNG 검사**
 
-Open the 3200x2400 PNG at original detail. Verify every number and label is readable above its own line, lines remain continuous, frames are transparent and chronological, activation bars do not cover arrowheads, returns point left, and no footer overlaps a frame.
+3200x2400 PNG를 original detail로 연다. 모든 number와 label이 자기 line 위에서 읽히는지, line이 continuous인지, frame이 transparent이며 chronological인지, activation bar가 arrowhead를 가리지 않는지, return이 왼쪽을 향하는지, footer가 frame과 overlap하지 않는지 확인한다.
 
-- [ ] **Step 4: Commit the sequence asset**
+- [ ] **Step 4: sequence asset commit**
 
 ```bash
 git add docs/images/readme-diagrams/customer-migration-batch-integration-sequence.svg docs/images/readme-diagrams/customer-migration-batch-integration-sequence.png
 git commit -m "docs: add customer migration sequence diagram"
 ```
 
-## Task 5: Embed the Assets in Both README Locales
+## Task 5: 두 README Locale에 Asset Embed
 
-- [ ] **Step 1: Update the English README**
+- [ ] **Step 1: English README 업데이트**
 
-Embed the scenario after the existing crash/restart walkthrough, add an `Architecture` section before `Operations Contract`, and add a `Crash and Restart Sequence` section before `Runbook Notes`. Explain that the architecture is an ownership view and the sequence shows the manual failure followed by a leader-held restart.
+existing crash/restart walkthrough 뒤에 scenario를 embed한다. `Operations Contract` 앞에 `Architecture` section을 추가하고, `Runbook Notes` 앞에 `Crash and Restart Sequence` section을 추가한다. architecture는 ownership view이며 sequence는 manual failure 뒤 leader-held restart를 보여준다고 설명한다.
 
-- [ ] **Step 2: Update the Korean README**
+- [ ] **Step 2: Korean README 업데이트**
 
-Add the same three PNG paths in the same order under natural Korean headings and source-equivalent explanations. Preserve `cust-*`, `NextIndex`, endpoint paths, error codes, and checkpoint values exactly.
+같은 PNG path 세 개를 같은 순서로 자연스러운 한국어 heading과 source-equivalent explanation 아래에 추가한다. `cust-*`, `NextIndex`, endpoint path, error code, checkpoint value는 정확히 보존한다.
 
-- [ ] **Step 3: Verify locale and link parity**
+- [ ] **Step 3: locale 및 link parity 검증**
 
-Run:
+실행한다.
 
 ```bash
 diff <(rg -o 'readme-diagrams/[^) ]+\.png' examples/customer-migration-batch-integration/README.md) <(rg -o 'readme-diagrams/[^) ]+\.png' examples/customer-migration-batch-integration/README.ko.md)
@@ -188,9 +188,9 @@ for asset in $(rg -o 'readme-diagrams/[^) ]+\.png' examples/customer-migration-b
 git diff --check
 ```
 
-Expected: no diff output, all six assets resolve, and diff check exits zero.
+기대값: diff output 없음, asset 여섯 개 모두 resolve, diff check exit zero.
 
-- [ ] **Step 4: Commit README integration and approved artifacts**
+- [ ] **Step 4: README integration 및 approved artifact commit**
 
 ```bash
 git add examples/customer-migration-batch-integration/README.md examples/customer-migration-batch-integration/README.ko.md docs/superpowers/specs/2026-07-13-issue-75-customer-migration-diagrams-design.md docs/superpowers/plans/2026-07-13-issue-75-customer-migration-diagrams-plan.md
@@ -199,24 +199,24 @@ git commit -m "docs: explain customer migration diagrams"
 
 ## Task 6: Final Verification and Delivery
 
-- [ ] **Step 1: Run focused normal and race tests**
+- [ ] **Step 1: focused normal 및 race test 실행**
 
 ```bash
 go test -count=1 ./examples/customer-migration-batch-integration/...
 go test -race -count=1 ./examples/customer-migration-batch-integration/...
 ```
 
-Expected: every package passes with zero failures and the race detector reports no race.
+기대값: 모든 package가 zero failure로 pass하고 race detector가 race를 보고하지 않는다.
 
-- [ ] **Step 2: Run the authoritative repository gate**
+- [ ] **Step 2: authoritative repository gate 실행**
 
 ```bash
 make ci
 ```
 
-Expected: formatting, tidy, vet, lint, test, and race gates pass.
+기대값: formatting, tidy, vet, lint, test, race gate가 pass한다.
 
-- [ ] **Step 3: Review the final diff and checklist ledger**
+- [ ] **Step 3: final diff 및 checklist ledger review**
 
 ```bash
 git status --short
@@ -225,12 +225,12 @@ git diff --stat develop...HEAD
 git log --oneline develop..HEAD
 ```
 
-Expected: only the approved spec, plan, README pair, and six diagram assets differ; all DIA, Type E, Go public-evidence, and workflow rows have concrete evidence with no blocker.
+기대값: approved spec, plan, README pair, diagram asset 여섯 개만 differ한다. 모든 DIA, Type E, Go public-evidence, workflow row가 구체적 evidence를 가지며 blocker가 없다.
 
-- [ ] **Step 4: Push and create the PR**
+- [ ] **Step 4: push 및 PR 생성**
 
-Push `docs/issue-75-customer-migration-diagrams`, create an English PR referencing #75 and milestone `0.5.0`, assign the repository owner, and make `## DoD Status` the final level-two heading.
+`docs/issue-75-customer-migration-diagrams`를 push하고 #75와 milestone `0.5.0`을 참조하는 English PR을 생성한다. repository owner를 assign하고 `## DoD Status`를 final level-two heading으로 만든다.
 
-- [ ] **Step 5: Wait for CI and stop before merge**
+- [ ] **Step 5: CI 대기 및 merge 전 중단**
 
-Verify live PR body, labels, milestone, assignee, checks, review threads, and head SHA. Report the PR URL and local worktree path. Do not merge or delete the remote branch until the user explicitly approves the merge.
+live PR body, label, milestone, assignee, check, review thread, head SHA를 확인한다. PR URL과 local worktree path를 보고한다. 사용자가 명시적으로 merge를 승인하기 전까지 merge하거나 remote branch를 삭제하지 않는다.
