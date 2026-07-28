@@ -879,11 +879,10 @@ git commit -m "feat: add language routing preview command"
 
 ## Task 4: Bilingual Lesson and Root Navigation
 
-**Complexity:** Medium. This task must match real output and preserve locale parity.
+**Complexity:** Medium. 이 작업은 실제 output과 맞아야 하며 locale parity를 보존해야 한다.
 
-**Required skills:** `bluetape-writer`; `bluetape-diagram` is N/A because the
-approved spec selects a compact routing table and linear prose instead of an
-asset.
+**Required skills:** `bluetape-writer`; approved spec이 asset 대신 compact routing table과 linear prose를 선택했으므로
+`bluetape-diagram`은 N/A이다.
 
 **Files:**
 
@@ -892,45 +891,41 @@ asset.
 - Modify: `README.md`
 - Modify: `README.ko.md`
 
-- [x] **Step 1: Capture actual deterministic output**
+- [x] **Step 1: 실제 deterministic output 캡처**
 
-Run both `go run` commands from Task 3. Select representative JSON directly
-from stdout for English/Korean shared moderation, Japanese tokenization,
-Chinese unsupported review, mixed ordered reasons, and the separately labeled
-threshold `1.0` low-confidence fallback. Do not
-hand-invent numeric confidences or byte offsets.
+Task 3의 `go run` command 두 개를 모두 실행한다. English/Korean shared moderation,
+Japanese tokenization, Chinese unsupported review, mixed ordered reasons, 별도로 표시된 threshold `1.0`
+low-confidence fallback에 사용할 representative JSON은 stdout에서 직접 선택한다.
+numeric confidence나 byte offset을 손으로 만들어내면 안 된다.
 
-- [x] **Step 2: Write the English README**
+- [x] **Step 2: English README 작성**
 
-Use title `# multilingual-language-routing`, then `English | [한국어](README.ko.md)`.
-Include these exact sections:
+title은 `# multilingual-language-routing`를 사용하고, 바로 다음에 `English | [한국어](README.ko.md)`를 둔다.
+다음 section을 정확히 포함한다.
 
-1. Package Lesson: detector evidence versus application route policy.
-2. Routing Matrix: the six spec rows and exact machine values.
-3. Evidence Contract: four descending confidences, ISO codes, Latin/Hangul/Kana/Han hints, mixed section UTF-8 byte spans.
-4. Run: both lazy and `--preload` commands plus actual output.
-5. Test: focused normal/race commands and exact 18-call bounded contract.
-6. Lifecycle and Cost: construct once/reuse, qualitative preload tradeoff,
-   three public evidence views with repeated work/allocation, production
-   gather-only-needed guidance, and no in-process startup/memory claim.
-7. Boundaries: no processor execution, no security/compliance decision, original-text redaction/logging/access-control duty, no certainty claim.
+1. Package Lesson: detector evidence와 application route policy의 차이.
+2. Routing Matrix: 여섯 spec row와 정확한 machine value.
+3. Evidence Contract: confidence 네 개의 내림차순, ISO code, Latin/Hangul/Kana/Han hint, mixed section UTF-8 byte span.
+4. Run: lazy와 `--preload` command 및 실제 output.
+5. Test: focused normal/race command와 정확한 18-call bounded contract.
+6. Lifecycle and Cost: construct once/reuse, 정성적 preload tradeoff, repeated work/allocation을 수반하는 세 public evidence view,
+   production gather-only-needed guidance, 그리고 in-process startup/memory claim 없음.
+7. Boundaries: processor execution 없음, security/compliance decision 없음, original-text redaction/logging/access-control 책임, certainty claim 없음.
 
-- [x] **Step 3: Write the Korean README with source-equivalent meaning**
+- [x] **Step 3: source-equivalent 의미를 가진 Korean README 작성**
 
-Use title `# multilingual-language-routing`, then `[English](README.md) | 한국어`.
-Preserve every command, route/reason value, code symbol, numeric threshold, and
-boundary from the English README. Use natural Korean technical prose; do not
-abbreviate lifecycle, security, or privacy guidance.
+title은 `# multilingual-language-routing`를 사용하고, 바로 다음에 `[English](README.md) | 한국어`를 둔다.
+English README의 모든 command, route/reason value, code symbol, numeric threshold, boundary를 보존한다.
+자연스러운 한국어 기술 문장으로 쓰되 lifecycle, security, privacy guidance를 축약하지 않는다.
 
-- [x] **Step 4: Update root README navigation in milestone order**
+- [x] **Step 4: milestone 순서에 맞춰 root README navigation 업데이트**
 
-Insert `examples/multilingual-language-routing` immediately after
-`examples/japanese-search-preparation` in both root tables and run sections.
-Use English public prose in `README.md` and source-equivalent Korean in
-`README.ko.md`. Add both run commands and both focused test commands without
-reordering existing examples.
+두 root table과 run section에서 `examples/multilingual-language-routing`를
+`examples/japanese-search-preparation` 바로 뒤에 삽입한다. `README.md`에는 English public prose를,
+`README.ko.md`에는 source-equivalent Korean을 사용한다. 기존 example 순서를 바꾸지 말고 두 run command와
+두 focused test command를 모두 추가한다.
 
-- [x] **Step 5: Verify documentation against the program**
+- [x] **Step 5: program 기준으로 documentation 검증**
 
 ```bash
 go run ./examples/multilingual-language-routing
@@ -938,11 +933,11 @@ go run ./examples/multilingual-language-routing --preload
 git diff --check
 ```
 
-Compare README snippets to stdout field-for-field. Search both locales for all
-route values, all six review reasons, `0.70`, `8`, `--preload`, `UTF-8`,
-`authentication`, `authorization`, `compliance`, and redaction/logging wording.
+README snippet을 stdout과 field-by-field로 비교한다. 두 locale에서 모든 route value, 여섯 review reason,
+`0.70`, `8`, `--preload`, `UTF-8`, `authentication`, `authorization`, `compliance`,
+그리고 redaction/logging 문구를 검색한다.
 
-- [x] **Step 6: Commit Task 4**
+- [x] **Step 6: Task 4 commit**
 
 ```bash
 git add README.md README.ko.md \
@@ -953,17 +948,17 @@ git commit -m "docs: explain multilingual language routing"
 
 ## Task 5: Verification, Review, Lesson, and Delivery
 
-**Complexity:** High workflow gate; no feature behavior should be added here.
+**Complexity:** High workflow gate. 여기서는 feature behavior를 추가하면 안 된다.
 
-**Required skills:** `verification-before-completion`, Type A verifier and six
-code-review perspectives, then `finishing-a-development-branch` for delivery.
+**Required skills:** `verification-before-completion`, Type A verifier와 여섯 code-review perspective,
+그리고 delivery를 위한 `finishing-a-development-branch`.
 
 **Files:**
 
 - Create: `docs/lessons/2026-07-12-issue-119-multilingual-language-routing.md`
 - Optionally create only when useful: `docs/review/2026-07-12-issue-119-multilingual-language-routing-review.md`
 
-- [x] **Step 1: Run focused verification from scratch**
+- [x] **Step 1: focused verification을 처음부터 실행**
 
 ```bash
 go test -count=1 ./examples/multilingual-language-routing/...
@@ -972,12 +967,12 @@ go run ./examples/multilingual-language-routing
 go run ./examples/multilingual-language-routing --preload
 ```
 
-Every command must return an observed exit code 0. Lost process handles or
-PASS-looking output without an exit code are invalid and must be rerun.
+모든 command는 관찰된 exit code 0을 반환해야 한다. process handle을 잃었거나 exit code 없이 PASS처럼 보이는 output은
+유효하지 않으므로 다시 실행해야 한다.
 
-- [x] **Step 2: Run repository gates in authoritative order**
+- [x] **Step 2: authoritative order로 repository gate 실행**
 
-Run targeted cheap checks first, then the single authoritative gate:
+targeted cheap check를 먼저 실행한 뒤, 단일 authoritative gate를 실행한다.
 
 ```bash
 make fmt-check
@@ -988,110 +983,100 @@ make ci
 git diff --check origin/develop...HEAD
 ```
 
-`make ci` owns the final full test/race proof. Do not run heavyweight commands
-in parallel across agents or worktrees. A fail-then-pass requires root-cause
-investigation before acceptance.
+`make ci`가 최종 full test/race proof를 소유한다. heavyweight command를 여러 agent나 worktree에서 병렬 실행하지 않는다.
+fail-then-pass가 발생하면 수락하기 전에 root-cause investigation이 필요하다.
 
-- [x] **Step 3: Audit exact diff and conditional hazards**
+- [x] **Step 3: exact diff 및 conditional hazard audit**
 
-Confirm only the planned example, README pair, spec/plan, `.gitignore`, and
-lesson/review artifacts changed. Record concrete N/A evidence:
+planned example, README pair, spec/plan, `.gitignore`, lesson/review artifact만 변경되었는지 확인한다.
+구체적인 N/A evidence를 기록한다.
 
-- new Go module/registration: N/A, this is a package under the existing module;
-- dependencies/catalog: N/A, `go.mod` and `go.sum` unchanged;
-- workflow/Nightly/coverage: N/A, existing `go test ./...` discovery covers it;
-- Docker/Testcontainers/database/HTTP: N/A, none added;
-- public bluetape-go API/CHANGELOG: N/A, workshop-internal package only;
-- diagram asset: N/A, approved small table/linear flow is clearer.
+- new Go module/registration: N/A, existing module 아래의 package이다.
+- dependencies/catalog: N/A, `go.mod`와 `go.sum`이 변경되지 않는다.
+- workflow/Nightly/coverage: N/A, 기존 `go test ./...` discovery가 이를 포함한다.
+- Docker/Testcontainers/database/HTTP: N/A, 추가하지 않는다.
+- public bluetape-go API/CHANGELOG: N/A, workshop-internal package만 다룬다.
+- diagram asset: N/A, 승인된 small table/linear flow가 더 명확하다.
 
-- [x] **Step 4: Run spec/plan verifier and pre-PR review**
+- [x] **Step 4: spec/plan verifier 및 pre-PR review 실행**
 
-The verifier maps every spec acceptance row and every plan checkbox to current
-files and fresh commands. Then run performance, stability, security,
-operator/Ops, developer/API, and user/caller code-review lenses plus main
-integration. P0/P1 blocks delivery; fix, rerun focused proof, and rerun only
-affected lenses. Resolve or justify every P2/P3.
+verifier는 모든 spec acceptance row와 모든 plan checkbox를 현재 file 및 fresh command에 매핑한다.
+그다음 performance, stability, security, operator/Ops, developer/API, user/caller code-review lens와
+main integration을 실행한다. P0/P1은 delivery를 막는다. 수정 후 focused proof를 다시 실행하고, 영향받은 lens만 다시 실행한다.
+모든 P2/P3는 해결하거나 정당화한다.
 
-- [x] **Step 5: Write and commit the lesson**
+- [x] **Step 5: lesson 작성 및 commit**
 
-Write concise context, decision, surprising detector/fixture or concurrency
-evidence, outcome, exact verification commands, review misses, and future guard.
-Commit it before PR creation:
+간결한 context, decision, 예상 밖의 detector/fixture 또는 concurrency evidence, outcome, 정확한 verification command,
+review miss, future guard를 작성한다. PR 생성 전에 commit한다.
 
 ```bash
 git add docs/lessons/2026-07-12-issue-119-multilingual-language-routing.md
 git commit -m "docs: record language routing lessons"
 ```
 
-- [ ] **Step 6: Push and create the PR**
+- [ ] **Step 6: push 및 PR 생성**
 
-Push the feature branch. Create an English PR assigned to `debop`, milestone
-`0.8.0`, labels `enhancement` and `examples`, resolving #119. Use the repository
-PR template, explain why/what before validation, and end with `## DoD Status`.
-Verify live title, body, base/head, assignee, milestone, labels, and issue link.
+feature branch를 push한다. #119를 해결하는 English PR을 생성하고 `debop`에게 assign하며 milestone `0.8.0`,
+label `enhancement`, `examples`를 지정한다. repository PR template을 사용하고 validation보다 앞에서 why/what을 설명하며
+`## DoD Status`로 끝낸다. live title, body, base/head, assignee, milestone, label, issue link를 확인한다.
 
-- [ ] **Step 7: Converge live PR review and CI**
+- [ ] **Step 7: live PR review 및 CI 수렴**
 
-Run the post-PR review against the actual PR diff. Monitor required checks until
-all conclude SUCCESS. After green, reread reviews and unresolved threads; any
-new feedback reopens implementation/review. Update the final PR DoD status with
-fresh evidence.
+actual PR diff를 대상으로 post-PR review를 실행한다. required check가 모두 SUCCESS로 끝날 때까지 모니터링한다.
+green 이후 review와 unresolved thread를 다시 읽는다. 새 feedback은 implementation/review를 다시 연다.
+fresh evidence로 최종 PR DoD status를 업데이트한다.
 
-- [ ] **Step 8: Merge, update umbrella issue, sync, and clean**
+- [ ] **Step 8: merge, umbrella issue 업데이트, sync, cleanup**
 
-Under the user's approved delivery scope, use the workspace-default rebase merge
-after CI/review convergence. Verify #119 closed. Update umbrella #34
-to check #119 only after live closure. Sync the real local `develop` checkout,
-verify its SHA equals `origin/develop`, then remove the integrated worktree and
-local feature branch only after ancestry or patch-equivalence is proven.
+사용자가 승인한 delivery scope 안에서 CI/review 수렴 후 workspace-default rebase merge를 사용한다.
+#119가 닫혔는지 확인한다. live closure 이후에만 umbrella #34에서 #119를 check한다.
+실제 local `develop` checkout을 sync하고 SHA가 `origin/develop`와 같은지 확인한다.
+그다음 ancestry 또는 patch-equivalence가 증명된 뒤 integrated worktree와 local feature branch를 제거한다.
 
-- [ ] **Step 9: Final DoD report**
+- [ ] **Step 9: 최종 DoD 보고**
 
-Report every A-01 through A-11 and CG-01 through CG-17 row with evidence or
-concrete N/A, P0/P1 convergence, focused/full commands, PR/CI/review/merge
-state, issue metadata, local/upstream SHA equality, and clean worktree list.
-Required format: `Required checks: X/Y; N/A: N; Blocked: 0`.
+A-01부터 A-11, CG-01부터 CG-17까지 모든 row를 evidence 또는 구체적인 N/A와 함께 보고한다.
+P0/P1 convergence, focused/full command, PR/CI/review/merge state, issue metadata,
+local/upstream SHA equality, clean worktree list를 포함한다.
+필수 format: `Required checks: X/Y; N/A: N; Blocked: 0`.
 
 ## Plan Review Gate
 
-Before Task 1, review this plan through performance, stability, security,
-operator/Ops, developer/API, and user/caller lenses plus main integration.
-Verify every spec row maps to an earlier-producing task and exact command, no
-task needs a later file, and all triggered risks have rerun points. Close only
-at P0=0/P1=0 and commit the reviewed plan before code.
+Task 1 전에 performance, stability, security, operator/Ops, developer/API, user/caller lens와
+main integration으로 이 plan을 review한다. 모든 spec row가 더 앞에서 산출되는 task 및 정확한 command에 매핑되는지,
+나중 file이 필요한 task가 없는지, trigger된 모든 risk에 rerun point가 있는지 확인한다.
+P0=0/P1=0일 때만 닫고, code 전에 reviewed plan을 commit한다.
 
 ## Plan Review Results
 
-Native read-only performance, security, and developer/API lanes returned
-evidence-backed findings. Stability/Ops and user/caller lanes did not respond
-after bounded waits and immediate-return requests, so the main session applied
-the model-routing timeout fallback for those perspectives and operator/Ops.
+native read-only performance, security, developer/API lane은 evidence-backed finding을 반환했다.
+Stability/Ops와 user/caller lane은 bounded wait와 immediate-return request 이후에도 응답하지 않았다.
+따라서 main session은 해당 perspective와 operator/Ops에 model-routing timeout fallback을 적용했다.
 
 | Priority | Lens | Evidence | Resolution |
 |---|---|---|---|
-| P1 | Performance | The original concurrency helper computed expectations with the same lazy router before concurrent calls. | Removed all target-router prewarming; a focused process invokes a fresh lazy router first and validates hard-coded route/reason contracts plus cross-round equality. |
-| P1 | Performance | `maxActive` measured goroutines parked before the release gate, not overlap inside `Router.Route`. | Removed the metric and overlap claim; assert six ready participants, exact 18 outcomes, three identical results per request, and race cleanliness. |
-| P1 | Developer/API | `<0 || >1` accepts `math.NaN()`. | Added a RED NaN configuration case and `math.IsNaN` rejection. |
-| P1 | Developer/API | Plan used `Unknown` while the approved machine value is `unknown`. | Changed the fixture and implementation to lowercase and asserted empty ISO codes. |
-| P2 | Performance | “Three detector passes” understated the work behind three public APIs. | Renamed these three public evidence views and documented repeated detector work/projection allocation with no throughput claim. |
-| P2 | Performance/Ops | In-process lazy/preloaded comparison cannot prove startup time or memory behavior. | Scoped proof to option wiring and behavioral equality; lifecycle tradeoffs remain qualitative upstream guidance. |
-| P2 | Developer/API | The stale spec promised overlap assertions after the concurrency contract changed. | Updated the spec to ready-gate, exact-result, determinism, and race proof. |
-| P2 | Developer/API | Positional-argument rejection was tested after its implementation step. | Moved the escaped positional-argument test into the initial RED CLI suite. |
-| P3 | Security | `%v` could echo newline/control characters into diagnostics. | Changed to `%q` and added an exact escaped stderr test with empty stdout. |
-| P3 | Developer/API | The `unicode/utf8` import was implicit. | Added the exact import instruction to the implementation step. |
+| P1 | Performance | 기존 concurrency helper는 concurrent call 전에 같은 lazy router로 expectation을 계산했다. | 모든 target-router prewarming을 제거했다. focused process가 fresh lazy router를 먼저 호출하고 hard-coded route/reason contract와 cross-round equality를 검증한다. |
+| P1 | Performance | `maxActive`는 `Router.Route` 내부 overlap이 아니라 release gate 전에 parked된 goroutine을 측정했다. | metric과 overlap claim을 제거했다. 준비된 participant 여섯 개, 정확한 outcome 18개, request별 동일 result 세 개, race cleanliness를 assert한다. |
+| P1 | Developer/API | `<0 || >1`은 `math.NaN()`을 허용한다. | RED NaN configuration case와 `math.IsNaN` rejection을 추가했다. |
+| P1 | Developer/API | plan은 approved machine value가 `unknown`인데 `Unknown`을 사용했다. | fixture와 implementation을 lowercase로 바꾸고 empty ISO code를 assert했다. |
+| P2 | Performance | “Three detector passes”는 세 public API 뒤의 작업량을 과소표현했다. | 이를 세 public evidence view로 이름 바꾸고 throughput claim 없이 repeated detector work/projection allocation을 문서화했다. |
+| P2 | Performance/Ops | in-process lazy/preloaded 비교는 startup time이나 memory behavior를 증명할 수 없다. | proof를 option wiring과 behavioral equality로 제한했다. lifecycle tradeoff는 정성적 upstream guidance로 유지한다. |
+| P2 | Developer/API | stale spec은 concurrency contract 변경 뒤에도 overlap assertion을 약속했다. | spec을 ready-gate, exact-result, determinism, race proof로 업데이트했다. |
+| P2 | Developer/API | positional-argument rejection은 implementation step 뒤에서야 테스트됐다. | escaped positional-argument test를 initial RED CLI suite로 옮겼다. |
+| P3 | Security | `%v`는 diagnostic에 newline/control character를 그대로 echo할 수 있다. | `%q`로 바꾸고 empty stdout을 포함한 exact escaped stderr test를 추가했다. |
+| P3 | Developer/API | `unicode/utf8` import가 암묵적이었다. | implementation step에 정확한 import instruction을 추가했다. |
 
-Main integration confirmed task ordering, spec traceability, bilingual parity,
-fail-closed routing, lifecycle/rollback evidence, main-session commit ownership,
-and rebase merge/sync boundaries. Latest convergence: P0=0, P1=0. All listed
-P2/P3 findings are resolved in this plan.
+main integration은 task ordering, spec traceability, bilingual parity, fail-closed routing,
+lifecycle/rollback evidence, main-session commit ownership, rebase merge/sync boundary를 확인했다.
+최신 convergence: P0=0, P1=0. 나열된 모든 P2/P3 finding은 이 plan에서 해결됐다.
 
 ## Execution Stop Conditions
 
-- Stop if the pinned low-confidence fixture is not detected as Korean below the
-  explicit `1.0` threshold or gains an unapproved reason under v0.18.0.
-- Stop if a task needs a new dependency, module, workflow, HTTP integration, or
-  reusable library abstraction; that changes the approved scope.
-- Stop if `go.mod`, `go.sum`, workflow, Nightly, or unrelated example files
-  change.
-- Stop on any P0/P1 review finding or unexplained fail-then-pass test.
-- Stop before destructive cleanup unless live merge integration is proven.
+- pinned low-confidence fixture가 v0.18.0에서 explicit `1.0` threshold 아래의 Korean으로 detect되지 않거나
+  승인되지 않은 reason을 얻으면 중단한다.
+- task에 new dependency, module, workflow, HTTP integration, reusable library abstraction이 필요하면 중단한다.
+  이는 approved scope를 변경한다.
+- `go.mod`, `go.sum`, workflow, Nightly, unrelated example file이 변경되면 중단한다.
+- P0/P1 review finding 또는 설명되지 않은 fail-then-pass test가 있으면 중단한다.
+- live merge integration이 증명되지 않았다면 destructive cleanup 전에 중단한다.
