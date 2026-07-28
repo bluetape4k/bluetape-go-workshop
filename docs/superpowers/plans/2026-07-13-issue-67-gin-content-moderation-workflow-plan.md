@@ -408,64 +408,60 @@ git add examples/gin-content-moderation-workflow/internal/moderationapi
 git commit -m "feat: expose Gin moderation workflow API"
 ```
 
-### Task 5: Add application lifecycle and runnable server
+### Task 5: application lifecycle 및 runnable server 추가
 
 **Complexity:** Medium
 
 **Dependencies:** Task 4 engine construction.
 
-**Write scope:** `main.go`, `main_test.go` only.
+**Write scope:** `main.go`, `main_test.go`만 포함한다.
 
-**Pattern and hazards:** One application-owned service/server. Default loopback, explicit insecure remote opt-in, fixed server timeouts, `SIGINT`/`SIGTERM`, five-second drain, forced close, joined listen result, safe logs, and non-zero failures. No service close method or background goroutine.
+**Pattern and hazards:** application-owned service/server 하나만 둔다. default loopback, explicit insecure remote opt-in, fixed server timeout, `SIGINT`/`SIGTERM`, five-second drain, forced close, joined listen result, safe log, non-zero failure를 사용한다. service close method나 background goroutine은 없다.
 
 **Files:**
 
 - Create: `examples/gin-content-moderation-workflow/main.go`
 - Create: `examples/gin-content-moderation-workflow/main_test.go`
 
-- [ ] **Step 1: Write failing address and server-default tests**
+- [ ] **Step 1: 실패하는 address 및 server-default test 작성**
 
-Test default `127.0.0.1:8080` and accepted `127.0.0.1`/`[::1]` loopback
-overrides. Use a table to reject `:8080`, `0.0.0.0:8080`, `[::]:8080`, a
-representative private IPv4 address, and a representative public IPv4 address
-without `ALLOW_UNAUTHENTICATED_REMOTE=1`; assert each is accepted only with the
-explicit opt-in. Also assert exact `ReadHeaderTimeout=2s`, `ReadTimeout=5s`,
-`WriteTimeout=5s`, and `IdleTimeout=30s`.
+default `127.0.0.1:8080`과 허용된 `127.0.0.1`/`[::1]` loopback override를 테스트한다.
+table을 사용해 `ALLOW_UNAUTHENTICATED_REMOTE=1` 없이 `:8080`, `0.0.0.0:8080`, `[::]:8080`,
+대표 private IPv4 address, 대표 public IPv4 address를 reject하고, explicit opt-in이 있을 때만 accept되는지 assert한다.
+또한 exact `ReadHeaderTimeout=2s`, `ReadTimeout=5s`, `WriteTimeout=5s`, `IdleTimeout=30s`를 assert한다.
 
-- [ ] **Step 2: Write failing fake-server lifecycle tests**
+- [ ] **Step 2: 실패하는 fake-server lifecycle test 작성**
 
-Define a test fake implementing `ListenAndServe`, `Shutdown`, and `Close` with
-channels. Cover early listen failure, `http.ErrServerClosed`, graceful context
-cancellation, shutdown deadline and forced close, forced-close failure, listen
-result joining, no leaked goroutine, and safe lifecycle log fields.
+channel을 사용해 `ListenAndServe`, `Shutdown`, `Close`를 구현하는 test fake를 정의한다.
+early listen failure, `http.ErrServerClosed`, graceful context cancellation, shutdown deadline 및 forced close,
+forced-close failure, listen result joining, leaked goroutine 없음, safe lifecycle log field를 cover한다.
 
-- [ ] **Step 3: Run main tests and observe RED**
+- [ ] **Step 3: main test 실행 및 RED 확인**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow -run 'Test(Address|HTTPServer|RunServer)'
 ```
 
-Expected: FAIL because lifecycle helpers are absent.
+기대값: lifecycle helper가 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement `main`, `NewHTTPServer`, and `RunServer`**
+- [ ] **Step 4: `main`, `NewHTTPServer`, `RunServer` 구현**
 
-Build `signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)`,
-construct one service/engine/server, and run it. `RunServer` starts exactly one
-listen goroutine, selects listen completion versus context completion, calls
-`Shutdown` with a five-second background timeout, calls `Close` after deadline,
-always joins the listen result, and returns an error for every non-normal
-startup/listen/shutdown/close path. Operational logs follow the spec allowlist.
+`signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)`를 만들고 service/engine/server 하나를 구성해 실행한다.
+`RunServer`는 listen goroutine을 정확히 하나 시작하고, listen completion과 context completion 중 하나를 select한다.
+five-second background timeout으로 `Shutdown`을 호출하고 deadline 이후에는 `Close`를 호출한다.
+항상 listen result를 join하며, 정상적이지 않은 startup/listen/shutdown/close path마다 error를 반환한다.
+operational log는 spec allowlist를 따른다.
 
-- [ ] **Step 5: Run focused and race tests**
+- [ ] **Step 5: focused 및 race test 실행**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow
 go test -race -count=1 ./examples/gin-content-moderation-workflow/...
 ```
 
-Expected: PASS without binding a public port or leaking a lifecycle goroutine.
+기대값: public port bind나 lifecycle goroutine leak 없이 PASS한다.
 
-- [ ] **Step 6: Commit the runnable application**
+- [ ] **Step 6: runnable application commit**
 
 ```bash
 gofmt -w examples/gin-content-moderation-workflow/*.go
@@ -473,15 +469,17 @@ git add examples/gin-content-moderation-workflow/main.go examples/gin-content-mo
 git commit -m "feat: run moderation workflow server"
 ```
 
-### Task 6: Add bilingual public documentation and navigation
+### Task 6: bilingual public documentation 및 navigation 추가
 
 **Complexity:** Medium
 
-**Dependencies:** Tasks 1-5 final command names, payloads, and behavior.
+**Dependencies:** Tasks 1-5 final command name, payload, behavior.
 
-**Write scope:** Example README pair and two root navigation files only.
+**Write scope:** example README pair와 두 root navigation file만 포함한다.
 
-**Pattern and hazards:** Use `bluetape-writer`; keep English/Korean structure and examples equivalent. Never describe language detection as certainty or moderation as a security/compliance boundary. Show the unauthenticated original-content risk and remote-bind opt-in prominently.
+**Pattern and hazards:** `bluetape-writer`를 사용한다. English/Korean structure와 example은 equivalent하게 유지한다.
+language detection을 certainty로 설명하거나 moderation을 security/compliance boundary로 설명하면 안 된다.
+unauthenticated original-content risk와 remote-bind opt-in을 눈에 띄게 보여준다.
 
 **Files:**
 
@@ -490,53 +488,50 @@ git commit -m "feat: run moderation workflow server"
 - Modify: `README.md`
 - Modify: `README.ko.md`
 
-- [ ] **Step 1: Write both README files**
+- [ ] **Step 1: 두 README file 작성**
 
-Each locale must include the prerequisite links (#53, #54, #55, #118, #119),
-package lesson, architecture ownership, run command, default loopback address,
-create/get/search/health curl commands, metadata exact-match and cursor example,
-expected allowed/masked/manual-review responses, byte-span explanation, all
-stable error codes, lifecycle/concurrency bounds, 64 KiB/8,000-rune/2-second/
-1,000-record/20-default/100-maximum limits, validation commands, restart data
-loss, linear-search limitation, heuristic boundary, original-content exposure,
-and `ALLOW_UNAUTHENTICATED_REMOTE=1` warning.
-Both locales must also state that metadata is caller-owned exact-match data,
-appears in create/get/search responses, and must not contain credentials or
-secrets.
+각 locale은 prerequisite link (#53, #54, #55, #118, #119), package lesson, architecture ownership,
+run command, default loopback address, create/get/search/health curl command,
+metadata exact-match 및 cursor example, expected allowed/masked/manual-review response,
+byte-span explanation, 모든 stable error code, lifecycle/concurrency bound,
+64 KiB/8,000-rune/2-second/1,000-record/20-default/100-maximum limit, validation command,
+restart data loss, linear-search limitation, heuristic boundary, original-content exposure,
+`ALLOW_UNAUTHENTICATED_REMOTE=1` warning을 포함해야 한다. 두 locale 모두 metadata가 caller-owned exact-match data이며,
+create/get/search response에 나타나고 credential이나 secret을 담으면 안 된다고 명시해야 한다.
 
-- [ ] **Step 2: Add matching root navigation entries**
+- [ ] **Step 2: matching root navigation entry 추가**
 
-Place the example in the text-search/multilingual sequence after Issue #119 in
-both root READMEs. Use the same description meaning in both languages and a
-relative link to the corresponding example README.
+두 root README의 text-search/multilingual sequence에서 Issue #119 뒤에 example을 배치한다.
+두 언어에서 같은 description meaning을 사용하고 corresponding example README로 relative link를 건다.
 
-- [ ] **Step 3: Verify public examples against the application**
+- [ ] **Step 3: application 기준 public example 검증**
 
 ```bash
 go test -count=1 ./examples/gin-content-moderation-workflow/...
 rg -n 'gin-content-moderation-workflow|POST /moderation/records/search|ALLOW_UNAUTHENTICATED_REMOTE' README.md README.ko.md examples/gin-content-moderation-workflow/README*.md
 ```
 
-Expected: tests PASS and every required phrase appears in both locale surfaces.
+기대값: test가 PASS하고 모든 required phrase가 두 locale surface에 나타난다.
 
-- [ ] **Step 4: Commit documentation**
+- [ ] **Step 4: documentation commit**
 
 ```bash
 git add README.md README.ko.md examples/gin-content-moderation-workflow/README.md examples/gin-content-moderation-workflow/README.ko.md
 git commit -m "docs: explain Gin moderation workflow"
 ```
 
-### Task 7: Validate, review, and prepare integration
+### Task 7: validation, review, integration 준비
 
 **Complexity:** High
 
 **Dependencies:** Tasks 1-6 complete.
 
-**Write scope:** Fix only evidence-backed findings in Issue #67 files; do not change dependencies, workflows, coverage, or unrelated examples.
+**Write scope:** Issue #67 file에서 evidence-backed finding만 수정한다. dependency, workflow, coverage, unrelated example은 변경하지 않는다.
 
-**Risk prediction:** Highest risks are UTF-8 span corruption, context cancellation committing a record, duplicate/capacity precedence races, strict JSON bypass, sensitive diagnostic leakage, and shutdown goroutine leakage. Their signals and rerun points are the focused span/cancellation/concurrency/HTTP/lifecycle tests before the full gate. Roll back the responsible task commit if a repair expands scope beyond the approved design.
+**Risk prediction:** 가장 큰 risk는 UTF-8 span corruption, context cancellation 뒤 record commit, duplicate/capacity precedence race,
+strict JSON bypass, sensitive diagnostic leakage, shutdown goroutine leakage이다. signal과 rerun point는 full gate 전에 실행하는 focused span/cancellation/concurrency/HTTP/lifecycle test다. repair가 approved design을 넘어 scope를 확장하면 책임 task commit을 roll back한다.
 
-- [ ] **Step 1: Run formatting, dependency, static, focused, full, and race gates**
+- [ ] **Step 1: formatting, dependency, static, focused, full, race gate 실행**
 
 ```bash
 make fmt-check
@@ -549,34 +544,31 @@ go test -count=1 ./...
 make ci
 ```
 
-Expected: every command exits 0 from a fresh invocation. Lost handles or missing exit codes are not evidence; rerun those commands.
+기대값: 모든 command가 fresh invocation에서 exit 0으로 끝난다. lost handle이나 missing exit code는 evidence가 아니므로 해당 command를 다시 실행한다.
 
-- [ ] **Step 2: Run six-lens implementation review and quality review**
+- [ ] **Step 2: six-lens implementation review 및 quality review 실행**
 
-Review performance, stability, security, operator/ops, developer/API, and
-user/caller behavior against the approved spec. Require P0=0/P1=0, fix or
-explicitly defer every P2/P3 with rationale, rerun affected focused tests and
-`make ci`, then run fresh code-quality and bilingual-documentation reviews.
+approved spec 기준으로 performance, stability, security, operator/ops, developer/API, user/caller behavior를 review한다.
+P0=0/P1=0을 요구한다. 모든 P2/P3는 rationale과 함께 fix하거나 명시적으로 defer한다.
+affected focused test와 `make ci`를 다시 실행한 뒤 fresh code-quality 및 bilingual-documentation review를 실행한다.
 
-- [ ] **Step 3: Record the lesson and final branch evidence**
+- [ ] **Step 3: lesson 및 final branch evidence 기록**
 
-Confirm no diagram, changelog, dependency, workflow, module registration,
-container, database, or public-library release artifact is required. Record the
-exact focused/race/full commands, clean status, commit range, and Issue #67
-acceptance mapping.
+diagram, changelog, dependency, workflow, module registration, container, database, public-library release artifact가 필요하지 않음을 확인한다.
+exact focused/race/full command, clean status, commit range, Issue #67 acceptance mapping을 기록한다.
 
-- [ ] **Step 4: Commit review fixes, if any**
+- [ ] **Step 4: review fix가 있으면 commit**
 
 ```bash
 git add examples/gin-content-moderation-workflow README.md README.ko.md
 git commit -m "fix: harden Gin moderation workflow example"
 ```
 
-Skip this commit when the review produces no file changes.
+review에서 file change가 나오지 않으면 이 commit은 skip한다.
 
-- [ ] **Step 5: Push, open the PR, wait for CI, merge, and synchronize**
+- [ ] **Step 5: push, PR 생성, CI 대기, merge, synchronize**
 
-After local P0=0/P1=0 and `make ci` success:
+local P0=0/P1=0과 `make ci` success 이후 실행한다.
 
 ```bash
 git push -u origin feat/issue-67-gin-content-moderation-workflow
@@ -593,6 +585,6 @@ git rev-parse develop
 git rev-parse origin/develop
 ```
 
-Expected: required CI checks succeed, the PR is rebase-merged, Issue #67 closes,
-umbrella #34 reflects completion, local `develop` equals `origin/develop`, and
-the feature worktree and local feature branch are removed only after merge.
+기대값: required CI check가 succeed하고 PR이 rebase-merged되며 Issue #67이 닫힌다.
+umbrella #34는 completion을 반영하고, local `develop`은 `origin/develop`와 같아야 한다.
+feature worktree와 local feature branch는 merge 이후에만 제거된다.
