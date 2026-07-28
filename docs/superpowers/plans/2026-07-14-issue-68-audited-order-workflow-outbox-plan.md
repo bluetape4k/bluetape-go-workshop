@@ -213,16 +213,15 @@ git commit -m "feat: add durable audit history store"
 
 기대값: reader contract, corruption, query-plan, race assertion이 PASS한다.
 
-## Task 3: Commit create and transition state atomically
+## Task 3: create 및 transition state를 atomic하게 commit
 
 **Complexity:** High. **Depends on:** Tasks 1-2. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `service.go`, `service_test.go`.
 
-- [ ] **Step 1: Write atomic create and transition tests first**
+- [ ] **Step 1: atomic create 및 transition test를 먼저 작성**
 
-Under the existing PostgreSQL fixture, prove create gives pending revision 1,
-confirm gives revision 2, cancel accepts pending/confirmed, invalid transitions
-conflict, missing order is not found, and each accepted command leaves exactly
-one matching order/history/outbox projection.
+existing PostgreSQL fixture 아래에서 create는 pending revision 1을 만들고 confirm은 revision 2를 만들며,
+cancel은 pending/confirmed를 accept하고 invalid transition은 conflict가 되며 missing order는 not found인지 증명한다.
+accepted command마다 matching order/history/outbox projection이 정확히 하나씩 남아야 한다.
 
 ```go
 created, replayed, err := service.Create(ctx, CreateCommand{
@@ -234,53 +233,41 @@ if err != nil || replayed || created.Status != StatusPending || created.Revision
 }
 ```
 
-- [ ] **Step 2: Add rollback and race tests before implementation**
+- [ ] **Step 2: implementation 전에 rollback 및 race test 추가**
 
-Inject a history uniqueness failure after the order write and an outbox identity
-failure after the history write; assert all three tables remain unchanged.
-Run two same-order transitions concurrently and require one valid next revision.
-Run identical creates concurrently for the same order, plus identical and
-conflicting command IDs across different orders. The same-order loser may hit
-the order primary key before history identity; it must still reload and replay
-the winner when canonical intent matches. Install a package-private transaction
-runner whose first call delegates to a real successful `sqlkit.WithTx` and then
-returns a synthetic deadline error. Require the first service call to return the
-error after commit, then retry through the normal runner and require the original
-projection with no new history/outbox row.
-Hold the order row lock in a separate transaction, call a competing transition
-with a 100 ms test deadline, require `context.DeadlineExceeded`, unchanged table
-counts, and released pool capacity, then release the lock and require a fresh
-transition to succeed. This is the deterministic fast analogue of the 2-second
-HTTP operation deadline.
+order write 뒤 history uniqueness failure를, history write 뒤 outbox identity failure를 inject한다.
+세 table이 모두 unchanged인지 assert한다. 같은 order transition 두 개를 concurrently 실행하고 valid next revision 하나만 요구한다.
+same order에 대한 identical create, 다른 order 간 identical/conflicting command ID도 concurrently 실행한다.
+same-order loser는 history identity 전에 order primary key를 먼저 맞을 수 있지만, canonical intent가 match하면 winner를 reload하고 replay해야 한다.
+첫 call은 real successful `sqlkit.WithTx`에 delegate한 뒤 synthetic deadline error를 반환하는 package-private transaction runner를 설치한다.
+첫 service call은 commit 이후 error를 반환해야 하며, normal runner로 retry하면 새 history/outbox row 없이 original projection을 반환해야 한다.
+별도 transaction에서 order row lock을 잡고 100 ms test deadline으로 competing transition을 호출한다.
+`context.DeadlineExceeded`, unchanged table count, released pool capacity를 요구한 뒤 lock을 release하고 fresh transition 성공을 요구한다.
+이는 2-second HTTP operation deadline의 deterministic fast analogue다.
 
-- [ ] **Step 3: Run RED**
+- [ ] **Step 3: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestService(Create|Transition|Rollback|Concurrent|Ambiguous)'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestService(Create|Transition|Rollback|Concurrent|Ambiguous)'`
 
-Expected: FAIL because service methods are absent.
+기대값: service method가 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement create with replay recovery**
+- [ ] **Step 4: replay recovery가 있는 create 구현**
 
-Validate before `sqlkit.WithTx`; inside it check command identity, insert the
-order, build one entry, call `HistoryStore.Insert(ctx, tx, entry)`, then
-`outbox.Enqueue(ctx, tx, entry)`. On an event/idempotency unique violation,
-allow `WithTx` to roll back completely and load the winner in a fresh database
-operation. Return the original payload projection only when canonical intent
-matches; otherwise return `ErrConflict`. Detect only PostgreSQL SQLSTATE `23505`
-for the named order primary-key and event/idempotency constraints through
-`errors.As`; all other database failures remain wrapped storage errors. Store a
-package-private `runTx` function on the service, defaulting exactly to
-`sqlkit.WithTx`; tests may replace it only to return an error after a real
-successful delegate call.
+`sqlkit.WithTx` 전에 validate한다. 내부에서는 command identity를 check하고 order를 insert한 뒤 entry 하나를 build하고
+`HistoryStore.Insert(ctx, tx, entry)`, `outbox.Enqueue(ctx, tx, entry)`를 순서대로 호출한다.
+event/idempotency unique violation이 발생하면 `WithTx`가 완전히 roll back하게 두고 fresh database operation에서 winner를 load한다.
+canonical intent가 match할 때만 original payload projection을 반환하고, 그렇지 않으면 `ErrConflict`를 반환한다.
+named order primary-key 및 event/idempotency constraint에 대한 PostgreSQL SQLSTATE `23505`만 `errors.As`로 detect한다.
+다른 database failure는 wrapped storage error로 남긴다. service에는 package-private `runTx` function을 두고 default는 정확히 `sqlkit.WithTx`로 둔다.
+test는 real successful delegate call 뒤 error를 반환하는 경우에만 이를 replace할 수 있다.
 
-- [ ] **Step 5: Implement locked transitions**
+- [ ] **Step 5: locked transition 구현**
 
-Inside one `sqlkit.WithTx`, `SELECT ... FOR UPDATE`, check command identity
-before state validation, compute `Revision.Next`, update with prior revision as
-a guard, insert history, and enqueue the same entry. Redis calls are forbidden
-in this file. Preserve cancellation and wrap errors with stage plus `%w`.
+`sqlkit.WithTx` 하나 안에서 `SELECT ... FOR UPDATE`를 실행하고, state validation 전에 command identity를 check한다.
+`Revision.Next`를 계산하고 prior revision을 guard로 update한 뒤 history를 insert하고 같은 entry를 enqueue한다.
+이 file에서는 Redis call이 금지된다. cancellation을 보존하고 error는 stage와 `%w`로 wrap한다.
 
-- [ ] **Step 6: Run GREEN, race, and commit**
+- [ ] **Step 6: GREEN, race, commit 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestService'
@@ -289,24 +276,20 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: add atomic audited order workflow"
 ```
 
-Expected: table-count/parity checks PASS and no duplicate logical revision is
-committed under `-race`.
+기대값: table-count/parity check가 PASS하고 `-race` 아래에서 duplicate logical revision이 commit되지 않는다.
 
-## Task 4: Expose strict POST JSON commands and audit queries
+## Task 4: strict POST JSON command 및 audit query 노출
 
 **Complexity:** High. **Depends on:** Task 3. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `handler.go`, `handler_test.go`.
 
-- [ ] **Step 1: Write strict decoder and route tests first**
+- [ ] **Step 1: strict decoder 및 route test를 먼저 작성**
 
-Borrow the proven token-walking duplicate-key detector from
-`gin-audit-query-api`; do not import its `internal` package. Cover exact media
-type, optional UTF-8 charset, identity encoding, 32 KiB limit, invalid UTF-8,
-duplicate nested keys, unknown fields, trailing values, arrays/scalars, empty
-body, body closure, 404, and 405. Explicitly reject gzip, br, deflate, and
-multiple `Content-Encoding` values as 415 without calling a handler. Configure
-the token and typed decoders with `UseNumber`; test exact int64 boundaries,
-overflow, fraction, exponent, and negative/zero revision and limit values so no
-float conversion can silently lose precision.
+`gin-audit-query-api`에서 proven token-walking duplicate-key detector를 가져오되 그 `internal` package는 import하지 않는다.
+exact media type, optional UTF-8 charset, identity encoding, 32 KiB limit, invalid UTF-8,
+duplicate nested key, unknown field, trailing value, array/scalar, empty body, body closure, 404, 405를 cover한다.
+gzip, br, deflate, multiple `Content-Encoding` value는 handler를 호출하지 않고 415로 명시적으로 reject한다.
+token 및 typed decoder는 `UseNumber`로 configure한다. float conversion이 precision을 silently lose하지 않도록 exact int64 boundary,
+overflow, fraction, exponent, negative/zero revision 및 limit value를 test한다.
 
 Add an explicit registration table and assert each method/path pair:
 
@@ -320,39 +303,33 @@ GET  /readyz
 GET  /statusz
 ```
 
-For every path, assert the registered method succeeds through its stub and an
-unsupported method is 405; an unknown path is 404.
+모든 path에 대해 registered method는 stub을 통해 succeed하고 unsupported method는 405이며 unknown path는 404인지 assert한다.
 
-- [ ] **Step 2: Write command/response/error tests**
+- [ ] **Step 2: command/response/error test 작성**
 
-Assert POST `/orders` returns 201 then 200 replay, transitions return 200,
-`replayed` and `delivery: asynchronous` are exact, invalid transitions are 409,
-missing orders are 404, server deadlines are 408, over-limit is 413, media
-errors are 415, storage errors are redacted 500, and request IDs exist.
+POST `/orders`가 201 이후 replay에서는 200을 반환하고 transition은 200을 반환하는지 assert한다.
+`replayed`와 `delivery: asynchronous`는 exact해야 한다. invalid transition은 409, missing order는 404,
+server deadline은 408, over-limit은 413, media error는 415, storage error는 redacted 500이어야 하며 request ID가 있어야 한다.
 
-- [ ] **Step 3: Write query/cursor and overload tests**
+- [ ] **Step 3: query/cursor 및 overload test 작성**
 
-POST the canonical search/detail bodies. With revisions 1 and 2 and limit 1,
-require page one to return revision 1/cursor 2 and page two to return revision
-2/null. A fake reader that panics on Redis access proves queries use history
-only. Fill a 32-slot semaphore, assert the next request gets 429,
-`Retry-After: 1`, `Connection: close`, a closed body, and no service call.
-Assert `GET /statusz` returns only Redis/relay state, bounded outbox counts, and
-rounded oldest-pending seconds; a 250 ms status-query timeout becomes a degraded
-safe response. Seed identity, payload, metadata, endpoint, and provider markers
-and require every marker absent from the HTTP body.
-Decode the complete error envelope for representative 400/404/408/409/413/415,
-429, and 500 responses. Require request ID, exact stable code, safe message, no
-`data`, `invalid_transition` for the state conflict, and
-`too_many_requests` for overload.
+canonical search/detail body를 POST한다. revision 1과 2, limit 1일 때 page one은 revision 1/cursor 2를,
+page two는 revision 2/null을 반환해야 한다. Redis access에서 panic하는 fake reader로 query가 history만 사용하는지 증명한다.
+32-slot semaphore를 채우고 다음 request가 429, `Retry-After: 1`, `Connection: close`, closed body,
+service call 없음 을 받는지 assert한다. `GET /statusz`는 Redis/relay state, bounded outbox count,
+rounded oldest-pending seconds만 반환해야 한다. 250 ms status-query timeout은 degraded safe response가 된다.
+identity, payload, metadata, endpoint, provider marker를 seed하고 HTTP body에 어떤 marker도 없어야 한다.
+대표 400/404/408/409/413/415, 429, 500 response의 complete error envelope를 decode한다.
+request ID, exact stable code, safe message, `data` 없음, state conflict의 `invalid_transition`,
+overload의 `too_many_requests`를 요구한다.
 
-- [ ] **Step 4: Run RED**
+- [ ] **Step 4: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHTTP'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHTTP'`
 
-Expected: FAIL because `NewEngine` and transport types are absent.
+기대값: `NewEngine`과 transport type이 없으므로 FAIL한다.
 
-- [ ] **Step 5: Implement the minimal Gin adapter**
+- [ ] **Step 5: minimal Gin adapter 구현**
 
 ```go
 func NewEngine(service CommandService, reader audit.HistoryReader,
@@ -368,12 +345,11 @@ func NewEngine(service CommandService, reader audit.HistoryReader,
 }
 ```
 
-Use `http.MaxBytesReader`, `json.Decoder.DisallowUnknownFields`, explicit EOF,
-duplicate-key walking, operation contexts, stable success/error envelopes, and
-safe structured fields only. GET routes are limited to health/readiness/status;
-all user commands and queries remain POST JSON.
+`http.MaxBytesReader`, `json.Decoder.DisallowUnknownFields`, explicit EOF,
+duplicate-key walking, operation context, stable success/error envelope, safe structured field만 사용한다.
+GET route는 health/readiness/status로 제한하고 모든 user command 및 query는 POST JSON으로 유지한다.
 
-- [ ] **Step 6: Run GREEN, race, and commit**
+- [ ] **Step 6: GREEN, race, commit 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHTTP'
