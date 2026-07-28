@@ -253,9 +253,7 @@ func NewRouter(config Config) (*Router, error) {
 }
 ```
 
-Add the initial `Route` validation path so Step 1 compiles and passes; return a
-non-nil empty-slice decision after validation until the behavior tests are
-added:
+Step 1이 compile되고 통과하도록 initial `Route` validation path를 추가한다. Behavior test가 추가되기 전까지는 validation 뒤 non-nil empty-slice decision을 반환한다.
 
 ```go
 func (r *Router) Route(request Request) (Decision, error) {
@@ -276,13 +274,13 @@ func (r *Router) Route(request Request) (Decision, error) {
 }
 ```
 
-- [x] **Step 4: Run configuration/input tests and observe GREEN**
+- [x] **Step 4: Configuration/input test 실행 및 GREEN 관찰**
 
-Run the focused package test. Expected: PASS with no race or compile failure.
+Focused package test를 실행한다. 기대값은 race 또는 compile failure 없이 PASS다.
 
-- [x] **Step 5: Write failing route and evidence table tests**
+- [x] **Step 5: 실패하는 route 및 evidence table test 작성**
 
-Add fixtures with exact expected routes and reasons:
+Exact expected route와 reason을 가진 fixture를 추가한다.
 
 ```go
 func TestRoutePolicy(t *testing.T) {
@@ -373,21 +371,15 @@ func TestJapaneseWithoutKanaFailsClosed(t *testing.T) {
 }
 ```
 
-Before locking the explicit low-confidence expectation, confirm the pinned
-v0.18.0 fixture is detected as Korean below `1.0`, while its Korean plus
-`Unknown` sections do not create `mixed-language`. If the live pinned dependency
-does not match, stop and reopen the spec rather than changing the threshold or
-weakening the test.
+명시적 low-confidence expectation을 고정하기 전에 pinned v0.18.0 fixture가 `1.0` 아래에서 Korean으로 감지되고, Korean plus `Unknown` section이 `mixed-language`를 만들지 않는지 확인한다. Live pinned dependency가 맞지 않으면 threshold를 바꾸거나 test를 약화하지 말고 중단한 뒤 spec을 다시 연다.
 
-- [x] **Step 6: Run route tests and observe the RED state**
+- [x] **Step 6: Route test 실행 및 RED state 관찰**
 
-Run the focused package test. Expected: FAIL because `Route` does not project
-confidence/sections/hints or apply the route matrix.
+Focused package test를 실행한다. 기대값은 `Route`가 confidence/section/hint를 project하지 않거나 route matrix를 적용하지 않아 FAIL하는 것이다.
 
-- [x] **Step 7: Implement the complete route decision**
+- [x] **Step 7: Complete route decision 구현**
 
-Add `"unicode/utf8"` to the `router.go` import block. Replace the provisional
-`Route` body after validation with:
+`router.go` import block에 `"unicode/utf8"`을 추가한다. Validation 뒤 provisional `Route` body를 다음으로 교체한다.
 
 ```go
 detected, err := r.detector.Detect(request.Text)
@@ -441,12 +433,7 @@ if !decision.ManualReview {
 return decision, nil
 ```
 
-Implement `scriptHints`, `projectConfidences`, `projectSections`, and
-`hasMultipleLanguages` as pure helpers. `scriptHints` appends only in the order
-Latin, Hangul, Kana, Han. `hasMultipleLanguages` ignores `language.Unknown` and
-returns true after seeing two distinct non-Unknown section languages.
-Projection functions allocate non-nil slices with `make`, copy every ISO field,
-and never sort or alter upstream offsets.
+`scriptHints`, `projectConfidences`, `projectSections`, `hasMultipleLanguages`를 pure helper로 구현한다. `scriptHints`는 Latin, Hangul, Kana, Han 순서로만 append한다. `hasMultipleLanguages`는 `language.Unknown`을 무시하고 서로 다른 non-Unknown section language 두 개를 보면 true를 반환한다. Projection function은 `make`로 non-nil slice를 할당하고 모든 ISO field를 copy하며 upstream offset을 sort하거나 변경하지 않는다.
 
 ```go
 func scriptHints(text string) []string {
@@ -491,7 +478,7 @@ func hasMultipleLanguages(values []language.Section) bool {
 }
 ```
 
-- [x] **Step 8: Run focused tests and refactor while green**
+- [x] **Step 8: Focused test 실행 및 green 상태에서 refactor**
 
 Run:
 
@@ -499,7 +486,7 @@ Run:
 go test -count=1 ./examples/multilingual-language-routing/internal/routing
 ```
 
-Expected: PASS. Then run `gofmt` on both files and rerun the same command.
+기대값: PASS. 그런 다음 두 파일에 `gofmt`를 실행하고 같은 명령을 다시 실행한다.
 
 - [x] **Step 9: Commit Task 1**
 
@@ -509,12 +496,11 @@ git add examples/multilingual-language-routing/internal/routing/router.go \
 git commit -m "feat: add multilingual language routing policy"
 ```
 
-Use Lore body fields with the exact focused test evidence. Do not include files
-owned by later tasks.
+Exact focused test evidence를 포함한 Lore body field를 사용한다. 이후 task가 소유한 파일은 포함하지 않는다.
 
 ## Task 2: Preview, Lifecycle Equality, and Concurrent Reuse
 
-**Complexity:** High. This task owns fixture stability, preload equivalence, and race proof.
+**Complexity:** High. 이 task는 fixture stability, preload equivalence, race proof를 소유한다.
 
 **Required skills:** `test-driven-development`, `bluetape-go-patterns`.
 
