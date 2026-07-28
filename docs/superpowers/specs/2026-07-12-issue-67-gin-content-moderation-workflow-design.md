@@ -418,107 +418,98 @@ secret이 나타나지 않는지 assert한다.
 
 ## Release and Rollback
 
-The example adds no schema, migration, service dependency, or compatibility
-step. Rollback means replacing the example binary/configuration with the prior
-revision and restarting it. Every restart, replacement, crash, or rollback
-intentionally loses all in-memory moderation records. Both README languages
-warn operators not to use this store for durable evidence or audit retention.
+예제는 schema, migration, service dependency, compatibility step을 추가하지 않는다.
+rollback은 예제 binary/configuration을 이전 revision으로 교체하고 재시작하는 것을 뜻한다.
+모든 restart, replacement, crash, rollback은 의도적으로 모든 in-memory moderation record를
+잃는다. 양쪽 README 언어는 operator에게 이 store를 durable evidence 또는 audit retention에
+사용하지 말라고 경고한다.
 
 ## Failure Modes
 
 | Failure | Behavior | Evidence |
 |---|---|---|
-| Detector, tokenizer, or matcher fails | Return `internal_error`; do not commit; log only the safe category | service and HTTP injected-failure tests |
-| Deadline or client cancellation arrives | Cooperatively stop between stages or during scan; recheck under the commit lock; never commit afterward | pre-stage, scan, pre-commit, and handler timeout tests |
-| Concurrent callers create one ID | Exactly one atomic create succeeds; every other completed call receives conflict without overwrite | bounded start-gate test under race detector |
-| Store reaches 1,000 records | Preserve existing records; duplicate remains conflict; new ID returns capacity error; liveness stays healthy | capacity precedence and health tests |
-| Shutdown drain exceeds five seconds | Force close, join the listen path, log the safe event, and exit non-zero without leaving a goroutine | fake-server lifecycle test |
-| Malformed, duplicate-key, encoded, or oversized JSON arrives | Reject at the HTTP boundary, close the body, and never invoke the workflow | strict-decoder and tracking-body tests |
+| Detector, tokenizer 또는 matcher 실패 | `internal_error`를 반환하고 commit하지 않으며 안전한 category만 log에 남긴다 | service 및 HTTP injected-failure test |
+| Deadline 또는 client cancellation 도착 | 단계 사이 또는 scan 중에 협력적으로 중단하고 commit lock 안에서 다시 확인하며 이후에는 절대 commit하지 않는다 | pre-stage, scan, pre-commit, handler timeout test |
+| 동시 caller가 같은 ID 생성 | 정확히 하나의 atomic create만 성공하고 완료된 나머지 호출은 overwrite 없이 conflict를 받는다 | race detector 아래의 bounded start-gate test |
+| Store가 1,000 record에 도달 | 기존 record를 보존하고 duplicate는 계속 conflict이며 새 ID는 capacity error를 반환하고 liveness는 healthy로 남는다 | capacity precedence 및 health test |
+| Shutdown drain이 5초 초과 | force close하고 listen path를 join하며 안전한 event를 log로 남긴 뒤 goroutine을 남기지 않고 non-zero로 종료한다 | fake-server lifecycle test |
+| Malformed, duplicate-key, encoded 또는 oversized JSON 도착 | HTTP boundary에서 거부하고 body를 닫으며 workflow를 호출하지 않는다 | strict-decoder 및 tracking-body test |
 
 ## Concurrency and Ownership
 
-One service is safe for concurrent create, get, and search calls. Detector,
-tokenizer, and moderation policy are shared only according to their documented
-concurrency contracts; request projections are local. The record map is the
-only application mutable state and is guarded by `sync.RWMutex`.
+하나의 service는 concurrent create, get, search 호출에 안전하다. detector, tokenizer,
+moderation policy는 문서화된 concurrency contract에 따라서만 공유한다. request projection은
+local 값이다. record map은 유일한 application mutable state이며 `sync.RWMutex`로 보호한다.
 
-Duplicate creation is linearized inside the write lock: concurrent requests
-for one ID yield exactly one success and the rest conflicts. Only bounded
-constant-time commit operations run under that lock: context checks,
-duplicate/capacity checks, the documented non-blocking serialized clock,
-stamping, and insertion. Detection, tokenization, masking, and other expensive
-work remain outside. Get and search return deep copies so callers cannot race
-with internal state.
+중복 생성은 write lock 안에서 linearize된다. 같은 ID에 대한 concurrent request는 정확히
+하나의 성공과 나머지 conflict를 낳는다. 해당 lock 아래에서는 제한된 constant-time commit
+작업만 수행한다. 이 작업은 context 확인, duplicate/capacity 확인, 문서화된 non-blocking
+serialized clock, stamping, insertion이다. detection, tokenization, masking, 그 밖의
+비싼 작업은 lock 밖에 둔다. Get과 search는 깊은 복사본을 반환하므로 caller가 내부 state와
+race하지 못한다.
 
-Focused tests and the race detector will prove concurrent reuse, duplicate
-linearization, simultaneous create/search/get, and result-copy isolation. A
-bounded start gate coordinates workers without timing sleeps. Lifecycle tests
-also prove the listen result is joined after graceful or forced shutdown so the
-runner leaks no goroutine.
+focused test와 race detector는 concurrent reuse, duplicate linearization, simultaneous
+create/search/get, result-copy isolation을 증명한다. bounded start gate는 timing sleep 없이
+worker를 조율한다. lifecycle test는 graceful 또는 forced shutdown 뒤 listen result가 join되어
+runner가 goroutine을 leak하지 않는다는 점도 증명한다.
 
 ## Test Strategy
 
-Service tests cover:
+service test는 다음 항목을 다룬다.
 
-- default and custom configuration, including `NaN`, infinities, and search
-  maxima below/equal/above the default limit;
-- allowed English and Korean records;
-- masked content with exact UTF-8 byte spans;
-- Japanese Search-mode terms and original byte spans;
-- short, mixed, unknown, ambiguous CJK, and unsupported manual review;
-- duplicate rejection without overwrite;
-- capacity enforcement and duplicate precedence at capacity;
-- metadata copying and exact-match filtering;
-- ID/path/cursor grammar, metadata-key trimming, and post-trim collision
-  rejection;
-- create/query term-projection parity, case normalization, deduplication, and
-  empty-term rejection;
-- all-term English/Korean and Japanese searches, exclusions, stable ordering,
-  limits, cursor continuation, truncation, and empty results;
-- cancellation before work, during a bounded scan, and immediately before
-  commit;
-- writer progress during concurrent bounded searches;
-- returned map/slice mutation isolation; and
-- concurrent reuse under `go test -race`.
+- `NaN`, infinity, 기본 limit보다 작거나 같거나 큰 search maxima를 포함한 default 및
+  custom configuration
+- allowed English 및 Korean record
+- 정확한 UTF-8 byte span을 갖는 masked content
+- Japanese Search-mode term과 원본 byte span
+- short, mixed, unknown, ambiguous CJK, unsupported manual review
+- overwrite 없는 duplicate rejection
+- capacity enforcement와 capacity 상태에서의 duplicate precedence
+- metadata copying과 exact-match filtering
+- ID/path/cursor grammar, metadata-key trimming, trim 이후 collision rejection
+- create/query term-projection parity, case normalization, deduplication,
+  empty-term rejection
+- all-term English/Korean 및 Japanese search, exclusion, stable ordering, limit,
+  cursor continuation, truncation, empty result
+- 작업 전, bounded scan 중, commit 직전 cancellation
+- concurrent bounded search 중 writer progress
+- 반환된 map/slice mutation isolation
+- `go test -race` 아래의 concurrent reuse
 
-Cancellation tests use pre-canceled contexts for every workflow method, a
-deterministic counting context for scan checkpoints, and a test clock that
-cancels the context before the final under-lock commit check. They do not sleep
-or add mutable production hooks.
+cancellation test는 모든 workflow method에 pre-canceled context를 사용하고, scan checkpoint에는
+deterministic counting context를 사용하며, 최종 under-lock commit 확인 전에 context를 취소하는
+test clock을 사용한다. 이 test는 sleep하지 않고 mutable production hook을 추가하지 않는다.
 
-HTTP tests cover successful create/get/search, strict JSON decoding, body
-closure, the 64 KiB boundary, timeout cancellation through an injected service,
-duplicate object keys, JSON media types, UTF-8 charset parameters, content
-encoding, every stable error mapping, original-content omission from search,
-escaped path rejection, health, and trusted-proxy configuration. Main tests
-cover server construction, loopback enforcement and explicit remote opt-in,
-safe diagnostics, signal-driven graceful shutdown, shutdown-deadline forced
-close, and lifecycle failure exits without binding a public port.
+HTTP test는 성공 create/get/search, strict JSON decoding, body closure, 64 KiB boundary,
+주입 service를 통한 timeout cancellation, duplicate object key, JSON media type, UTF-8
+charset parameter, content encoding, 모든 stable error mapping, search에서 original-content
+omission, escaped path rejection, health, trusted-proxy configuration을 다룬다. Main test는
+server construction, loopback enforcement와 explicit remote opt-in, safe diagnostics,
+signal-driven graceful shutdown, shutdown-deadline forced close, public port binding 없는
+lifecycle failure exit을 다룬다.
 
-Validation runs focused package tests first, then focused race tests, then
-`go test -count=1 ./...` and the repository-authoritative `make ci`.
+validation은 먼저 focused package test를 실행하고, 그다음 focused race test,
+`go test -count=1 ./...`, repository-authoritative `make ci`를 순서대로 실행한다.
 
 ## Documentation
 
-English and Korean README files show the lesson, run command, request/response
-examples, metadata search, outcomes, error codes, lifecycle ownership,
-concurrency behavior, and validation commands. They explicitly state the
-limits of in-memory storage, linear search, blockword policy, automatic
-language detection, unauthenticated original-content lookup, and application-
-owned security/privacy controls.
+English 및 Korean README file은 lesson, run command, request/response example,
+metadata search, outcome, error code, lifecycle ownership, concurrency behavior,
+validation command를 보여준다. 또한 in-memory storage, linear search, blockword policy,
+automatic language detection, unauthenticated original-content lookup, application-owned
+security/privacy control의 한계를 명시한다.
 
-Root English and Korean READMEs add matching navigation entries. No diagram is
-needed because the four-stage linear workflow is clearer as text and API
-examples.
+root English 및 Korean README는 서로 맞는 navigation entry를 추가한다. 네 단계 linear
+workflow는 text와 API example이 더 명확하므로 diagram은 필요하지 않다.
 
 ## Acceptance Boundary
 
-The issue is complete when the example composes bluetape-go v0.18.0 without a
-new dependency, all accepted and manual-review paths are inspectable, only
-accepted records are searchable through the POST JSON contract, duplicate and
-timeout semantics are deterministic, race tests prove shared lifecycle safety,
-both README languages are discoverable, and the full repository gate passes.
+예제가 새 dependency 없이 bluetape-go v0.18.0을 조합하고, 모든 accepted 및 manual-review
+path를 inspect할 수 있으며, POST JSON contract를 통해 accepted record만 검색 가능할 때 이
+issue는 완료된다. 또한 duplicate 및 timeout semantic이 deterministic이고, race test가 공유
+lifecycle safety를 증명하며, 양쪽 README 언어가 discoverable이고, 전체 repository gate가
+통과해야 한다.
 
-Durable persistence/indexing, authentication/authorization, compliance policy,
-production moderation accuracy, generalized framework abstractions, and
-changes to bluetape-go public APIs remain out of scope.
+durable persistence/indexing, authentication/authorization, compliance policy,
+production moderation accuracy, generalized framework abstraction, bluetape-go public API
+변경은 범위 밖이다.
