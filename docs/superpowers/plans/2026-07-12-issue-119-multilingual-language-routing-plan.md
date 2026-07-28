@@ -500,7 +500,7 @@ Exact focused test evidence를 포함한 Lore body field를 사용한다. 이후
 
 ## Task 2: Preview, Lifecycle Equality, and Concurrent Reuse
 
-**Complexity:** High. 이 task는 fixture stability, preload equivalence, race proof를 소유한다.
+**Complexity:** High. 이 작업은 fixture stability, preload equivalence, race proof를 소유한다.
 
 **Required skills:** `test-driven-development`, `bluetape-go-patterns`.
 
@@ -509,9 +509,9 @@ Exact focused test evidence를 포함한 Lore body field를 사용한다. 이후
 - Create: `examples/multilingual-language-routing/internal/routing/preview.go`
 - Modify: `examples/multilingual-language-routing/internal/routing/router_test.go`
 
-- [x] **Step 1: Write failing preview and lifecycle tests**
+- [x] **Step 1: 실패하는 preview 및 lifecycle 테스트 작성**
 
-Add tests that call `NewPreview(false)` twice and `NewPreview(true)` once. Assert:
+`NewPreview(false)`를 두 번, `NewPreview(true)`를 한 번 호출하는 테스트를 추가한다. 다음을 검증한다.
 
 ```go
 lazyA, err := NewPreview(false)
@@ -540,20 +540,19 @@ if lazyA.LowConfidenceFallback.Config.MinimumConfidence != 1.0 ||
 }
 ```
 
-Also assert lifecycle notes mention construct-once/reuse and lazy/preloaded
-tradeoffs, and boundary notes mention heuristic, security/compliance,
-redaction/logging, and the intentional cost of gathering three public evidence
-views. The test must not claim that an in-process comparison measures startup
-time, memory, or model-cache behavior; it proves option wiring and route
-equivalence only.
+또한 lifecycle notes가 construct-once/reuse와 lazy/preloaded tradeoff를 언급하는지 확인한다.
+boundary notes는 heuristic, security/compliance, redaction/logging, 그리고 세 가지 public
+evidence view를 모으는 의도적 비용을 언급해야 한다. 이 테스트는 in-process 비교가 startup
+time, memory, model-cache 동작을 측정한다고 주장하면 안 된다. 검증 대상은 option wiring과 route
+equivalence뿐이다.
 
-- [x] **Step 2: Run preview tests and observe RED**
+- [x] **Step 2: preview 테스트 실행 및 RED 확인**
 
-Expected: compile failure because `Preview` and `NewPreview` do not exist.
+기대값: `Preview`와 `NewPreview`가 아직 없으므로 compile failure가 발생한다.
 
-- [x] **Step 3: Implement fixed preview data**
+- [x] **Step 3: 고정 preview data 구현**
 
-Create `preview.go` with:
+`preview.go`를 다음 내용으로 생성한다.
 
 ```go
 type Preview struct {
@@ -621,15 +620,13 @@ func NewPreview(preload bool) (Preview, error) {
 }
 ```
 
-- [x] **Step 4: Run preview tests and observe GREEN**
+- [x] **Step 4: preview 테스트 실행 및 GREEN 확인**
 
-Run the focused package test. Expected: PASS and exact decision equality across
-model-loading modes.
+focused package test를 실행한다. 기대값: PASS, 그리고 model-loading mode 사이에서 decision이 정확히 동일하다.
 
-- [x] **Step 5: Write the failing bounded concurrency test**
+- [x] **Step 5: 실패하는 bounded concurrency 테스트 작성**
 
-Use six requests per round and three rounds. The helper below makes the entry
-gate and exact call arithmetic explicit:
+round마다 여섯 개의 request를 사용하고 세 round를 실행한다. 아래 helper는 entry gate와 정확한 call arithmetic을 명시한다.
 
 ```go
 func exerciseConcurrentRoutes(t *testing.T, router *Router, requests []Request) {
@@ -722,7 +719,7 @@ func TestRouterConcurrentFirstUse(t *testing.T) {
 }
 ```
 
-- [x] **Step 6: Run normal and race tests**
+- [x] **Step 6: normal 및 race 테스트 실행**
 
 ```bash
 go test -count=1 -run '^TestRouterConcurrentFirstUse$' ./examples/multilingual-language-routing/internal/routing
@@ -731,13 +728,12 @@ go test -count=1 ./examples/multilingual-language-routing/internal/routing
 go test -race -count=1 ./examples/multilingual-language-routing/internal/routing
 ```
 
-Expected: the isolated first-use commands and both full package commands PASS.
-Every concurrency subtest releases exactly six ready goroutines per round,
-returns exactly three identical decisions per request and 18 total decisions,
-and produces no race report. The test makes no claim about instrumented overlap
-inside the upstream detector.
+기대값: isolated first-use command와 두 full package command가 모두 PASS한다.
+각 concurrency subtest는 round마다 준비된 goroutine 여섯 개를 정확히 release하고,
+request마다 동일한 decision 세 개와 총 decision 18개를 반환하며, race report를 만들지 않는다.
+이 테스트는 upstream detector 내부의 instrumented overlap에 대해 어떤 주장도 하지 않는다.
 
-- [x] **Step 7: Commit Task 2**
+- [x] **Step 7: Task 2 commit**
 
 ```bash
 git add examples/multilingual-language-routing/internal/routing/preview.go \
@@ -745,7 +741,7 @@ git add examples/multilingual-language-routing/internal/routing/preview.go \
 git commit -m "test: prove language router lifecycle reuse"
 ```
 
-Record both normal and race commands in the Lore body.
+normal command와 race command를 모두 Lore body에 기록한다.
 
 ## Task 3: Deterministic CLI and Preload Flag
 
