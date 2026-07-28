@@ -1,84 +1,84 @@
-# Probabilistic Dedupe Admission Implementation Plan
+# Probabilistic Dedupe Admission 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **에이전트 작업자 참고:** 필수 하위 스킬: `superpowers:subagent-driven-development`(권장) 또는 `superpowers:executing-plans`를 사용해 이 계획을 작업 단위로 구현한다. 단계 추적에는 체크박스(`- [ ]`) 문법을 사용한다.
 
-**Goal:** Build a runnable Gin example that uses `bluetape-go/probabilistic` to prefilter event IDs as definitely new or probably seen.
+**목표:** `bluetape-go/probabilistic`을 사용해 event ID를 definitely new 또는 probably seen으로 사전 필터링하는 실행 가능한 Gin 예제를 만든다.
 
-**Architecture:** The example has a small `dedupe.Service` that owns one `probabilistic.BloomFilter[string]`, returns stable response DTOs, and exposes a Gin router. The Bloom filter is an admission prefilter only; docs explain that production dedupe still needs durable authoritative storage.
+**아키텍처:** 예제에는 `probabilistic.BloomFilter[string]` 하나를 소유하고 안정적인 response DTO를 반환하며 Gin router를 노출하는 작은 `dedupe.Service`가 있다. Bloom filter는 admission prefilter일 뿐이며, 문서는 production dedupe에 여전히 durable authoritative storage가 필요하다는 점을 설명한다.
 
-**Tech Stack:** Go, Gin, `github.com/bluetape4k/bluetape-go/probabilistic`, standard `net/http` server timeouts.
+**기술 스택:** Go, Gin, `github.com/bluetape4k/bluetape-go/probabilistic`, 표준 `net/http` server timeout.
 
 ---
 
-## File Structure
+## 파일 구조
 
-- Create `examples/probabilistic-dedupe-admission/main.go`: loopback-only runnable server on `127.0.0.1:8099`.
-- Create `examples/probabilistic-dedupe-admission/internal/dedupe/service.go`: service, DTOs, router, error mapping, and stats projection.
-- Create `examples/probabilistic-dedupe-admission/internal/dedupe/service_test.go`: service-level tests for admit/probably-seen/invalid/stats behavior.
-- Create `examples/probabilistic-dedupe-admission/internal/dedupe/http_test.go`: router tests for HTTP success, repeat event, public errors, and health.
-- Create `examples/probabilistic-dedupe-admission/README.md` and `README.ko.md`: run instructions, sample curl calls, false-positive and durable-store notes.
-- Modify root `README.md` and `README.ko.md`: examples table and run section.
-- Create `docs/lessons/2026-06-22-probabilistic-dedupe-admission.md`: decision record and follow-up context.
-- Create `docs/review/2026-06-22-issue-46-probabilistic-dedupe-code-review.md`: Step 6-R review artifact after implementation.
+- `examples/probabilistic-dedupe-admission/main.go` 생성: `127.0.0.1:8099`에서 실행되는 loopback-only 서버.
+- `examples/probabilistic-dedupe-admission/internal/dedupe/service.go` 생성: service, DTO, router, error mapping, stats projection.
+- `examples/probabilistic-dedupe-admission/internal/dedupe/service_test.go` 생성: admit/probably-seen/invalid/stats 동작에 대한 service-level test.
+- `examples/probabilistic-dedupe-admission/internal/dedupe/http_test.go` 생성: HTTP 성공, repeat event, 공개 오류, health에 대한 router test.
+- `examples/probabilistic-dedupe-admission/README.md`와 `README.ko.md` 생성: 실행 지침, sample curl 호출, false-positive 및 durable-store 주의.
+- root `README.md`와 `README.ko.md` 수정: examples table과 run section.
+- `docs/lessons/2026-06-22-probabilistic-dedupe-admission.md` 생성: decision record와 follow-up context.
+- `docs/review/2026-06-22-issue-46-probabilistic-dedupe-code-review.md` 생성: 구현 후 Step 6-R review artifact.
 
-## Tasks
+## 작업
 
 ### Task 1: Service TDD
 
-- [ ] Write failing tests in `examples/probabilistic-dedupe-admission/internal/dedupe/service_test.go`:
+- [ ] `examples/probabilistic-dedupe-admission/internal/dedupe/service_test.go`에 실패 테스트를 작성한다.
   - `TestServiceAdmitsDefinitelyNewEvent`
   - `TestServiceMarksRepeatedEventAsProbablySeen`
   - `TestServiceRejectsInvalidEventID`
   - `TestServiceStatsReflectAdmissions`
-- [ ] Run `go test -count=1 ./examples/probabilistic-dedupe-admission/...` and verify failure from undefined service/types.
-- [ ] Implement `Service`, `NewService`, `Admit`, `Stats`, DTOs, and sentinel errors.
-- [ ] Run `go test -count=1 ./examples/probabilistic-dedupe-admission/...` and verify service tests pass.
+- [ ] `go test -count=1 ./examples/probabilistic-dedupe-admission/...`를 실행하고 정의되지 않은 service/type 때문에 실패하는지 확인한다.
+- [ ] `Service`, `NewService`, `Admit`, `Stats`, DTO, sentinel error를 구현한다.
+- [ ] `go test -count=1 ./examples/probabilistic-dedupe-admission/...`를 실행하고 service test가 통과하는지 확인한다.
 
 ### Task 2: HTTP TDD
 
-- [ ] Write failing tests in `examples/probabilistic-dedupe-admission/internal/dedupe/http_test.go`:
+- [ ] `examples/probabilistic-dedupe-admission/internal/dedupe/http_test.go`에 실패 테스트를 작성한다.
   - `TestRouterAdmitsAndThenMarksProbablySeen`
   - `TestRouterMapsInvalidRequest`
   - `TestHealthz`
-- [ ] Run targeted tests and verify router symbols are missing or failing.
-- [ ] Implement `NewRouter`, `/healthz`, `/events/admit`, `/filters/current`, max JSON body, and public error responses.
-- [ ] Run targeted tests and verify pass.
+- [ ] targeted test를 실행하고 router symbol이 없거나 실패하는지 확인한다.
+- [ ] `NewRouter`, `/healthz`, `/events/admit`, `/filters/current`, max JSON body, 공개 오류 응답을 구현한다.
+- [ ] targeted test를 실행하고 통과하는지 확인한다.
 
-### Task 3: Runnable Example and Docs
+### Task 3: 실행 예제와 문서
 
-- [ ] Add `main.go` with loopback-only `HTTP_ADDR`, server timeouts, signal shutdown, and default port `8099`.
-- [ ] Add English/Korean example READMEs with run commands, first/repeat event curl calls, stats endpoint, false-positive notes, and durable-store pairing.
-- [ ] Update root English/Korean README examples table and run section.
-- [ ] Add lesson note under `docs/lessons`.
+- [ ] loopback-only `HTTP_ADDR`, server timeout, signal shutdown, 기본 port `8099`를 포함해 `main.go`를 추가한다.
+- [ ] 실행 명령, first/repeat event curl 호출, stats endpoint, false-positive 주의, durable-store pairing을 담은 영어/한국어 예제 README를 추가한다.
+- [ ] root 영어/한국어 README의 examples table과 run section을 갱신한다.
+- [ ] `docs/lessons` 아래에 lesson note를 추가한다.
 
-### Task 4: Verification and Review
+### Task 4: 검증과 Review
 
-- [ ] Run `gofmt` on changed Go files.
-- [ ] Run `go test -count=1 ./examples/probabilistic-dedupe-admission/...`.
-- [ ] Run `go test -race -count=1 ./examples/probabilistic-dedupe-admission/...`.
-- [ ] Run `go test -p 1 ./...`.
-- [ ] Run `make ci`.
-- [ ] Run `git diff --check`.
-- [ ] Run Step 6-R local six-lane review, fix P0/P1, and store review artifact under `docs/review`.
+- [ ] 변경된 Go 파일에 `gofmt`를 실행한다.
+- [ ] `go test -count=1 ./examples/probabilistic-dedupe-admission/...`를 실행한다.
+- [ ] `go test -race -count=1 ./examples/probabilistic-dedupe-admission/...`를 실행한다.
+- [ ] `go test -p 1 ./...`를 실행한다.
+- [ ] `make ci`를 실행한다.
+- [ ] `git diff --check`를 실행한다.
+- [ ] Step 6-R local six-lane review를 실행하고 P0/P1을 수정한 뒤 review artifact를 `docs/review` 아래에 저장한다.
 
 ### Task 5: Commit and PR
 
-- [ ] Commit with Lore trailers and validation evidence.
-- [ ] Push `feat/issue-46-probabilistic-dedupe`.
-- [ ] Create PR against `develop`, linked with `Closes #46`, assignee `debop`, labels `enhancement` and `examples`, milestone `0.6.0`.
-- [ ] Verify PR body ends with `## DoD Status`.
-- [ ] Wait for GitHub CI.
-- [ ] If CI passes, rebase merge on the user-approved current continuation path, sync local `develop`, remove worktree, and delete local/remote feature branch.
+- [ ] Lore trailer와 validation evidence를 포함해 commit한다.
+- [ ] `feat/issue-46-probabilistic-dedupe`를 push한다.
+- [ ] `develop` 대상 PR을 만들고 `Closes #46`, assignee `debop`, label `enhancement` 및 `examples`, milestone `0.6.0`을 연결한다.
+- [ ] PR body가 `## DoD Status`로 끝나는지 확인한다.
+- [ ] GitHub CI를 기다린다.
+- [ ] CI가 통과하면 사용자 승인된 현재 continuation path에서 rebase merge하고, local `develop`을 sync하고, worktree를 제거한 뒤 local/remote feature branch를 삭제한다.
 
 ## Step 3-R Integrated Review
 
-Native subagent spawning is not available in this Codex surface, so the six review lanes were run as independent main-session checks using the full-feature reference contract.
+이 Codex surface에서는 native subagent spawning을 사용할 수 없으므로, full-feature reference contract를 사용해 여섯 review lane을 main-session의 독립 점검으로 실행했다.
 
-| Priority | Area | Finding | Required plan edit |
+| Priority | Area | Finding | 필요한 계획 수정 |
 |---|---|---|---|
-| P2 | Stability | Shared filter state needs a changed-package race test. | Add targeted race task. Done. |
-| P2 | User | README must not imply the Bloom filter is authoritative. | Add false-positive and durable-store doc task. Done. |
-| P2 | Developer | HTTP tests must cover repeat event, not just service tests. | Add router duplicate-path task. Done. |
-| P3 | Operator | Stats endpoint should expose approximate values without production telemetry claims. | Add stats projection only. Done. |
+| P2 | Stability | 공유 filter state에는 변경 package race test가 필요하다. | targeted race 작업을 추가한다. 완료. |
+| P2 | User | README가 Bloom filter를 authoritative storage처럼 암시하면 안 된다. | false-positive와 durable-store 문서 작업을 추가한다. 완료. |
+| P2 | Developer | HTTP test는 service test뿐 아니라 repeat event를 직접 다뤄야 한다. | router duplicate-path 작업을 추가한다. 완료. |
+| P3 | Operator | Stats endpoint는 production telemetry claim 없이 approximate value만 노출해야 한다. | stats projection만 추가한다. 완료. |
 
 Final Step 3-R verdict: P0 = 0, P1 = 0.
