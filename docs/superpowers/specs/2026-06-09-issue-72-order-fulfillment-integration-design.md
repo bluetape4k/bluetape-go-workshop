@@ -1,48 +1,47 @@
-# Issue #72 Design: Order Fulfillment Workflow Integration Example
+# Issue #72 설계: Order Fulfillment Workflow Integration 예제
 
-## Goal
+## 목표
 
-Add the milestone-level 0.4.0 integration example that combines order lifecycle
-state transitions, fulfillment workflow execution, report projection, failure
-policy, and compensation into one runnable Gin API.
+Order lifecycle state transition, fulfillment workflow 실행, report projection,
+failure policy, compensation을 하나의 실행 가능한 Gin API로 결합하는
+milestone-level 0.4.0 통합 예제를 추가한다.
 
-## Non-Goals
+## 비목표
 
-- Do not add a durable workflow engine, saga coordinator, queue, database,
-  retry scheduler, or external inventory/payment/shipping service.
-- Do not import previous example packages as implementation dependencies.
-- Do not hide `state`, `workflow`, or `workreport` behind a generic framework.
-- Do not claim request-scoped compensation is production-grade durability.
+- durable workflow engine, saga coordinator, queue, database, retry scheduler,
+  외부 inventory/payment/shipping service를 추가하지 않는다.
+- 이전 예제 package를 구현 의존성으로 import하지 않는다.
+- `state`, `workflow`, `workreport`를 generic framework 뒤에 숨기지 않는다.
+- request-scoped compensation이 production-grade durability라고 주장하지 않는다.
 
-## Example
+## 예제
 
-- Path: `examples/order-fulfillment-integration`
-- Package: `internal/orderfulfillment`
+- 경로: `examples/order-fulfillment-integration`
+- 패키지: `internal/orderfulfillment`
 - HTTP framework: Gin
-- Default port: `:8088`
+- 기본 포트: `:8088`
 
-## Scenario
+## 시나리오
 
-The API accepts an order fulfillment request and runs one request-scoped
-fulfillment:
+API는 order fulfillment 요청을 받고 요청 범위 fulfillment 하나를 실행한다.
 
-1. `submit-order` transitions lifecycle from `draft` to `submitted`.
-2. `reserve-inventory` records an inventory side effect and registers
-   `release-inventory`.
-3. `authorize-payment` transitions lifecycle from `submitted` to `paid`,
-   records a payment side effect, and registers `void-payment`.
-4. `pack-order` transitions lifecycle from `paid` to `packed`.
-5. `create-shipment` transitions lifecycle from `packed` to `shipped` when the
-   shipment provider is available.
+1. `submit-order`는 lifecycle을 `draft`에서 `submitted`로 transition한다.
+2. `reserve-inventory`는 inventory side effect를 기록하고 `release-inventory`를
+   등록한다.
+3. `authorize-payment`는 lifecycle을 `submitted`에서 `paid`로 transition하고,
+   payment side effect를 기록하며 `void-payment`를 등록한다.
+4. `pack-order`는 lifecycle을 `paid`에서 `packed`로 transition한다.
+5. `create-shipment`는 shipment provider를 사용할 수 있을 때 lifecycle을
+   `packed`에서 `shipped`로 transition한다.
 
-When a later step fails after reversible side effects, the example runs
-registered compensation in reverse order and transitions the lifecycle to
-`cancelled` when that transition is legal. The response preserves the original
-failure and includes both the forward and compensation report trees.
+Reversible side effect 이후 나중 단계가 실패하면, 예제는 등록된 compensation을
+역순으로 실행하고 해당 transition이 합법적일 때 lifecycle을 `cancelled`로
+transition한다. 응답은 원래 failure를 보존하고 forward 및 compensation report
+tree를 모두 포함한다.
 
-## Lifecycle Model
+## Lifecycle 모델
 
-States:
+상태:
 
 - `draft`
 - `submitted`
@@ -51,7 +50,7 @@ States:
 - `shipped`
 - `cancelled`
 
-Events:
+Event:
 
 - `submit`: `draft -> submitted`
 - `pay`: `submitted -> paid`
@@ -59,7 +58,7 @@ Events:
 - `ship`: `packed -> shipped`
 - `cancel`: `draft|submitted|paid|packed -> cancelled`
 
-Final states:
+Final state:
 
 - `shipped`
 - `cancelled`
@@ -68,11 +67,11 @@ Final states:
 
 ### `GET /healthz`
 
-Returns `200 OK` with `{"status":"ok"}`.
+`{"status":"ok"}`와 함께 `200 OK`를 반환한다.
 
 ### `POST /orders/fulfillment`
 
-Request:
+요청:
 
 ```json
 {
@@ -87,27 +86,27 @@ Request:
 }
 ```
 
-Validation:
+검증:
 
-- `order_id` is required after trimming whitespace.
-- `total_cents` must be positive.
-- Malformed JSON and invalid fields return `400 Bad Request`.
+- `order_id`는 공백 trim 이후 필수다.
+- `total_cents`는 양수여야 한다.
+- 잘못된 JSON과 유효하지 않은 필드는 `400 Bad Request`를 반환한다.
 
-Scenario flags:
+시나리오 flag:
 
-- `stock_available=false` fails before inventory side effects.
-- `payment_authorized=false` fails after inventory reservation and then releases
-  inventory.
-- `shipment_provider_available=false` fails after inventory reservation and
-  payment authorization, then voids payment and releases inventory.
-- `force_invalid_transition=true` deliberately attempts `ship` before `pack`
-  after payment authorization to demonstrate a state-machine invalid transition
-  inside a workflow.
-- `void_payment_fails=true` records a failed payment compensation while still
-  running inventory release.
-- `release_inventory_fails=true` records a failed inventory compensation.
+- `stock_available=false`는 inventory side effect 전에 실패한다.
+- `payment_authorized=false`는 inventory reservation 이후 실패하고 inventory를
+  release한다.
+- `shipment_provider_available=false`는 inventory reservation과 payment
+  authorization 이후 실패한 다음 payment를 void하고 inventory를 release한다.
+- `force_invalid_transition=true`는 workflow 내부 state-machine invalid
+  transition을 보여주기 위해 payment authorization 이후 `pack` 전에 `ship`을
+  의도적으로 시도한다.
+- `void_payment_fails=true`는 실패한 payment compensation을 기록하면서도
+  inventory release를 계속 실행한다.
+- `release_inventory_fails=true`는 실패한 inventory compensation을 기록한다.
 
-Response:
+응답:
 
 ```json
 {
@@ -139,20 +138,20 @@ Response:
 }
 ```
 
-Report projection is stable and omits runtime timestamps.
+Report projection은 안정적이며 런타임 timestamp를 생략한다.
 
 ## HTTP Status Mapping
 
 - successful fulfillment -> `200 OK`
-- invalid transition, domain failure, or compensated failure -> `409 Conflict`
+- invalid transition, domain failure, compensated failure -> `409 Conflict`
 - caller cancellation -> `408 Request Timeout`
 - invalid request -> `400 Bad Request`
 - unexpected report state -> `500 Internal Server Error`
 
-## Design
+## 설계
 
-`orderRun` owns one request-scoped state machine, side-effect flags, state
-history, and compensation stack.
+`orderRun`은 요청 범위 state machine 하나, side-effect flag, state history,
+compensation stack을 소유한다.
 
 Forward runner:
 
@@ -178,58 +177,57 @@ workflow.Sequential(
 )
 ```
 
-The top-level response uses `workreport` status predicates and a summary helper
-like `operations-report-policy`, but does not expose mutable runtime timestamp
-fields.
+Top-level response는 `operations-report-policy`와 비슷한 `workreport` status
+predicate 및 summary helper를 사용하지만, mutable runtime timestamp field는
+노출하지 않는다.
 
-## Diagrams
+## 다이어그램
 
-Generate README diagram assets under `docs/images/readme-diagrams/`:
+`docs/images/readme-diagrams/` 아래에 README 다이어그램 자산을 생성한다.
 
 - `order-fulfillment-integration-scenario`
 - `order-fulfillment-integration-architecture`
 - `order-fulfillment-integration-sequence`
 
-README files embed PNG only. SVG files remain next to PNGs for review.
-Graphviz `.dot`, `.plain`, `*-graphviz.svg`, and `*-graphviz.png` remain route
-evidence. Final README SVG/PNG assets must use the existing decorated workshop
-baseline, not raw Graphviz output.
+README 파일은 PNG만 embed한다. SVG 파일은 review를 위해 PNG 옆에 유지한다.
+Graphviz `.dot`, `.plain`, `*-graphviz.svg`, `*-graphviz.png`는 route evidence로
+남긴다. 최종 README SVG/PNG 자산은 raw Graphviz output이 아니라 기존 decorated
+workshop baseline을 사용해야 한다.
 
-The diagram generator must print concrete geometry evidence including
-`margins=L/R/T/B`.
+Diagram generator는 `margins=L/R/T/B`를 포함한 구체적인 geometry evidence를
+출력해야 한다.
 
-## Tests
+## 테스트
 
-Focused tests must cover:
+집중 테스트는 다음을 다뤄야 한다.
 
 - health endpoint
-- happy path reaches `shipped`, records all expected lifecycle states, and has a
-  successful report summary
-- invalid transition scenario returns `409`, preserves the state-machine error,
-  and exposes the failed report node
-- shipment-provider failure returns `409`, runs `void-payment` then
-  `release-inventory`, transitions lifecycle to `cancelled`, and preserves the
-  original shipment error
-- compensation failure still preserves the original shipment error and reports
-  compensation child failures
-- caller cancellation before or during fulfillment maps to `408` and, when a
-  reversible side effect was already registered, still runs compensation before
-  returning
-- malformed JSON, blank `order_id`, and non-positive total return `400`
-- parallel HTTP requests keep independent state and side-effect flags
-- race test over `./examples/order-fulfillment-integration/...`
+- happy path가 `shipped`에 도달하고, 기대한 모든 lifecycle state를 기록하며,
+  successful report summary를 갖는지
+- invalid transition 시나리오가 `409`를 반환하고 state-machine error를
+  보존하며 failed report node를 노출하는지
+- shipment-provider failure가 `409`를 반환하고 `void-payment` 이후
+  `release-inventory`를 실행하며 lifecycle을 `cancelled`로 transition하고 원래
+  shipment error를 보존하는지
+- compensation failure가 원래 shipment error를 보존하면서 compensation child
+  failure를 보고하는지
+- fulfillment 전 또는 중 caller cancellation이 `408`로 mapping되고, reversible
+  side effect가 이미 등록된 경우 반환 전에 compensation을 계속 실행하는지
+- 잘못된 JSON, 빈 `order_id`, 양수가 아닌 total이 `400`을 반환하는지
+- parallel HTTP request가 독립 state와 side-effect flag를 유지하는지
+- `./examples/order-fulfillment-integration/...` 대상 race test
 
-## Documentation
+## 문서
 
-Add English and Korean README files that include:
+영어 및 한국어 README 파일에 다음을 추가한다.
 
 - Example Scenario
-- how this integrates the smaller 0.4.0 examples
-- API and response examples
+- 이 예제가 더 작은 0.4.0 예제들을 통합하는 방식
+- API 및 응답 예제
 - Architecture
 - Sequence Diagram
-- production hardening notes for durability, idempotency, retries, audit, and
-  external service integration
+- durability, idempotency, retry, audit, external service integration에 대한
+  production hardening note
 
-Update root `README.md` and `README.ko.md` example tables, quickstart section,
-and 0.4.0 roadmap row.
+루트 `README.md`와 `README.ko.md`의 예제 표, quickstart 섹션, 0.4.0 roadmap
+row를 갱신한다.
