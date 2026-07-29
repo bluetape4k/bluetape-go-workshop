@@ -1,4 +1,4 @@
-// Package main prints the SQL order repository preview.
+// Package main 은 SQL 주문 repository 미리보기를 출력한다.
 package main
 
 import (

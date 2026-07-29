@@ -1,4 +1,4 @@
-// Package tokenrefresh implements the JWT claims and refresh-token workshop example.
+// Package tokenrefresh 는 JWT claims 와 refresh-token 워크숍 예제를 구현한다.
 package tokenrefresh
 
 import (
@@ -15,15 +15,15 @@ import (
 )
 
 const (
-	// DefaultIssuer is the demo issuer expected by the token boundary.
+	// DefaultIssuer 는 토큰 경계가 기대하는 데모 issuer 다.
 	DefaultIssuer = "token-refresh-claims"
-	// AccessAudience is the audience required for access tokens.
+	// AccessAudience 는 access token 에 필요한 audience 다.
 	AccessAudience = "session-api"
-	// RefreshAudience is the audience required for refresh tokens.
+	// RefreshAudience 는 refresh token 에 필요한 audience 다.
 	RefreshAudience = "token-refresh"
-	// TokenUseAccess marks tokens accepted by protected resources.
+	// TokenUseAccess 는 보호 리소스가 수락하는 token 을 표시한다.
 	TokenUseAccess = "access"
-	// TokenUseRefresh marks tokens accepted only by the refresh endpoint.
+	// TokenUseRefresh 는 refresh endpoint 에서만 수락하는 token 을 표시한다.
 	TokenUseRefresh = "refresh"
 
 	defaultRole       = "customer"
@@ -34,15 +34,15 @@ const (
 )
 
 var (
-	// ErrMissingToken reports a missing bearer token.
+	// ErrMissingToken 은 bearer token 누락을 나타낸다.
 	ErrMissingToken = errors.New("tokenrefresh: missing token")
-	// ErrInvalidToken reports a malformed or unverifiable token.
+	// ErrInvalidToken 은 형식이 잘못됐거나 검증할 수 없는 token 을 나타낸다.
 	ErrInvalidToken = errors.New("tokenrefresh: invalid token")
-	// ErrExpiredToken reports a verified token that is past expiration.
+	// ErrExpiredToken 은 검증은 됐지만 만료 시간이 지난 token 을 나타낸다.
 	ErrExpiredToken = errors.New("tokenrefresh: expired token")
-	// ErrInvalidClaims reports a verified token with the wrong claim contract.
+	// ErrInvalidClaims 는 검증됐지만 claim 계약이 맞지 않는 token 을 나타낸다.
 	ErrInvalidClaims = errors.New("tokenrefresh: invalid claims")
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("tokenrefresh: invalid request")
 
 	errInjectedIDFailure = errors.New("injected id failure")
@@ -52,7 +52,7 @@ type stringGenerator interface {
 	NextString() (string, error)
 }
 
-// Config holds service wiring for the demo boundary.
+// Config 는 데모 경계의 서비스 wiring 을 보관한다.
 type Config struct {
 	issuer          string
 	accessAudience  string
@@ -64,10 +64,10 @@ type Config struct {
 	idGenerator     stringGenerator
 }
 
-// Option customizes Config before the service is constructed.
+// Option 은 서비스 구성 전에 Config 를 조정한다.
 type Option func(*Config)
 
-// WithClock sets the service clock used for token issue and parse checks.
+// WithClock 은 token 발급과 parse 검사에 사용할 서비스 clock 을 설정한다.
 func WithClock(clock func() time.Time) Option {
 	return func(cfg *Config) {
 		if clock != nil {
@@ -76,14 +76,14 @@ func WithClock(clock func() time.Time) Option {
 	}
 }
 
-// WithSecret sets the fixed HMAC demo secret.
+// WithSecret 은 고정 HMAC 데모 secret 을 설정한다.
 func WithSecret(secret []byte) Option {
 	return func(cfg *Config) {
 		cfg.secret = append([]byte(nil), secret...)
 	}
 }
 
-// WithIDGenerator sets the ID generator used for session IDs and JWT IDs.
+// WithIDGenerator 는 session ID 와 JWT ID 에 사용할 ID generator 를 설정한다.
 func WithIDGenerator(generator stringGenerator) Option {
 	return func(cfg *Config) {
 		if generator != nil {
@@ -92,7 +92,7 @@ func WithIDGenerator(generator stringGenerator) Option {
 	}
 }
 
-// Service owns token issue, token verification, and refresh-token exchange.
+// Service 는 token 발급, token 검증, refresh-token 교환을 소유한다.
 type Service struct {
 	provider        *btjwt.Provider
 	idGenerator     stringGenerator
@@ -104,7 +104,7 @@ type Service struct {
 	requiredScope   string
 }
 
-// SessionRequest is the local demo session issue request.
+// SessionRequest 는 로컬 데모 session 발급 요청이다.
 type SessionRequest struct {
 	Subject    string   `json:"subject"`
 	Role       string   `json:"role"`
@@ -112,7 +112,7 @@ type SessionRequest struct {
 	TTLSeconds int      `json:"ttl_seconds"`
 }
 
-// SessionResponse is the issued access/refresh token pair.
+// SessionResponse 는 발급된 access/refresh token 쌍이다.
 type SessionResponse struct {
 	TokenType               string `json:"token_type"`
 	AccessExpiresInSeconds  int    `json:"access_expires_in_seconds"`
@@ -122,12 +122,12 @@ type SessionResponse struct {
 	SessionID               string `json:"session_id"`
 }
 
-// RefreshRequest exchanges a refresh token for a new access token.
+// RefreshRequest 는 refresh token 을 새 access token 으로 교환한다.
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-// AccessTokenResponse is the refresh endpoint response.
+// AccessTokenResponse 는 refresh endpoint 응답이다.
 type AccessTokenResponse struct {
 	TokenType        string `json:"token_type"`
 	ExpiresInSeconds int    `json:"expires_in_seconds"`
@@ -135,7 +135,7 @@ type AccessTokenResponse struct {
 	SessionID        string `json:"session_id"`
 }
 
-// ProfileResponse is the protected resource projection from verified claims.
+// ProfileResponse 는 검증된 claims 로부터 만든 보호 리소스 표현이다.
 type ProfileResponse struct {
 	Subject                string `json:"subject"`
 	Role                   string `json:"role"`
@@ -144,7 +144,7 @@ type ProfileResponse struct {
 	AccessExpiresInSeconds int    `json:"access_expires_in_seconds"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적으로 공개되는 오류 응답 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
@@ -163,7 +163,7 @@ type refreshClaims struct {
 	sessionID string
 }
 
-// NewService builds the demo service with deterministic local JWT defaults.
+// NewService 는 결정적인 로컬 JWT 기본값으로 데모 서비스를 구성한다.
 func NewService(options ...Option) (*Service, error) {
 	cfg := defaultConfig()
 	for _, option := range options {
@@ -208,7 +208,7 @@ func defaultConfig() Config {
 	}
 }
 
-// IssueSession signs a local demo access/refresh token pair.
+// IssueSession 은 로컬 데모 access/refresh token 쌍에 서명한다.
 func (s *Service) IssueSession(request SessionRequest) (SessionResponse, error) {
 	if err := validateSessionRequest(request); err != nil {
 		return SessionResponse{}, err
@@ -253,7 +253,7 @@ func (s *Service) IssueSession(request SessionRequest) (SessionResponse, error) 
 	}, nil
 }
 
-// ValidateAccess verifies the bearer access token and returns stable claim context.
+// ValidateAccess 는 bearer access token 을 검증하고 안정적인 claim context 를 반환한다.
 func (s *Service) ValidateAccess(authorization string) (ProfileResponse, error) {
 	token, err := bearerToken(authorization)
 	if err != nil {
@@ -272,7 +272,7 @@ func (s *Service) ValidateAccess(authorization string) (ProfileResponse, error) 
 	}, nil
 }
 
-// RefreshAccess verifies a refresh token and returns a new access token.
+// RefreshAccess 는 refresh token 을 검증하고 새 access token 을 반환한다.
 func (s *Service) RefreshAccess(request RefreshRequest) (AccessTokenResponse, error) {
 	token := strings.TrimSpace(request.RefreshToken)
 	if token == "" {
@@ -390,7 +390,7 @@ func (s *Service) nextID() (string, error) {
 	return id, nil
 }
 
-// NewRouter creates the Gin router for the token refresh claims API.
+// NewRouter 는 token refresh claims API용 Gin 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

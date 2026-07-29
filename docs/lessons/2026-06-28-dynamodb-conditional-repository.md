@@ -19,9 +19,9 @@ attribute, condition expression, conflict handling을 조립하면 같은 consis
 따라서 예제는 repository가 다음을 소유하게 한다.
 
 - `TENANT#...` / `ITEM#...` key construction.
-- create-if-absent 및 expected-version condition expression.
+- create-if-absent 및 expected-version 조건식.
 - application conflict signal인 `ErrConditionalConflict`.
-- diagnostic을 위한 typed AWS SDK error preservation.
+- 진단을 위한 타입 있는 AWS SDK 오류 보존.
 - `pk` equality와 `begins_with(sk, ITEM#)`를 사용하는 tenant query shape.
 
 ## 검증 형태

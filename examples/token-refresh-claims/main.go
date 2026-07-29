@@ -1,4 +1,4 @@
-// Package main runs the token refresh and claims validation example service.
+// Package main 은 토큰 refresh 와 claims 검증 예제 서비스를 실행한다.
 package main
 
 import (

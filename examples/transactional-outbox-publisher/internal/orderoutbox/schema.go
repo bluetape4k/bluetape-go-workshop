@@ -17,7 +17,7 @@ create table if not exists transactional_outbox_orders (
 	created_at timestamptz not null
 )`
 
-// CreateSchema creates the workshop order table followed by the SQL outbox schema.
+// CreateSchema 는 워크숍 주문 테이블과 SQL outbox schema 를 순서대로 생성한다.
 func (s *Service) CreateSchema(ctx context.Context, execer sqlkit.Execer) error {
 	if s == nil || s.store == nil {
 		return fmt.Errorf("%w: initialized service is required", ErrInvalidConfig)

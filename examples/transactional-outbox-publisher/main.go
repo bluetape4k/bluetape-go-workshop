@@ -1,4 +1,4 @@
-// Package main runs one transactional outbox commit and Redis Streams relay.
+// Package main 은 transactional outbox commit 과 Redis Streams relay 를 한 번 실행한다.
 package main
 
 import (

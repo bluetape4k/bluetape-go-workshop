@@ -1,4 +1,4 @@
-// Package orderrepo demonstrates a small sqlkit-backed order repository.
+// Package orderrepo 는 작은 sqlkit 기반 주문 repository 를 보여준다.
 package orderrepo
 
 import (
@@ -13,22 +13,22 @@ import (
 
 const ordersTable = "sql_order_repository_orders"
 
-// ErrInvalidOrder reports missing or invalid order input.
+// ErrInvalidOrder 는 누락되었거나 유효하지 않은 주문 입력을 나타낸다.
 var ErrInvalidOrder = errors.New("orderrepo: invalid order")
 
-// Status is the narrow order lifecycle state used by this repository example.
+// Status 는 이 repository 예제가 사용하는 좁은 주문 수명주기 상태다.
 type Status string
 
 const (
-	// StatusPending means the order was accepted but not paid.
+	// StatusPending 은 주문이 접수됐지만 결제되지 않았음을 의미한다.
 	StatusPending Status = "pending"
-	// StatusPaid means payment authorization succeeded.
+	// StatusPaid 는 결제 승인이 성공했음을 의미한다.
 	StatusPaid Status = "paid"
-	// StatusCancelled means the order was cancelled.
+	// StatusCancelled 는 주문이 취소됐음을 의미한다.
 	StatusCancelled Status = "cancelled"
 )
 
-// Order is the domain object persisted by Repository.
+// Order 는 Repository 가 저장하는 도메인 객체다.
 type Order struct {
 	ID         string    `json:"id"`
 	CustomerID string    `json:"customer_id"`
@@ -37,21 +37,21 @@ type Order struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-// Filter scopes repository list queries without hiding SQL semantics.
+// Filter 는 SQL 의미를 숨기지 않고 repository 목록 조회 범위를 제한한다.
 type Filter struct {
 	CustomerID string
 	Status     Status
 	Limit      int
 }
 
-// StatementSnapshot is an inspectable SQL statement plus ordered arguments.
+// StatementSnapshot 은 검토 가능한 SQL 문과 순서가 있는 인자 목록이다.
 type StatementSnapshot struct {
 	Name string `json:"name"`
 	SQL  string `json:"sql"`
 	Args []any  `json:"args,omitempty"`
 }
 
-// Preview describes the runnable repository lesson printed by main.
+// Preview 는 main 이 출력하는 실행 가능한 repository 학습 내용을 설명한다.
 type Preview struct {
 	Scenario    string              `json:"scenario"`
 	Repository  string              `json:"repository"`
@@ -62,10 +62,10 @@ type Preview struct {
 	TestCommand string              `json:"test_command"`
 }
 
-// Repository owns order SQL while the application owns the database session.
+// Repository 는 주문 SQL을 소유하고 애플리케이션은 database session 을 소유한다.
 type Repository struct{}
 
-// NewPreview builds a human-readable snapshot of the repository contract.
+// NewPreview 는 repository 계약의 사람이 읽기 쉬운 snapshot 을 구성한다.
 func NewPreview(sample Order) (Preview, error) {
 	repo := Repository{}
 	create, err := repo.CreateStatement(sample)
@@ -107,7 +107,7 @@ func NewPreview(sample Order) (Preview, error) {
 	}, nil
 }
 
-// Create inserts an order through the provided database/sql execution boundary.
+// Create 는 제공된 database/sql 실행 경계를 통해 주문을 삽입한다.
 func (repo Repository) Create(ctx context.Context, db sqlkit.Execer, order Order) error {
 	stmt, err := repo.createSQL(order)
 	if err != nil {
@@ -117,7 +117,7 @@ func (repo Repository) Create(ctx context.Context, db sqlkit.Execer, order Order
 	return err
 }
 
-// FindByID returns exactly one order or sqlkit.ErrNoRows.
+// FindByID 는 주문 하나만 반환하거나 sqlkit.ErrNoRows 를 반환한다.
 func (repo Repository) FindByID(ctx context.Context, db sqlkit.Queryer, id string) (Order, error) {
 	stmt, err := repo.findSQL(id)
 	if err != nil {
@@ -126,7 +126,7 @@ func (repo Repository) FindByID(ctx context.Context, db sqlkit.Queryer, id strin
 	return sqlkit.QueryOne(ctx, db, stmt.SQL, scanOrder, stmt.Args...)
 }
 
-// List returns orders that match the optional customer/status filter.
+// List 는 선택적 customer/status filter 에 맞는 주문을 반환한다.
 func (repo Repository) List(ctx context.Context, db sqlkit.Queryer, filter Filter) ([]Order, error) {
 	stmt, err := repo.listSQL(filter)
 	if err != nil {
@@ -135,19 +135,19 @@ func (repo Repository) List(ctx context.Context, db sqlkit.Queryer, filter Filte
 	return sqlkit.QueryAll(ctx, db, stmt.SQL, scanOrder, stmt.Args...)
 }
 
-// CreateStatement returns the create SQL shown by the README and preview.
+// CreateStatement 는 README 와 미리보기에 표시되는 create SQL을 반환한다.
 func (repo Repository) CreateStatement(order Order) (StatementSnapshot, error) {
 	stmt, err := repo.createSQL(order)
 	return snapshot("orders.create", stmt, err)
 }
 
-// FindStatement returns the find SQL shown by the README and preview.
+// FindStatement 는 README 와 미리보기에 표시되는 find SQL을 반환한다.
 func (repo Repository) FindStatement(id string) (StatementSnapshot, error) {
 	stmt, err := repo.findSQL(id)
 	return snapshot("orders.find_by_id", stmt, err)
 }
 
-// ListStatement returns the list SQL shown by the README and preview.
+// ListStatement 는 README 와 미리보기에 표시되는 list SQL을 반환한다.
 func (repo Repository) ListStatement(filter Filter) (StatementSnapshot, error) {
 	stmt, err := repo.listSQL(filter)
 	return snapshot("orders.list", stmt, err)

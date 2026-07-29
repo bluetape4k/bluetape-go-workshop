@@ -1,4 +1,4 @@
-// Package main prints the text moderation masking preview.
+// Package main 은 텍스트 moderation 마스킹 미리보기를 출력한다.
 package main
 
 import (

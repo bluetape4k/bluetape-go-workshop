@@ -6,7 +6,7 @@
 - 이 구현은 남은 child scope를 닫는다.
   - #42 Gin batch operations API.
   - #43 leader-guarded scheduled batch.
-  - #75 customer migration integration example.
+  - #75 customer migration 통합 예제.
 - 선행 focused issue #41, #73, #74는 이미 checkpoint restart, policy reporting,
   retry/dead-letter 동작을 다뤘다. 필요한 빈칸은 또 다른 primitive demo가 아니라
   실행 가능한 composition example이었다.
