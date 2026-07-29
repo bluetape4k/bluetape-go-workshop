@@ -1,42 +1,42 @@
-# Multilingual Intake Feasibility Implementation Plan
+# Multilingual Intake Feasibility 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **에이전트 작업자 참고:** 필수 하위 스킬: `superpowers:subagent-driven-development`(권장) 또는 `superpowers:executing-plans`를 사용해 이 계획을 작업 단위로 구현한다. 단계 추적에는 체크박스(`- [ ]`) 문법을 사용한다.
 
-**Goal:** Add a runnable support-intake evaluator that reports English, Korean, Japanese, mixed, short, and unknown language outcomes while tokenizing only supported Japanese input.
+**목표:** English, Korean, Japanese, mixed, short, unknown language outcome을 보고하고, 지원되는 Japanese input만 tokenizing하는 runnable support-intake evaluator를 추가한다.
 
-**Architecture:** A framework-independent `intake.Evaluator` owns one reusable three-language Lingua detector and one reusable Kagome tokenizer. The command builds the evaluator once, evaluates deterministic fixtures, and prints JSON; application policy turns short, uncertain, or mixed results into explicit manual-review outcomes.
+**아키텍처:** 프레임워크에 독립적인 `intake.Evaluator`가 재사용 가능한 three-language Lingua detector 하나와 재사용 가능한 Kagome tokenizer 하나를 소유한다. Command는 evaluator를 한 번 만들고 결정적 fixture를 평가한 뒤 JSON을 출력한다. Application policy는 short, uncertain, mixed result를 명시적인 manual-review outcome으로 바꾼다.
 
-**Tech Stack:** Go 1.26, bluetape-go v0.18.0 `textsearch/language`, `textsearch/japanese`, `testing/concurrency`, standard `encoding/json`.
+**기술 스택:** Go 1.26, bluetape-go v0.18.0 `textsearch/language`, `textsearch/japanese`, `testing/concurrency`, 표준 `encoding/json`.
 
 ---
 
-### Task 1: Upgrade the stable bluetape-go baseline
+### Task 1: Stable bluetape-go baseline upgrade
 
 **Files:**
 - Modify: `go.mod`
 - Modify: `go.sum`
 
-- [ ] **Step 1: Upgrade only the bluetape-go module**
+- [ ] **Step 1: bluetape-go module만 upgrade**
 
 Run: `go get github.com/bluetape4k/bluetape-go@v0.18.0`
 
-Expected: `go.mod` requires `github.com/bluetape4k/bluetape-go v0.18.0`; no unrelated direct dependency is added.
+기대값: `go.mod`가 `github.com/bluetape4k/bluetape-go v0.18.0`을 요구한다. 관련 없는 direct dependency는 추가하지 않는다.
 
-- [ ] **Step 2: Normalize the module graph**
+- [ ] **Step 2: Module graph normalize**
 
 Run: `go mod tidy`
 
-Expected: Kagome and Lingua transitive requirements required by imported bluetape-go subpackages are recorded consistently.
+기대값: import한 bluetape-go subpackage가 요구하는 Kagome 및 Lingua transitive requirement가 일관되게 기록된다.
 
-### Task 2: Drive the evaluator contract with failing tests
+### Task 2: 실패 테스트로 evaluator contract 고정
 
 **Files:**
 - Create: `examples/multilingual-intake-feasibility/internal/intake/evaluator_test.go`
 - Create: `examples/multilingual-intake-feasibility/internal/intake/evaluator.go`
 
-- [ ] **Step 1: Write tests against the desired API**
+- [ ] **Step 1: 원하는 API에 대한 test 작성**
 
-The tests construct `NewEvaluator(DefaultConfig())`, call `Evaluate(Message{ID, Text})`, and assert:
+테스트는 `NewEvaluator(DefaultConfig())`를 구성하고 `Evaluate(Message{ID, Text})`를 호출한 뒤 다음을 검증한다.
 
 ```go
 report, err := evaluator.Evaluate(Message{ID: "ticket-ja", Text: "配送状況を確認したいです。注文番号を教えてください。"})
@@ -47,17 +47,17 @@ for _, token := range report.SelectedTokens {
 }
 ```
 
-Table-driven cases cover English, Korean, Japanese, mixed English/Japanese, short input, numeric/unknown input, and blank input. Error assertions use `errors.Is(err, language.ErrBlankText)`.
+Table-driven case는 English, Korean, Japanese, mixed English/Japanese, short input, numeric/unknown input, blank input을 다룬다. Error assertion은 `errors.Is(err, language.ErrBlankText)`를 사용한다.
 
 - [ ] **Step 2: Verify RED**
 
 Run: `go test -count=1 ./examples/multilingual-intake-feasibility/internal/intake`
 
-Expected: FAIL because `NewEvaluator`, `DefaultConfig`, `Message`, and `Report` do not exist.
+기대값: `NewEvaluator`, `DefaultConfig`, `Message`, `Report`가 없어서 FAIL한다.
 
-- [ ] **Step 3: Implement the minimal evaluator**
+- [ ] **Step 3: 최소 evaluator 구현**
 
-Define:
+다음을 정의한다.
 
 ```go
 type Config struct { MinimumConfidence float64; MinimumRunes int; PreloadModels bool }
@@ -67,20 +67,20 @@ type Report struct { ID string; Text string; Language string; Confidence float64
 type Evaluator struct { detector *language.Detector; japanese *japanese.Tokenizer; config Config }
 ```
 
-`NewEvaluator` selects English, Korean, and Japanese; applies `WithPreloadedLanguageModels` only when requested; and constructs Kagome once. `Evaluate` validates the message, detects language/confidence/sections, records script hints, requires manual review for short, unknown, low-confidence, or mixed input, and tokenizes only a confident non-mixed Japanese result. Selected tokens preserve source order and include nouns or verbs.
+`NewEvaluator`는 English, Korean, Japanese를 선택한다. 요청된 경우에만 `WithPreloadedLanguageModels`를 적용하고 Kagome를 한 번 구성한다. `Evaluate`는 message를 검증하고 language/confidence/section을 감지하며 script hint를 기록한다. Short, unknown, low-confidence, mixed input에는 manual review를 요구하고, confident non-mixed Japanese result만 tokenize한다. Selected token은 source order를 보존하고 noun 또는 verb를 포함한다.
 
 - [ ] **Step 4: Verify GREEN**
 
 Run: `go test -count=1 ./examples/multilingual-intake-feasibility/internal/intake`
 
-Expected: PASS for normal, boundary, error, and byte-span cases.
+기대값: normal, boundary, error, byte-span case가 PASS한다.
 
-### Task 3: Prove reusable detector/tokenizer concurrency
+### Task 3: 재사용 detector/tokenizer concurrency 증명
 
 **Files:**
 - Modify: `examples/multilingual-intake-feasibility/internal/intake/evaluator_test.go`
 
-- [ ] **Step 1: Add a bounded shared-instance stress test**
+- [ ] **Step 1: 제한된 shared-instance stress test 추가**
 
 Use:
 
@@ -90,17 +90,17 @@ report := tester.RunT(t, tasks...)
 if report.Completed != 18 { t.Fatalf("report = %+v", report) }
 ```
 
-Every task calls the same evaluator instance and asserts its expected language, review state, tokenizer, and byte spans.
+모든 task는 같은 evaluator instance를 호출하고 expected language, review state, tokenizer, byte span을 검증한다.
 
-- [ ] **Step 2: Verify normal and race execution**
+- [ ] **Step 2: Normal 및 race execution 검증**
 
 Run: `go test -count=1 ./examples/multilingual-intake-feasibility/...`
 
 Run: `go test -race -count=1 ./examples/multilingual-intake-feasibility/...`
 
-Expected: both PASS with exactly 18 completed stress calls.
+기대값: 두 명령이 모두 PASS하고 completed stress call이 정확히 18개다.
 
-### Task 4: Add the runnable preview and bilingual documentation
+### Task 4: Runnable preview와 bilingual documentation 추가
 
 **Files:**
 - Create: `examples/multilingual-intake-feasibility/main.go`
@@ -109,42 +109,42 @@ Expected: both PASS with exactly 18 completed stress calls.
 - Modify: `README.md`
 - Modify: `README.ko.md`
 
-- [ ] **Step 1: Add deterministic preview construction**
+- [ ] **Step 1: Deterministic preview construction 추가**
 
-Add `NewPreview() (Preview, error)` to `evaluator.go`. It evaluates fixed English, Korean, Japanese, mixed, short, and numeric samples and returns scenario, lifecycle notes, heuristic boundaries, reports, and test commands.
+`evaluator.go`에 `NewPreview() (Preview, error)`를 추가한다. 이 함수는 고정 English, Korean, Japanese, mixed, short, numeric sample을 평가하고 scenario, lifecycle note, heuristic boundary, report, test command를 반환한다.
 
-- [ ] **Step 2: Add the CLI**
+- [ ] **Step 2: CLI 추가**
 
-`main.go` builds the preview, encodes it with `json.MarshalIndent`, and prints it. Errors terminate with a descriptive `log.Fatalf` message.
+`main.go`는 preview를 만들고 `json.MarshalIndent`로 encode한 뒤 출력한다. 오류가 발생하면 설명적인 `log.Fatalf` message로 종료한다.
 
-- [ ] **Step 3: Document the lesson in both locales**
+- [ ] **Step 3: 두 locale에 lesson 문서화**
 
-Both READMEs describe the package lesson, run command, representative JSON fields, confidence/manual-review policy, Japanese byte spans/POS selection, unsupported English/Korean tokenization, lazy versus preloaded Lingua models, Kagome IPA dictionary footprint, and race-test command.
+두 README는 package lesson, run command, representative JSON field, confidence/manual-review policy, Japanese byte span/POS selection, 지원하지 않는 English/Korean tokenization, lazy versus preloaded Lingua model, Kagome IPA dictionary footprint, race-test command를 설명한다.
 
-- [ ] **Step 4: Register the example in root navigation**
+- [ ] **Step 4: Root navigation에 example 등록**
 
-Add one example-table row after `gin-text-search-service` and one run section after the Gin text example in both root READMEs.
+두 root README에서 `gin-text-search-service` 뒤에 example-table row 하나를 추가하고, Gin text example 뒤에 run section 하나를 추가한다.
 
-- [ ] **Step 5: Verify the preview**
+- [ ] **Step 5: Preview 검증**
 
 Run: `go run ./examples/multilingual-intake-feasibility`
 
-Expected: valid JSON containing six reports, a Japanese `kagome-ipa` report with selected tokens, and review reasons for mixed/short/unknown fixtures.
+기대값: 여섯 개 report, selected token을 포함한 Japanese `kagome-ipa` report, mixed/short/unknown fixture의 review reason을 담은 valid JSON이다.
 
-### Task 5: Complete repository verification and review
+### Task 5: Repository verification과 review 완료
 
 **Files:**
-- Review all files changed by Tasks 1-4.
+- Task 1-4에서 변경한 모든 파일을 review한다.
 
-- [ ] **Step 1: Format and verify the module**
+- [ ] **Step 1: Module format 및 검증**
 
 Run: `gofmt -w examples/multilingual-intake-feasibility`
 
 Run: `make fmt-check && make tidy-check && make vet && make lint`
 
-Expected: all commands PASS.
+기대값: 모든 명령이 PASS한다.
 
-- [ ] **Step 2: Run focused and repository verification**
+- [ ] **Step 2: Focused 및 repository verification 실행**
 
 Run: `go test -count=1 ./examples/multilingual-intake-feasibility/...`
 
@@ -152,12 +152,12 @@ Run: `go test -race -count=1 ./examples/multilingual-intake-feasibility/...`
 
 Run: `make ci`
 
-Expected: all commands PASS.
+기대값: 모든 명령이 PASS한다.
 
-- [ ] **Step 3: Review scope and evidence**
+- [ ] **Step 3: Scope와 evidence review**
 
 Run: `git diff --check`
 
 Run: `git diff --stat && git diff -- go.mod go.sum examples/multilingual-intake-feasibility README.md README.ko.md`
 
-Expected: only the approved dependency, example, plan, and bilingual navigation changes; P0=0 and P1=0.
+기대값: 승인된 dependency, example, plan, bilingual navigation 변경만 존재한다. P0=0, P1=0이어야 한다.

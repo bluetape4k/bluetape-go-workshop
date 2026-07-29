@@ -18,7 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Workflow is the narrow service contract used by the Gin boundary.
+// Workflow 는 Gin boundary가 사용하는 좁은 service 계약이다.
 type Workflow interface {
 	Create(context.Context, CreateRequest) (Record, error)
 	Get(context.Context, string) (Record, error)
@@ -37,7 +37,7 @@ var (
 	errUnsupportedContentEncoding = errors.New("unsupported content encoding")
 )
 
-// NewEngine builds the strict, bounded Gin HTTP adapter.
+// NewEngine 은 엄격하고 제한된 Gin HTTP adapter를 만든다.
 func NewEngine(workflow Workflow, config HTTPConfig, logger *log.Logger) (*gin.Engine, error) {
 	if workflow == nil || isNilInterface(workflow) || logger == nil || config.MaximumBodyBytes <= 0 || config.RequestTimeout <= 0 {
 		return nil, ErrInvalidConfig

@@ -59,7 +59,7 @@ var fixtureEdges = [...]edgeSpec{
 	{opaqueID: "uses-010", userID: "usr-006", identifierID: "ip-003"},
 }
 
-// NewFixture builds the stable logical abuse-cluster graph in fixtureID.
+// NewFixture 는 fixtureID 안에 안정적인 logical abuse-cluster graph를 만든다.
 func NewFixture(fixtureID string) (Fixture, error) {
 	if strings.TrimSpace(fixtureID) == "" {
 		return Fixture{}, fmt.Errorf("%w: blank id", ErrInvalidFixture)
@@ -112,12 +112,12 @@ func NewFixture(fixtureID string) (Fixture, error) {
 	return fixture, nil
 }
 
-// DefaultFixture builds the stable graph in FixtureID.
+// DefaultFixture 는 FixtureID 안에 안정적인 graph를 만든다.
 func DefaultFixture() (Fixture, error) {
 	return NewFixture(FixtureID)
 }
 
-// ValidateFixture validates fixture size, schema, endpoints, and uniqueness.
+// ValidateFixture 는 fixture 크기, schema, endpoint, uniqueness를 검증한다.
 func ValidateFixture(fixture Fixture) error {
 	if len(fixture.Vertices) > MaxVertices || len(fixture.Edges) > MaxEdges {
 		return fmt.Errorf("%w: limit exceeded", ErrGraphTooLarge)

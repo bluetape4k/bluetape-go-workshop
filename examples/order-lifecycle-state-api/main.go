@@ -1,4 +1,4 @@
-// Package main runs the order lifecycle state API example.
+// Package main 은 주문 수명주기 상태 API 예제를 실행한다.
 package main
 
 import (

@@ -1,4 +1,4 @@
-// Package intake demonstrates confidence-aware multilingual support intake.
+// Package intake 는 신뢰도 기반 다국어 지원 접수 흐름을 보여준다.
 package intake
 
 import (
@@ -13,44 +13,44 @@ import (
 )
 
 const (
-	// TokenizerNone means review policy prevented tokenization.
+	// TokenizerNone 은 검토 정책 때문에 토큰화가 수행되지 않았음을 의미한다.
 	TokenizerNone = "none"
-	// TokenizerUnsupported means the language was accepted without a tokenizer lesson.
+	// TokenizerUnsupported 는 언어는 수용됐지만 토크나이저 학습 대상이 아님을 의미한다.
 	TokenizerUnsupported = "unsupported"
-	// TokenizerKagomeIPA identifies the Japanese Kagome IPA path.
+	// TokenizerKagomeIPA 는 일본어 Kagome IPA 경로를 식별한다.
 	TokenizerKagomeIPA = "kagome-ipa"
 
-	// ReviewTextTooShort identifies input below the configured rune threshold.
+	// ReviewTextTooShort 는 설정된 rune 임계값보다 짧은 입력을 식별한다.
 	ReviewTextTooShort = "text_too_short"
-	// ReviewLanguageUnknown identifies input without a supported language decision.
+	// ReviewLanguageUnknown 은 지원 언어 판단을 만들 수 없는 입력을 식별한다.
 	ReviewLanguageUnknown = "language_unknown"
-	// ReviewLowConfidence identifies a detector result below the configured threshold.
+	// ReviewLowConfidence 는 설정된 임계값보다 낮은 감지 결과를 식별한다.
 	ReviewLowConfidence = "low_confidence"
-	// ReviewMixedLanguage identifies input containing multiple supported script families.
+	// ReviewMixedLanguage 는 여러 지원 문자 계열이 섞인 입력을 식별한다.
 	ReviewMixedLanguage = "mixed_language"
 )
 
 var (
-	// ErrInvalidConfig identifies invalid evaluator construction policy.
+	// ErrInvalidConfig 는 평가기 생성 정책이 유효하지 않음을 식별한다.
 	ErrInvalidConfig = errors.New("intake: invalid config")
-	// ErrInvalidMessage identifies an intake message without required metadata.
+	// ErrInvalidMessage 는 필수 메타데이터가 없는 접수 메시지를 식별한다.
 	ErrInvalidMessage = errors.New("intake: invalid message")
 )
 
-// Config owns application-level confidence and detector lifecycle policy.
+// Config 는 애플리케이션 수준 신뢰도와 감지기 수명주기 정책을 소유한다.
 type Config struct {
 	MinimumConfidence float64 `json:"minimum_confidence"`
 	MinimumRunes      int     `json:"minimum_runes"`
 	PreloadModels     bool    `json:"preload_models"`
 }
 
-// Message is one support-intake item.
+// Message 는 하나의 지원 접수 항목이다.
 type Message struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 }
 
-// SelectedToken is a useful Japanese noun or verb with an original byte span.
+// SelectedToken 은 원본 바이트 범위를 포함하는 유용한 일본어 명사 또는 동사다.
 type SelectedToken struct {
 	Text  string `json:"text"`
 	Start int    `json:"start"`
@@ -58,7 +58,7 @@ type SelectedToken struct {
 	POS   string `json:"pos"`
 }
 
-// LanguageSection is a detector-reported contiguous language region.
+// LanguageSection 은 감지기가 보고한 연속 언어 영역이다.
 type LanguageSection struct {
 	Language string `json:"language"`
 	Start    int    `json:"start"`
@@ -66,7 +66,7 @@ type LanguageSection struct {
 	Text     string `json:"text"`
 }
 
-// Report makes heuristic and deterministic evaluator decisions explicit.
+// Report 는 휴리스틱 판단과 결정적 평가기 결정을 명시적으로 보여준다.
 type Report struct {
 	ID             string            `json:"id"`
 	Text           string            `json:"text"`
@@ -81,14 +81,14 @@ type Report struct {
 	ReviewReasons  []string          `json:"review_reasons"`
 }
 
-// Evaluator reuses one language detector and one Japanese tokenizer.
+// Evaluator 는 하나의 언어 감지기와 하나의 일본어 토크나이저를 재사용한다.
 type Evaluator struct {
 	detector          *language.Detector
 	japaneseTokenizer *japanese.Tokenizer
 	config            Config
 }
 
-// Preview is the deterministic JSON payload printed by the example command.
+// Preview 는 예제 명령이 출력하는 결정적 JSON 페이로드다.
 type Preview struct {
 	Scenario            string   `json:"scenario"`
 	Config              Config   `json:"config"`
@@ -98,12 +98,12 @@ type Preview struct {
 	TestCommands        []string `json:"test_commands"`
 }
 
-// DefaultConfig uses lazy detector models and conservative review thresholds.
+// DefaultConfig 는 지연 로딩 감지기 모델과 보수적인 검토 임계값을 사용한다.
 func DefaultConfig() Config {
 	return Config{MinimumConfidence: 0.70, MinimumRunes: 8}
 }
 
-// NewEvaluator constructs the reusable detector and tokenizer pair.
+// NewEvaluator 는 재사용 가능한 감지기와 토크나이저 쌍을 구성한다.
 func NewEvaluator(config Config) (*Evaluator, error) {
 	if config.MinimumConfidence < 0 || config.MinimumConfidence > 1 {
 		return nil, fmt.Errorf("%w: minimum confidence must be between 0 and 1", ErrInvalidConfig)
@@ -131,7 +131,7 @@ func NewEvaluator(config Config) (*Evaluator, error) {
 	return &Evaluator{detector: detector, japaneseTokenizer: tokenizer, config: config}, nil
 }
 
-// NewPreview evaluates fixed fixtures for the command and documentation.
+// NewPreview 는 명령과 문서에 사용할 고정 fixture를 평가한다.
 func NewPreview() (Preview, error) {
 	config := DefaultConfig()
 	evaluator, err := NewEvaluator(config)
@@ -176,7 +176,7 @@ func NewPreview() (Preview, error) {
 	}, nil
 }
 
-// Evaluate returns one confidence-aware support-intake report.
+// Evaluate 는 신뢰도 기반 지원 접수 리포트 하나를 반환한다.
 func (e *Evaluator) Evaluate(message Message) (Report, error) {
 	if e == nil || e.detector == nil || e.japaneseTokenizer == nil {
 		return Report{}, fmt.Errorf("%w: evaluator is nil", ErrInvalidConfig)

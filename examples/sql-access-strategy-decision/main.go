@@ -1,4 +1,4 @@
-// Package main prints the SQL access strategy decision example.
+// Package main 은 SQL 접근 전략 결정 예제를 출력한다.
 package main
 
 import (

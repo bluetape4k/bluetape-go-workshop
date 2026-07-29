@@ -1,4 +1,4 @@
-// Package orderstate exposes an order lifecycle finite state machine over Gin.
+// Package orderstate 는 주문 수명주기 유한 상태 머신을 Gin으로 노출한다.
 package orderstate
 
 import (
@@ -12,54 +12,54 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// OrderState is the current lifecycle state for the example order.
+// OrderState 는 예제 주문의 현재 수명주기 상태다.
 type OrderState string
 
 const (
-	// StateDraft is the initial editable order state.
+	// StateDraft 는 처음의 수정 가능한 주문 상태다.
 	StateDraft OrderState = "draft"
-	// StateSubmitted means the order is ready for payment.
+	// StateSubmitted 는 주문이 결제 가능한 상태임을 의미한다.
 	StateSubmitted OrderState = "submitted"
-	// StatePaid means payment has been accepted.
+	// StatePaid 는 결제가 승인됐음을 의미한다.
 	StatePaid OrderState = "paid"
-	// StatePacked means fulfillment has packed the order.
+	// StatePacked 는 이행 단계에서 주문 포장을 마쳤음을 의미한다.
 	StatePacked OrderState = "packed"
-	// StateShipped is a final successful order state.
+	// StateShipped 는 성공으로 끝난 최종 주문 상태다.
 	StateShipped OrderState = "shipped"
-	// StateCancelled is a final cancelled order state.
+	// StateCancelled 는 취소로 끝난 최종 주문 상태다.
 	StateCancelled OrderState = "cancelled"
 )
 
-// OrderEvent is the command accepted by the order lifecycle state machine.
+// OrderEvent 는 주문 수명주기 상태 머신이 받는 명령이다.
 type OrderEvent string
 
 const (
-	// EventSubmit moves a draft order to submitted.
+	// EventSubmit 은 초안 주문을 제출됨 상태로 이동시킨다.
 	EventSubmit OrderEvent = "submit"
-	// EventPay moves a submitted order to paid when the payment guard accepts it.
+	// EventPay 는 결제 가드가 허용한 제출 주문을 결제됨 상태로 이동시킨다.
 	EventPay OrderEvent = "pay"
-	// EventPack moves a paid order to packed.
+	// EventPack 은 결제된 주문을 포장됨 상태로 이동시킨다.
 	EventPack OrderEvent = "pack"
-	// EventShip moves a packed order to shipped.
+	// EventShip 은 포장된 주문을 배송됨 상태로 이동시킨다.
 	EventShip OrderEvent = "ship"
-	// EventCancel moves a cancellable order to cancelled.
+	// EventCancel 은 취소 가능한 주문을 취소됨 상태로 이동시킨다.
 	EventCancel OrderEvent = "cancel"
 )
 
 var (
-	// ErrNonPositiveTotal rejects payment for orders without a positive total.
+	// ErrNonPositiveTotal 은 양수 합계가 없는 주문의 결제를 거부한다.
 	ErrNonPositiveTotal = errors.New("order total must be positive before payment")
 
 	errUnknownEvent = errors.New("unknown order lifecycle event")
 )
 
-// Options configures the order lifecycle API server.
+// Options 는 주문 수명주기 API 서버를 설정한다.
 type Options struct {
 	OrderID    string
 	TotalCents int
 }
 
-// Server exposes one in-memory order lifecycle over HTTP.
+// Server 는 하나의 인메모리 주문 수명주기를 HTTP로 노출한다.
 type Server struct {
 	router *gin.Engine
 
@@ -68,7 +68,7 @@ type Server struct {
 	machine    *state.Machine[OrderState, OrderEvent]
 }
 
-// OrderSnapshot is the stable response shape for reading the current order.
+// OrderSnapshot 은 현재 주문을 읽기 위한 안정적인 응답 형태다.
 type OrderSnapshot struct {
 	OrderID       string       `json:"order_id"`
 	State         OrderState   `json:"state"`
@@ -100,7 +100,7 @@ type errorResponse struct {
 	Error string `json:"error"`
 }
 
-// NewServer creates the in-memory order lifecycle API.
+// NewServer 는 인메모리 주문 수명주기 API를 생성한다.
 func NewServer(options Options) (*Server, error) {
 	orderID := options.OrderID
 	if orderID == "" {
@@ -130,7 +130,7 @@ func NewServer(options Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the Gin router.
+// ServeHTTP 는 요청을 Gin 라우터로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

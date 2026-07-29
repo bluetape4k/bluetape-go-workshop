@@ -1,26 +1,27 @@
-# Issue #72 Plan: Order Fulfillment Workflow Integration Example
+# Issue #72 계획: Order Fulfillment Workflow Integration 예제
 
-## Work Type
+## 작업 유형
 
 Type A - Full Feature.
 
-Reason: new runnable example directory, Go implementation, tests, bilingual
-READMEs, generated diagrams, root navigation updates, review artifacts, and PR.
+이유: 새 runnable example directory, Go implementation, test, bilingual README,
+generated diagram, root navigation update, review artifact, PR이 필요하다.
 
-## Implementation Tasks
+## 구현 작업
 
-1. Add `examples/order-fulfillment-integration/main.go` with `HTTP_ADDR`
+1. `HTTP_ADDR`
    default `:8088`.
-2. Add `examples/order-fulfillment-integration/internal/orderfulfillment`.
+   를 가진 `examples/order-fulfillment-integration/main.go`를 추가한다.
+2. `examples/order-fulfillment-integration/internal/orderfulfillment`를 추가한다.
    - Gin routes: `GET /healthz`, `POST /orders/fulfillment`.
    - Request validation for malformed JSON, blank `order_id`, and non-positive
      totals.
    - Request-scoped `state.Machine` for draft/submitted/paid/packed/shipped/
-     cancelled lifecycle transitions.
+     cancelled lifecycle 전환.
    - `workflow.Sequential` forward runner with `StopOnFailure`.
    - Reverse compensation runner with `ContinueOnFailure`.
-   - Stable `workreport` projection and summary without timestamp fields.
-3. Add focused tests.
+   - timestamp field 없는 stable `workreport` projection 및 summary.
+3. focused test를 추가한다.
    - health
    - shipped happy path
    - invalid transition inside workflow
@@ -29,22 +30,21 @@ READMEs, generated diagrams, root navigation updates, review artifacts, and PR.
    - caller cancellation before/during workflow
    - invalid requests
    - parallel request independence
-4. Add English/Korean READMEs.
+4. English/Korean README를 추가한다.
    - scenario
    - how the example integrates smaller 0.4.0 examples
    - API examples
    - Architecture
    - Sequence Diagram
    - production hardening notes
-5. Add `scripts/generate-order-fulfillment-integration-diagrams.sh`.
+5. `scripts/generate-order-fulfillment-integration-diagrams.sh`를 추가한다.
    - DOT/plain/Graphviz SVG/PNG route evidence.
    - final decorated SVG/PNG assets.
    - geometry gate output with concrete `margins=L/R/T/B` values.
-6. Update root `README.md` and `README.ko.md` example maps and quickstart
-   entries.
-7. Add Step 6-R review/verifier artifacts after implementation.
+6. root `README.md`와 `README.ko.md`의 example map 및 quickstart entry를 갱신한다.
+7. 구현 뒤 Step 6-R review/verifier artifact를 추가한다.
 
-## Validation Plan
+## 검증 계획
 
 - `bash scripts/generate-order-fulfillment-integration-diagrams.sh`
 - visual inspection of changed PNG assets
@@ -55,12 +55,12 @@ READMEs, generated diagrams, root navigation updates, review artifacts, and PR.
 - `golangci-lint cache clean && make ci`
 - GitHub PR checks
 
-## Risks and Mitigations
+## 위험과 완화
 
-| Risk | Mitigation |
+| 위험 | 완화 |
 |---|---|
-| Integration example hides the smaller concepts | README and code keep state, workflow, workreport, and compensation boundaries explicit. |
-| Example overclaims durable workflow behavior | README states it is request-scoped and lists durable storage, outbox, idempotency, and retry hardening. |
-| Compensation failure hides the forward error | Response has `original_error`; tests assert it remains shipment failure even when compensation fails. |
-| Cancellation skips cleanup after side effects | Spec and tests require compensation with `context.WithoutCancel` once a reversible side effect exists. |
-| Diagram drift repeats margin/decorator regressions | Generator uses decorated assets and prints concrete margin evidence, not only raw Graphviz output. |
+| integration example이 작은 concept를 숨김 | README와 code가 state, workflow, workreport, compensation boundary를 명시적으로 유지한다. |
+| 예제가 durable workflow behavior를 과장 | README가 request-scoped임을 밝히고 durable storage, outbox, idempotency, retry hardening을 나열한다. |
+| compensation failure가 forward error를 숨김 | response에 `original_error`가 있고 test는 compensation이 실패해도 shipment failure로 남는지 assert한다. |
+| cancellation이 side effect 뒤 cleanup을 건너뜀 | reversible side effect가 있으면 spec과 test가 `context.WithoutCancel` compensation을 요구한다. |
+| diagram drift가 margin/decorator regression 반복 | generator는 raw Graphviz output뿐 아니라 decorated asset을 사용하고 concrete margin evidence를 출력한다. |

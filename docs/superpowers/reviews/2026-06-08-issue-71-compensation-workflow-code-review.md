@@ -1,10 +1,10 @@
-# Step 6-R Code Review: Issue #71 Compensation Workflow
+# Step 6-R 코드 리뷰: Issue #71 Compensation Workflow
 
-## Scope
+## 범위
 
 - Branch: `feat/issue-71-compensation-workflow`
 - Baseline: `origin/develop`
-- Reviewed files:
+- 검토 파일:
   - `examples/compensation-workflow/**`
   - `scripts/generate-compensation-workflow-diagrams.sh`
   - `docs/images/readme-diagrams/compensation-workflow-*`
@@ -12,27 +12,27 @@
   - `docs/images/readme-diagrams/workshop-example-map.*`
   - `docs/lessons/2026-06-08-compensation-workflow.md`
 
-## Review Iteration
+## 리뷰 반복
 
-| Iteration | Finding | Resolution |
+| 반복 | finding | 해결 |
 |---|---|---|
-| 1 | P1 candidate: caller cancellation after a reversible forward step could leave cleanup unrun if compensation used the cancelled request context. | Fixed by running registered compensation with `context.WithoutCancel(ctx)` when the forward report is cancelled after side effects, and by adding `TestCompensationRunCancellationAfterSideEffectStillCleansUp`. |
-| 2 | Diagram review finding: final README diagrams looked like raw Graphviz evidence and missed the workshop baseline decorator frame, visual bands, footer, and richer route context. | Reworked final scenario, architecture, and sequence SVG/PNG assets as decorated hand-authored README diagrams while keeping Graphviz `.dot`, `.plain`, and `*-graphviz.*` files as route evidence. Re-rendered and visually inspected all three PNGs. |
-| 3 | Diagram review finding: frame Top/Bottom/Left/Right margins were visually imbalanced, especially in the sequence diagram. | Centered the sequence participant/lifeline/message body, widened its footer to match the frame, and added explicit generator margin output and failure gating for L/R/T/B values. |
+| 1 | P1 candidate: reversible forward step 뒤 caller cancellation이 발생했을 때 compensation이 cancelled request context를 사용하면 cleanup이 실행되지 않을 수 있었다. | side effect 뒤 forward report가 cancelled이면 registered compensation을 `context.WithoutCancel(ctx)`로 실행하도록 수정하고 `TestCompensationRunCancellationAfterSideEffectStillCleansUp`을 추가했다. |
+| 2 | diagram review finding: final README diagram이 raw Graphviz evidence처럼 보였고 workshop baseline decorator frame, visual band, footer, 더 풍부한 route context가 빠져 있었다. | Graphviz `.dot`, `.plain`, `*-graphviz.*` file은 route evidence로 유지하면서 final scenario, architecture, sequence SVG/PNG asset을 decorated hand-authored README diagram으로 재작업했다. 세 PNG를 다시 render하고 시각적으로 검사했다. |
+| 3 | diagram review finding: frame Top/Bottom/Left/Right margin이 특히 sequence diagram에서 시각적으로 불균형했다. | sequence participant/lifeline/message body를 중앙 정렬하고 footer를 frame에 맞게 넓혔으며, L/R/T/B value에 대한 explicit generator margin output과 failure gating을 추가했다. |
 
-## 7-Tier Findings
+## 7-Tier finding
 
-| Tier | Result | Evidence |
+| Tier | 결과 | 근거 |
 |---|---|---|
-| 1. Security | P0=0 P1=0 | No auth/trust boundary or unsafe deserialization added. Input is limited to JSON binding plus blank `order_id` validation in `server.go`. |
-| 2. Ops/SRE reliability | P0=0 P1=0 | `main.go` uses explicit `ReadHeaderTimeout`; `/healthz` exists; status mapping covers success, conflict, cancellation, and bad request. |
-| 3. Structural impact | P0=0 P1=0 | New example package only; no reusable `bluetape-go` API or shared package changed. |
-| 4. Go code quality | P0=0 P1=0 | `context.Context` is propagated through workflow steps; compensation preserves original errors; `make ci` lint passed after fixing revive return-order issue. |
-| 5. Tests/types/silent failure | P0=0 P1=0 | Tests cover success, shipment failure, payment failure, inventory failure, compensation failure, bad requests, caller cancellation, cancellation after side effect, and parallel request state isolation. |
-| 6. Performance/stability | P0=0 P1=0 | No goroutines, timers, retry loops, or external IO added. Request-scoped mutable state is isolated per run and race-tested. |
-| 7. Docs/release/evidence | P0=0 P1=0 | EN/KO README files include scenario, architecture, sequence diagram, run instructions, and production durability caveats. Diagram PNG/SVG/DOT/PLAIN artifacts exist and were visually inspected. |
+| 1. Security | P0=0 P1=0 | auth/trust boundary나 unsafe deserialization은 추가되지 않았다. input은 JSON binding과 `server.go`의 blank `order_id` validation으로 제한된다. |
+| 2. Ops/SRE reliability | P0=0 P1=0 | `main.go`는 explicit `ReadHeaderTimeout`을 사용한다. `/healthz`가 있으며 status mapping은 success, conflict, cancellation, bad request를 다룬다. |
+| 3. Structural impact | P0=0 P1=0 | 새 example package만 추가되며 reusable `bluetape-go` API나 shared package는 변경되지 않았다. |
+| 4. Go code quality | P0=0 P1=0 | `context.Context`는 workflow step을 통해 전파된다. compensation은 original error를 보존한다. revive return-order issue 수정 뒤 `make ci` lint가 통과했다. |
+| 5. Tests/types/silent failure | P0=0 P1=0 | test는 success, shipment failure, payment failure, inventory failure, compensation failure, bad request, caller cancellation, side effect 뒤 cancellation, parallel request state isolation을 다룬다. |
+| 6. Performance/stability | P0=0 P1=0 | goroutine, timer, retry loop, external IO가 추가되지 않았다. request-scoped mutable state는 run별로 격리되고 race-tested 상태다. |
+| 7. Docs/release/evidence | P0=0 P1=0 | EN/KO README는 scenario, architecture, sequence diagram, run instruction, production durability caveat을 포함한다. diagram PNG/SVG/DOT/PLAIN artifact가 있고 시각적으로 검사했다. |
 
-## Validation Evidence
+## 검증 근거
 
 ```bash
 ./scripts/generate-compensation-workflow-diagrams.sh
@@ -42,7 +42,7 @@ go test -race -count=1 ./examples/compensation-workflow/...
 make ci
 ```
 
-Additional diagram checks:
+추가 diagram check:
 
 ```bash
 rg -n ">[0-9]+<|>[0-9]+\\.<|undefined|Actor [0-9]|source to target" docs/images/readme-diagrams/compensation-workflow-*.svg || true
@@ -50,6 +50,6 @@ rg -n "Inter|Arial|Helvetica" docs/images/readme-diagrams/compensation-workflow-
 rg -n "!\\[.*\\]\\(([^)]*\\.svg|[^)]*-graphviz|[^)]*\\.dot|[^)]*\\.plain)\\)" README.md README.ko.md examples/compensation-workflow/README.md examples/compensation-workflow/README.ko.md || true
 ```
 
-## Gate Verdict
+## Gate 판정
 
-P0=0 P1=0. Step 6-R passes.
+P0=0 P1=0. Step 6-R이 통과했다.

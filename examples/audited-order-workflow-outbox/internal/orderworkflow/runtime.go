@@ -28,15 +28,15 @@ const (
 
 var errDependencyUnavailable = errors.New("orderworkflow: dependency unavailable")
 
-// Probe checks one runtime dependency without exposing its endpoint or error.
+// Probe 는 엔드포인트나 원본 오류를 노출하지 않고 런타임 의존성 하나를 점검한다.
 type Probe func(context.Context) error
 
-// DeliveryStatusReader supplies the redacted SQL outbox status snapshot.
+// DeliveryStatusReader 는 민감 정보가 제거된 SQL outbox 상태 스냅샷을 제공한다.
 type DeliveryStatusReader interface {
 	DeliveryStatus(context.Context, time.Time) (DeliveryStatus, error)
 }
 
-// RuntimeHealth tracks relay ownership and separates Redis degradation from SQL readiness.
+// RuntimeHealth 는 릴레이 소유권을 추적하고 Redis 저하 상태를 SQL readiness와 분리한다.
 type RuntimeHealth struct {
 	databaseProbe Probe
 	redisProbe    Probe
@@ -45,7 +45,7 @@ type RuntimeHealth struct {
 	relayRunning  atomic.Bool
 }
 
-// NewRuntimeHealth constructs the application health model from bounded probes.
+// NewRuntimeHealth 는 제한된 probe들로 애플리케이션 상태 모델을 구성한다.
 func NewRuntimeHealth(databaseProbe Probe, redisProbe Probe, delivery DeliveryStatusReader, now func() time.Time) (*RuntimeHealth, error) {
 	if databaseProbe == nil || redisProbe == nil || delivery == nil || isNilInterface(delivery) || now == nil {
 		return nil, ErrInvalidConfig
@@ -53,19 +53,19 @@ func NewRuntimeHealth(databaseProbe Probe, redisProbe Probe, delivery DeliverySt
 	return &RuntimeHealth{databaseProbe: databaseProbe, redisProbe: redisProbe, delivery: delivery, now: now}, nil
 }
 
-// SetRelayRunning records the supervised relay lifecycle state.
+// SetRelayRunning 은 감독 대상 릴레이의 생명주기 상태를 기록한다.
 func (h *RuntimeHealth) SetRelayRunning(running bool) {
 	if h != nil {
 		h.relayRunning.Store(running)
 	}
 }
 
-// RelayRunning reports whether the supervised relay is expected to serve work.
+// RelayRunning 은 감독 대상 릴레이가 작업을 처리해야 하는 상태인지 보고한다.
 func (h *RuntimeHealth) RelayRunning() bool {
 	return h != nil && h.relayRunning.Load()
 }
 
-// Readiness reports SQL and relay readiness while treating Redis as degradable.
+// Readiness 는 Redis를 저하 가능 의존성으로 취급하면서 SQL과 릴레이 readiness를 보고한다.
 func (h *RuntimeHealth) Readiness(ctx context.Context) (Readiness, error) {
 	if h == nil || h.databaseProbe == nil || h.redisProbe == nil {
 		return Readiness{}, ErrInvalidConfig
@@ -80,7 +80,7 @@ func (h *RuntimeHealth) Readiness(ctx context.Context) (Readiness, error) {
 	return readiness, nil
 }
 
-// Status returns redacted Redis, relay, and aggregate delivery state.
+// Status 는 민감 정보가 제거된 Redis, 릴레이, 집계 전달 상태를 반환한다.
 func (h *RuntimeHealth) Status(ctx context.Context) (DeliverySnapshot, error) {
 	if h == nil || h.redisProbe == nil || h.delivery == nil || h.now == nil {
 		return DeliverySnapshot{}, ErrInvalidConfig
@@ -101,7 +101,7 @@ func (h *RuntimeHealth) Status(ctx context.Context) (DeliverySnapshot, error) {
 	return DeliverySnapshot{RedisState: redisState, RelayState: relayState, Delivery: status}, nil
 }
 
-// ConfigureDatabase applies the workshop's bounded PostgreSQL pool settings.
+// ConfigureDatabase 는 워크숍용 제한된 PostgreSQL pool 설정을 적용한다.
 func ConfigureDatabase(db *sql.DB) {
 	if db == nil {
 		return
@@ -112,7 +112,7 @@ func ConfigureDatabase(db *sql.DB) {
 	db.SetConnMaxLifetime(30 * time.Minute)
 }
 
-// NewRedisOptions returns bounded Redis client settings for address.
+// NewRedisOptions 는 address에 대한 제한된 Redis 클라이언트 설정을 반환한다.
 func NewRedisOptions(address string) *redis.Options {
 	return &redis.Options{
 		Addr: address, PoolSize: redisPoolSize, MinIdleConns: 1,
@@ -120,7 +120,7 @@ func NewRedisOptions(address string) *redis.Options {
 	}
 }
 
-// NewHTTPServer constructs a server with bounded headers, I/O, and idle time.
+// NewHTTPServer 는 헤더, I/O, idle 시간이 제한된 서버를 구성한다.
 func NewHTTPServer(address string, handler http.Handler) *http.Server {
 	return &http.Server{
 		Addr: address, Handler: handler,
@@ -132,7 +132,7 @@ func NewHTTPServer(address string, handler http.Handler) *http.Server {
 	}
 }
 
-// DefaultRelayOptions returns conservative teaching values for continuous delivery.
+// DefaultRelayOptions 는 연속 전달 학습에 맞춘 보수적인 값을 반환한다.
 func DefaultRelayOptions() sqloutbox.RelayOptions {
 	return sqloutbox.RelayOptions{
 		ClaimLimit: 16, MaxAttempts: 3,
@@ -140,7 +140,7 @@ func DefaultRelayOptions() sqloutbox.RelayOptions {
 	}
 }
 
-// ValidateLoopbackAddress accepts only an IP-literal loopback host and valid port.
+// ValidateLoopbackAddress 는 IP 리터럴 루프백 host와 유효한 port만 허용한다.
 func ValidateLoopbackAddress(address string) error {
 	host, port, err := net.SplitHostPort(strings.TrimSpace(address))
 	if err != nil || host == "" || port == "" || strings.Contains(host, "%") {
@@ -157,7 +157,7 @@ func ValidateLoopbackAddress(address string) error {
 	return nil
 }
 
-// ValidateRedisStream normalizes a bounded Redis stream name or returns the default.
+// ValidateRedisStream 은 제한된 Redis stream 이름을 정규화하거나 기본값을 반환한다.
 func ValidateRedisStream(raw string) (string, error) {
 	if raw == "" {
 		return defaultRedisStream, nil
@@ -169,12 +169,12 @@ func ValidateRedisStream(raw string) (string, error) {
 	return stream, nil
 }
 
-// RelayRunner owns continuous SQL outbox delivery until its context is canceled.
+// RelayRunner 는 context가 취소될 때까지 이어지는 SQL outbox 전달을 소유한다.
 type RelayRunner interface {
 	Run(context.Context, sqlkit.Session) error
 }
 
-// RunLifecycle supervises HTTP and relay execution under one bounded shutdown budget.
+// RunLifecycle 은 하나의 제한된 종료 예산 안에서 HTTP와 릴레이 실행을 감독한다.
 func RunLifecycle(
 	ctx context.Context,
 	server *http.Server,
@@ -268,7 +268,7 @@ func safeStageError(stage string, class string) error {
 	return fmt.Errorf("%s: %s", stage, class)
 }
 
-// DefaultShutdownLimit returns the shared HTTP drain and relay join deadline.
+// DefaultShutdownLimit 은 HTTP drain과 릴레이 join에 공유되는 제한 시간을 반환한다.
 func DefaultShutdownLimit() time.Duration {
 	return defaultShutdownLimit
 }

@@ -1,4 +1,4 @@
-// Package main runs the provider-backed exchange-rate pricing example service.
+// Package main 은 provider-backed exchange-rate pricing 예제 서비스를 실행한다.
 package main
 
 import (

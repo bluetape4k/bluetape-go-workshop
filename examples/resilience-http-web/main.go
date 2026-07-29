@@ -1,4 +1,4 @@
-// Package main runs the resilience HTTP web example.
+// Package main 은 회복성 HTTP 웹 예제를 실행한다.
 package main
 
 import (

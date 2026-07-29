@@ -1,30 +1,23 @@
-# Resilience HTTP Workshop Example
+# Resilience HTTP Workshop 예제
 
-## Context
+## 맥락
 
-`bluetape-go` milestone `0.2.0` added HTTP resilience policies. Before closing
-the library Epic, the workshop needed a runnable service example that proves the
-public API works in application-shaped code.
+`bluetape-go` milestone `0.2.0`은 HTTP resilience policy를 추가했다. library Epic을 닫기 전에, public API가 애플리케이션 형태의 코드에서 동작함을 증명하는 실행 가능한 service 예제가 필요했다.
 
-## Decision
+## 결정
 
-Add `examples/resilience-http-web` as a thin chi-based HTTP service. Keep the
-example focused on policy wiring and event visibility, not on reusable helper
-abstractions.
+`examples/resilience-http-web`를 얇은 `chi` 기반 HTTP service로 추가한다. 예제는 재사용 helper abstraction이 아니라 policy wiring과 event visibility에 집중한다.
 
-## Outcome
+## 결과
 
-The example demonstrates outbound retry/timeout/circuit-breaker composition,
-inbound bulkhead protection, typed error handling, and low-cardinality event
-hooks.
+예제는 outbound retry/timeout/circuit-breaker 조합, inbound bulkhead protection, typed error handling, low-cardinality event hook을 보여 준다.
 
-## Verification
+## 검증
 
 - `go test -count=1 ./examples/resilience-http-web/...`
 - `make ci`
 - `git diff --check`
 
-## Future Guard
+## 이후 Guard
 
-When `bluetape-go` adds a new feature, add workshop examples only after the
-library API is stable enough to compile against a GitHub pseudo-version.
+`bluetape-go`가 새 feature를 추가할 때는 library API가 GitHub pseudo-version에 맞춰 compile될 만큼 안정된 뒤에만 workshop 예제를 추가한다.

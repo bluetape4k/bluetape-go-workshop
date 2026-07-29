@@ -1,4 +1,4 @@
-# Issue #50 graph abuse cluster verification
+# Issue #50 graph abuse cluster 검증
 
 ## 결론
 
@@ -14,9 +14,9 @@ adapter는 caller-owned driver를 통해 graph 값을 운반하고, connected co
 evidence, 5/3/1 score, 정렬은 예제의 Go policy로 남겼다. reusable graph
 repository나 algorithm abstraction은 추가하지 않았다.
 
-## Acceptance evidence
+## 인수 증거
 
-| Contract | Evidence |
+| 계약 | 증거 |
 |---|---|
 | persistence 전 graph value 검증 | `fixture_test.go`의 schema, duplicate, endpoint, exact/max+1 경계와 defensive-copy 표 |
 | scoped atomic reset/seed | `store.go`의 단일 `ExecuteWrite`와 fixture parameter; integration idempotence/rollback/unrelated namespace 증거 |
@@ -27,9 +27,9 @@ repository나 algorithm abstraction은 추가하지 않았다.
 | runnable lesson | bilingual README parity, exact JSON, Terminal 1/2 commands, fixed namespace and production caveats |
 | visual explanation | architecture/sequence canonical SVG+PNG, deterministic render, structural audits and original-size eye checks |
 
-## Fresh command evidence
+## 최신 명령 증거
 
-| Command | Result |
+| 명령 | 결과 |
 |---|---|
 | `git diff --check origin/develop` | exit 0 |
 | `gofmt -l examples/graph-abuse-cluster` | empty |
@@ -69,7 +69,7 @@ review에서 repository 규칙과 달리 `make test`/`make race`가 package를 �
 지정했다. 두 경우 모두 제품 코드 변경 없이 Colima 동적 host-port mapping
 혼선으로 분류했으며 첫 실패를 retry-only pass로 숨기지 않았다.
 
-## Performance, stability, and security evidence
+## 성능, 안정성, 보안 증거
 
 - 정상 DB path는 connectivity 뒤 `ExecuteWrite` 한 번, `ReadVertices` 한 번,
   `ReadEdges` 한 번이다. per-node query는 없다.
@@ -86,7 +86,7 @@ review에서 repository 규칙과 달리 `make test`/`make race`가 package를 �
 - operation cancellation과 별개인 cleanup context로 client/driver를 닫은 뒤에만
   완성된 JSON을 stdout에 쓴다.
 
-## Dependency and license evidence
+## 의존성과 license 증거
 
 | Module | Version | License | Role |
 |---|---:|---|---|
@@ -97,9 +97,9 @@ review에서 repository 규칙과 달리 `make test`/`make race`가 package를 �
 세 license는 repository의 MIT license와 배포 호환된다. 새 graph algorithm,
 logging, CLI framework, Memgraph dependency는 없다.
 
-## Diagram evidence ledger
+## 다이어그램 증거 기록
 
-### References
+### 참조
 
 - `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/graph-graph-core-architecture-01.png`
 - `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/diagrams/best-practices/assets/sequence-workflow-sample.png`
@@ -107,7 +107,7 @@ logging, CLI framework, Memgraph dependency는 없다.
 - `/Users/debop/work/bluetape4k/bluetape-go-workshop/.worktrees/feat-issue-50-graph-abuse-cluster/docs/images/readme-diagrams/audited-order-workflow-outbox-sequence.png`
 - Neo4j icon: `/Users/debop/work/bluetape4k/bluetape4k-wiki/docs/icons/testcontainers/graphdb/neo4j.svg`
 
-### Canonical assets
+### 표준 assets
 
 | Asset | Dimensions | SHA-256 |
 |---|---:|---|
@@ -145,9 +145,9 @@ style audit도 통과했다. CairoSVG scale-2 재렌더와 canonical PNG의 `cmp
 최종 PNG에서 모든 화살촉의 송신/수신 방향, 꺾임 뒤 marker 여유, card/label
 침범, 1..25 call-number 가독성을 다시 확인했다.
 
-## Six-lens final review
+## Six-lens 최종 리뷰
 
-| Lens | Result | Evidence focus |
+| 관점 | 결과 | 증거 초점 |
 |---|---|---|
 | Performance | P0=0, P1=0, P2=0 | fixed DB path, bounded data, iterative traversal, deterministic sort |
 | Stability | P0=0, P1=0, P2=0 | atomic replace, cancellation, idempotence, cleanup, real backend |
@@ -166,7 +166,7 @@ README, rendered assets를 직접 대조했다.
 tests와 diagram full audit/원본 눈검사를 반복해 최종 P0/P1/P2를 모두 0으로
 닫았다.
 
-## Residual boundaries
+## 잔여 경계
 
 - fixed namespace를 공유하는 concurrent CLI run은 지원하지 않는다.
 - fixture 전체를 memory에 모으는 교육용 예제이며 production-scale traversal이나

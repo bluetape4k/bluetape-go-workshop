@@ -1,33 +1,29 @@
 # Code review: issue #113 shared Redis Bloom admission
 
-## Scope
+## 범위
 
-- New runnable example: `examples/shared-redis-bloom-admission`
-- New README diagrams for architecture, cross-instance sequence, and decision
-  policy
-- Root README navigation and focused run instructions
-- Lesson note for the Redis-backed Bloom admission example
+- 새 runnable example: `examples/shared-redis-bloom-admission`
+- architecture, cross-instance sequence, decision policy를 위한 새 README diagram
+- root README navigation과 focused run instruction
+- Redis-backed Bloom admission example lesson note
 
-## Findings
+## 발견 사항
 
-No P0/P1 findings in the local review pass.
+local review pass에서 P0/P1 finding은 없다.
 
-## Checks
+## 점검
 
-- `probably_seen` is never described as authorization or exact dedupe.
-- First insert, repeated event, and cross-instance shared-state behavior are
-  covered by Redis-backed tests.
-- Config fingerprint mismatch is surfaced as `filter_config_mismatch` rather
-  than silently mixing incompatible Bloom sizing.
-- Redis outage and canceled requests map to `filter_unavailable`.
-- The HTTP server binds to loopback by default and rejects non-loopback
-  `HTTP_ADDR` values.
-- README diagrams render as PNG and keep architecture, sequence, and policy
-  concerns separated.
+- `probably_seen`은 authorization이나 exact dedupe로 설명되지 않는다.
+- first insert, repeated event, cross-instance shared-state behavior는 Redis-backed test로
+  다룬다.
+- config fingerprint mismatch는 incompatible Bloom sizing을 조용히 섞지 않고
+  `filter_config_mismatch`로 드러낸다.
+- Redis outage와 canceled request는 `filter_unavailable`로 mapping된다.
+- HTTP server는 기본적으로 loopback에 bind하고 non-loopback `HTTP_ADDR` 값을 거부한다.
+- README diagram은 PNG로 render되며 architecture, sequence, policy concern을 분리한다.
 
-## Residual risk
+## 잔여 Risk
 
-The runtime example expects an externally supplied Redis instance for manual
-`go run`. Test coverage uses Testcontainers Redis, but the example does not
-include a bundled docker-compose file because repository examples already share
-Testcontainers fixtures for integration verification.
+runtime example은 manual `go run`을 위해 externally supplied Redis instance를 기대한다.
+test coverage는 Testcontainers Redis를 사용하지만, repository example은 이미 integration
+verification에 Testcontainers fixture를 공유하므로 bundled docker-compose file은 포함하지 않는다.

@@ -1,35 +1,33 @@
-# Issue #71 Spec Review
+# Issue #71 명세 리뷰
 
-## Verdict
+## 판정
 
 - Gate: PASS
 - P0: 0
 - P1: 0
-- Reviewer stance: Step 2-R spec/design review before implementation.
+- reviewer stance: implementation 전 Step 2-R spec/design review.
 
-## Findings
+## finding
 
-No P0/P1 blockers found.
+P0/P1 blocker는 발견되지 않았다.
 
-## Seven-Tier Checks
+## Seven-Tier 점검
 
-| Tier | Result | Notes |
+| Tier | 결과 | 메모 |
 |---|---|---|
-| Security | PASS | In-memory request-scoped example; no secrets, command execution, persistence, or external trust boundary. |
-| Ops/SRE reliability | PASS | Spec requires original error preservation and production hardening notes for durable compensation. |
-| Structural impact | PASS | New isolated example; no shared package API change. |
-| Go code quality | PASS | Design keeps API narrow and uses `context.Context`, `workflow`, and `workreport` directly. |
-| Tests/types | PASS | Test plan covers success, failure, compensation order, compensation failure, invalid request, cancellation, and race. |
-| Performance/stability | PASS | No goroutines or unbounded retry; compensation work is bounded by the forward success stack. |
-| Docs/release | PASS | README scenario, architecture, sequence, bilingual docs, and diagram assets are required. |
+| Security | PASS | in-memory request-scoped example이며 secret, command execution, persistence, external trust boundary가 없다. |
+| Ops/SRE reliability | PASS | spec은 durable compensation을 위한 original error preservation과 production hardening note를 요구한다. |
+| Structural impact | PASS | 새 isolated example이며 shared package API change는 없다. |
+| Go code quality | PASS | design은 API를 좁게 유지하고 `context.Context`, `workflow`, `workreport`를 직접 사용한다. |
+| Tests/types | PASS | test plan은 success, failure, compensation order, compensation failure, invalid request, cancellation, race를 다룬다. |
+| Performance/stability | PASS | goroutine이나 unbounded retry가 없다. compensation work는 forward success stack으로 bounded하다. |
+| Docs/release | PASS | README scenario, architecture, sequence, bilingual docs, diagram asset이 요구된다. |
 
-## Required Guardrails During Implementation
+## 구현 중 필수 guardrail
 
-- Keep compensation app-layer; do not imply `workflow` owns durable saga
-  semantics.
-- Preserve original forward failure even when compensation fails.
-- Run compensation in reverse order.
-- Use `ContinueOnFailure` for compensation so later cleanup still runs.
-- Keep README diagrams generated as PNG embeds with matching SVG and Graphviz
-  evidence.
-
+- compensation을 app-layer로 유지하고 `workflow`가 durable saga semantic을 소유한다고 암시하지
+  않는다.
+- compensation이 실패해도 original forward failure를 보존한다.
+- compensation은 reverse order로 실행한다.
+- 이후 cleanup이 계속 실행되도록 compensation에는 `ContinueOnFailure`를 사용한다.
+- README diagram은 matching SVG와 Graphviz evidence가 있는 PNG embed로 유지한다.

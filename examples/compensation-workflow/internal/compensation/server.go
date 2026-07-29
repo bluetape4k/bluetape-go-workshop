@@ -1,4 +1,4 @@
-// Package compensation exposes a request-scoped compensation workflow over Gin.
+// Package compensation 은 Gin 위에 request-scoped compensation workflow를 노출한다.
 package compensation
 
 import (
@@ -14,29 +14,29 @@ import (
 )
 
 var (
-	// ErrInventoryUnavailable reports that fulfillment cannot reserve stock.
+	// ErrInventoryUnavailable 은 fulfillment가 재고를 예약할 수 없음을 나타낸다.
 	ErrInventoryUnavailable = errors.New("inventory is unavailable")
-	// ErrPaymentDeclined reports that payment authorization failed.
+	// ErrPaymentDeclined 는 결제 승인이 실패했음을 나타낸다.
 	ErrPaymentDeclined = errors.New("payment authorization declined")
-	// ErrShipmentProviderUnavailable reports that shipment creation cannot start.
+	// ErrShipmentProviderUnavailable 은 배송 생성이 시작될 수 없음을 나타낸다.
 	ErrShipmentProviderUnavailable = errors.New("shipment provider is unavailable")
-	// ErrPaymentVoidFailed reports that payment compensation failed.
+	// ErrPaymentVoidFailed 는 결제 보상 처리가 실패했음을 나타낸다.
 	ErrPaymentVoidFailed = errors.New("payment void failed")
-	// ErrInventoryReleaseFailed reports that inventory compensation failed.
+	// ErrInventoryReleaseFailed 는 재고 보상 처리가 실패했음을 나타낸다.
 	ErrInventoryReleaseFailed = errors.New("inventory release failed")
 
 	errInvalidOrderID = errors.New("order_id is required")
 )
 
-// Options configures the compensation workflow API server.
+// Options 는 compensation workflow API server를 설정한다.
 type Options struct{}
 
-// Server exposes a request-scoped compensation workflow over HTTP.
+// Server 는 HTTP 위에 request-scoped compensation workflow를 노출한다.
 type Server struct {
 	router *gin.Engine
 }
 
-// RunRequest describes one fulfillment scenario with optional compensation failures.
+// RunRequest 는 선택적 보상 실패를 포함하는 fulfillment scenario 하나를 설명한다.
 type RunRequest struct {
 	OrderID                   string `json:"order_id" binding:"required"`
 	StockAvailable            bool   `json:"stock_available"`
@@ -89,7 +89,7 @@ type compensationRun struct {
 	afterReserve  func()
 }
 
-// NewServer creates the compensation workflow API.
+// NewServer 는 compensation workflow API를 만든다.
 func NewServer(Options) (*Server, error) {
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -101,7 +101,7 @@ func NewServer(Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the Gin router.
+// ServeHTTP 는 요청을 Gin router로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

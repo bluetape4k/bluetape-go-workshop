@@ -1,33 +1,29 @@
 # Code review: issue #114 safe decompression upload
 
-## Scope
+## 범위
 
-- New runnable example: `examples/safe-decompression-upload`
-- New README diagrams for architecture, request sequence, and error policy
-- Root README navigation and focused run instructions
-- Lesson note for untrusted compressed upload handling
+- 새 runnable example: `examples/safe-decompression-upload`
+- architecture, request sequence, error policy를 위한 새 README diagram
+- root README navigation과 focused run instruction
+- untrusted compressed upload handling lesson note
 
-## Findings
+## 발견 사항
 
-No P0/P1 findings in the local review pass.
+local review pass에서 P0/P1 finding은 없다.
 
-## Checks
+## 점검
 
-- Compressed request bodies are bounded with `http.MaxBytesReader` before
-  `io.ReadAll`.
-- Expanded payloads are bounded with `compression.DecompressLimit`.
-- `compression.ErrDecompressedSizeExceeded` remains observable through
-  `errors.Is`.
-- Public HTTP errors distinguish compressed request overflow, decompressed
-  payload overflow, malformed compressed bytes, unsupported algorithms, invalid
-  expanded JSON, and cancellation.
-- The runtime HTTP server binds to loopback by default and rejects non-loopback
-  `HTTP_ADDR` values.
-- README diagrams render as PNG and keep boundary, flow, and policy concerns
-  separated.
+- compressed request body는 `io.ReadAll` 전에 `http.MaxBytesReader`로 제한된다.
+- expanded payload는 `compression.DecompressLimit`로 제한된다.
+- `compression.ErrDecompressedSizeExceeded`는 `errors.Is`로 계속 관찰 가능하다.
+- public HTTP error는 compressed request overflow, decompressed payload overflow,
+  malformed compressed bytes, unsupported algorithm, invalid expanded JSON, cancellation을
+  구분한다.
+- runtime HTTP server는 기본적으로 loopback에 bind하고 non-loopback `HTTP_ADDR` 값을 거부한다.
+- README diagram은 PNG로 render되며 boundary, flow, policy concern을 분리한다.
 
-## Residual risk
+## 잔여 Risk
 
-The example intentionally stops at bounded decompression and strict JSON
-validation. Malware scanning, authorization, durable storage, and deeper schema
-governance are documented as downstream responsibilities.
+예제는 bounded decompression과 strict JSON validation에서 의도적으로 멈춘다. malware scanning,
+authorization, durable storage, deeper schema governance는 downstream responsibility로
+문서화되어 있다.

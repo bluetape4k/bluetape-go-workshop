@@ -1,4 +1,4 @@
-// Package csvimport demonstrates chunked CSV import with checkpoints and restart.
+// Package csvimport 는 checkpoint와 restart를 사용하는 chunked CSV import를 보여준다.
 package csvimport
 
 import (
@@ -15,26 +15,26 @@ import (
 )
 
 const (
-	// DefaultChunkSize is the demo chunk size used by the customer import step.
+	// DefaultChunkSize 는 customer import step에서 사용하는 데모 chunk 크기다.
 	DefaultChunkSize = 2
-	// DefaultCheckpointKey is the checkpoint key shared by the first run and restart run.
+	// DefaultCheckpointKey 는 첫 실행과 restart 실행이 공유하는 checkpoint key다.
 	DefaultCheckpointKey = "customer-csv-import"
-	// StepName is the batch step name shown in reports.
+	// StepName 은 report에 표시되는 batch step 이름이다.
 	StepName = "chunked-customer-csv-import"
-	// JobName is the batch job name shown in reports.
+	// JobName 은 report에 표시되는 batch job 이름이다.
 	JobName = "customer-csv-import"
 )
 
 var (
-	// ErrInvalidCSV reports malformed CSV shape or headers.
+	// ErrInvalidCSV 는 CSV 형식 또는 header가 잘못되었음을 나타낸다.
 	ErrInvalidCSV = errors.New("invalid customer csv")
-	// ErrInvalidCustomer reports a row that cannot be imported as a customer.
+	// ErrInvalidCustomer 는 customer로 가져올 수 없는 row를 나타낸다.
 	ErrInvalidCustomer = errors.New("invalid customer row")
-	// ErrSimulatedCrash reports the teaching failure injected after a partial chunk commit.
+	// ErrSimulatedCrash 는 부분 chunk commit 뒤에 주입되는 교육용 실패를 나타낸다.
 	ErrSimulatedCrash = errors.New("simulated writer crash")
 )
 
-// CSVRow is one parsed data row from the customer CSV fixture.
+// CSVRow 는 customer CSV fixture에서 parsing된 data row 하나다.
 type CSVRow struct {
 	Index      int
 	LineNumber int
@@ -43,19 +43,19 @@ type CSVRow struct {
 	Tier       string
 }
 
-// Customer is the normalized domain object written by the batch step.
+// Customer 는 batch step이 기록하는 정규화된 domain 객체다.
 type Customer struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
 	Tier  string `json:"tier"`
 }
 
-// Checkpoint stores the next unread data-row index, excluding the CSV header.
+// Checkpoint 는 CSV header를 제외하고 다음에 읽을 data-row index를 저장한다.
 type Checkpoint struct {
 	NextRow int `json:"next_row"`
 }
 
-// CSVReader reads customers from a CSV file and supports checkpoint restore.
+// CSVReader 는 CSV 파일에서 customer를 읽고 checkpoint restore를 지원한다.
 type CSVReader struct {
 	path   string
 	rows   []CSVRow
@@ -64,12 +64,12 @@ type CSVReader struct {
 	closed bool
 }
 
-// NewCSVReader creates a checkpoint-aware reader for path.
+// NewCSVReader 는 path를 읽는 checkpoint-aware reader를 만든다.
 func NewCSVReader(path string) *CSVReader {
 	return &CSVReader{path: path}
 }
 
-// Open parses and validates the CSV fixture.
+// Open 은 CSV fixture를 parsing하고 검증한다.
 func (r *CSVReader) Open(ctx context.Context) (err error) {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -119,7 +119,7 @@ func (r *CSVReader) Open(ctx context.Context) (err error) {
 	return nil
 }
 
-// Read returns the next CSV row and advances the checkpoint cursor.
+// Read 는 다음 CSV row를 반환하고 checkpoint cursor를 앞으로 이동한다.
 func (r *CSVReader) Read(ctx context.Context) (CSVRow, bool, error) {
 	var zero CSVRow
 	if err := ctx.Err(); err != nil {
@@ -136,7 +136,7 @@ func (r *CSVReader) Read(ctx context.Context) (CSVRow, bool, error) {
 	return row, true, nil
 }
 
-// Restore moves the next unread row cursor to a stored checkpoint.
+// Restore 는 다음 unread row cursor를 저장된 checkpoint 위치로 이동한다.
 func (r *CSVReader) Restore(ctx context.Context, value any) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -155,7 +155,7 @@ func (r *CSVReader) Restore(ctx context.Context, value any) error {
 	return nil
 }
 
-// Checkpoint returns the next unread row cursor after committed work.
+// Checkpoint 는 commit된 작업 이후 다음 unread row cursor를 반환한다.
 func (r *CSVReader) Checkpoint(ctx context.Context) (any, bool, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, false, err
@@ -166,7 +166,7 @@ func (r *CSVReader) Checkpoint(ctx context.Context) (any, bool, error) {
 	return Checkpoint{NextRow: r.next}, true, nil
 }
 
-// Close records reader cleanup.
+// Close 는 reader cleanup을 기록한다.
 func (r *CSVReader) Close(ctx context.Context) error {
 	if r == nil {
 		return nil
@@ -178,12 +178,12 @@ func (r *CSVReader) Close(ctx context.Context) error {
 	return nil
 }
 
-// Closed reports whether Close was called.
+// Closed 는 Close 호출 여부를 보고한다.
 func (r *CSVReader) Closed() bool {
 	return r != nil && r.closed
 }
 
-// CustomerProcessor returns the row validation and normalization processor.
+// CustomerProcessor 는 row 검증과 정규화를 수행하는 processor를 반환한다.
 func CustomerProcessor() batch.Processor[CSVRow, Customer] {
 	return batch.ProcessorFunc[CSVRow, Customer](func(ctx context.Context, row CSVRow) (Customer, bool, error) {
 		if err := ctx.Err(); err != nil {
@@ -201,7 +201,7 @@ func CustomerProcessor() batch.Processor[CSVRow, Customer] {
 	})
 }
 
-// CustomerSink stores imported customers with idempotency by customer ID.
+// CustomerSink 는 customer ID 기준 idempotency를 유지하며 import된 customer를 저장한다.
 type CustomerSink struct {
 	mu             sync.RWMutex
 	customers      map[string]Customer
@@ -211,7 +211,7 @@ type CustomerSink struct {
 	writeAttempts  int
 }
 
-// NewCustomerSink creates an empty in-memory customer sink.
+// NewCustomerSink 는 비어 있는 in-memory customer sink를 만든다.
 func NewCustomerSink() *CustomerSink {
 	return &CustomerSink{customers: make(map[string]Customer)}
 }
@@ -230,7 +230,7 @@ func (s *CustomerSink) put(customer Customer) bool {
 	return true
 }
 
-// Snapshot returns customers in first-commit order.
+// Snapshot 은 최초 commit 순서대로 customer 목록을 반환한다.
 func (s *CustomerSink) Snapshot() []Customer {
 	if s == nil {
 		return nil
@@ -244,7 +244,7 @@ func (s *CustomerSink) Snapshot() []Customer {
 	return customers
 }
 
-// NewCommits returns the number of unique committed customers.
+// NewCommits 는 고유하게 commit된 customer 수를 반환한다.
 func (s *CustomerSink) NewCommits() int {
 	if s == nil {
 		return 0
@@ -254,7 +254,7 @@ func (s *CustomerSink) NewCommits() int {
 	return s.newCommits
 }
 
-// DuplicateSkips returns the number of duplicate customer writes skipped.
+// DuplicateSkips 는 건너뛴 중복 customer write 수를 반환한다.
 func (s *CustomerSink) DuplicateSkips() int {
 	if s == nil {
 		return 0
@@ -264,7 +264,7 @@ func (s *CustomerSink) DuplicateSkips() int {
 	return s.duplicateSkips
 }
 
-// WriteAttempts returns attempted row-level writes.
+// WriteAttempts 는 row 단위 write 시도 횟수를 반환한다.
 func (s *CustomerSink) WriteAttempts() int {
 	if s == nil {
 		return 0
@@ -274,7 +274,7 @@ func (s *CustomerSink) WriteAttempts() int {
 	return s.writeAttempts
 }
 
-// CustomerWriter writes customer chunks into a sink and can inject one crash.
+// CustomerWriter 는 customer chunk를 sink에 쓰며 한 번의 crash를 주입할 수 있다.
 type CustomerWriter struct {
 	sink                 *CustomerSink
 	crashAfterNewCommits int
@@ -283,12 +283,12 @@ type CustomerWriter struct {
 	closed               bool
 }
 
-// WriterOptions configures CustomerWriter behavior.
+// WriterOptions 는 CustomerWriter 동작을 설정한다.
 type WriterOptions struct {
 	CrashAfterNewCommits int
 }
 
-// NewCustomerWriter creates a chunk writer for sink.
+// NewCustomerWriter 는 sink에 쓰는 chunk writer를 만든다.
 func NewCustomerWriter(sink *CustomerSink, options WriterOptions) *CustomerWriter {
 	if sink == nil {
 		sink = NewCustomerSink()
@@ -299,7 +299,7 @@ func NewCustomerWriter(sink *CustomerSink, options WriterOptions) *CustomerWrite
 	}
 }
 
-// Open records writer startup.
+// Open 은 writer startup을 기록한다.
 func (w *CustomerWriter) Open(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -312,7 +312,7 @@ func (w *CustomerWriter) Open(ctx context.Context) error {
 	return nil
 }
 
-// Write commits a chunk with idempotency by customer ID.
+// Write 는 customer ID 기준 idempotency를 유지하며 chunk를 commit한다.
 func (w *CustomerWriter) Write(ctx context.Context, chunk []Customer) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -333,7 +333,7 @@ func (w *CustomerWriter) Write(ctx context.Context, chunk []Customer) error {
 	return nil
 }
 
-// Close records writer cleanup.
+// Close 는 writer cleanup을 기록한다.
 func (w *CustomerWriter) Close(ctx context.Context) error {
 	if w == nil {
 		return nil
@@ -345,12 +345,12 @@ func (w *CustomerWriter) Close(ctx context.Context) error {
 	return nil
 }
 
-// Closed reports whether Close was called.
+// Closed 는 Close 호출 여부를 보고한다.
 func (w *CustomerWriter) Closed() bool {
 	return w != nil && w.closed
 }
 
-// RunOptions configures one import run.
+// RunOptions 는 import run 하나를 설정한다.
 type RunOptions struct {
 	CSVPath              string
 	ChunkSize            int
@@ -361,7 +361,7 @@ type RunOptions struct {
 	Processor            batch.Processor[CSVRow, Customer]
 }
 
-// ImportRun is stable output for one batch job run.
+// ImportRun 은 batch job run 하나에 대한 안정적인 출력이다.
 type ImportRun struct {
 	Report          ReportNode  `json:"report"`
 	Checkpoint      *Checkpoint `json:"checkpoint,omitempty"`
@@ -373,7 +373,7 @@ type ImportRun struct {
 	WriterWasClosed bool        `json:"-"`
 }
 
-// ReportNode is a timestamp-free batch report projection.
+// ReportNode 는 timestamp를 제거한 batch report 프로젝션이다.
 type ReportNode struct {
 	Name        string       `json:"name"`
 	Status      batch.Status `json:"status"`
@@ -386,7 +386,7 @@ type ReportNode struct {
 	Children    []ReportNode `json:"children,omitempty"`
 }
 
-// DemoResult is the runnable example output.
+// DemoResult 는 실행 가능한 예제 출력이다.
 type DemoResult struct {
 	CheckpointKey     string     `json:"checkpoint_key"`
 	ChunkSize         int        `json:"chunk_size"`
@@ -397,7 +397,7 @@ type DemoResult struct {
 	Customers         []Customer `json:"customers"`
 }
 
-// RunImport executes one checkpoint-aware customer import job.
+// RunImport 는 checkpoint-aware customer import job 하나를 실행한다.
 func RunImport(ctx context.Context, options RunOptions) (ImportRun, error) {
 	ctx = normalizeContext(ctx)
 	if options.CSVPath == "" {
@@ -457,7 +457,7 @@ func RunImport(ctx context.Context, options RunOptions) (ImportRun, error) {
 	}, nil
 }
 
-// RunDemo executes the expected fail-and-restart scenario.
+// RunDemo 는 의도된 fail-and-restart scenario를 실행한다.
 func RunDemo(ctx context.Context, csvPath string) (DemoResult, error) {
 	store := batch.NewMemoryCheckpointStore()
 	sink := NewCustomerSink()

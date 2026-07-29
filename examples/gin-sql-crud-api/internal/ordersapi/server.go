@@ -1,4 +1,4 @@
-// Package ordersapi exposes a small Gin CRUD API over a sqlkit repository.
+// Package ordersapi 는 sqlkit repository 위에 작은 Gin CRUD API를 노출한다.
 package ordersapi
 
 import (
@@ -23,25 +23,25 @@ const (
 )
 
 var (
-	// ErrInvalidOrder reports invalid domain or API input.
+	// ErrInvalidOrder 는 유효하지 않은 domain 또는 API 입력을 나타낸다.
 	ErrInvalidOrder = errors.New("ordersapi: invalid order")
-	// ErrOrderNotFound reports that an order row does not exist.
+	// ErrOrderNotFound 는 order row가 존재하지 않음을 나타낸다.
 	ErrOrderNotFound = errors.New("ordersapi: order not found")
 )
 
-// Status is the public order state accepted by the API.
+// Status 는 API가 허용하는 공개 order state다.
 type Status string
 
 const (
-	// StatusPending means the order was accepted but is not paid yet.
+	// StatusPending 은 주문이 접수되었지만 아직 결제되지 않았다는 뜻이다.
 	StatusPending Status = "pending"
-	// StatusPaid means the order has been paid.
+	// StatusPaid 는 주문 결제가 완료되었다는 뜻이다.
 	StatusPaid Status = "paid"
-	// StatusCancelled means the order was cancelled.
+	// StatusCancelled 는 주문이 취소되었다는 뜻이다.
 	StatusCancelled Status = "cancelled"
 )
 
-// Order is the domain row persisted by the repository and returned by the API.
+// Order 는 repository가 영속화하고 API가 반환하는 domain row다.
 type Order struct {
 	ID         string    `json:"id"`
 	CustomerID string    `json:"customer_id"`
@@ -50,32 +50,32 @@ type Order struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-// CreateOrderRequest is the POST /orders request body.
+// CreateOrderRequest 는 POST /orders 요청 본문이다.
 type CreateOrderRequest struct {
 	CustomerID string `json:"customer_id"`
 	TotalCents int64  `json:"total_cents"`
 }
 
-// UpdateStatusRequest is the PATCH /orders/:id/status request body.
+// UpdateStatusRequest 는 PATCH /orders/:id/status 요청 본문이다.
 type UpdateStatusRequest struct {
 	Status Status `json:"status"`
 }
 
-// ListFilter scopes GET /orders queries.
+// ListFilter 는 GET /orders query 범위를 제한한다.
 type ListFilter struct {
 	CustomerID string
 	Status     Status
 	Limit      int
 }
 
-// StatementSnapshot is an inspectable SQL statement plus ordered arguments.
+// StatementSnapshot 은 검사 가능한 SQL statement와 순서가 있는 argument 묶음이다.
 type StatementSnapshot struct {
 	Name string `json:"name"`
 	SQL  string `json:"sql"`
 	Args []any  `json:"args,omitempty"`
 }
 
-// Preview describes the runnable API lesson printed when DATABASE_URL is unset.
+// Preview 는 DATABASE_URL이 없을 때 출력되는 실행 가능한 API lesson을 설명한다.
 type Preview struct {
 	Scenario        string              `json:"scenario"`
 	HTTPBoundary    []string            `json:"http_boundary"`
@@ -88,7 +88,7 @@ type Preview struct {
 	RaceTestCommand string              `json:"race_test_command"`
 }
 
-// Options configures the Gin SQL CRUD API.
+// Options 는 Gin SQL CRUD API를 설정한다.
 type Options struct {
 	DB             *sql.DB
 	Now            func() time.Time
@@ -96,7 +96,7 @@ type Options struct {
 	RequestTimeout time.Duration
 }
 
-// Server exposes order CRUD endpoints over Gin.
+// Server 는 Gin 위에 order CRUD endpoint를 노출한다.
 type Server struct {
 	router         *gin.Engine
 	db             *sql.DB
@@ -106,11 +106,11 @@ type Server struct {
 	requestTimeout time.Duration
 }
 
-// Repository owns order SQL while callers own database sessions.
+// Repository 는 order SQL을 소유하고 호출자는 database session을 소유한다.
 type Repository struct{}
 
-// NewServer creates the order API. Gin stays at this boundary; repository code
-// only sees context, sqlkit interfaces, and database/sql.
+// NewServer 는 order API를 만든다. Gin은 이 boundary에 머물고 repository code는
+// context, sqlkit interface, database/sql만 본다.
 func NewServer(options Options) (*Server, error) {
 	if options.DB == nil {
 		return nil, fmt.Errorf("%w: db is required", ErrInvalidOrder)
@@ -152,13 +152,13 @@ func NewServer(options Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to Gin.
+// ServeHTTP 는 요청을 Gin으로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-// Migrate creates the example table. Production systems should use a migration
-// tool; this keeps the local demo runnable.
+// Migrate 는 예제 table을 만든다. Production system은 migration tool을 사용해야 하며,
+// 이 함수는 local demo를 실행 가능하게 유지하기 위한 것이다.
 func Migrate(ctx context.Context, db *sql.DB) error {
 	_, err := db.ExecContext(ctx, `create table if not exists gin_sql_crud_orders (
 		id text primary key,
@@ -170,7 +170,7 @@ func Migrate(ctx context.Context, db *sql.DB) error {
 	return err
 }
 
-// NewPreview returns the API and repository contract without requiring a DB.
+// NewPreview 는 DB 없이 API와 repository 계약을 반환한다.
 func NewPreview() (Preview, error) {
 	repo := Repository{}
 	create, err := repo.CreateStatement(Order{
@@ -333,7 +333,7 @@ func (s *Server) requestContext(c *gin.Context) (context.Context, context.Cancel
 	return context.WithTimeout(c.Request.Context(), s.requestTimeout)
 }
 
-// Create inserts an order through the provided database/sql execution boundary.
+// Create 는 제공된 database/sql 실행 boundary를 통해 order를 삽입한다.
 func (Repository) Create(ctx context.Context, db sqlkit.Execer, order Order) error {
 	stmt, err := createSQL(order)
 	if err != nil {
@@ -343,7 +343,7 @@ func (Repository) Create(ctx context.Context, db sqlkit.Execer, order Order) err
 	return err
 }
 
-// FindByID returns one order or ErrOrderNotFound.
+// FindByID 는 order 하나를 반환하거나 ErrOrderNotFound를 반환한다.
 func (Repository) FindByID(ctx context.Context, db sqlkit.Queryer, id string) (Order, error) {
 	stmt, err := findSQL(id)
 	if err != nil {
@@ -356,7 +356,7 @@ func (Repository) FindByID(ctx context.Context, db sqlkit.Queryer, id string) (O
 	return order, err
 }
 
-// List returns orders matching optional customer/status filters.
+// List 는 선택적 customer/status filter와 일치하는 order를 반환한다.
 func (Repository) List(ctx context.Context, db sqlkit.Queryer, filter ListFilter) ([]Order, error) {
 	stmt, err := listSQL(filter)
 	if err != nil {
@@ -365,7 +365,7 @@ func (Repository) List(ctx context.Context, db sqlkit.Queryer, filter ListFilter
 	return sqlkit.QueryAll(ctx, db, stmt.SQL, scanOrder, stmt.Args...)
 }
 
-// UpdateStatus updates one order status and returns the fresh row.
+// UpdateStatus 는 order status 하나를 갱신하고 최신 row를 반환한다.
 func (repo Repository) UpdateStatus(ctx context.Context, db sqlkit.Execer, id string, status Status) (Order, error) {
 	stmt, err := updateStatusSQL(id, status)
 	if err != nil {
@@ -385,7 +385,7 @@ func (repo Repository) UpdateStatus(ctx context.Context, db sqlkit.Execer, id st
 	return repo.FindByID(ctx, queryer, id)
 }
 
-// Delete removes one order.
+// Delete 는 order 하나를 제거한다.
 func (Repository) Delete(ctx context.Context, db sqlkit.Execer, id string) error {
 	stmt, err := deleteSQL(id)
 	if err != nil {
@@ -401,31 +401,31 @@ func (Repository) Delete(ctx context.Context, db sqlkit.Execer, id string) error
 	return nil
 }
 
-// CreateStatement returns the create SQL shown by the README and preview.
+// CreateStatement 는 README와 preview에 표시되는 create SQL을 반환한다.
 func (Repository) CreateStatement(order Order) (StatementSnapshot, error) {
 	stmt, err := createSQL(order)
 	return snapshot("orders.create", stmt, err)
 }
 
-// FindStatement returns the find SQL shown by the README and preview.
+// FindStatement 는 README와 preview에 표시되는 find SQL을 반환한다.
 func (Repository) FindStatement(id string) (StatementSnapshot, error) {
 	stmt, err := findSQL(id)
 	return snapshot("orders.find_by_id", stmt, err)
 }
 
-// ListStatement returns the list SQL shown by the README and preview.
+// ListStatement 는 README와 preview에 표시되는 list SQL을 반환한다.
 func (Repository) ListStatement(filter ListFilter) (StatementSnapshot, error) {
 	stmt, err := listSQL(filter)
 	return snapshot("orders.list", stmt, err)
 }
 
-// UpdateStatusStatement returns the update SQL shown by the README and preview.
+// UpdateStatusStatement 는 README와 preview에 표시되는 update SQL을 반환한다.
 func (Repository) UpdateStatusStatement(id string, status Status) (StatementSnapshot, error) {
 	stmt, err := updateStatusSQL(id, status)
 	return snapshot("orders.update_status", stmt, err)
 }
 
-// DeleteStatement returns the delete SQL shown by the README and preview.
+// DeleteStatement 는 README와 preview에 표시되는 delete SQL을 반환한다.
 func (Repository) DeleteStatement(id string) (StatementSnapshot, error) {
 	stmt, err := deleteSQL(id)
 	return snapshot("orders.delete", stmt, err)
@@ -522,7 +522,7 @@ func validateOrder(order Order) error {
 	}
 }
 
-// Valid reports whether the status is accepted by this example API.
+// Valid 는 이 예제 API가 status를 허용하는지 보고한다.
 func (s Status) Valid() bool {
 	switch s {
 	case StatusPending, StatusPaid, StatusCancelled:

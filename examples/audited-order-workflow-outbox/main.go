@@ -1,4 +1,4 @@
-// Package main runs the audited order workflow and its supervised SQL outbox relay.
+// Package main 은 감사 가능한 주문 워크플로와 감독되는 SQL outbox 릴레이를 실행한다.
 package main
 
 import (

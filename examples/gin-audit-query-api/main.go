@@ -1,4 +1,4 @@
-// Package main runs the Gin audit query API example.
+// Package main 은 Gin audit query API 예제를 실행한다.
 package main
 
 import (

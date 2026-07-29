@@ -1,34 +1,29 @@
-# Measured shipping quote example
+# Measured shipping quote 예제
 
 Issue: #115
 
-## Decision
+## 결정
 
-Use a runnable Gin shipping quote API to teach `measure` parsing, formatting,
-derived area/volume, dimensional weight, billable-weight selection, and stable
-HTTP error mapping.
+실행 가능한 Gin shipping quote API로 `measure` parsing, formatting, derived area/volume,
+dimensional weight, billable-weight selection, 안정적인 HTTP error mapping을 설명한다.
 
-## Why
+## 이유
 
-The `measure` package is easiest to understand when a caller sends real unit
-strings across an application boundary. Shipping quotes make the unit risk
-concrete: dimensions and weight can arrive in metric or imperial forms, but the
-application must compare typed values instead of mixing raw floats and suffix
-strings.
+`measure` package는 caller가 application boundary를 넘어 실제 unit string을 보낼 때 가장
+이해하기 쉽다. shipping quote는 unit risk를 구체화한다. dimension과 weight는 metric 또는
+imperial 형태로 들어올 수 있지만, application은 raw float와 suffix string을 섞지 않고 typed
+value를 비교해야 한다.
 
-The example intentionally returns billable measurements instead of money totals.
-That keeps dimensional math separate from currency policy and makes the
-`measure` lesson the main reader contract.
+예제는 의도적으로 money total 대신 billable measurement를 반환한다. 이렇게 하면 dimensional
+math와 currency policy가 분리되고 `measure` lesson이 main reader contract로 남는다.
 
-## Verification shape
+## 검증 형태
 
-- Service tests assert metric input, imperial dimensions with pounds, typed
-  incompatible-unit errors, parse failures, divide-by-zero preservation,
-  declared max-side validation, and invalid display-unit handling.
-- Router tests assert stable JSON responses, malformed JSON handling,
-  invalid-measure mapping, incompatible-unit mapping, invalid dimensional
-  divisor mapping, max-side request validation, oversize request rejection, and
-  health output.
-- README diagrams show the architecture, request sequence, and error policy as
-  separate reader questions so the measurement boundary is visible without
-  hiding HTTP behavior.
+- service test는 metric input, pound를 포함한 imperial dimension, typed incompatible-unit
+  error, parse failure, divide-by-zero preservation, declared max-side validation,
+  invalid display-unit handling을 assert한다.
+- router test는 stable JSON response, malformed JSON handling, invalid-measure
+  mapping, incompatible-unit mapping, invalid dimensional divisor mapping,
+  max-side request validation, oversize request rejection, health output을 assert한다.
+- README diagram은 architecture, request sequence, error policy를 별도 reader question으로
+  보여 HTTP behavior를 숨기지 않으면서 measurement boundary를 드러낸다.

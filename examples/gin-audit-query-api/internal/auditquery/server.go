@@ -25,24 +25,24 @@ var (
 	errUnsupportedContentEncoding = errors.New("unsupported content encoding")
 )
 
-// HTTPConfig controls request size and execution time limits.
+// HTTPConfig 는 요청 크기와 실행 시간 제한을 제어한다.
 type HTTPConfig struct {
 	MaximumBodyBytes int64
 	RequestTimeout   time.Duration
 }
 
-// DefaultHTTPConfig returns bounded request settings for the example.
+// DefaultHTTPConfig 는 예제용 제한된 요청 설정을 반환한다.
 func DefaultHTTPConfig() HTTPConfig {
 	return HTTPConfig{MaximumBodyBytes: 32 << 10, RequestTimeout: 2 * time.Second}
 }
 
-// QueryService is the audit query behavior exposed through HTTP.
+// QueryService 는 HTTP로 노출되는 audit query 동작이다.
 type QueryService interface {
 	Search(context.Context, SearchRequest) (SearchResponse, error)
 	Get(context.Context, AggregateRequest, audit.Revision) (audit.Entry, error)
 }
 
-// NewEngine creates the Gin routes for health, history search, and revision detail.
+// NewEngine 은 health, history search, revision detail용 Gin route를 만든다.
 func NewEngine(service QueryService, config HTTPConfig, logger *log.Logger) (*gin.Engine, error) {
 	if service == nil || isNilInterface(service) || logger == nil || config.MaximumBodyBytes <= 0 || config.RequestTimeout <= 0 {
 		return nil, ErrInvalidConfig

@@ -1,4 +1,4 @@
-// Command retry-dead-letter-batch-worker runs the local batch retry demo.
+// Command retry-dead-letter-batch-worker 는 로컬 배치 재시도 데모를 실행한다.
 package main
 
 import (

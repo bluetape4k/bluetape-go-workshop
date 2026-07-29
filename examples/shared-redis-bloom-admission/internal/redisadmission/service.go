@@ -1,4 +1,4 @@
-// Package redisadmission implements the shared Redis Bloom admission example.
+// Package redisadmission 은 공유 Redis Bloom 입장 판단 예제를 구현한다.
 package redisadmission
 
 import (
@@ -17,34 +17,34 @@ import (
 const maxJSONBodySize = 8 << 10
 
 var (
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("redisadmission: invalid request")
-	// ErrInvalidConfig reports invalid Bloom filter configuration.
+	// ErrInvalidConfig 는 Bloom filter 설정이 유효하지 않음을 나타낸다.
 	ErrInvalidConfig = errors.New("redisadmission: invalid config")
-	// ErrConfigMismatch reports a Redis Bloom namespace initialized with different metadata.
+	// ErrConfigMismatch 는 Redis Bloom namespace 가 다른 metadata 로 초기화됐음을 나타낸다.
 	ErrConfigMismatch = errors.New("redisadmission: redis bloom config mismatch")
-	// ErrFilterUnavailable reports Redis-backed filter failures.
+	// ErrFilterUnavailable 는 Redis 기반 filter 실패를 나타낸다.
 	ErrFilterUnavailable = errors.New("redisadmission: redis bloom unavailable")
 )
 
-// Decision is the public admission decision.
+// Decision 은 공개 입장 판단 값이다.
 type Decision string
 
 const (
-	// DecisionAdmit means at least one Bloom bit changed, so this value is definitely new to the filter.
+	// DecisionAdmit 은 하나 이상의 Bloom bit 가 바뀌어 이 값이 filter 에 확실히 새 값임을 의미한다.
 	DecisionAdmit Decision = "admit"
-	// DecisionProbablySeen means all Bloom bits were already set, so the value may be duplicate or a false positive.
+	// DecisionProbablySeen 은 모든 Bloom bit 가 이미 설정되어 값이 중복이거나 false positive 일 수 있음을 의미한다.
 	DecisionProbablySeen Decision = "probably_seen"
 )
 
 const (
-	// ReasonDefinitelyNew describes the no-false-negative first-insert path.
+	// ReasonDefinitelyNew 는 false negative 가 없는 최초 삽입 경로를 설명한다.
 	ReasonDefinitelyNew = "definitely_new"
-	// ReasonMightBeDuplicate describes the duplicate-or-false-positive path.
+	// ReasonMightBeDuplicate 는 중복 또는 false positive 경로를 설명한다.
 	ReasonMightBeDuplicate = "might_be_duplicate_or_false_positive"
 )
 
-// Config customizes the shared Redis Bloom admission service.
+// Config 는 공유 Redis Bloom 입장 판단 서비스를 조정한다.
 type Config struct {
 	Namespace                string
 	InstanceID               string
@@ -53,7 +53,7 @@ type Config struct {
 	FalsePositiveProbability float64
 }
 
-// Service owns one application instance using a shared Redis Bloom filter.
+// Service 는 공유 Redis Bloom filter 를 사용하는 애플리케이션 인스턴스 하나를 소유한다.
 type Service struct {
 	filter       redisbloom.BloomFilter[string]
 	namespace    string
@@ -61,13 +61,13 @@ type Service struct {
 	scenarioName string
 }
 
-// EventRequest is the HTTP and service request for one event admission.
+// EventRequest 는 이벤트 입장 하나를 위한 HTTP 및 서비스 요청이다.
 type EventRequest struct {
 	EventID string `json:"event_id"`
 	Source  string `json:"source"`
 }
 
-// AdmitResponse is the stable public admission projection.
+// AdmitResponse 는 안정적으로 공개되는 입장 판단 응답 표현이다.
 type AdmitResponse struct {
 	EventID  string      `json:"event_id"`
 	Source   string      `json:"source,omitempty"`
@@ -79,7 +79,7 @@ type AdmitResponse struct {
 	Stats    FilterStats `json:"stats"`
 }
 
-// FilterStats reports approximate Redis Bloom filter state and reader caveats.
+// FilterStats 는 근사적인 Redis Bloom filter 상태와 reader 주의사항을 보고한다.
 type FilterStats struct {
 	Namespace                          string  `json:"namespace"`
 	ExpectedInsertions                 uint64  `json:"expected_insertions"`
@@ -95,13 +95,13 @@ type FilterStats struct {
 	ProbabilisticFalsePositivePossible bool    `json:"probabilistic_false_positive_possible"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적으로 공개되는 오류 응답 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService creates a Redis-backed Bloom admission service.
+// NewService 는 Redis 기반 Bloom 입장 판단 서비스를 생성한다.
 func NewService(ctx context.Context, client redis.Cmdable, config Config) (*Service, error) {
 	cfg, err := bloomConfig(config)
 	if err != nil {
@@ -132,7 +132,7 @@ func NewService(ctx context.Context, client redis.Cmdable, config Config) (*Serv
 	}, nil
 }
 
-// Admit evaluates and inserts one event ID through the shared Bloom prefilter.
+// Admit 은 공유 Bloom prefilter 로 이벤트 ID 하나를 평가하고 삽입한다.
 func (s *Service) Admit(ctx context.Context, request EventRequest) (AdmitResponse, error) {
 	if s == nil || s.filter == nil {
 		return AdmitResponse{}, ErrFilterUnavailable
@@ -175,7 +175,7 @@ func (s *Service) Admit(ctx context.Context, request EventRequest) (AdmitRespons
 	}, nil
 }
 
-// Stats returns approximate current Bloom filter state.
+// Stats 는 현재 Bloom filter 상태의 근사값을 반환한다.
 func (s *Service) Stats(ctx context.Context) (FilterStats, error) {
 	if s == nil || s.filter == nil {
 		return FilterStats{}, ErrFilterUnavailable
@@ -208,7 +208,7 @@ func (s *Service) Stats(ctx context.Context) (FilterStats, error) {
 	}, nil
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

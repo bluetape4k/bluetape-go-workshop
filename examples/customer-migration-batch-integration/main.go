@@ -1,4 +1,4 @@
-// Package main runs the customer migration batch integration example service.
+// Package main 은 customer migration batch integration 예제 서비스를 실행한다.
 package main
 
 import (

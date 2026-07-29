@@ -1,5 +1,5 @@
-// Package orderservice integrates Gin handlers, service-owned SQL
-// transactions, and sqlkit repositories for a small order workflow.
+// Package orderservice 는 Gin handler, service-owned SQL
+// transaction, sqlkit repository를 작은 order workflow로 통합한다.
 package orderservice
 
 import (
@@ -25,29 +25,29 @@ const (
 )
 
 var (
-	// ErrInvalidOrder reports invalid API or domain input.
+	// ErrInvalidOrder 는 유효하지 않은 API 또는 domain 입력을 나타낸다.
 	ErrInvalidOrder = errors.New("orderservice: invalid order")
-	// ErrOrderNotFound reports that an order row does not exist.
+	// ErrOrderNotFound 는 order row가 존재하지 않음을 나타낸다.
 	ErrOrderNotFound = errors.New("orderservice: order not found")
-	// ErrItemNotFound reports that an item row does not exist for an order.
+	// ErrItemNotFound 는 order에 해당하는 item row가 존재하지 않음을 나타낸다.
 	ErrItemNotFound = errors.New("orderservice: item not found")
-	// ErrOrderRejected is a deterministic workshop fault used to prove rollback.
+	// ErrOrderRejected 는 rollback 증명에 쓰는 결정적인 워크숍 fault다.
 	ErrOrderRejected = errors.New("orderservice: order rejected")
 )
 
-// Status is the narrow order service state used by this integration example.
+// Status 는 이 integration 예제에서 사용하는 좁은 order service state다.
 type Status string
 
 const (
-	// StatusPending means the order exists and can still be edited.
+	// StatusPending 은 order가 존재하며 아직 수정 가능하다는 뜻이다.
 	StatusPending Status = "pending"
-	// StatusConfirmed means the order was confirmed.
+	// StatusConfirmed 는 order가 확정되었다는 뜻이다.
 	StatusConfirmed Status = "confirmed"
-	// StatusCancelled means the order was cancelled.
+	// StatusCancelled 는 order가 취소되었다는 뜻이다.
 	StatusCancelled Status = "cancelled"
 )
 
-// Order is the order header persisted by the service.
+// Order 는 service가 영속화하는 order header다.
 type Order struct {
 	ID         string    `json:"id"`
 	CustomerID string    `json:"customer_id"`
@@ -57,7 +57,7 @@ type Order struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-// OrderItem is one persisted order item row.
+// OrderItem 은 영속화된 order item row 하나다.
 type OrderItem struct {
 	ID             string `json:"id"`
 	OrderID        string `json:"order_id"`
@@ -67,7 +67,7 @@ type OrderItem struct {
 	LineTotalCents int64  `json:"line_total_cents"`
 }
 
-// StatusEvent records why the order status was touched.
+// StatusEvent 는 order status가 변경된 이유를 기록한다.
 type StatusEvent struct {
 	ID        string    `json:"id"`
 	OrderID   string    `json:"order_id"`
@@ -76,47 +76,47 @@ type StatusEvent struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// OrderView is the HTTP response shape for an order aggregate.
+// OrderView 는 order aggregate용 HTTP response shape다.
 type OrderView struct {
 	Order         Order         `json:"order"`
 	Items         []OrderItem   `json:"items"`
 	StatusHistory []StatusEvent `json:"status_history"`
 }
 
-// CreateOrderRequest is the POST /orders request body.
+// CreateOrderRequest 는 POST /orders 요청 본문이다.
 type CreateOrderRequest struct {
 	CustomerID       string              `json:"customer_id"`
 	Items            []CreateItemRequest `json:"items"`
 	RejectAfterItems bool                `json:"reject_after_items,omitempty"`
 }
 
-// CreateItemRequest is one item in a create-order request.
+// CreateItemRequest 는 create-order 요청 안의 item 하나다.
 type CreateItemRequest struct {
 	SKU            string `json:"sku"`
 	Quantity       int    `json:"quantity"`
 	UnitPriceCents int64  `json:"unit_price_cents"`
 }
 
-// UpdateItemRequest is the PATCH /orders/:id/items/:item_id request body.
+// UpdateItemRequest 는 PATCH /orders/:id/items/:item_id 요청 본문이다.
 type UpdateItemRequest struct {
 	Quantity int `json:"quantity"`
 }
 
-// StatusResponse is the GET /orders/:id/status response body.
+// StatusResponse 는 GET /orders/:id/status 응답 본문이다.
 type StatusResponse struct {
 	OrderID string        `json:"order_id"`
 	Status  Status        `json:"status"`
 	History []StatusEvent `json:"history"`
 }
 
-// StatementSnapshot is an inspectable SQL statement plus ordered arguments.
+// StatementSnapshot 은 검사 가능한 SQL statement와 순서가 있는 argument 묶음이다.
 type StatementSnapshot struct {
 	Name string `json:"name"`
 	SQL  string `json:"sql"`
 	Args []any  `json:"args,omitempty"`
 }
 
-// Preview describes the integrated order service lesson.
+// Preview 는 통합 order service lesson을 설명한다.
 type Preview struct {
 	Scenario        string              `json:"scenario"`
 	BuildsOn        []string            `json:"builds_on"`
@@ -130,7 +130,7 @@ type Preview struct {
 	RaceTestCommand string              `json:"race_test_command"`
 }
 
-// Options configures the Gin SQL order service API.
+// Options 는 Gin SQL order service API를 설정한다.
 type Options struct {
 	DB             *sql.DB
 	Now            func() time.Time
@@ -138,7 +138,7 @@ type Options struct {
 	RequestTimeout time.Duration
 }
 
-// Server exposes the order service over Gin.
+// Server 는 Gin 위에 order service를 노출한다.
 type Server struct {
 	router         *gin.Engine
 	db             *sql.DB
@@ -146,7 +146,7 @@ type Server struct {
 	requestTimeout time.Duration
 }
 
-// Service owns transaction lifetime and coordinates repositories.
+// Service 는 transaction lifetime을 소유하고 repository들을 조율한다.
 type Service struct {
 	orders   OrderRepository
 	items    ItemRepository
@@ -155,16 +155,16 @@ type Service struct {
 	newID    func(prefix string) (string, error)
 }
 
-// OrderRepository owns order header SQL.
+// OrderRepository 는 order header SQL을 소유한다.
 type OrderRepository struct{}
 
-// ItemRepository owns order item SQL.
+// ItemRepository 는 order item SQL을 소유한다.
 type ItemRepository struct{}
 
-// StatusRepository owns status history SQL.
+// StatusRepository 는 status history SQL을 소유한다.
 type StatusRepository struct{}
 
-// NewServer creates a Gin order service API.
+// NewServer 는 Gin order service API를 만든다.
 func NewServer(options Options) (*Server, error) {
 	if options.DB == nil {
 		return nil, fmt.Errorf("%w: db is required", ErrInvalidOrder)
@@ -194,7 +194,7 @@ func NewServer(options Options) (*Server, error) {
 	return server, nil
 }
 
-// NewService returns an order service with service-owned transaction boundaries.
+// NewService 는 service-owned transaction boundary를 가진 order service를 반환한다.
 func NewService(now func() time.Time, newID func(prefix string) (string, error)) Service {
 	if now == nil {
 		now = time.Now
@@ -211,12 +211,12 @@ func NewService(now func() time.Time, newID func(prefix string) (string, error))
 	}
 }
 
-// ServeHTTP dispatches requests to Gin.
+// ServeHTTP 는 요청을 Gin으로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-// Migrate creates the local example schema.
+// Migrate 는 local example schema를 만든다.
 func Migrate(ctx context.Context, db *sql.DB) error {
 	statements := []string{
 		`create table if not exists gin_sql_order_service_orders (
@@ -251,7 +251,7 @@ func Migrate(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-// NewPreview returns an inspectable API, service, and SQL contract.
+// NewPreview 는 검사 가능한 API, service, SQL 계약을 반환한다.
 func NewPreview() (Preview, error) {
 	orders := OrderRepository{}
 	items := ItemRepository{}
@@ -337,7 +337,7 @@ func NewPreview() (Preview, error) {
 	}, nil
 }
 
-// CreateOrder writes order, items, and status history atomically.
+// CreateOrder 는 order, item, status history를 원자적으로 기록한다.
 func (s Service) CreateOrder(ctx context.Context, db *sql.DB, request CreateOrderRequest) (OrderView, error) {
 	request.CustomerID = strings.TrimSpace(request.CustomerID)
 	if err := validateCreateOrderRequest(request); err != nil {
@@ -406,7 +406,7 @@ func (s Service) CreateOrder(ctx context.Context, db *sql.DB, request CreateOrde
 	return s.GetOrder(ctx, db, orderID)
 }
 
-// GetOrder returns an order aggregate.
+// GetOrder 는 order aggregate를 반환한다.
 func (s Service) GetOrder(ctx context.Context, db sqlkit.Queryer, id string) (OrderView, error) {
 	order, err := s.orders.FindByID(ctx, db, id)
 	if err != nil {
@@ -423,7 +423,7 @@ func (s Service) GetOrder(ctx context.Context, db sqlkit.Queryer, id string) (Or
 	return OrderView{Order: order, Items: items, StatusHistory: statuses}, nil
 }
 
-// GetStatus returns the current status and status history.
+// GetStatus 는 current status와 status history를 반환한다.
 func (s Service) GetStatus(ctx context.Context, db sqlkit.Queryer, id string) (StatusResponse, error) {
 	order, err := s.orders.FindByID(ctx, db, id)
 	if err != nil {
@@ -436,7 +436,7 @@ func (s Service) GetStatus(ctx context.Context, db sqlkit.Queryer, id string) (S
 	return StatusResponse{OrderID: order.ID, Status: order.Status, History: history}, nil
 }
 
-// UpdateItemQuantity updates one item and recalculates the order total atomically.
+// UpdateItemQuantity 는 item 하나를 갱신하고 order total을 원자적으로 다시 계산한다.
 func (s Service) UpdateItemQuantity(ctx context.Context, db *sql.DB, orderID, itemID string, request UpdateItemRequest) (OrderView, error) {
 	if request.Quantity <= 0 {
 		return OrderView{}, fmt.Errorf("%w: quantity must be positive", ErrInvalidOrder)
@@ -540,7 +540,7 @@ func (s *Server) requestContext(c *gin.Context) (context.Context, context.Cancel
 	return context.WithTimeout(c.Request.Context(), s.requestTimeout)
 }
 
-// Create inserts an order header.
+// Create 는 order header를 삽입한다.
 func (OrderRepository) Create(ctx context.Context, db sqlkit.Execer, order Order) error {
 	stmt, err := createOrderSQL(order)
 	if err != nil {
@@ -550,7 +550,7 @@ func (OrderRepository) Create(ctx context.Context, db sqlkit.Execer, order Order
 	return err
 }
 
-// FindByID returns an order header or ErrOrderNotFound.
+// FindByID 는 order header를 반환하거나 ErrOrderNotFound를 반환한다.
 func (OrderRepository) FindByID(ctx context.Context, db sqlkit.Queryer, id string) (Order, error) {
 	stmt, err := findOrderSQL(id)
 	if err != nil {
@@ -563,7 +563,7 @@ func (OrderRepository) FindByID(ctx context.Context, db sqlkit.Queryer, id strin
 	return order, err
 }
 
-// UpdateTotal updates an order aggregate total.
+// UpdateTotal 은 order aggregate total을 갱신한다.
 func (OrderRepository) UpdateTotal(ctx context.Context, db sqlkit.Execer, orderID string, totalCents int64, updatedAt time.Time) error {
 	stmt, err := updateOrderTotalSQL(orderID, totalCents, updatedAt)
 	if err != nil {
@@ -579,19 +579,19 @@ func (OrderRepository) UpdateTotal(ctx context.Context, db sqlkit.Execer, orderI
 	return nil
 }
 
-// CreateStatement returns the create-order SQL shown by the preview.
+// CreateStatement 는 preview에 표시되는 create-order SQL을 반환한다.
 func (OrderRepository) CreateStatement(order Order) (StatementSnapshot, error) {
 	stmt, err := createOrderSQL(order)
 	return snapshot("orders.create", stmt, err)
 }
 
-// UpdateTotalStatement returns the update-total SQL shown by the preview.
+// UpdateTotalStatement 는 preview에 표시되는 update-total SQL을 반환한다.
 func (OrderRepository) UpdateTotalStatement(orderID string, totalCents int64, updatedAt time.Time) (StatementSnapshot, error) {
 	stmt, err := updateOrderTotalSQL(orderID, totalCents, updatedAt)
 	return snapshot("orders.update_total", stmt, err)
 }
 
-// Create inserts an order item.
+// Create 는 order item을 삽입한다.
 func (ItemRepository) Create(ctx context.Context, db sqlkit.Execer, item OrderItem) error {
 	stmt, err := createItemSQL(item)
 	if err != nil {
@@ -601,7 +601,7 @@ func (ItemRepository) Create(ctx context.Context, db sqlkit.Execer, item OrderIt
 	return err
 }
 
-// FindByID returns one item scoped by order.
+// FindByID 는 order 범위의 item 하나를 반환한다.
 func (ItemRepository) FindByID(ctx context.Context, db sqlkit.Queryer, orderID, itemID string) (OrderItem, error) {
 	stmt, err := findItemSQL(orderID, itemID)
 	if err != nil {
@@ -614,7 +614,7 @@ func (ItemRepository) FindByID(ctx context.Context, db sqlkit.Queryer, orderID, 
 	return item, err
 }
 
-// ListByOrder returns all items for one order.
+// ListByOrder 는 order 하나의 모든 item을 반환한다.
 func (ItemRepository) ListByOrder(ctx context.Context, db sqlkit.Queryer, orderID string) ([]OrderItem, error) {
 	stmt, err := listItemsSQL(orderID)
 	if err != nil {
@@ -623,7 +623,7 @@ func (ItemRepository) ListByOrder(ctx context.Context, db sqlkit.Queryer, orderI
 	return sqlkit.QueryAll(ctx, db, stmt.SQL, scanItem, stmt.Args...)
 }
 
-// UpdateQuantity updates one item quantity and derived line total.
+// UpdateQuantity 는 item quantity와 파생 line total을 갱신한다.
 func (ItemRepository) UpdateQuantity(ctx context.Context, db sqlkit.Execer, orderID, itemID string, quantity int, unitPriceCents int64) error {
 	stmt, err := updateItemQuantitySQL(orderID, itemID, quantity, unitPriceCents)
 	if err != nil {
@@ -639,7 +639,7 @@ func (ItemRepository) UpdateQuantity(ctx context.Context, db sqlkit.Execer, orde
 	return nil
 }
 
-// SumOrderTotal returns the current aggregate total from item rows.
+// SumOrderTotal 은 item row에서 current aggregate total을 반환한다.
 func (ItemRepository) SumOrderTotal(ctx context.Context, db sqlkit.Queryer, orderID string) (int64, error) {
 	stmt, err := sumItemsSQL(orderID)
 	if err != nil {
@@ -651,19 +651,19 @@ func (ItemRepository) SumOrderTotal(ctx context.Context, db sqlkit.Queryer, orde
 	}, stmt.Args...)
 }
 
-// CreateStatement returns the create-item SQL shown by the preview.
+// CreateStatement 는 preview에 표시되는 create-item SQL을 반환한다.
 func (ItemRepository) CreateStatement(item OrderItem) (StatementSnapshot, error) {
 	stmt, err := createItemSQL(item)
 	return snapshot("items.create", stmt, err)
 }
 
-// UpdateQuantityStatement returns the update-item SQL shown by the preview.
+// UpdateQuantityStatement 는 preview에 표시되는 update-item SQL을 반환한다.
 func (ItemRepository) UpdateQuantityStatement(orderID, itemID string, quantity int, unitPriceCents int64) (StatementSnapshot, error) {
 	stmt, err := updateItemQuantitySQL(orderID, itemID, quantity, unitPriceCents)
 	return snapshot("items.update_quantity", stmt, err)
 }
 
-// Append inserts a status event.
+// Append 는 status event를 삽입한다.
 func (StatusRepository) Append(ctx context.Context, db sqlkit.Execer, event StatusEvent) error {
 	stmt, err := appendStatusSQL(event)
 	if err != nil {
@@ -673,7 +673,7 @@ func (StatusRepository) Append(ctx context.Context, db sqlkit.Execer, event Stat
 	return err
 }
 
-// ListByOrder returns status events in chronological order.
+// ListByOrder 는 status event를 시간순으로 반환한다.
 func (StatusRepository) ListByOrder(ctx context.Context, db sqlkit.Queryer, orderID string) ([]StatusEvent, error) {
 	stmt, err := listStatusesSQL(orderID)
 	if err != nil {
@@ -682,7 +682,7 @@ func (StatusRepository) ListByOrder(ctx context.Context, db sqlkit.Queryer, orde
 	return sqlkit.QueryAll(ctx, db, stmt.SQL, scanStatus, stmt.Args...)
 }
 
-// AppendStatement returns the append-status SQL shown by the preview.
+// AppendStatement 는 preview에 표시되는 append-status SQL을 반환한다.
 func (StatusRepository) AppendStatement(event StatusEvent) (StatementSnapshot, error) {
 	stmt, err := appendStatusSQL(event)
 	return snapshot("statuses.append", stmt, err)
@@ -897,7 +897,7 @@ func validateStatusEvent(event StatusEvent) error {
 	}
 }
 
-// Valid reports whether the status is accepted by this example service.
+// Valid 는 이 예제 service가 status를 허용하는지 보고한다.
 func (s Status) Valid() bool {
 	switch s {
 	case StatusPending, StatusConfirmed, StatusCancelled:

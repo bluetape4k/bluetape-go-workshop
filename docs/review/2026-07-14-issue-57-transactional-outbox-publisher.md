@@ -1,67 +1,65 @@
-# Issue #57 Transactional Outbox Publisher Review
+# Issue #57 Transactional Outbox Publisher 리뷰
 
-## Scope and Baseline
+## 범위와 기준선
 
-- Branch: `feat/issue-57-transactional-outbox-publisher`
-- Base: `origin/develop@a7f2627d9e8457a4c88e910692a67016842a1032`
-- Library baseline: released `bluetape-go` v0.18.0 APIs
-- Scope: application-shaped PostgreSQL order placement plus the released SQL
-  outbox relay and Redis Streams publisher; no reusable outbox implementation
-- CodeGraph fallback: the repository query returned zero indexed nodes and
-  edges, so source, tests, issue contract, and direct diff inspection were used
+- 브랜치: `feat/issue-57-transactional-outbox-publisher`
+- 기준: `origin/develop@a7f2627d9e8457a4c88e910692a67016842a1032`
+- Library 기준선: released `bluetape-go` v0.18.0 APIs
+- 범위: application-shaped PostgreSQL order placement와 released SQL outbox relay,
+  Redis Streams publisher의 조합. reusable outbox implementation은 만들지 않는다.
+- CodeGraph fallback: repository query가 indexed node와 edge를 0개 반환했으므로
+  source, test, issue contract, 직접 diff inspection을 사용했다.
 
-## Acceptance Review
+## 인수 리뷰
 
-| Contract | Evidence | Result |
+| 계약 | 증거 | 결과 |
 | --- | --- | --- |
-| Atomic order and outbox commit | Real PostgreSQL commit and rollback tests use one `sqlkit.WithTx` and `Store.Enqueue` | PASS |
-| Released relay behavior | Success, exact 250 ms retry, third-attempt dead letter, cancellation, continuous run, and concurrent claim tests | PASS |
-| Redis adapter contract | Real Redis test verifies 13 scalar/envelope fields and decoded `entry_json` parity | PASS |
-| Stable delivery identity | Retry tests preserve `event_id` and `idempotency_key`; stale pending output fails closed | PASS |
-| Resource lifecycle | Partial-open cleanup, idempotent close, joined cancellation, and close-failure stdout suppression tests | PASS |
-| Runnable lesson | Pinned PostgreSQL/Redis commands produce the documented JSON and exactly 13 Redis fields | PASS |
-| Bilingual documentation | English/Korean examples expose matched run, test, field, retry, replay, and production boundaries | PASS |
-| Navigation | Both root READMEs link the example and its released package set | PASS |
+| Atomic order and outbox commit | 실제 PostgreSQL commit/rollback test가 하나의 `sqlkit.WithTx`와 `Store.Enqueue`를 사용한다 | PASS |
+| Released relay behavior | success, 정확한 250 ms retry, third-attempt dead letter, cancellation, continuous run, concurrent claim test | PASS |
+| Redis adapter contract | 실제 Redis test가 13개 scalar/envelope field와 decoded `entry_json` parity를 검증한다 | PASS |
+| Stable delivery identity | retry test가 `event_id`와 `idempotency_key`를 보존한다. stale pending output은 fail closed 처리된다 | PASS |
+| Resource lifecycle | partial-open cleanup, idempotent close, joined cancellation, close-failure stdout suppression test | PASS |
+| Runnable lesson | pinned PostgreSQL/Redis command가 문서화된 JSON과 정확히 13개 Redis field를 생성한다 | PASS |
+| Bilingual documentation | English/Korean 예제가 대응되는 run, test, field, retry, replay, production boundary를 노출한다 | PASS |
+| Navigation | 두 root README가 예제와 released package set을 link한다 | PASS |
 
-## Six-Lens Review
+## Six-lens 리뷰
 
-| Lens | Result | Decision |
+| 관점 | 결과 | 결정 |
 | --- | --- | --- |
-| Performance | P0=0, P1=0 | Claims and stream verification are bounded; no throughput claim is made. |
-| Stability | P0=0, P1=0 | Shared clocks, exact retry eligibility, joined cancellation, and deterministic cleanup are covered. |
-| Security | P0=0, P1=0 | Identifiers are bounded/validated, SQL is parameterized, endpoints are not printed, and replay requires separate authorization/audit policy. |
-| Operator/Ops | P0=0, P1=0 | SQL is named as the durable source; Redis is transport; recovery, retention, trimming, metrics, and replay automation remain explicit production work. |
-| Developer/API | P0=0, P1=0 | Workshop code composes released store, relay, publisher, fixtures, and transaction helper without duplicating library abstractions. |
-| User/caller | P0=0, P1=0 | Exact commands, output, rerun identities, failure boundaries, and both diagrams are visible in both locales. |
+| Performance | P0=0, P1=0 | claim과 stream verification은 bounded이다. throughput claim은 하지 않는다. |
+| Stability | P0=0, P1=0 | shared clock, 정확한 retry eligibility, joined cancellation, deterministic cleanup이 다뤄진다. |
+| Security | P0=0, P1=0 | identifier는 bounded/validated이고 SQL은 parameterized다. endpoint는 출력하지 않으며 replay에는 별도 authorization/audit policy가 필요하다. |
+| Operator/Ops | P0=0, P1=0 | SQL은 durable source로 명명되고 Redis는 transport다. recovery, retention, trimming, metrics, replay automation은 명시적 production work로 남는다. |
+| Developer/API | P0=0, P1=0 | workshop code는 library abstraction을 복제하지 않고 released store, relay, publisher, fixture, transaction helper를 조합한다. |
+| User/caller | P0=0, P1=0 | 정확한 command, output, rerun identity, failure boundary, 두 diagram이 양쪽 locale에서 보인다. |
 
-The independent code-review lane concluded `APPROVE` with no remaining
-CRITICAL/HIGH/MEDIUM/LOW findings. The independent architecture lane concluded
-`CLEAR` with P0/P1/P2/P3 all zero. Earlier review findings were repaired by:
+독립 code-review lane은 남은 CRITICAL/HIGH/MEDIUM/LOW finding 없이 `APPROVE`로
+끝났다. 독립 architecture lane은 P0/P1/P2/P3가 모두 0인 `CLEAR`로 끝났다.
+초기 review finding은 다음으로 수정했다.
 
-- buffering success JSON until both clients close successfully;
-- adding close-failure and stale-pending fail-closed regression tests;
-- separating right-going `XADD` calls from left-going error/success returns;
-- making the cancellation branch an independent claim-to-cancel sequence; and
-- documenting the clean-state command, independent production lifecycles,
-  durable SQL source, Redis transport role, and replay authorization boundary.
+- 두 client가 성공적으로 close될 때까지 success JSON을 buffer한다.
+- close-failure 및 stale-pending fail-closed regression test를 추가한다.
+- 오른쪽으로 향하는 `XADD` call과 왼쪽으로 돌아오는 error/success return을 분리한다.
+- cancellation branch를 독립 claim-to-cancel sequence로 만든다.
+- clean-state command, 독립 production lifecycle, durable SQL source, Redis
+  transport role, replay authorization boundary를 문서화한다.
 
-## Diagram Verification Ledger
+## 다이어그램 검증 기록
 
-| Asset | Automated evidence | Render and eye inspection |
+| Asset | 자동화 증거 | Render 및 눈검사 |
 | --- | --- | --- |
-| Architecture | 4 markers, 8 connectors, 9 cards, 0 intrusions, 0 crossings, 0 geometry failures; endpoint and mixed-corner PASS with 3 Q bends | 3000x1800 PNG; SHA-256 `caecee685692d8269d11db6130dbc04c8ac7c568ed346bee6dbdca7704e46bf6`; CairoSVG byte parity PASS; original plus full-resolution quadrant inspection PASS |
-| Sequence | 5 markers, 20 connectors, 6 cards, 0 intrusions, 0 crossings, 0 geometry failures; endpoint, mixed-corner, and sequence-style PASS | 3200x2440 PNG; SHA-256 `24903cf08a663364b2892c3f883219e1f7d65840d9cc1f704bac602780869394`; CairoSVG byte parity PASS; original plus full-resolution quadrant inspection PASS |
+| Architecture | marker 4개, connector 8개, card 9개, intrusion 0, crossing 0, geometry failure 0. endpoint 및 mixed-corner PASS with 3 Q bends | 3000x1800 PNG; SHA-256 `caecee685692d8269d11db6130dbc04c8ac7c568ed346bee6dbdca7704e46bf6`; CairoSVG byte parity PASS; original 및 full-resolution quadrant inspection PASS |
+| Sequence | marker 5개, connector 20개, card 6개, intrusion 0, crossing 0, geometry failure 0. endpoint, mixed-corner, sequence-style PASS | 3200x2440 PNG; SHA-256 `24903cf08a663364b2892c3f883219e1f7d65840d9cc1f704bac602780869394`; CairoSVG byte parity PASS; original 및 full-resolution quadrant inspection PASS |
 
-The PNG inspection explicitly checked arrowhead direction and size, dashed
-return-marker rendering, terminal straight clearance before card edges, rounded
-bends, activation endpoints, labels, line/card intrusion, crossings, and
-whitespace. Calls point toward their receivers; error/success returns point back
-to their callers.
+PNG inspection은 arrowhead 방향과 크기, dashed return-marker rendering, card edge
+앞 terminal straight clearance, rounded bend, activation endpoint, label,
+line/card intrusion, crossing, whitespace를 명시적으로 확인했다. call은 receiver를
+향하고 error/success return은 caller로 돌아간다.
 
-## Fresh Validation
+## 최신 검증
 
-The following commands were observed to exit 0 after the last code and diagram
-changes:
+마지막 code 및 diagram 변경 뒤 다음 명령이 exit 0으로 끝난 것을 확인했다.
 
 ```bash
 git diff --check
@@ -72,20 +70,19 @@ go test -count=10 ./examples/transactional-outbox-publisher/internal/orderoutbox
 make ci
 ```
 
-The README container commands were also executed from a clean state with
-`postgres:16-alpine` and `redis:7.4-alpine`. The command emitted the documented
-newline-terminated JSON object, and `XRANGE` contained exactly the documented 13
-field names. Both containers were removed afterward.
+README container command도 `postgres:16-alpine` 및 `redis:7.4-alpine` clean
+state에서 실행했다. 명령은 문서화된 newline-terminated JSON object를 출력했고,
+`XRANGE`에는 문서화된 13개 field name이 정확히 포함됐다. 두 container는 이후
+제거했다.
 
-The first full lint attempt exposed missing exported comments, intentional nil
-context literals, and a stale deleted-worktree cache entry. Source findings were
-fixed, the cache was cleaned, and only the later focused lint plus fresh
-`make ci` exit 0 are accepted as final evidence.
+첫 full lint 시도는 누락된 exported comment, 의도적 nil context literal, stale
+deleted-worktree cache entry를 드러냈다. source finding은 수정했고 cache를
+정리했으며, 이후 focused lint와 fresh `make ci` exit 0만 최종 증거로 인정한다.
 
-## Integration Decision
+## 통합 결정
 
-The implementation is PR-ready with P0=0 and P1=0. Delivery remains
-at-least-once by design: an ambiguous Redis success can be published more than
-once before the SQL row is marked. Consumers must deduplicate by stable event
-identity. Merge, local synchronization, and worktree cleanup remain blocked on
-new explicit user approval after live PR CI succeeds.
+구현은 P0=0, P1=0으로 PR-ready다. delivery는 설계상 at-least-once다. 모호한
+Redis success는 SQL row가 marked되기 전에 두 번 이상 publish될 수 있다.
+consumer는 stable event identity로 deduplicate해야 한다. merge, local
+synchronization, worktree cleanup은 live PR CI 성공 뒤 새 명시 승인 전까지
+blocked 상태다.

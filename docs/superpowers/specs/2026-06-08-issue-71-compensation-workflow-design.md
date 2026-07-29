@@ -1,51 +1,50 @@
-# Issue #71 Design: Compensation Workflow Example
+# Issue #71 설계: Compensation Workflow 예제
 
-## Goal
+## 목표
 
-Add a focused v0.4.0 example that demonstrates ordered workflow execution plus
-rollback-style compensation after a later fulfillment step fails.
+순서가 있는 workflow 실행과, 이후 fulfillment 단계가 실패했을 때 수행하는
+rollback-style compensation을 보여주는 집중 v0.4.0 예제를 추가한다.
 
-## Non-Goals
+## 비목표
 
-- Do not implement a durable saga coordinator, queue, database, retry scheduler,
-  or external inventory/payment/shipping service.
-- Do not claim `workflow` provides compensation by itself.
-- Do not duplicate the broader fulfillment runner example from #39.
-- Do not hide the original forward failure behind compensation reports.
+- durable saga coordinator, queue, database, retry scheduler, 외부
+  inventory/payment/shipping service를 구현하지 않는다.
+- `workflow`가 compensation을 자체 제공한다고 주장하지 않는다.
+- #39의 더 넓은 fulfillment runner 예제를 복제하지 않는다.
+- 원래의 forward failure를 compensation report 뒤에 숨기지 않는다.
 
-## Example
+## 예제
 
-- Path: `examples/compensation-workflow`
-- Package: `internal/compensation`
+- 경로: `examples/compensation-workflow`
+- 패키지: `internal/compensation`
 - HTTP framework: Gin
-- Default port: `:8087`
+- 기본 포트: `:8087`
 
-## Scenario
+## 시나리오
 
-A fulfillment workflow executes three forward steps:
+Fulfillment workflow는 세 개의 forward step을 실행한다.
 
 1. `reserve-inventory`
 2. `authorize-payment`
 3. `create-shipment`
 
-The first two steps are reversible. When `create-shipment` fails after inventory
-and payment succeeded, the example runs compensation in reverse order:
+처음 두 단계는 되돌릴 수 있다. Inventory와 payment가 성공한 뒤
+`create-shipment`가 실패하면, 예제는 역순으로 compensation을 실행한다.
 
 1. `void-payment`
 2. `release-inventory`
 
-The response preserves the original shipment error and also exposes a
-compensation report tree.
+응답은 원래 shipment error를 보존하고 compensation report tree도 함께 노출한다.
 
 ## API
 
 ### `GET /healthz`
 
-Returns `200 OK` with `{"status":"ok"}`.
+`{"status":"ok"}`와 함께 `200 OK`를 반환한다.
 
 ### `POST /compensation/fulfillment`
 
-Request:
+요청:
 
 ```json
 {
@@ -58,21 +57,21 @@ Request:
 }
 ```
 
-Rules:
+규칙:
 
-- `order_id` is required after trimming whitespace.
-- `stock_available=false` fails before registering inventory compensation.
-- `payment_authorized=false` fails after inventory reservation and then releases
-  inventory.
-- `shipment_provider_available=false` fails after inventory reservation and
-  payment authorization, then voids payment and releases inventory.
-- `void_payment_fails=true` records a failed payment compensation but still runs
-  inventory release.
-- `release_inventory_fails=true` records a failed inventory compensation.
-- Malformed JSON and invalid request fields return `400 Bad Request`.
-- Caller cancellation maps to `408 Request Timeout`.
+- `order_id`는 공백 trim 이후 필수다.
+- `stock_available=false`는 inventory compensation 등록 전에 실패한다.
+- `payment_authorized=false`는 inventory reservation 이후 실패하고 inventory를
+  release한다.
+- `shipment_provider_available=false`는 inventory reservation과 payment
+  authorization 이후 실패한 다음 payment를 void하고 inventory를 release한다.
+- `void_payment_fails=true`는 실패한 payment compensation을 기록하지만
+  inventory release는 계속 실행한다.
+- `release_inventory_fails=true`는 실패한 inventory compensation을 기록한다.
+- 잘못된 JSON과 유효하지 않은 요청 필드는 `400 Bad Request`를 반환한다.
+- Caller cancellation은 `408 Request Timeout`으로 mapping한다.
 
-Response:
+응답:
 
 ```json
 {
@@ -93,9 +92,9 @@ Response:
 }
 ```
 
-## Report Shape
+## Report 형태
 
-Expose a stable DTO:
+안정적인 DTO를 노출한다.
 
 - `name`
 - `status`
@@ -107,12 +106,12 @@ Expose a stable DTO:
 - `cancelled`
 - `children`
 
-Timestamps are intentionally omitted.
+Timestamp는 의도적으로 생략한다.
 
-## Design
+## 설계
 
-`compensationRun` owns request-scoped side-effect flags and a stack of
-compensation handlers. The forward runner is built as:
+`compensationRun`은 요청 범위 side-effect flag와 compensation handler stack을
+소유한다. Forward runner는 다음처럼 구성한다.
 
 ```go
 workflow.Sequential(
@@ -124,16 +123,16 @@ workflow.Sequential(
 )
 ```
 
-Successful reversible steps append their compensation work to the stack. If the
-forward report is not successful, compensation handlers are copied in reverse
-order and executed through:
+성공한 reversible step은 자신의 compensation work를 stack에 추가한다. Forward
+report가 성공이 아니면 compensation handler를 역순으로 복사하고 다음 runner로
+실행한다.
 
 ```go
 workflow.Sequential("compensation", workreport.ContinueOnFailure, works...)
 ```
 
-The top-level report keeps the original forward error as its own error, and
-embeds both forward and compensation child reports.
+Top-level report는 원래 forward error를 자신의 error로 유지하고, forward 및
+compensation child report를 모두 embed한다.
 
 ## HTTP Status Mapping
 
@@ -143,37 +142,36 @@ embeds both forward and compensation child reports.
 - invalid JSON/request -> `400 Bad Request`
 - unexpected report state -> `500 Internal Server Error`
 
-## Tests
+## 테스트
 
-Focused tests must cover:
+집중 테스트는 다음을 다뤄야 한다.
 
 - health endpoint
-- successful execution with no compensation
-- shipment failure runs `void-payment` then `release-inventory`
-- payment failure runs only `release-inventory`
-- compensation failure still preserves the original shipment error and continues
-  remaining compensation
-- inventory failure has no compensation work
-- caller cancellation maps to `408`
-- malformed JSON and invalid request fields return `400`
-- race test over the example package
+- compensation 없는 성공 실행
+- shipment failure가 `void-payment` 이후 `release-inventory`를 실행하는지
+- payment failure가 `release-inventory`만 실행하는지
+- compensation failure가 원래 shipment error를 보존하면서 남은 compensation을
+  계속 실행하는지
+- inventory failure에 compensation work가 없는지
+- caller cancellation이 `408`로 mapping되는지
+- 잘못된 JSON과 유효하지 않은 요청 필드가 `400`을 반환하는지
+- 예제 package 대상 race test
 
-## Documentation and Diagrams
+## 문서 및 다이어그램
 
-Add English and Korean README files with:
+영어 및 한국어 README 파일에 다음을 추가한다.
 
 - Example Scenario
-- when compensation is different from a plain state transition
-- API and response examples
+- compensation이 단순 state transition과 다른 시점
+- API 및 응답 예제
 - Architecture
 - Sequence Diagram
-- production hardening notes
+- 운영 환경 hardening notes
 
-Generate README diagram assets under `docs/images/readme-diagrams/`:
+`docs/images/readme-diagrams/` 아래에 README 다이어그램 자산을 생성한다.
 
 - `compensation-workflow-scenario`
 - `compensation-workflow-architecture`
 - `compensation-workflow-sequence`
 
-README files embed PNG only and keep generated diagram labels in English.
-
+README 파일은 PNG만 embed하고 생성된 다이어그램 label은 영어로 유지한다.

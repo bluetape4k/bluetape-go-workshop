@@ -1,4 +1,4 @@
-// Package main runs the multi-currency invoice rule example service.
+// Package main 은 다중 통화 인보이스 규칙 예제 서비스를 실행한다.
 package main
 
 import (

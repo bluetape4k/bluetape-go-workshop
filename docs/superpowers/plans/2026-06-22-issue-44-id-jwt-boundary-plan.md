@@ -1,37 +1,25 @@
-# ID and JWT Boundary Example Implementation Plan
+# ID와 JWT 경계 예제 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **에이전트 작업자 참고:** 필수 하위 스킬: `superpowers:subagent-driven-development`(권장) 또는 `superpowers:executing-plans`를 사용해 이 계획을 작업 단위로 구현한다. 단계 추적에는 체크박스(`- [ ]`) 문법을 사용한다.
 
-**Goal:** Add `examples/id-jwt-boundary`, a runnable Gin example that combines
-`bluetape-go/id` UUID v7 identifiers and `bluetape-go/jwt` fixed-HMAC demo
-tokens while teaching the boundary between identifiers, signed claims, and
-authorization policy.
+**목표:** `examples/id-jwt-boundary`를 추가한다. 이 Gin 실행 예제는 `bluetape-go/id` UUID v7 식별자와 `bluetape-go/jwt` 고정 HMAC 데모 토큰을 함께 사용하면서, 식별자, 서명된 claim, 인가 정책의 경계를 설명한다.
 
-**Architecture:** Keep one example-local `internal/idjwtboundary` package. The
-service owns token issuance, token validation, role/scope checks, order request
-validation, UUID v7 generation, and stable public error mapping. `main.go` only
-wires a loopback HTTP server. Tests drive the contract first with deterministic
-clock/token/ID dependencies.
+**아키텍처:** 예제 내부 전용 `internal/idjwtboundary` 패키지 하나를 둔다. 서비스는 토큰 발급, 토큰 검증, 역할/scope 검사, 주문 요청 검증, UUID v7 생성, 안정적인 공개 오류 매핑을 소유한다. `main.go`는 loopback HTTP 서버 연결만 담당한다. 테스트는 결정적 clock/token/ID 의존성을 주입해 계약을 먼저 고정한다.
 
-**Tech Stack:** Go, Gin, `github.com/bluetape4k/bluetape-go/id`,
-`github.com/bluetape4k/bluetape-go/jwt`, standard-library `errors`,
-`net/http`, `strings`, `sync`, and `time`. No new direct dependencies.
+**기술 스택:** Go, Gin, `github.com/bluetape4k/bluetape-go/id`, `github.com/bluetape4k/bluetape-go/jwt`, 표준 라이브러리 `errors`, `net/http`, `strings`, `sync`, `time`. 새 직접 의존성은 추가하지 않는다.
 
 ---
 
-## Constraints
+## 제약
 
-- Apply `$bluetape-go-patterns`: context-aware boundaries where relevant,
-  sentinel errors, table-driven tests, race-safe dependencies, and `gofmt`.
-- Keep the example application-shaped; reusable library code belongs in
-  `bluetape-go`.
-- Use tests before implementation.
-- Keep public error responses allowlisted and secret-safe.
-- Keep docs bilingual and update root navigation.
-- Do not add databases, Redis, Testcontainers, sessions, OIDC, JWKS, or a
-  generic auth middleware framework.
+- `$bluetape-go-patterns`를 적용한다. 관련 경계에는 context-aware 처리를 사용하고, sentinel error, table-driven test, race-safe 의존성, `gofmt`를 지킨다.
+- 예제는 애플리케이션 형태로 유지한다. 재사용 가능한 라이브러리 코드는 `bluetape-go`에 둔다.
+- 구현 전에 테스트를 먼저 작성한다.
+- 공개 오류 응답은 allowlist 기반으로 유지하고 secret을 노출하지 않는다.
+- 문서는 영어/한국어 쌍을 유지하고 root navigation을 갱신한다.
+- 데이터베이스, Redis, Testcontainers, session, OIDC, JWKS, 범용 auth middleware framework는 추가하지 않는다.
 
-## Planned Files
+## 계획 파일
 
 - `examples/id-jwt-boundary/main.go`
 - `examples/id-jwt-boundary/main_test.go`
@@ -44,50 +32,37 @@ clock/token/ID dependencies.
 - `docs/lessons/2026-06-22-id-jwt-boundary.md`
 - `docs/review/2026-06-22-issue-44-id-jwt-boundary-code-review.md`
 
-## Implementation Tasks
+## 구현 작업
 
-- [ ] **A. Service TDD red tests [complexity: medium]**
-  - Create tests for valid token order creation, missing token, expired token,
-    malformed token, wrong-key token, forbidden scope, invalid JSON/request
-    validation, UUID v7 shape, and ID generator failure.
-  - Assert public errors omit raw token, demo secret, and raw JWT parser text.
-  - Run `go test -count=1 ./examples/id-jwt-boundary/internal/idjwtboundary`
-    and keep the expected compile/fail output as TDD evidence.
+- [ ] **A. 서비스 TDD red 테스트 [복잡도: 중간]**
+  - 유효한 토큰의 주문 생성, 누락된 토큰, 만료된 토큰, 잘못된 형식의 토큰, 잘못된 키로 서명된 토큰, 금지된 scope, 잘못된 JSON/요청 검증, UUID v7 형태, ID generator 실패 테스트를 만든다.
+  - 공개 오류가 원본 토큰, 데모 secret, 원본 JWT parser 문구를 포함하지 않는지 검증한다.
+  - `go test -count=1 ./examples/id-jwt-boundary/internal/idjwtboundary`를 실행하고 예상되는 compile/fail 출력을 TDD 증거로 남긴다.
 
-- [ ] **B. Service implementation [complexity: medium]**
-  - Implement sentinel errors, DTOs, `Service`, `IssueToken`, `CreateOrder`,
-    claim parsing helpers, bearer-token extraction, stable error mapping, and
-    `NewRouter`.
-  - Use `jwt.NewFixedHMACProvider(jwt.HS256, secret, jwt.WithClock(...),
-    jwt.WithKeyIDGenerator(...))`.
-  - Use `id.NewUUIDV7Generator` in production wiring and an injected generator
-    in tests.
-  - Run focused package tests.
+- [ ] **B. 서비스 구현 [복잡도: 중간]**
+  - sentinel error, DTO, `Service`, `IssueToken`, `CreateOrder`, claim parsing helper, bearer-token 추출, 안정적인 오류 매핑, `NewRouter`를 구현한다.
+  - `jwt.NewFixedHMACProvider(jwt.HS256, secret, jwt.WithClock(...), jwt.WithKeyIDGenerator(...))`를 사용한다.
+  - production wiring에서는 `id.NewUUIDV7Generator`를 사용하고, 테스트에서는 generator를 주입한다.
+  - 집중 package test를 실행한다.
 
-- [ ] **C. Main entrypoint TDD/implementation [complexity: small]**
-  - Add tests for default loopback address, `HTTP_ADDR` override, non-loopback
-    rejection, and server timeouts.
-  - Implement `main.go` with default `127.0.0.1:8096`, bounded HTTP server
-    timeouts, signal handling, and graceful shutdown.
-  - Run `go test -count=1 ./examples/id-jwt-boundary/...`.
+- [ ] **C. Main 진입점 TDD/구현 [복잡도: 낮음]**
+  - 기본 loopback 주소, `HTTP_ADDR` override, non-loopback 거부, server timeout 테스트를 추가한다.
+  - 기본값 `127.0.0.1:8096`, 제한된 HTTP server timeout, signal handling, graceful shutdown을 포함해 `main.go`를 구현한다.
+  - `go test -count=1 ./examples/id-jwt-boundary/...`를 실행한다.
 
-- [ ] **D. Documentation [complexity: medium]**
-  - Add English/Korean example READMEs with scenario, endpoint table, run
-    command, curl flow, valid/missing/expired/invalid/forbidden examples, and
-    production hardening boundaries.
-  - Update root `README.md` and `README.ko.md` example tables and run sections.
-  - Add `docs/lessons/2026-06-22-id-jwt-boundary.md`.
+- [ ] **D. 문서 [복잡도: 중간]**
+  - 시나리오, endpoint 표, 실행 명령, curl 흐름, valid/missing/expired/invalid/forbidden 예시, production hardening 경계를 담은 영어/한국어 예제 README를 추가한다.
+  - root `README.md`와 `README.ko.md`의 예제 표 및 실행 섹션을 갱신한다.
+  - `docs/lessons/2026-06-22-id-jwt-boundary.md`를 추가한다.
 
-- [ ] **E. Focused verification [complexity: medium]**
-  - Run:
+- [ ] **E. 집중 검증 [복잡도: 중간]**
+  - 다음을 실행한다.
     - `go test -count=1 ./examples/id-jwt-boundary/...`
     - `go test -race -count=1 ./examples/id-jwt-boundary/...`
-    - live smoke with `go run ./examples/id-jwt-boundary` for `/healthz`,
-      token issue, valid order, missing token, expired token, malformed token,
-      and forbidden scope.
+    - `go run ./examples/id-jwt-boundary`로 live smoke를 실행해 `/healthz`, token issue, valid order, missing token, expired token, malformed token, forbidden scope를 확인한다.
 
-- [ ] **F. Full repository verification [complexity: high]**
-  - Run:
+- [ ] **F. 전체 repository 검증 [복잡도: 높음]**
+  - 다음을 실행한다.
     - `go test -p 1 ./...`
     - `make fmt-check`
     - `make tidy-check`
@@ -95,40 +70,34 @@ clock/token/ID dependencies.
     - `make lint`
     - `GOFLAGS=-p=1 make ci`
     - `git diff --check`
-  - Fix failures in scope.
+  - 범위 안의 실패를 수정한다.
 
-- [ ] **G. Step 6-R code review and fixes [complexity: medium]**
-  - Run six-lane review plus security/trust-boundary review.
-  - Save `docs/review/2026-06-22-issue-44-id-jwt-boundary-code-review.md`.
-  - Fix all P0/P1 findings and rerun affected tests.
+- [ ] **G. Step 6-R code review와 수정 [복잡도: 중간]**
+  - six-lane review와 security/trust-boundary review를 실행한다.
+  - `docs/review/2026-06-22-issue-44-id-jwt-boundary-code-review.md`에 저장한다.
+  - 모든 P0/P1 finding을 수정하고 영향받은 테스트를 다시 실행한다.
 
-- [ ] **H. Commit and PR [complexity: small]**
-  - Commit with Lore protocol.
-  - Push branch and create a PR with `Closes #44`.
-  - Match PR metadata from issue #44: assignee `debop`, milestone `0.6.0`,
-    labels `enhancement` and `examples`.
-  - End PR body with `## DoD Status`.
+- [ ] **H. Commit과 PR [복잡도: 낮음]**
+  - Lore protocol로 commit한다.
+  - branch를 push하고 `Closes #44`가 포함된 PR을 만든다.
+  - issue #44의 PR metadata를 맞춘다. assignee는 `debop`, milestone은 `0.6.0`, label은 `enhancement`와 `examples`다.
+  - PR body는 `## DoD Status`로 끝낸다.
 
-## Acceptance Criteria Mapping
+## Acceptance Criteria 매핑
 
-| Spec requirement | Plan coverage |
+| Spec 요구사항 | 계획 범위 |
 |---|---|
-| Internal order ID and request token flow | A, B, D, E |
-| JWT issue/verify and invalid rejection | A, B, D, E |
-| Expired token path | A, B, D, E |
-| ID shape tests | A, B |
-| Secret handling and trust-boundary docs | D, G |
+| 내부 주문 ID와 요청 토큰 흐름 | A, B, D, E |
+| JWT 발급/검증과 invalid 거부 | A, B, D, E |
+| 만료 토큰 경로 | A, B, D, E |
+| ID 형태 테스트 | A, B |
+| Secret handling과 trust-boundary 문서 | D, G |
 | Root navigation | D |
-| Verification gates | E, F |
-| Review and PR metadata | G, H |
+| 검증 gate | E, F |
+| Review와 PR metadata | G, H |
 
-## Risk Assumptions
+## 위험 가정
 
-- `go mod tidy` may add checksums for transitive `bluetape-go/id` and
-  `bluetape-go/jwt` dependencies that are not currently used by the workshop
-  module.
-- The fixed HMAC secret is intentionally committed as deterministic demo
-  material. README must explicitly state that production systems must not copy
-  it.
-- The example is not a complete authorization system; role/scope checks are
-  local policy hooks for the boundary lesson only.
+- `go mod tidy`는 workshop module에서 아직 직접 사용하지 않는 `bluetape-go/id`와 `bluetape-go/jwt` 전이 의존성의 checksum을 추가할 수 있다.
+- 고정 HMAC secret은 결정적 데모 자료로 의도적으로 commit한다. README는 production system이 이를 복사하면 안 된다고 명시해야 한다.
+- 이 예제는 완전한 인가 시스템이 아니다. 역할/scope 검사는 경계 학습을 위한 local policy hook일 뿐이다.

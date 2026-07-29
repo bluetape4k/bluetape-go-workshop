@@ -1,4 +1,4 @@
-// Package taskqueue demonstrates a small SQS-backed worker boundary.
+// Package taskqueue 는 작은 SQS 기반 worker 경계를 보여준다.
 package taskqueue
 
 import (
@@ -20,13 +20,13 @@ const (
 )
 
 var (
-	// ErrInvalidTask reports an unsafe or incomplete task message.
+	// ErrInvalidTask 는 안전하지 않거나 불완전한 task message 를 나타낸다.
 	ErrInvalidTask = errors.New("taskqueue: invalid task")
-	// ErrNoMessages reports that a poll returned no visible SQS messages.
+	// ErrNoMessages 는 poll 이 visible SQS message 를 반환하지 않았음을 나타낸다.
 	ErrNoMessages = errors.New("taskqueue: no messages")
 )
 
-// Client is the narrow SQS client surface needed by Queue.
+// Client 는 Queue 에 필요한 좁은 SQS client 표면이다.
 type Client interface {
 	SendMessage(context.Context, *sqs.SendMessageInput, ...func(*sqs.Options)) (*sqs.SendMessageOutput, error)
 	ReceiveMessage(context.Context, *sqs.ReceiveMessageInput, ...func(*sqs.Options)) (*sqs.ReceiveMessageOutput, error)
@@ -34,7 +34,7 @@ type Client interface {
 	ChangeMessageVisibility(context.Context, *sqs.ChangeMessageVisibilityInput, ...func(*sqs.Options)) (*sqs.ChangeMessageVisibilityOutput, error)
 }
 
-// Queue owns the queue URL and worker receive policy.
+// Queue 는 queue URL 과 worker receive 정책을 소유한다.
 type Queue struct {
 	QueueURL              string
 	WaitTimeSeconds       int32
@@ -42,7 +42,7 @@ type Queue struct {
 	FailureVisibleSeconds int32
 }
 
-// FulfillmentTask is the application-owned work payload.
+// FulfillmentTask 는 애플리케이션이 소유하는 작업 payload 다.
 type FulfillmentTask struct {
 	TenantID       string `json:"tenant_id"`
 	OrderID        string `json:"order_id"`
@@ -50,13 +50,13 @@ type FulfillmentTask struct {
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
-// EnqueuedTask describes a sent SQS message.
+// EnqueuedTask 는 전송된 SQS message 를 설명한다.
 type EnqueuedTask struct {
 	MessageID      string `json:"message_id"`
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
-// WorkResult describes one worker poll attempt.
+// WorkResult 는 worker poll 시도 하나를 설명한다.
 type WorkResult struct {
 	Task              FulfillmentTask `json:"task,omitempty"`
 	MessageID         string          `json:"message_id,omitempty"`
@@ -68,7 +68,7 @@ type WorkResult struct {
 	VisibilitySeconds int32           `json:"visibility_seconds,omitempty"`
 }
 
-// Preview describes the example contract without contacting SQS.
+// Preview 는 SQS에 접속하지 않고 예제 계약을 설명한다.
 type Preview struct {
 	QueueName         string   `json:"queue_name"`
 	Operations        []string `json:"operations"`
@@ -76,10 +76,10 @@ type Preview struct {
 	SmokeTest         string   `json:"smoke_test"`
 }
 
-// Handler processes one decoded task.
+// Handler 는 decode 된 task 하나를 처리한다.
 type Handler func(context.Context, FulfillmentTask) error
 
-// NewQueue creates a worker queue with bounded receive defaults.
+// NewQueue 는 제한된 receive 기본값을 가진 worker queue 를 생성한다.
 func NewQueue(queueURL string, waitTimeSeconds, visibilitySeconds, failureVisibleSeconds int32) (Queue, error) {
 	if queueURL == "" {
 		return Queue{}, fmt.Errorf("%w: queue_url is required", ErrInvalidTask)
@@ -101,7 +101,7 @@ func NewQueue(queueURL string, waitTimeSeconds, visibilitySeconds, failureVisibl
 	}, nil
 }
 
-// NewPreview builds a local preview for README and go run output.
+// NewPreview 는 README 와 go run 출력용 로컬 미리보기를 구성한다.
 func NewPreview(queueName string) Preview {
 	return Preview{
 		QueueName: queueName,
@@ -121,7 +121,7 @@ func NewPreview(queueName string) Preview {
 	}
 }
 
-// Enqueue sends one task to SQS.
+// Enqueue 는 task 하나를 SQS로 전송한다.
 func (q Queue) Enqueue(ctx context.Context, client Client, task FulfillmentTask) (EnqueuedTask, error) {
 	if err := ctx.Err(); err != nil {
 		return EnqueuedTask{}, err
@@ -160,7 +160,7 @@ func (q Queue) Enqueue(ctx context.Context, client Client, task FulfillmentTask)
 	return EnqueuedTask{MessageID: aws.ToString(out.MessageId), IdempotencyKey: task.IdempotencyKey}, nil
 }
 
-// PollOnce receives at most one task and acknowledges only after handler success.
+// PollOnce 는 최대 하나의 task 를 받고 handler 성공 후에만 acknowledge 한다.
 func (q Queue) PollOnce(ctx context.Context, client Client, handler Handler) (WorkResult, error) {
 	if err := ctx.Err(); err != nil {
 		return WorkResult{}, err
@@ -216,7 +216,7 @@ func (q Queue) PollOnce(ctx context.Context, client Client, handler Handler) (Wo
 	return result, nil
 }
 
-// SampleTasks returns scenario-shaped work for preview and tests.
+// SampleTasks 는 미리보기와 테스트에 사용할 시나리오 형태 작업을 반환한다.
 func SampleTasks() []FulfillmentTask {
 	return []FulfillmentTask{
 		{TenantID: "tenant-alpha", OrderID: "order-1001", Step: "reserve-inventory", IdempotencyKey: "tenant-alpha/order-1001/reserve-inventory"},
@@ -282,7 +282,7 @@ func (q Queue) retrySoon(ctx context.Context, client Client, receiptHandle strin
 	return nil
 }
 
-// RetryDelay returns the local retry visibility duration for documentation.
+// RetryDelay 는 문서화를 위한 로컬 재시도 visibility 기간을 반환한다.
 func (q Queue) RetryDelay() time.Duration {
 	return time.Duration(q.FailureVisibleSeconds) * time.Second
 }

@@ -1,4 +1,4 @@
-// Package catalogrefresh demonstrates retry and timeout policies for SKU refresh.
+// Package catalogrefresh 는 SKU refresh에 retry와 timeout policy를 적용하는 방식을 보여준다.
 package catalogrefresh
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/bluetape4k/bluetape-go/resilience"
 )
 
-// Product is the refreshed catalog read model used by the storefront.
+// Product 는 storefront가 사용하는 refreshed catalog read model이다.
 type Product struct {
 	SKU        string
 	Name       string
@@ -17,23 +17,23 @@ type Product struct {
 	Inventory  int
 }
 
-// Source loads the latest product state from an upstream catalog provider.
+// Source 는 upstream catalog provider에서 최신 product state를 load한다.
 type Source func(context.Context, string) (Product, error)
 
-// Options configures the catalog refresh policies.
+// Options 는 catalog refresh policy를 설정한다.
 type Options struct {
 	MaxAttempts int
 	Timeout     time.Duration
 	OnEvent     resilience.EventHandler
 }
 
-// Refresher protects one SKU refresh with retry and per-attempt timeout.
+// Refresher 는 retry와 per-attempt timeout으로 SKU refresh 하나를 보호한다.
 type Refresher struct {
 	retry   *resilience.RetryPolicy[Product]
 	timeout *resilience.TimeoutPolicy[Product]
 }
 
-// New creates a catalog refresher.
+// New 는 catalog refresher를 만든다.
 func New(options Options) (*Refresher, error) {
 	attempts := options.MaxAttempts
 	if attempts == 0 {
@@ -64,7 +64,7 @@ func New(options Options) (*Refresher, error) {
 	return &Refresher{retry: retry, timeout: deadline}, nil
 }
 
-// Refresh loads one SKU and returns the refreshed read model.
+// Refresh 는 SKU 하나를 load하고 refreshed read model을 반환한다.
 func (r *Refresher) Refresh(ctx context.Context, sku string, source Source) (Product, error) {
 	if r == nil {
 		return Product{}, fmt.Errorf("refresher must not be nil")

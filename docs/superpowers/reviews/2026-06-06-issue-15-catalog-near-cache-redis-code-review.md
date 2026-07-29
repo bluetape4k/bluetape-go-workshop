@@ -1,16 +1,16 @@
-# Issue #15 Step 6-R Code Review
+# Issue #15 Step 6-R 코드 리뷰
 
 Result: PASS
 
 Final gate: P0=0, P1=0
 
-## Review Scope
+## 리뷰 범위
 
-- Branch diff for issue #15 after Step 6 validation.
-- Production/example code:
+- Step 6 validation 뒤 issue #15 branch diff.
+- production/example code:
   - `examples/catalog-near-cache-redis/internal/catalogcache/catalog.go`
   - `examples/catalog-near-cache-redis/internal/catalogcache/catalog_test.go`
-- Documentation and generated assets:
+- 문서와 generated asset:
   - `examples/catalog-near-cache-redis/README.md`
   - `examples/catalog-near-cache-redis/README.ko.md`
   - `README.md`
@@ -18,21 +18,21 @@ Final gate: P0=0, P1=0
   - `docs/images/readme-diagrams/catalog-near-cache-redis-*`
   - `docs/images/readme-diagrams/workshop-example-map.*`
 
-## Tier Findings
+## Tier 결과
 
 | Tier | Area | P0 | P1 | P2 | P3 | Notes |
 |---|---|---:|---:|---:|---:|---|
-| 1 | Security | 0 | 0 | 0 | 0 | No secrets, auth boundary, SQL/NoSQL query construction, unsafe deserialization, or user-controlled network trust boundary added. Redis client remains caller-owned. |
-| 2 | Ops/SRE Reliability | 0 | 0 | 0 | 0 | `Peer.Close` stops the near-cache subscriber; Redis clients and Testcontainers are caller/test-owned and closed through `t.Cleanup`. Redis readiness is checked with `PING`. |
-| 3 | Structural Impact | 0 | 0 | 0 | 0 | New package is example-local under `internal/catalogcache`; no public module API or dependency direction change. |
-| 4 | Go Code Quality | 0 | 0 | 0 | 0 | Context is propagated through cache/store operations; errors wrap operation and peer context; nil and blank input paths are covered. `context.Background()` hits are test setup, constructor seeding, or nil-context fallback. |
-| 5 | Tests/Types/Silent Failure | 0 | 0 | 0 | 0 | Tests assert invalidation, reload count, cold-burst loader count, missing-product non-cache behavior, input validation, cancellation, and close idempotency. |
-| 6 | Performance/Stability | 0 | 0 | 0 | 0 | Cold-miss polling is bounded and configurable in `Options`; test polling is bounded. No unbounded buffers, repeated regex/reflection, leaked Redis clients, or unclosed subscribers found. |
-| 7 | Documentation/Release/Evidence | 0 | 0 | 0 | 0 | Bilingual README pair, root README tables, PNG-only embeds, Graphviz evidence, final SVG/PNG pairs, and verifier artifact are present. CHANGELOG/release note N/A for workshop example. |
+| 1 | Security | 0 | 0 | 0 | 0 | secret, auth boundary, SQL/NoSQL query construction, unsafe deserialization, user-controlled network trust boundary를 추가하지 않았다. Redis client는 caller-owned로 남아 있다. |
+| 2 | Ops/SRE Reliability | 0 | 0 | 0 | 0 | `Peer.Close`는 near-cache subscriber를 중단한다. Redis client와 Testcontainers는 caller/test-owned이며 `t.Cleanup`으로 닫힌다. Redis readiness는 `PING`으로 확인한다. |
+| 3 | Structural Impact | 0 | 0 | 0 | 0 | 새 package는 `internal/catalogcache` 아래 example-local이다. public module API나 dependency direction 변경은 없다. |
+| 4 | Go Code Quality | 0 | 0 | 0 | 0 | context는 cache/store operation을 통해 전파된다. error는 operation과 peer context를 wrap한다. nil과 blank input path가 다뤄진다. `context.Background()` hit는 test setup, constructor seeding, nil-context fallback이다. |
+| 5 | Tests/Types/Silent Failure | 0 | 0 | 0 | 0 | test는 invalidation, reload count, cold-burst loader count, missing-product non-cache behavior, input validation, cancellation, close idempotency를 assert한다. |
+| 6 | Performance/Stability | 0 | 0 | 0 | 0 | cold-miss polling은 `Options`에서 bounded하고 configurable하다. test polling도 bounded하다. unbounded buffer, repeated regex/reflection, leaked Redis client, unclosed subscriber는 발견되지 않았다. |
+| 7 | Documentation/Release/Evidence | 0 | 0 | 0 | 0 | bilingual README pair, root README table, PNG-only embed, Graphviz evidence, 최종 SVG/PNG pair, verifier artifact가 있다. workshop example이라 CHANGELOG/release note는 해당 없음. |
 
-## Quick Scan Evidence
+## Quick Scan 근거
 
-Concurrency/perf quick scan hits:
+concurrency/perf quick scan hit:
 
 ```text
 context.Background(): test setup, constructor seed, and nil-context fallback only
@@ -40,13 +40,13 @@ go func: cold-miss burst test only
 time.Sleep: bounded polling helper and one 50ms waiter-start stabilization in the cold-miss test
 ```
 
-The cold-miss test was rerun repeatedly to guard the bounded stabilization wait:
+cold-miss test는 bounded stabilization wait를 보호하기 위해 반복 실행했다.
 
 ```text
 go test -count=10 -run TestColdMissBurstAcrossPeersRunsBackingLoaderOnce ./examples/catalog-near-cache-redis/... PASS
 ```
 
-## Validation Evidence
+## 검증 근거
 
 ```text
 go test -count=1 ./examples/catalog-near-cache-redis/... PASS
@@ -58,18 +58,18 @@ README SVG embed check PASS
 SVG stale UI font check PASS
 ```
 
-Initial `make ci` run failed from stale golangci-lint cache entries pointing at
-a deleted sibling worktree path:
+초기 `make ci` 실행은 삭제된 sibling worktree path를 가리키는 stale golangci-lint cache
+entry 때문에 실패했다.
 
 ```text
 ../issue-14-payment-authorization-guard/.../server.go: response body must be closed
 open .../issue-14-payment-authorization-guard/.../server.go: no such file or directory
 ```
 
-After `golangci-lint cache clean`, the same `make ci` gate passed.
+`golangci-lint cache clean` 뒤 같은 `make ci` gate가 통과했다.
 
-## Convergence
+## 수렴
 
-- Baseline blocker count: P0=0, P1=0.
-- Final blocker count: P0=0, P1=0.
+- baseline blocker count: P0=0, P1=0.
+- final blocker count: P0=0, P1=0.
 - PR creation gate: PASS.

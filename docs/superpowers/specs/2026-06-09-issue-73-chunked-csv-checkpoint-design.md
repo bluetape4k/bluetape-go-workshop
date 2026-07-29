@@ -1,50 +1,50 @@
-# Issue #73 Design: Chunked CSV Import Checkpoint Example
+# Issue #73 설계: Chunked CSV Import Checkpoint 예제
 
-## Goal
+## 목표
 
-Add a focused v0.5.0 batch example that demonstrates chunked CSV import,
-checkpoint persistence, restart from the last successful chunk, and duplicate
-prevention when a failed chunk is replayed.
+Chunked CSV import, checkpoint persistence, 마지막 성공 chunk부터의 restart,
+실패한 chunk replay 시 duplicate prevention을 보여주는 집중 v0.5.0 batch
+예제를 추가한다.
 
-## Non-Goals
+## 비목표
 
-- Do not add an HTTP service, Gin route, or background scheduler.
-- Do not add a durable database, Redis, queue, or object storage checkpoint
-  adapter.
-- Do not implement a generic CSV import framework.
-- Do not claim `batch.MemoryCheckpointStore` is production durability.
-- Do not advance checkpoints after a partially failed writer chunk.
+- HTTP service, Gin route, background scheduler를 추가하지 않는다.
+- durable database, Redis, queue, object storage checkpoint adapter를 추가하지
+  않는다.
+- generic CSV import framework를 구현하지 않는다.
+- `batch.MemoryCheckpointStore`가 production durability라고 주장하지 않는다.
+- 부분 실패한 writer chunk 이후 checkpoint를 advance하지 않는다.
 
-## Example
+## 예제
 
-- Path: `examples/chunked-csv-import-checkpoint`
-- Package: `internal/csvimport`
-- Runnable entrypoint: `main.go`
+- 경로: `examples/chunked-csv-import-checkpoint`
+- 패키지: `internal/csvimport`
+- 실행 entrypoint: `main.go`
 - Fixture: `testdata/customers.csv`
 - Package dependency focus: `batch`
 
-## Scenario
+## 시나리오
 
-A merchant uploads a customer CSV file. The import job reads rows in chunks of
-two, validates and normalizes each customer, writes committed customers to a
-domain sink, and stores a checkpoint after each successful chunk write.
+Merchant가 customer CSV 파일을 업로드한다. Import job은 row를 2개 단위 chunk로
+읽고, 각 customer를 검증 및 정규화한 뒤 committed customer를 domain sink에
+쓰며, 성공한 각 chunk write 이후 checkpoint를 저장한다.
 
-The first run simulates a crash while writing the second chunk. One customer in
-that chunk is already committed before the writer returns an error. Because the
-chunk failed, the checkpoint remains at the end of the first successful chunk.
-The restart run creates a fresh reader, restores the checkpoint, replays the
-failed chunk, skips the already committed customer ID, writes the remaining
-rows, and advances the checkpoint to the end of the file.
+첫 번째 실행은 두 번째 chunk를 쓰는 중 crash를 simulation한다. Writer가 error를
+반환하기 전에 해당 chunk의 customer 하나는 이미 commit된다. Chunk가 실패했기
+때문에 checkpoint는 첫 번째 성공 chunk 끝에 남는다. Restart 실행은 fresh
+reader를 만들고 checkpoint를 restore하며, 실패한 chunk를 replay하고 이미
+commit된 customer ID를 skip한 뒤 나머지 row를 쓰고 checkpoint를 파일 끝으로
+advance한다.
 
-This teaches two linked contracts:
+이 예제는 연결된 두 계약을 설명한다.
 
-1. Checkpoints represent the next unread CSV row after committed work.
-2. Writers must be idempotent at the batch boundary because a failed chunk can
-   be replayed.
+1. Checkpoint는 commit된 work 이후 아직 읽지 않은 다음 CSV row를 나타낸다.
+2. 실패한 chunk가 replay될 수 있으므로 writer는 batch boundary에서 idempotent
+   해야 한다.
 
-## Domain Model
+## 도메인 모델
 
-CSV columns:
+CSV column:
 
 - `customer_id`
 - `email`
@@ -68,51 +68,51 @@ type Checkpoint struct {
 }
 ```
 
-`NextRow` is zero-based over parsed data rows, excluding the CSV header. A final
-checkpoint of `5` means all five fixture rows have been read and committed.
+`NextRow`는 CSV header를 제외한 parsed data row 기준 zero-based 값이다. Final
+checkpoint `5`는 fixture row 다섯 개를 모두 읽고 commit했다는 뜻이다.
 
-## Batch Design
+## Batch 설계
 
 Reader:
 
-- parses the fixture with `encoding/csv`
-- validates the exact header
-- trims fields
-- tracks `nextRow`
-- implements `batch.CheckpointReader`
-- restores only from `Checkpoint`
-- checks `ctx.Err()` in `Open`, `Read`, `Restore`, `Checkpoint`, and `Close`
+- `encoding/csv`로 fixture를 parse한다.
+- 정확한 header를 검증한다.
+- field를 trim한다.
+- `nextRow`를 추적한다.
+- `batch.CheckpointReader`를 구현한다.
+- `Checkpoint`에서만 restore한다.
+- `Open`, `Read`, `Restore`, `Checkpoint`, `Close`에서 `ctx.Err()`를 확인한다.
 
 Processor:
 
-- validates non-blank customer ID, email, and tier
-- normalizes email to lowercase and tier to lowercase
-- returns wrapped errors that include row/customer context
-- checks `ctx.Err()` before work
+- 비어 있지 않은 customer ID, email, tier를 검증한다.
+- email과 tier를 lowercase로 정규화한다.
+- row/customer context를 포함한 wrapped error를 반환한다.
+- 작업 전에 `ctx.Err()`를 확인한다.
 
 Writer:
 
-- writes chunks into an in-memory customer sink
-- treats `Customer.ID` as the idempotency key
-- records duplicate skips separately from successful new commits
-- can simulate a crash after a configured new commit count
-- returns a wrapped `ErrSimulatedCrash` sentinel for restart tests
-- checks `ctx.Err()` before writing and between chunk items
+- chunk를 in-memory customer sink에 쓴다.
+- `Customer.ID`를 idempotency key로 취급한다.
+- duplicate skip을 성공한 새 commit과 별도로 기록한다.
+- 설정된 new commit count 이후 crash를 simulation할 수 있다.
+- restart test를 위해 wrapped `ErrSimulatedCrash` sentinel을 반환한다.
+- 쓰기 전과 chunk item 사이에서 `ctx.Err()`를 확인한다.
 
 Runner:
 
-- creates a `batch.Step[CSVRow, Customer]` with:
+- 다음 값으로 `batch.Step[CSVRow, Customer]`를 만든다.
   - `Name: "chunked-customer-csv-import"`
   - `ChunkSize: 2`
   - `CheckpointStore: batch.NewMemoryCheckpointStore()` for the demo
   - `CheckpointKey: "customer-csv-import"`
-- wraps the step in a `batch.Job` named `customer-csv-import`
-- returns a stable result projection without timestamps
+- step을 `customer-csv-import` 이름의 `batch.Job`으로 wrap한다.
+- timestamp 없는 안정적인 result projection을 반환한다.
 
-## CLI Output
+## CLI 출력
 
-`go run ./examples/chunked-csv-import-checkpoint` prints stable JSON showing the
-failure and restart demonstration:
+`go run ./examples/chunked-csv-import-checkpoint`는 failure와 restart demo를
+보여주는 안정적인 JSON을 출력한다.
 
 ```json
 {
@@ -135,81 +135,81 @@ failure and restart demonstration:
 }
 ```
 
-Exact field names may change during implementation, but the output must stay
-timestamp-free and deterministic.
+정확한 field name은 구현 중 바뀔 수 있지만, 출력은 timestamp-free이고 결정적이어야
+한다.
 
-## Failure and Cancellation Contracts
+## 실패 및 취소 계약
 
-- Malformed CSV headers fail during reader open.
-- Invalid customer rows fail during processing and wrap row/customer context.
-- Simulated writer crash returns `ErrSimulatedCrash` and leaves the checkpoint
-  at the previous successful chunk.
-- Caller cancellation returns `batch.StatusCancelled`, closes opened resources,
-  and does not save a later checkpoint.
-- A nil context is accepted by upstream `batch.Step.Run` as background context,
-  but this example should call it with explicit contexts in tests and runner
-  code.
+- 잘못된 CSV header는 reader open 중 실패한다.
+- 유효하지 않은 customer row는 processing 중 실패하고 row/customer context를
+  wrap한다.
+- Simulated writer crash는 `ErrSimulatedCrash`를 반환하고 checkpoint를 이전
+  성공 chunk 위치에 남긴다.
+- Caller cancellation은 `batch.StatusCancelled`를 반환하고 열린 resource를
+  닫으며, 이후 checkpoint를 저장하지 않는다.
+- nil context는 upstream `batch.Step.Run`에서 background context로 허용되지만,
+  이 예제는 테스트와 runner 코드에서 explicit context로 호출해야 한다.
 
-## Diagrams
+## 다이어그램
 
-Generate README diagram assets under `docs/images/readme-diagrams/`:
+`docs/images/readme-diagrams/` 아래에 README 다이어그램 자산을 생성한다.
 
 - `chunked-csv-import-checkpoint-scenario`
 - `chunked-csv-import-checkpoint-architecture`
 - `chunked-csv-import-checkpoint-sequence`
 
-README files embed PNG only. SVG files remain next to PNG files for review.
-Graphviz `.dot`, `.plain`, `*-graphviz.svg`, and `*-graphviz.png` remain route
-evidence. Final README SVG/PNG assets must use the decorated workshop baseline,
-not raw Graphviz output.
+README 파일은 PNG만 embed한다. SVG 파일은 review를 위해 PNG 파일 옆에 유지한다.
+Graphviz `.dot`, `.plain`, `*-graphviz.svg`, `*-graphviz.png`는 route evidence로
+남긴다. 최종 README SVG/PNG 자산은 raw Graphviz output이 아니라 decorated
+workshop baseline을 사용해야 한다.
 
-The generator must print deterministic geometry evidence including concrete
-`margins=L/R/T/B` values and must fail before rendering if the documented
-threshold is exceeded.
+Generator는 구체적인 `margins=L/R/T/B` 값을 포함한 deterministic geometry
+evidence를 출력해야 하며, 문서화된 threshold를 초과하면 rendering 전에
+실패해야 한다.
 
-## Documentation
+## 문서
 
-Add English and Korean README files that include:
+영어 및 한국어 README 파일에 다음을 추가한다.
 
 - Example Scenario
-- how to run the local batch demonstration
+- local batch demonstration 실행 방법
 - output shape
-- checkpoint key and chunk size
-- why the failed chunk is replayed
-- why the writer is idempotent by customer ID
+- checkpoint key와 chunk size
+- 실패한 chunk가 replay되는 이유
+- writer가 customer ID 기준 idempotent인 이유
 - Architecture
 - Sequence Diagram
-- production hardening notes for durable checkpoint stores, transactions,
-  database upserts, audit records, retry/dead-letter handling, and file schema
-  evolution
-- a link to issue #41 as the base checkpoint/restart track
+- durable checkpoint store, transaction, database upsert, audit record,
+  retry/dead-letter handling, file schema evolution에 대한 production hardening
+  note
+- base checkpoint/restart track인 issue #41 link
 
-Update root `README.md` and `README.ko.md`:
+루트 `README.md`와 `README.ko.md`를 갱신한다.
 
 - example table row
 - run section
-- roadmap row for 0.5.0 batch examples
+- 0.5.0 batch example roadmap row
 - workshop example map diagram
 
-## Tests
+## 테스트
 
-Focused tests must cover:
+집중 테스트는 다음을 다뤄야 한다.
 
-- initial import completes, writes all fixture rows, and checkpoints `NextRow`
-  to the row count
-- simulated mid-run failure returns failed status, wraps `ErrSimulatedCrash`,
-  commits the partial customer once, and keeps the checkpoint at the previous
-  successful chunk
-- restart creates a fresh reader, restores the checkpoint, replays the failed
-  chunk, skips the duplicate customer ID, completes the file, and writes each
-  customer exactly once
-- malformed CSV header fails before writing
-- invalid customer row fails with row context
-- cancellation before or during processing returns `batch.StatusCancelled`,
-  closes resources, and leaves checkpoint state unchanged
+- initial import가 완료되고 모든 fixture row를 쓰며 `NextRow`를 row count까지
+  checkpoint하는지
+- simulated mid-run failure가 failed status를 반환하고 `ErrSimulatedCrash`를
+  wrap하며, partial customer를 한 번 commit하고 checkpoint를 이전 성공 chunk에
+  유지하는지
+- restart가 fresh reader를 만들고 checkpoint를 restore하며, 실패한 chunk를
+  replay하고 duplicate customer ID를 skip하며, 파일을 완료하고 각 customer를
+  정확히 한 번 쓰는지
+- 잘못된 CSV header가 쓰기 전에 실패하는지
+- 유효하지 않은 customer row가 row context와 함께 실패하는지
+- processing 전 또는 중 cancellation이 `batch.StatusCancelled`를 반환하고
+  resource를 닫으며 checkpoint state를 변경하지 않는지
 - `go test -race -count=1 ./examples/chunked-csv-import-checkpoint/...`
 
-## Validation
+## 검증
 
 - `bash scripts/generate-chunked-csv-import-checkpoint-diagrams.sh`
 - visual inspection of changed PNG assets

@@ -3,7 +3,7 @@ GOLANGCI_LINT ?= golangci-lint
 
 GO_FILES := $(shell find . -name '*.go' -not -path './.git/*')
 
-.PHONY: help fmt fmt-check tidy tidy-check vet lint test race ci
+.PHONY: help fmt fmt-check tidy tidy-check vet lint test race docs-audit ci
 
 help:
 	@printf '%s\n' \
@@ -16,6 +16,7 @@ help:
 		'  lint        Run golangci-lint' \
 		'  test        Run uncached go test ./... including Testcontainers tests' \
 		'  race        Run uncached go test -race ./... including Testcontainers tests' \
+		'  docs-audit  Verify Korean rewrite scope and exclusions' \
 		'  ci          Run the local CI gate'
 
 fmt:
@@ -42,5 +43,8 @@ test:
 
 race:
 	@$(GO) test -p 1 -race -count=1 ./...
+
+docs-audit:
+	@scripts/audit-korean-rewrite-scope.sh
 
 ci: tidy-check fmt-check vet lint test race

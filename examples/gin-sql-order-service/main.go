@@ -1,4 +1,4 @@
-// Package main runs the Gin SQL order service integration example.
+// Package main 은 Gin SQL order service integration 예제를 실행한다.
 package main
 
 import (

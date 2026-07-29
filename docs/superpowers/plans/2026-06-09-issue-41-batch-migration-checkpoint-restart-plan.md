@@ -1,72 +1,70 @@
-# Issue #41 Plan: Batch Migration Checkpoint Restart Example
+# Issue #41 계획: Batch Migration Checkpoint Restart 예제
 
-## Scope
+## 범위
 
-Implement `examples/account-migration-checkpoint-restart` as a focused 0.5.0
-batch checkpoint/restart example.
+focused 0.5.0 batch checkpoint/restart 예제로
+`examples/account-migration-checkpoint-restart`를 구현한다.
 
-## Tasks
+## 작업
 
-### T1 - Example Package
+### T1 - 예제 패키지
 
-- Add `internal/accountmigration`.
-- Define account fixture, `MigrationCheckpoint`, result/report projections, and
-  sentinel errors.
-- Implement checkpoint-aware reader with `Restore` and `Checkpoint`.
-- Implement processor with deterministic crash injection after the first
-  checkpointed chunk.
-- Implement target sink and writer with idempotency and duplicate detection.
-- Implement `RunMigration` and `RunDemo`.
+- `internal/accountmigration`을 추가한다.
+- account fixture, `MigrationCheckpoint`, result/report projection, sentinel
+  error를 정의한다.
+- `Restore`와 `Checkpoint`를 가진 checkpoint-aware reader를 구현한다.
+- 첫 checkpointed chunk 뒤 deterministic crash injection이 있는 processor를 구현한다.
+- idempotency 및 duplicate detection이 있는 target sink와 writer를 구현한다.
+- `RunMigration` 및 `RunDemo`를 구현한다.
 
-### T2 - Tests
+### T2 - 테스트
 
-- Add table/focused tests for:
-  - first run fails after first chunk checkpoint,
-  - restart resumes at `next_index=2` and completes,
-  - completed first chunk is not re-read or re-written,
-  - final checkpoint is `next_index=5`,
-  - invalid checkpoint type/range wraps `ErrInvalidCheckpoint`,
-  - duplicate target write wraps `ErrDuplicateAccount`,
-  - cancellation before work and during processing,
+- 다음 항목에 대한 table/focused test를 추가한다.
+  - first run이 first chunk checkpoint 뒤 실패한다.
+  - restart가 `next_index=2`에서 재개되어 완료된다.
+  - 완료된 first chunk는 다시 read/write되지 않는다.
+  - final checkpoint는 `next_index=5`다.
+  - invalid checkpoint type/range는 `ErrInvalidCheckpoint`를 wrap한다.
+  - duplicate target write는 `ErrDuplicateAccount`를 wrap한다.
+  - 작업 전 및 processing 중 cancellation.
   - timestamp-free report projection.
-- Add bounded stress tests for:
-  - concurrent complete migration runs with independent stores/sinks,
-  - concurrent checkpoint store and target sink access.
-- Stress tests must pass in normal `go test` and under `go test -race`.
+- 다음 항목에 대한 bounded stress test를 추가한다.
+  - 독립 store/sink를 가진 concurrent complete migration 실행.
+  - concurrent checkpoint store 및 target sink access.
+- stress test는 일반 `go test`와 `go test -race`에서 모두 통과해야 한다.
 
 ### T3 - CLI
 
-- Add `main.go` that prints deterministic indented JSON from `RunDemo`.
-- Keep output free of runtime timestamps.
+- `RunDemo`의 deterministic indented JSON을 출력하는 `main.go`를 추가한다.
+- output에는 runtime timestamp를 넣지 않는다.
 
 ### T4 - README
 
-- Add English and Korean README files.
-- Include Example Scenario, Architecture, Sequence Diagram, checkpoint key,
-  chunk size, restart contract, tests, related examples, and production
-  hardening.
+- English 및 Korean README file을 추가한다.
+- Example Scenario, Architecture, Sequence Diagram, checkpoint key, chunk size,
+  restart contract, test, related example, production hardening을 포함한다.
 
-### T5 - Diagrams
+### T5 - 다이어그램
 
-- Add generator script:
+- generator script를 추가한다.
   - `scripts/generate-account-migration-checkpoint-restart-diagrams.sh`
-- Generate scenario, architecture, and sequence assets:
+- scenario, architecture, sequence asset을 생성한다.
   - DOT
   - PLAIN
   - Graphviz SVG/PNG
   - decorated final SVG/PNG
-- Gate output must include concrete margins and zero geometry failures.
-- Inspect every rendered PNG.
+- gate output은 concrete margin과 geometry failure 0을 포함해야 한다.
+- 모든 rendered PNG를 점검한다.
 
-### T6 - Root Navigation
+### T6 - 루트 navigation
 
-- Add the example to root `README.md` and `README.ko.md`.
-- Update workshop example map and generated map assets.
+- root `README.md`와 `README.ko.md`에 example을 추가한다.
+- workshop example map 및 generated map asset을 갱신한다.
 
-### T7 - Review and Verification
+### T7 - Review 및 검증
 
-- Add Step 6-R code review artifact and verifier checklist.
-- Run:
+- Step 6-R code review artifact와 verifier checklist를 추가한다.
+- 다음을 실행한다.
   - `bash scripts/generate-account-migration-checkpoint-restart-diagrams.sh`
   - `go test -count=1 -run 'Stress|Concurrent' ./examples/account-migration-checkpoint-restart/internal/accountmigration`
   - `go test -race -count=1 -run 'Stress|Concurrent' ./examples/account-migration-checkpoint-restart/internal/accountmigration`
@@ -81,19 +79,19 @@ batch checkpoint/restart example.
 
 ### T8 - PR
 
-- Commit with Lore trailers.
-- Push branch.
-- Create PR with `Closes #41`.
-- Verify PR body is non-empty and final section is `## DoD Status`.
-- Watch GitHub CI.
+- Lore trailer로 commit한다.
+- branch를 push한다.
+- `Closes #41`가 있는 PR을 만든다.
+- PR body가 비어 있지 않고 final section이 `## DoD Status`인지 검증한다.
+- GitHub CI를 확인한다.
 
-## Step 3 Checklist Completion Report
+## Step 3 체크리스트 완료 보고
 
-| Item | Status | Notes |
+| 항목 | 상태 | 메모 |
 |------|--------|-------|
-| Every spec requirement mapped to task | Done | T1-T8 map implementation, tests, docs, diagrams, review, PR. |
-| Task ordering valid | Done | Source, tests, CLI, docs/diagrams, review, validation, PR. |
-| Race/stress planned | Done | T2 and T7 require normal and race stress runs. |
-| README and localized docs covered | Done | T4 and T6. |
-| Diagram gate covered | Done | T5 requires generator gate and PNG inspection. |
-| Verification commands concrete | Done | T7 lists exact commands. |
+| 모든 spec requirement가 task에 매핑됨 | Done | T1-T8이 implementation, test, docs, diagram, review, PR을 매핑한다. |
+| task ordering 유효 | Done | source, test, CLI, docs/diagram, review, validation, PR. |
+| race/stress 계획됨 | Done | T2와 T7이 normal 및 race stress run을 요구한다. |
+| README 및 localized docs 포함 | Done | T4와 T6. |
+| diagram gate 포함 | Done | T5가 generator gate와 PNG inspection을 요구한다. |
+| verification command 구체적 | Done | T7이 exact command를 나열한다. |

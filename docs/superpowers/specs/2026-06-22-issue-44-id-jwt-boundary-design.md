@@ -1,129 +1,122 @@
-# Issue #44 Design: ID and JWT Boundary Example
+# Issue #44 설계: ID and JWT Boundary 예제
 
-## Classification
+## 분류
 
-- Work type: Type A - Full Feature.
-- Basis: issue #44 is the first concrete v0.6.0 example and establishes the
-  ID/JWT trust-boundary pattern that later issue #76 and umbrella #78 can link
-  to.
-- Repository: `bluetape4k/bluetape-go-workshop`.
-- Branch/worktree: `feat/issue-44-id-jwt-boundary` under
+- 작업 유형: Type A - Full Feature.
+- 근거: issue #44는 첫 번째 구체적인 v0.6.0 예제이며, 이후 issue #76과
+  umbrella #78이 연결할 수 있는 ID/JWT trust-boundary pattern을 정립한다.
+- 저장소: `bluetape4k/bluetape-go-workshop`.
+- 브랜치/워크트리: `feat/issue-44-id-jwt-boundary`, 위치는
   `.worktrees/feat-issue-44-id-jwt-boundary`.
 
-## Goal
+## 목표
 
-Add a runnable Gin example that shows how a service generates internal order
-identifiers with `bluetape-go/id`, issues and verifies short-lived request
-tokens with `bluetape-go/jwt`, and keeps those two concerns separated at an
-HTTP trust boundary.
+Service가 `bluetape-go/id`로 internal order identifier를 생성하고,
+`bluetape-go/jwt`로 short-lived request token을 발급 및 검증하며, 이 두 관심사를
+HTTP trust boundary에서 분리하는 방식을 보여주는 실행 가능한 Gin 예제를 추가한다.
 
-The example should make the boundary visible:
+이 예제는 boundary를 분명히 보여줘야 한다.
 
-- IDs are identifiers, not bearer secrets.
-- JWT payloads are signed and validated, not encrypted.
-- Public HTTP errors are stable and do not leak tokens, secrets, or raw parser
-  diagnostics.
-- The demo uses a deterministic fixed HMAC key for local repeatability only.
+- ID는 identifier이며 bearer secret이 아니다.
+- JWT payload는 서명되고 검증되지만 암호화되지 않는다.
+- Public HTTP error는 안정적이며 token, secret, raw parser diagnostic을 leak하지
+  않는다.
+- Demo는 local repeatability만을 위해 deterministic fixed HMAC key를 사용한다.
 
-## Current Evidence
+## 현재 근거
 
-- `gh issue view 44` requires a portable utility example for ID generation and
-  JWT trust boundaries, tests for valid/expired/invalid token paths, ID shape,
-  README secret-handling guidance, synchronized English/Korean docs, and root
-  README navigation.
-- `go doc github.com/bluetape4k/bluetape-go/id` confirms UUID v4/v7, ULID,
-  KSUID, KSUID millis, and Snowflake helpers. Its package docs explicitly state
-  generated IDs are identifiers, not authentication tokens or secrets.
-- `go doc github.com/bluetape4k/bluetape-go/jwt` confirms explicit algorithm
-  and KeyChain helpers plus fixed HMAC providers, `Compose`, `Parse`,
-  `WithSubject`, `WithAudience`, `WithExpiresAfter`, `WithExpectedIssuer`,
-  `WithExpectedAudience`, `WithExpirationRequired`, and `WithParseClock`.
-- `jwt/errors.go` exposes `ErrInvalidToken` and `ErrExpiredToken`; `TokenError`
-  wraps parser failures without exposing the token string.
-- Existing Gin examples such as `examples/payment-authorization-state` and
-  `examples/operations-report-policy` show local `internal` package layout,
-  `gin.New`, `gin.TestMode` tests, stable error DTOs, and small `main.go`
-  wiring.
-- `examples/invitation-codecs` provides the current documentation tone for
-  encoding/transport boundaries without overclaiming security.
+- `gh issue view 44`는 ID generation과 JWT trust boundary를 위한 portable utility
+  예제, valid/expired/invalid token path 테스트, ID shape, README secret-handling
+  guidance, 동기화된 English/Korean 문서, root README navigation을 요구한다.
+- `go doc github.com/bluetape4k/bluetape-go/id`는 UUID v4/v7, ULID, KSUID,
+  KSUID millis, Snowflake helper를 확인한다. Package 문서는 generated ID가
+  authentication token이나 secret이 아니라 identifier라고 명시한다.
+- `go doc github.com/bluetape4k/bluetape-go/jwt`는 explicit algorithm 및
+  KeyChain helper, fixed HMAC provider, `Compose`, `Parse`, `WithSubject`,
+  `WithAudience`, `WithExpiresAfter`, `WithExpectedIssuer`,
+  `WithExpectedAudience`, `WithExpirationRequired`, `WithParseClock`을 확인한다.
+- `jwt/errors.go`는 `ErrInvalidToken`과 `ErrExpiredToken`을 노출한다.
+  `TokenError`는 token string을 노출하지 않고 parser failure를 wrap한다.
+- `examples/payment-authorization-state`, `examples/operations-report-policy`
+  같은 기존 Gin 예제는 local `internal` package layout, `gin.New`,
+  `gin.TestMode` 테스트, 안정적인 error DTO, 작은 `main.go` wiring을 보여준다.
+- `examples/invitation-codecs`는 security를 과장하지 않는 encoding/transport
+  boundary 문서 톤을 제공한다.
 
-## Non-Goals
+## 비목표
 
-- Do not build a full auth service, OIDC provider, JWKS endpoint, session
-  manager, role/permission framework, or production key rotation service.
-- Do not add databases, Redis, Testcontainers, external secret managers, or new
-  dependencies.
-- Do not treat generated IDs as unguessable authorization credentials.
-- Do not echo tokens, HMAC secrets, raw `Authorization` headers, or library
-  parser errors in HTTP responses.
-- Do not import sibling example `internal` packages.
+- full auth service, OIDC provider, JWKS endpoint, session manager,
+  role/permission framework, production key rotation service를 만들지 않는다.
+- database, Redis, Testcontainers, external secret manager, 새 의존성을 추가하지
+  않는다.
+- generated ID를 추측 불가능한 authorization credential로 취급하지 않는다.
+- HTTP response에 token, HMAC secret, raw `Authorization` header, library parser
+  error를 echo하지 않는다.
+- sibling example `internal` package를 import하지 않는다.
 
-## Approaches Considered
+## 검토한 접근
 
-### A. Small Gin order intake API
+### A. 작은 Gin order intake API
 
-Create `examples/id-jwt-boundary` with a `POST /tokens` demo issuer and
-`POST /orders` protected order intake endpoint. The issuer uses a fixed local
-HMAC provider for repeatable workshop commands. The order endpoint validates
-issuer, audience, expiration, role, and scope, then generates an internal UUID
-v7 order ID.
+`POST /tokens` demo issuer와 `POST /orders` protected order intake endpoint를
+가진 `examples/id-jwt-boundary`를 만든다. Issuer는 반복 가능한 workshop command를
+위해 fixed local HMAC provider를 사용한다. Order endpoint는 issuer, audience,
+expiration, role, scope를 검증한 뒤 internal UUID v7 order ID를 생성한다.
 
-This is the selected approach. It keeps the example runnable, issue-focused,
-and application-shaped while avoiding a full auth product.
+이 접근을 선택한다. Full auth product를 피하면서 예제를 실행 가능하고 issue에
+집중하며 application-shaped로 유지한다.
 
-### B. Pure library-style CLI example
+### B. 순수 library-style CLI 예제
 
-A CLI could demonstrate ID and JWT helpers with fewer HTTP concerns, but issue
-#44 calls for an external request-token flow and trust boundary. Without HTTP
-headers and status codes the token boundary would be too abstract.
+CLI는 HTTP concern을 줄이고 ID/JWT helper를 보여줄 수 있지만, issue #44는 external
+request-token flow와 trust boundary를 요구한다. HTTP header와 status code가 없으면
+token boundary가 지나치게 추상적이다.
 
-Rejected because the workshop repository is for runnable application examples.
+워크숍 저장소는 실행 가능한 application example을 위한 곳이므로 기각한다.
 
-### C. Middleware-centered auth example
+### C. Middleware 중심 auth 예제
 
-A reusable Gin middleware would be familiar, but it risks implying the workshop
-repo is defining a reusable auth framework. It also hides the boundary decisions
-that #44 wants to teach.
+Reusable Gin middleware는 익숙하지만 워크숍 저장소가 reusable auth framework를
+정의한다고 암시할 위험이 있다. 또한 #44가 가르치려는 boundary decision을 숨긴다.
 
-Rejected because the lesson should keep policy explicit in the example-local
-service layer.
+Lesson은 example-local service layer에서 policy를 명시적으로 유지해야 하므로
+기각한다.
 
-## Example
+## 예제
 
-- Path: `examples/id-jwt-boundary`
-- Package: `internal/idjwtboundary`
-- Runnable entrypoint: `main.go`
+- 경로: `examples/id-jwt-boundary`
+- 패키지: `internal/idjwtboundary`
+- 실행 entrypoint: `main.go`
 - HTTP framework: Gin
-- Default address: `127.0.0.1:8096`
-- Package dependency focus: `id`, `jwt`, Gin, and standard-library
-  `errors`, `net/http`, `strings`, `sync`, and `time`.
+- 기본 주소: `127.0.0.1:8096`
+- Package dependency focus: `id`, `jwt`, Gin, 표준 라이브러리 `errors`,
+  `net/http`, `strings`, `sync`, `time`.
 
-## Scenario
+## 시나리오
 
-An internal order intake service accepts requests from a trusted upstream
-gateway. The gateway issues a short-lived JWT with claims for a customer
-subject, role, scope, issuer, and audience. The order service validates the
-token before accepting the request and creates internal UUID v7 identifiers for
-the order and request receipt.
+Internal order intake service는 trusted upstream gateway의 요청을 받는다. Gateway는
+customer subject, role, scope, issuer, audience claim을 가진 short-lived JWT를
+발급한다. Order service는 요청을 수락하기 전에 token을 검증하고 order와 request
+receipt를 위한 internal UUID v7 identifier를 만든다.
 
 Demo flow:
 
-1. `POST /tokens` issues a local demo token for `customer-1001`.
-2. `POST /orders` without a token returns `401 missing_token`.
-3. `POST /orders` with a valid token returns `201` and a UUID v7 `order_id`.
-4. Expired or malformed tokens return stable `401` error codes.
-5. A token with a valid signature but missing `orders:create` scope returns
-   `403 forbidden`.
+1. `POST /tokens`는 `customer-1001`용 local demo token을 발급한다.
+2. Token 없는 `POST /orders`는 `401 missing_token`을 반환한다.
+3. Valid token을 가진 `POST /orders`는 `201`과 UUID v7 `order_id`를 반환한다.
+4. Expired 또는 malformed token은 안정적인 `401` error code를 반환한다.
+5. Signature는 valid지만 `orders:create` scope가 없는 token은 `403 forbidden`을
+   반환한다.
 
-## HTTP Contract
+## HTTP 계약
 
-Routes:
+Route:
 
 - `GET /healthz`
 - `POST /tokens`
 - `POST /orders`
 
-Token request:
+Token 요청:
 
 ```json
 {
@@ -134,7 +127,7 @@ Token request:
 }
 ```
 
-Token response:
+Token 응답:
 
 ```json
 {
@@ -144,7 +137,7 @@ Token response:
 }
 ```
 
-Order request:
+Order 요청:
 
 ```json
 {
@@ -153,7 +146,7 @@ Order request:
 }
 ```
 
-Order response:
+Order 응답:
 
 ```json
 {
@@ -167,7 +160,7 @@ Order response:
 }
 ```
 
-Error response:
+Error 응답:
 
 ```json
 {
@@ -176,7 +169,7 @@ Error response:
 }
 ```
 
-Public error codes:
+Public error code:
 
 - `missing_token` -> 401
 - `invalid_token` -> 401
@@ -185,19 +178,19 @@ Public error codes:
 - `invalid_request` -> 400
 - `internal_error` -> 500
 
-## Domain Contract
+## Domain 계약
 
-- `Service` owns one `jwt.Provider`, one `id.StringGenerator`, the expected
-  issuer, expected audience, required role, required scope, and a clock.
-- `IssueToken` composes `iss`, `sub`, `aud`, `exp`, `role`, and `scope`.
-- `CreateOrder` extracts a `Bearer` token, validates issuer/audience/expiration,
-  checks `role=customer` and `scope=orders:create`, validates order fields, then
-  generates `order_id` and `request_id`.
-- HTTP handlers map domain sentinel errors to the public error contract.
-- The service may keep an in-memory accepted-order slice for status-free tests,
-  but public output is request/response based; there is no persistence lesson.
+- `Service`는 하나의 `jwt.Provider`, 하나의 `id.StringGenerator`, expected
+  issuer, expected audience, required role, required scope, clock을 소유한다.
+- `IssueToken`은 `iss`, `sub`, `aud`, `exp`, `role`, `scope`를 compose한다.
+- `CreateOrder`는 `Bearer` token을 추출하고 issuer/audience/expiration을
+  검증하며, `role=customer`와 `scope=orders:create`를 확인하고 order field를
+  검증한 뒤 `order_id`와 `request_id`를 생성한다.
+- HTTP handler는 domain sentinel error를 public error contract로 mapping한다.
+- Service는 status-free test를 위해 in-memory accepted-order slice를 유지할 수
+  있지만, public output은 request/response 기반이다. Persistence lesson은 없다.
 
-Sentinel errors:
+Sentinel error:
 
 - `ErrMissingToken`
 - `ErrInvalidToken`
@@ -205,64 +198,65 @@ Sentinel errors:
 - `ErrForbidden`
 - `ErrInvalidRequest`
 
-Errors returned from domain logic wrap sentinels with `%w` where useful so
-tests and HTTP mapping can use `errors.Is`.
+Domain logic에서 반환하는 error는 테스트와 HTTP mapping이 `errors.Is`를 사용할 수
+있도록 유용한 곳에서 sentinel을 `%w`로 wrap한다.
 
-## ID Contract
+## ID 계약
 
-- Use `id.NewUUIDV7Generator` for internal order/request identifiers.
-- Tests parse returned IDs with `id.ParseUUID` and verify UUID version `7`.
-- Tests use an injected deterministic generator or deterministic UUID v7
-  generator setup so assertions do not depend on wall clock or system entropy.
-- README states UUID v7 gives time-sortable identifiers but not secrecy.
+- Internal order/request identifier에는 `id.NewUUIDV7Generator`를 사용한다.
+- 테스트는 반환된 ID를 `id.ParseUUID`로 parse하고 UUID version `7`을 검증한다.
+- 테스트는 assertion이 wall clock이나 system entropy에 의존하지 않도록 injected
+  deterministic generator 또는 deterministic UUID v7 generator setup을 사용한다.
+- README는 UUID v7이 time-sortable identifier를 제공하지만 secrecy를 제공하지
+  않는다고 설명한다.
 
-## JWT Contract
+## JWT 계약
 
-- Use `jwt.NewFixedHMACProvider(jwt.HS256, secret, jwt.WithClock(...),
-  jwt.WithKeyIDGenerator(...))` for the local demo.
-- Compose tokens with `jwt.WithIssuer`, `jwt.WithSubject`,
-  `jwt.WithAudience`, `jwt.WithExpiresAfter`, `jwt.WithClaim("role", ...)`,
-  and `jwt.WithClaim("scope", ...)`.
-- Parse tokens with `jwt.WithExpectedIssuer`, `jwt.WithExpectedAudience`,
-  `jwt.WithExpirationRequired`, and `jwt.WithParseClock`.
-- Map `errors.Is(err, jwt.ErrExpiredToken)` to `ErrExpiredToken`.
-- Map all other parse/signature/key failures to `ErrInvalidToken`.
-- README states the fixed secret is a local demo value; real services load
-  secrets from a secret manager or environment and rotate keys.
+- Local demo에는 `jwt.NewFixedHMACProvider(jwt.HS256, secret, jwt.WithClock(...),
+  jwt.WithKeyIDGenerator(...))`를 사용한다.
+- Token은 `jwt.WithIssuer`, `jwt.WithSubject`, `jwt.WithAudience`,
+  `jwt.WithExpiresAfter`, `jwt.WithClaim("role", ...)`,
+  `jwt.WithClaim("scope", ...)`로 compose한다.
+- Token은 `jwt.WithExpectedIssuer`, `jwt.WithExpectedAudience`,
+  `jwt.WithExpirationRequired`, `jwt.WithParseClock`으로 parse한다.
+- `errors.Is(err, jwt.ErrExpiredToken)`은 `ErrExpiredToken`으로 mapping한다.
+- 그 밖의 parse/signature/key failure는 모두 `ErrInvalidToken`으로 mapping한다.
+- README는 fixed secret이 local demo value라고 설명한다. 실제 service는 secret
+  manager 또는 environment에서 secret을 load하고 key를 rotate한다.
 
-## Test Requirements
+## 테스트 요구사항
 
-- Valid token creates an order, returns 201, includes parseable UUID v7 IDs, and
-  includes the subject/role/scope from verified claims.
-- Expired token returns 401 `expired_token`.
-- Malformed token and token signed by a different key return 401
-  `invalid_token`.
-- Missing `Authorization` header returns 401 `missing_token`.
-- Valid token without required scope returns 403 `forbidden`.
-- Invalid JSON, blank SKU, and non-positive quantity return 400
-  `invalid_request`.
-- Public error responses never contain the raw token, the demo secret, or raw
-  library error text.
-- ID generator failure maps to 500 `internal_error` without leaking internals.
-- README curl snippets are runnable against the local service.
+- Valid token은 order를 만들고 201을 반환하며 parse 가능한 UUID v7 ID와 verified
+  claim의 subject/role/scope를 포함한다.
+- Expired token은 401 `expired_token`을 반환한다.
+- Malformed token과 다른 key로 서명된 token은 401 `invalid_token`을 반환한다.
+- 누락된 `Authorization` header는 401 `missing_token`을 반환한다.
+- Required scope가 없는 valid token은 403 `forbidden`을 반환한다.
+- Invalid JSON, blank SKU, 양수가 아닌 quantity는 400 `invalid_request`를
+  반환한다.
+- Public error response는 raw token, demo secret, raw library error text를 절대
+  포함하지 않는다.
+- ID generator failure는 internal을 leak하지 않고 500 `internal_error`로
+  mapping한다.
+- README curl snippet은 local service에서 실행 가능하다.
 
-## Documentation Requirements
+## 문서 요구사항
 
-- Add `examples/id-jwt-boundary/README.md`.
-- Add `examples/id-jwt-boundary/README.ko.md`.
-- Update root `README.md` and `README.ko.md` example tables.
-- Add a short run section to both root READMEs.
-- README pair must explain:
-  - generated IDs are identifiers, not authorization tokens;
-  - JWT signing validates integrity and origin assumptions but does not encrypt
-    claims;
-  - local fixed HMAC secret is deterministic demo material only;
-  - real deployments require secret loading, rotation, TLS, logging hygiene, and
-    authorization policy outside this minimal example.
+- `examples/id-jwt-boundary/README.md`를 추가한다.
+- `examples/id-jwt-boundary/README.ko.md`를 추가한다.
+- 루트 `README.md`와 `README.ko.md` example table을 갱신한다.
+- 두 루트 README에 짧은 run section을 추가한다.
+- README pair는 다음을 설명해야 한다.
+  - generated ID는 identifier이며 authorization token이 아니다.
+  - JWT signing은 integrity와 origin assumption을 검증하지만 claim을 암호화하지
+    않는다.
+  - local fixed HMAC secret은 deterministic demo material일 뿐이다.
+  - 실제 배포에는 secret loading, rotation, TLS, logging hygiene, 이 최소 예제
+    밖의 authorization policy가 필요하다.
 
-## Verification
+## 검증
 
-Focused gates:
+집중 gate:
 
 - `go test -count=1 ./examples/id-jwt-boundary/...`
 - `go test -race -count=1 ./examples/id-jwt-boundary/...`
@@ -275,7 +269,7 @@ Focused gates:
   - malformed token
   - forbidden scope
 
-Repository gates:
+저장소 gate:
 
 - `go test -p 1 ./...`
 - `make fmt-check`
@@ -287,11 +281,11 @@ Repository gates:
 
 ## DoD
 
-- Issue #44 acceptance criteria are implemented.
-- English/Korean docs are synchronized.
-- Root README navigation includes the new example.
-- No new dependencies beyond checksums required by importing existing
-  `bluetape-go/id` and `bluetape-go/jwt` packages.
-- Step 6-R code review records P0=0 and P1=0 in `docs/review`.
-- PR metadata mirrors issue #44: assignee `debop`, milestone `0.6.0`, labels
-  `enhancement` and `examples`.
+- Issue #44 acceptance criteria를 구현한다.
+- English/Korean 문서를 동기화한다.
+- Root README navigation이 새 예제를 포함한다.
+- 기존 `bluetape-go/id`와 `bluetape-go/jwt` package import에 필요한 checksum을
+  넘어서는 새 의존성은 없다.
+- Step 6-R code review가 `docs/review`에 P0=0 및 P1=0을 기록한다.
+- PR metadata는 issue #44를 반영한다. Assignee `debop`, milestone `0.6.0`,
+  label `enhancement`, `examples`.

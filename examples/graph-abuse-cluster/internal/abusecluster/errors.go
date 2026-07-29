@@ -2,7 +2,7 @@ package abusecluster
 
 import "errors"
 
-// ErrInvalidFixture and the related sentinels classify stable example failures.
+// ErrInvalidFixture 와 관련 sentinel들은 안정적인 예제 실패를 분류한다.
 var (
 	ErrInvalidFixture = errors.New("graph abuse cluster: invalid fixture")
 	ErrInvalidGraph   = errors.New("graph abuse cluster: invalid graph")

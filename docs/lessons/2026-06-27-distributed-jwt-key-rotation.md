@@ -1,25 +1,23 @@
-# Distributed JWT key rotation example
+# Distributed JWT key rotation 예제
 
 Issue: #111
 
-## Decision
+## 결정
 
-Use `jwt/redis.New`, `jwt.NewDistributedHMACProvider`, and
-`jwt.NewCachedDistributedProvider` directly in an application-shaped Gin example
-instead of wrapping the distributed repository behind a fake store.
+distributed repository를 fake store 뒤에 감싸지 않고 application-shaped Gin 예제에서
+`jwt/redis.New`, `jwt.NewDistributedHMACProvider`,
+`jwt.NewCachedDistributedProvider`를 직접 사용한다.
 
-## Why
+## 이유
 
-The lesson is not only JWT composition. The important boundary is that two API
-instances share signing authority through Redis, force a new `kid`, and continue
-to verify retained keys while local reader cache hits still revalidate the
-repository key state.
+lesson은 JWT composition만이 아니다. 중요한 boundary는 두 API instance가 Redis를 통해
+signing authority를 공유하고, 새 `kid`를 강제로 발급하며, local reader cache hit가 있어도
+repository key state를 다시 검증하면서 retained key를 계속 verify한다는 점이다.
 
-## Verification shape
+## 검증 형태
 
-- Service tests start Redis through the repository Testcontainers fixture.
-- Rotation tests assert both new `kid` issuance and old token retention.
-- Cancellation tests keep caller `context.Context` errors visible before Redis
-  I/O can be mistaken for token verification failures.
-- Router tests exercise warm repeated verification through the cached
-  distributed provider.
+- service test는 repository Testcontainers fixture로 Redis를 시작한다.
+- rotation test는 새 `kid` 발급과 old token retention을 모두 assert한다.
+- cancellation test는 Redis I/O가 token verification failure로 오해되기 전에 caller
+  `context.Context` error가 보이도록 유지한다.
+- router test는 cached distributed provider를 통한 warm repeated verification을 실행한다.

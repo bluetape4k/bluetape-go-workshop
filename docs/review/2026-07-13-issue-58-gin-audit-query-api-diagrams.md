@@ -1,60 +1,59 @@
-# Issue #58 Gin Audit Query API Diagram Review
+# Issue #58 Gin Audit Query API 다이어그램 리뷰
 
-## Scope and authority
+## 범위와 권한
 
-- Classification: Type E documentation/visual maintenance; no runtime behavior or dependency change.
-- Base: `origin/develop` at `2c56fcf`.
-- Delivery boundary: create the PR and wait for green CI; merge and worktree cleanup require a separate explicit approval.
-- Public surfaces: the English and Korean example README pair.
-- Authoritative image policy: editable SVG source plus rendered PNG; README embeds the PNG.
+- 분류: Type E documentation/visual maintenance. runtime behavior나 dependency 변경은 없다.
+- 기준: `2c56fcf`의 `origin/develop`.
+- 전달 경계: PR을 만들고 green CI를 기다린다. merge와 worktree cleanup은 별도 명시 승인이 필요하다.
+- Public surface: English/Korean 예제 README pair.
+- 권위 있는 image policy: 편집 가능한 SVG source와 렌더링된 PNG. README는 PNG를 embed한다.
 
-## Approved references
+## 승인된 참조
 
-| Diagram | Approved best-practice reference | Preserved visual contract |
+| 다이어그램 | 승인된 best-practice reference | 보존된 visual contract |
 |---|---|---|
-| Reader scenario | `workflow-image-upload.svg/png` | Numbered main row, supporting concerns below, short reader-first subtitle. |
-| Component architecture | `leader-ktor-architecture-01.svg/png` | Static ownership zones, separate integration/library/backend concerns, compact cards. |
-| Search sequence | `sequence-workflow-sample.svg/png` | Rectangular participant headers, dashed lifelines, activation bars, numbered pills, dashed returns, explicit `alt/else`. |
+| Reader scenario | `workflow-image-upload.svg/png` | 번호가 있는 main row, 아래쪽 supporting concern, 짧은 reader-first subtitle. |
+| Component architecture | `leader-ktor-architecture-01.svg/png` | static ownership zone, 분리된 integration/library/backend concern, compact card. |
+| Search sequence | `sequence-workflow-sample.svg/png` | 직사각형 participant header, dashed lifeline, activation bar, numbered pill, dashed return, 명시적 `alt/else`. |
 
-All references come from
-`bluetape4k-wiki/docs/diagrams/best-practices/assets`. Diagram labels remain
-English so both localized README files can share the same assets.
+모든 참조는 `bluetape4k-wiki/docs/diagrams/best-practices/assets`에서 왔다.
+두 localized README 파일이 같은 asset을 공유할 수 있도록 diagram label은
+English로 유지한다.
 
-## Source fact ledger
+## Source 사실 기록
 
-| Diagram claim | Source evidence |
+| 다이어그램 주장 | Source evidence |
 |---|---|
-| `order-1001` has revisions 1-4 from `order.created` through `order.shipped` | `examples/gin-audit-query-api/internal/auditquery/fixture.go` |
-| Search is `POST /audit/history/search`; exact revision is a GET route | `examples/gin-audit-query-api/internal/auditquery/server.go` |
-| JSON body limit is 32 KiB and request timeout is two seconds | `DefaultHTTPConfig` in `server.go` |
-| Query service reads `limit + 1`, returns the requested entries, and emits an inclusive next revision | `Service.Search` in `service.go` |
-| Query service depends on `audit.HistoryReader`; the runnable app wires `audit.NewMemoryRepository` | `service.go` and `main.go` |
-| Remote binding requires `ALLOW_UNAUTHENTICATED_REMOTE=1` | `resolveHTTPAddr` in `main.go` |
+| `order-1001`은 `order.created`부터 `order.shipped`까지 revision 1-4를 가진다 | `examples/gin-audit-query-api/internal/auditquery/fixture.go` |
+| Search는 `POST /audit/history/search`이고 exact revision은 GET route다 | `examples/gin-audit-query-api/internal/auditquery/server.go` |
+| JSON body limit은 32 KiB이고 request timeout은 2초다 | `server.go`의 `DefaultHTTPConfig` |
+| Query service는 `limit + 1`을 읽고 요청된 entry를 반환하며 inclusive next revision을 낸다 | `service.go`의 `Service.Search` |
+| Query service는 `audit.HistoryReader`에 의존하고 runnable app은 `audit.NewMemoryRepository`를 연결한다 | `service.go` 및 `main.go` |
+| Remote binding에는 `ALLOW_UNAUTHENTICATED_REMOTE=1`이 필요하다 | `main.go`의 `resolveHTTPAddr` |
 
-## Asset and audit ledger
+## Asset 및 audit 기록
 
-| Asset | Reader question | Parse/render | Connector audit | Geometry/endpoint/corner | Type audit | Full-size PNG review |
+| Asset | 독자 질문 | Parse/render | Connector audit | Geometry/endpoint/corner | Type audit | Full-size PNG review |
 |---|---|---|---|---|---|---|
-| `gin-audit-query-api-scenario.svg/png` | What does the reader do end to end? | PASS, 2880x1440 | PASS, 7 connectors, 0 intrusion/crossing | PASS | Five numbered steps and lower support band verified | PASS after replacing unsupported glyphs |
-| `gin-audit-query-api-architecture.svg/png` | Which layer owns each responsibility? | PASS, 3120x1840 | PASS, 4 connectors, 0 intrusion/crossing | PASS | Static ownership and framework/library/fixture boundaries verified | PASS after increasing the `MemoryRepository` title margin |
-| `gin-audit-query-api-sequence.svg/png` | In what order does one POST search execute? | PASS, 3360x2520 | PASS, 7 connectors, 0 intrusion/crossing | PASS | Sequence-style audit PASS; messages 1-7 and `alt/else` verified | PASS after moving activation starts away from endpoint collisions |
+| `gin-audit-query-api-scenario.svg/png` | 독자는 end-to-end로 무엇을 하는가? | PASS, 2880x1440 | PASS, 7 connectors, 0 intrusion/crossing | PASS | numbered step 5개와 lower support band 검증 | unsupported glyph 교체 뒤 PASS |
+| `gin-audit-query-api-architecture.svg/png` | 각 책임은 어느 layer가 소유하는가? | PASS, 3120x1840 | PASS, 4 connectors, 0 intrusion/crossing | PASS | static ownership 및 framework/library/fixture boundary 검증 | `MemoryRepository` title margin 확장 뒤 PASS |
+| `gin-audit-query-api-sequence.svg/png` | 하나의 POST search는 어떤 순서로 실행되는가? | PASS, 3360x2520 | PASS, 7 connectors, 0 intrusion/crossing | PASS | sequence-style audit PASS; message 1-7과 `alt/else` 검증 | activation start를 endpoint collision에서 옮긴 뒤 PASS |
 
-Infrastructure icon check is not applicable: every pictured element is code,
-an interface, or an in-memory example fixture. No external database, broker,
-cloud, or durable infrastructure is claimed.
+인프라 아이콘 점검은 해당하지 않는다. 표시된 모든 요소는 code, interface,
+또는 in-memory example fixture다. 외부 database, broker, cloud, durable
+infrastructure는 주장하지 않는다.
 
-## Visual inspection record
+## 시각 점검 기록
 
-Each PNG was opened individually at original resolution after its last coordinate
-or text change. The inspection covered title and subtitle readability, clipped or
-missing glyphs, card text margins, label-to-line clearance, arrowheads, endpoint
-placement, line crossings, branch frames, canvas edges, whitespace, and visual
-family consistency. Contact-sheet inspection was not used as a substitute.
-A supplemental three-image contact sheet then confirmed font, palette, frame,
-corner, and whitespace consistency across the asset family.
-The user then opened the local files and accepted the final visual result.
+각 PNG는 마지막 좌표 또는 텍스트 변경 후 원본 해상도로 개별 확인했다. 점검은
+title/subtitle 가독성, 잘리거나 누락된 glyph, card text margin, label-to-line
+clearance, arrowhead, endpoint placement, line crossing, branch frame, canvas
+edge, whitespace, visual family consistency를 다뤘다. contact-sheet inspection을
+대체 검증으로 사용하지 않았다. 보조 three-image contact sheet로 asset family의
+font, palette, frame, corner, whitespace 일관성을 확인했다. 이후 사용자가 로컬
+파일을 열고 최종 시각 결과를 승인했다.
 
-## Local verification
+## 로컬 검증
 
 ```text
 xmllint --noout <all three SVGs>                              PASS
@@ -69,31 +68,31 @@ make lint                                                    PASS, 0 issues
 make ci                                                      PASS
 ```
 
-The first `make ci` lint attempt exposed a stale shared golangci-lint cache that
-still referenced a deleted `feat-issue-58-gin-audit-query-api` worktree. The
-failure reproduced with the shared cache and passed with a fresh isolated cache.
-After `golangci-lint cache clean`, both default-environment `make lint` and a
-fresh full `make ci` passed without source changes.
+첫 `make ci` lint 시도는 삭제된 `feat-issue-58-gin-audit-query-api` worktree를
+여전히 참조하는 stale shared golangci-lint cache를 드러냈다. 실패는 shared
+cache에서 재현되었고 fresh isolated cache에서는 통과했다. `golangci-lint cache
+clean` 뒤 default-environment `make lint`와 fresh full `make ci`가 source 변경
+없이 모두 통과했다.
 
-## Blocking checklist
+## 차단 체크리스트
 
-| Checklist | Status | Evidence or hold |
+| 체크리스트 | 상태 | 증거 또는 보류 |
 |---|---|---|
-| `CL-01..CL-08` | IN PROGRESS | Created before mutation; Type E items classified and ordered; final count waits for PR/CI evidence. |
-| `WF-01..WF-06` | IN PROGRESS | First plan approved; execution contracts loaded; weak audit and visual findings were repaired immediately. |
-| `CG-01..CG-08` | PASS | Authority reread, current repo/code inspected, user work isolated in a worktree, public bilingual docs and ecosystem image patterns preserved. |
-| `CG-09..CG-10` | PENDING | Live PR metadata, body, checks, comments, and review threads will be verified after push. |
-| `CG-11` | HOLD | No merge, remote branch deletion, or worktree cleanup without separate explicit approval. |
-| `CG-12` | N/A | Post-merge synchronization is outside the currently approved phase. |
-| `CG-13..CG-16` | N/A | No managed/generated policy source or durable Codex resource changes; authoritative local image tooling is used directly. |
-| `CG-17` | PENDING | Final line-by-line count waits for PR/CI evidence. |
-| `E-01..E-05` | PASS | Diagram and writer skills routed; behavior preserved; locale parity and maintenance verification passed. |
-| `E-06` | PENDING | Durable PR delivery remains. |
-| `DIA-01..DIA-06` | PASS | Scope, rules, one-at-a-time SVG edits, PNG renders, automated audits, and individual visual reviews are recorded above. |
-| `DIA-07..DIA-08` | IN PROGRESS | README exposure is present; final diff hygiene and PR evidence remain. |
-| `DIA-COM-01..DIA-COM-02` | PASS | Sources and related set checked; approved fonts, palette, readable text, and shared English labels used. |
-| `DIA-COM-03` | N/A | No real infrastructure is pictured. |
-| `DIA-COM-04..DIA-COM-08` | PASS | PNG arrowheads, routes, corners, canvas, render commands, and audits were checked. |
-| `DIA-COM-09` | PENDING | Review exposure waits for the PR. |
-| `DIA-ARC-01..DIA-ARC-04` | PASS | Scenario and architecture answer distinct reader questions; the architecture is static and its dependencies are verified. |
-| `DIA-SEQ-01..DIA-SEQ-06` | PASS | Approved references opened, sequence signals/palette/markers/messages/branches verified, sequence audit passed. |
+| `CL-01..CL-08` | IN PROGRESS | mutation 전 생성됨. Type E 항목은 분류 및 순서화됨. 최종 count는 PR/CI 증거를 기다린다. |
+| `WF-01..WF-06` | IN PROGRESS | 첫 plan 승인됨. execution contract 로드됨. 약한 audit 및 visual finding은 즉시 수정됨. |
+| `CG-01..CG-08` | PASS | authority 재확인, 현재 repo/code 점검, 사용자 작업 worktree 격리, public bilingual docs 및 ecosystem image pattern 보존. |
+| `CG-09..CG-10` | PENDING | push 뒤 live PR metadata, body, check, comment, review thread를 검증한다. |
+| `CG-11` | HOLD | 별도 명시 승인 없이 merge, remote branch deletion, worktree cleanup 금지. |
+| `CG-12` | N/A | post-merge synchronization은 현재 승인 단계 밖이다. |
+| `CG-13..CG-16` | N/A | managed/generated policy source 또는 durable Codex resource 변경 없음. authoritative local image tooling을 직접 사용함. |
+| `CG-17` | PENDING | 최종 line-by-line count는 PR/CI evidence를 기다린다. |
+| `E-01..E-05` | PASS | diagram 및 writer skill routed. behavior 보존. locale parity와 maintenance verification 통과. |
+| `E-06` | PENDING | durable PR delivery가 남아 있다. |
+| `DIA-01..DIA-06` | PASS | scope, rule, one-at-a-time SVG edit, PNG render, automated audit, individual visual review가 위에 기록됨. |
+| `DIA-07..DIA-08` | IN PROGRESS | README exposure는 존재한다. final diff hygiene과 PR evidence가 남아 있다. |
+| `DIA-COM-01..DIA-COM-02` | PASS | source 및 related set 확인. 승인된 font, palette, readable text, shared English label 사용. |
+| `DIA-COM-03` | N/A | 실제 infrastructure는 표시하지 않는다. |
+| `DIA-COM-04..DIA-COM-08` | PASS | PNG arrowhead, route, corner, canvas, render command, audit를 확인했다. |
+| `DIA-COM-09` | PENDING | review exposure는 PR을 기다린다. |
+| `DIA-ARC-01..DIA-ARC-04` | PASS | scenario와 architecture는 서로 다른 reader question에 답한다. architecture는 static이고 dependency가 검증되어 있다. |
+| `DIA-SEQ-01..DIA-SEQ-06` | PASS | 승인된 reference를 열었고 sequence signal/palette/marker/message/branch를 검증했으며 sequence audit가 통과했다. |

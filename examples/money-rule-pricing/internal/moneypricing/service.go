@@ -1,4 +1,4 @@
-// Package moneypricing implements the money and rule based pricing workshop example.
+// Package moneypricing 은 금액과 규칙 기반 가격 산정 워크숍 예제를 구현한다.
 package moneypricing
 
 import (
@@ -17,30 +17,30 @@ const (
 )
 
 var (
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("moneypricing: invalid request")
-	// ErrInvalidMoney reports invalid currency or decimal money input.
+	// ErrInvalidMoney 는 통화 또는 십진 금액 입력이 유효하지 않음을 나타낸다.
 	ErrInvalidMoney = errors.New("moneypricing: invalid money")
-	// ErrCurrencyMismatch reports mixed currencies inside one cart.
+	// ErrCurrencyMismatch 는 하나의 장바구니에 서로 다른 통화가 섞였음을 나타낸다.
 	ErrCurrencyMismatch = errors.New("moneypricing: currency mismatch")
 )
 
-// RuleStatus is the public status for a pricing rule decision.
+// RuleStatus 는 가격 산정 규칙 판단의 공개 상태 값이다.
 type RuleStatus string
 
 const (
-	// RuleAccepted means the rule applied and affected the quote.
+	// RuleAccepted 는 규칙이 적용되어 견적에 영향을 주었음을 의미한다.
 	RuleAccepted RuleStatus = "accepted"
-	// RuleRejected means the rule was evaluated but could not apply.
+	// RuleRejected 는 규칙을 평가했지만 적용할 수 없었음을 의미한다.
 	RuleRejected RuleStatus = "rejected"
-	// RuleSkipped means the rule was evaluated and did not match.
+	// RuleSkipped 는 규칙을 평가했지만 조건과 일치하지 않았음을 의미한다.
 	RuleSkipped RuleStatus = "skipped"
 )
 
-// Service prices cart quote requests with decimal-backed money values.
+// Service 는 십진 금액 값을 사용해 장바구니 견적 요청의 가격을 산정한다.
 type Service struct{}
 
-// QuoteRequest is the HTTP and service request for one cart quote.
+// QuoteRequest 는 하나의 장바구니 견적을 위한 HTTP 및 서비스 요청이다.
 type QuoteRequest struct {
 	CartID       string            `json:"cart_id"`
 	Currency     string            `json:"currency"`
@@ -49,7 +49,7 @@ type QuoteRequest struct {
 	Items        []LineItemRequest `json:"items"`
 }
 
-// LineItemRequest is one cart line in caller-provided string money form.
+// LineItemRequest 는 호출자가 문자열 금액 형태로 제공하는 장바구니 한 줄이다.
 type LineItemRequest struct {
 	SKU       string `json:"sku"`
 	UnitPrice string `json:"unit_price"`
@@ -57,7 +57,7 @@ type LineItemRequest struct {
 	Quantity  int    `json:"quantity"`
 }
 
-// QuoteResponse is the stable public pricing projection.
+// QuoteResponse 는 안정적으로 공개되는 가격 산정 응답 표현이다.
 type QuoteResponse struct {
 	CartID        string          `json:"cart_id"`
 	Currency      string          `json:"currency"`
@@ -68,7 +68,7 @@ type QuoteResponse struct {
 	Rules         []RuleDecision  `json:"rules"`
 }
 
-// LineItemQuote is a priced cart line.
+// LineItemQuote 는 가격이 계산된 장바구니 한 줄이다.
 type LineItemQuote struct {
 	SKU       string     `json:"sku"`
 	UnitPrice MoneyValue `json:"unit_price"`
@@ -76,7 +76,7 @@ type LineItemQuote struct {
 	LineTotal MoneyValue `json:"line_total"`
 }
 
-// RuleDecision records how one pricing rule evaluated.
+// RuleDecision 은 하나의 가격 산정 규칙이 어떻게 평가됐는지 기록한다.
 type RuleDecision struct {
 	Name   string      `json:"name"`
 	Status RuleStatus  `json:"status"`
@@ -84,24 +84,24 @@ type RuleDecision struct {
 	Reason string      `json:"reason,omitempty"`
 }
 
-// MoneyValue is the example's stable JSON money shape.
+// MoneyValue 는 예제가 공개하는 안정적인 JSON 금액 형태다.
 type MoneyValue struct {
 	Amount   string `json:"amount"`
 	Currency string `json:"currency"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적으로 공개되는 오류 응답 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService creates a pricing service.
+// NewService 는 가격 산정 서비스를 생성한다.
 func NewService() *Service {
 	return &Service{}
 }
 
-// Quote prices one cart with deterministic local pricing rules.
+// Quote 는 결정적인 로컬 가격 산정 규칙으로 하나의 장바구니 가격을 계산한다.
 func (s *Service) Quote(request QuoteRequest) (QuoteResponse, error) {
 	if s == nil {
 		return QuoteResponse{}, fmt.Errorf("%w: service is nil", ErrInvalidRequest)
@@ -274,7 +274,7 @@ func applyRules(currency money.Currency, subtotal money.Money, customerTier, cou
 	return discountTotal, rules, nil
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

@@ -1,4 +1,4 @@
-// Package orderfeed demonstrates partner order feed cleanup.
+// Package orderfeed 는 파트너 주문 피드 정리 흐름을 보여준다.
 package orderfeed
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/bluetape4k/bluetape-go/core"
 )
 
-// PartnerRow is the raw order shape received from a partner feed.
+// PartnerRow 는 파트너 피드에서 받은 원본 주문 형태다.
 type PartnerRow struct {
 	OrderID  string
 	Tenant   string
@@ -21,13 +21,13 @@ type PartnerRow struct {
 	Tags     []string
 }
 
-// PartnerItem is one raw feed line item.
+// PartnerItem 은 원본 피드의 한 줄 품목이다.
 type PartnerItem struct {
 	SKU      string
 	Quantity int
 }
 
-// Order is the normalized internal order shape.
+// Order 는 정규화된 내부 주문 형태다.
 type Order struct {
 	ID       string
 	Tenant   string
@@ -39,19 +39,19 @@ type Order struct {
 	Tags     []string
 }
 
-// LineItem is a validated order line.
+// LineItem 은 검증된 주문 품목 줄이다.
 type LineItem struct {
 	SKU      string
 	Quantity int
 }
 
-// CleanupResult contains accepted orders and the downstream batching view.
+// CleanupResult 는 수락된 주문과 다운스트림 배치 관점을 담는다.
 type CleanupResult struct {
 	Orders    []Order
 	ByChannel map[string][]Order
 }
 
-// NormalizeRows validates and normalizes partner feed rows.
+// NormalizeRows 는 파트너 피드 행을 검증하고 정규화한다.
 func NormalizeRows(rows []PartnerRow) (CleanupResult, error) {
 	orders, err := collections.MapErr(rows, normalizeRow)
 	if err != nil {

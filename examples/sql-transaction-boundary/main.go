@@ -1,4 +1,4 @@
-// Package main prints the SQL transaction boundary preview.
+// Package main 은 SQL 트랜잭션 경계 미리보기를 출력한다.
 package main
 
 import (

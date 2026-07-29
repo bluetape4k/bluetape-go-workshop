@@ -1,4 +1,4 @@
-// Package main prints the local SQS worker preview.
+// Package main 은 로컬 SQS worker 미리보기를 출력한다.
 package main
 
 import (

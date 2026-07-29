@@ -1,4 +1,4 @@
-// Package main prints the DynamoDB conditional repository preview.
+// Package main 은 DynamoDB conditional repository preview를 출력한다.
 package main
 
 import (

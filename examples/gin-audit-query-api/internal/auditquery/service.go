@@ -12,13 +12,13 @@ import (
 
 var identifierPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
 
-// Service validates and executes aggregate-scoped audit history queries.
+// Service 는 aggregate 범위의 audit history query를 검증하고 실행한다.
 type Service struct {
 	reader audit.HistoryReader
 	config ServiceConfig
 }
 
-// NewService creates an audit query service with bounded pagination.
+// NewService 는 pagination이 제한된 audit query service를 만든다.
 func NewService(reader audit.HistoryReader, config ServiceConfig) (*Service, error) {
 	if reader == nil || isNilInterface(reader) {
 		return nil, fmt.Errorf("%w: history reader is required", ErrInvalidConfig)
@@ -29,7 +29,7 @@ func NewService(reader audit.HistoryReader, config ServiceConfig) (*Service, err
 	return &Service{reader: reader, config: config}, nil
 }
 
-// Search returns one page of audit history and a revision continuation boundary.
+// Search 는 audit history 한 page와 revision continuation boundary를 반환한다.
 func (s *Service) Search(ctx context.Context, request SearchRequest) (SearchResponse, error) {
 	if !s.ready() {
 		return SearchResponse{}, ErrInvalidConfig
@@ -88,7 +88,7 @@ func (s *Service) Search(ctx context.Context, request SearchRequest) (SearchResp
 	return response, nil
 }
 
-// Get returns an exact aggregate revision or ErrEntryNotFound.
+// Get 은 정확한 aggregate revision을 반환하거나 ErrEntryNotFound를 반환한다.
 func (s *Service) Get(ctx context.Context, request AggregateRequest, revision audit.Revision) (audit.Entry, error) {
 	if !s.ready() {
 		return audit.Entry{}, ErrInvalidConfig

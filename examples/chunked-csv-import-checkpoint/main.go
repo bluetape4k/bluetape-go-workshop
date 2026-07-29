@@ -1,4 +1,4 @@
-// Package main runs the chunked CSV import checkpoint example.
+// Package main 은 chunked CSV import checkpoint 예제를 실행한다.
 package main
 
 import (

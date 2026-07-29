@@ -1,4 +1,4 @@
-// Package main runs the distributed JWT key rotation example service.
+// Package main 은 distributed JWT key rotation 예제 서비스를 실행한다.
 package main
 
 import (

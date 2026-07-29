@@ -22,20 +22,20 @@ var (
 	runIDPattern   = regexp.MustCompile(`^[A-Za-z0-9_.-]{1,64}$`)
 )
 
-// LeaderGate runs scheduled work only while leadership is held.
+// LeaderGate 는 leadership을 보유한 동안에만 scheduled work를 실행한다.
 type LeaderGate interface {
 	RunIfLeader(context.Context, func(context.Context) (RunResponse, error)) (RunResponse, error)
 	LeaderHeld() bool
 }
 
-// ServiceOptions configures the operations service.
+// ServiceOptions 는 운영용 service를 설정한다.
 type ServiceOptions struct {
 	Stores     *Stores
 	LeaderGate LeaderGate
 	BeforeRun  func(context.Context)
 }
 
-// Service owns batch run lifecycle, snapshots, and leader-gated operations.
+// Service 는 batch run 생명주기, snapshot, leader-gated operation을 소유한다.
 type Service struct {
 	mu                sync.Mutex
 	active            bool
@@ -48,35 +48,35 @@ type Service struct {
 	lastRejectionCode string
 }
 
-// StartRequest starts a manual batch run.
+// StartRequest 는 manual batch run을 시작한다.
 type StartRequest struct {
 	RunID               string `json:"run_id"`
 	CrashAfterNewWrites int    `json:"crash_after_new_writes"`
 }
 
-// ScheduleRequest triggers one scheduled batch tick.
+// ScheduleRequest 는 scheduled batch tick 하나를 트리거한다.
 type ScheduleRequest struct {
 	RunID string `json:"run_id"`
 }
 
-// CancelRequest asks the service to cancel active work.
+// CancelRequest 는 service에 active work 취소를 요청한다.
 type CancelRequest struct {
 	Reason string `json:"reason"`
 }
 
-// CancelResponse acknowledges an accepted cancel request.
+// CancelResponse 는 수락된 cancel 요청을 확인한다.
 type CancelResponse struct {
 	Status    string `json:"status"`
 	ErrorCode string `json:"error_code,omitempty"`
 }
 
-// CheckpointSnapshot reports whether a checkpoint exists.
+// CheckpointSnapshot 은 checkpoint 존재 여부를 보고한다.
 type CheckpointSnapshot struct {
 	Valid bool       `json:"valid"`
 	Value Checkpoint `json:"value,omitempty"`
 }
 
-// StatusResponse is the stable operator status projection.
+// StatusResponse 는 안정적인 운영자용 status 프로젝션이다.
 type StatusResponse struct {
 	Active            bool               `json:"active"`
 	LeaderHeld        bool               `json:"leader_held"`
@@ -92,7 +92,7 @@ type errorResponse struct {
 	ErrorMessage string `json:"error_message"`
 }
 
-// NewService creates a service with in-memory stores by default.
+// NewService 는 기본적으로 in-memory store를 사용하는 service를 만든다.
 func NewService(options ServiceOptions) *Service {
 	stores := options.Stores.normalize()
 	gate := options.LeaderGate
@@ -106,7 +106,7 @@ func NewService(options ServiceOptions) *Service {
 	}
 }
 
-// StartManual runs one operator-started batch.
+// StartManual 은 운영자가 시작한 batch 하나를 실행한다.
 func (s *Service) StartManual(ctx context.Context, request StartRequest) (RunResponse, error) {
 	request.RunID = strings.TrimSpace(request.RunID)
 	if err := validateRunID(request.RunID); err != nil {
@@ -124,7 +124,7 @@ func (s *Service) StartManual(ctx context.Context, request StartRequest) (RunRes
 	})
 }
 
-// RunScheduledTick runs one leader-gated scheduled batch.
+// RunScheduledTick 은 leader-gated scheduled batch 하나를 실행한다.
 func (s *Service) RunScheduledTick(ctx context.Context, request ScheduleRequest) (RunResponse, error) {
 	request.RunID = strings.TrimSpace(request.RunID)
 	if err := validateRunID(request.RunID); err != nil {
@@ -155,7 +155,7 @@ func (s *Service) RunScheduledTick(ctx context.Context, request ScheduleRequest)
 	return response, err
 }
 
-// CancelActiveRun cancels the currently active run.
+// CancelActiveRun 은 현재 active run을 취소한다.
 func (s *Service) CancelActiveRun(context.Context, CancelRequest) (CancelResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -167,7 +167,7 @@ func (s *Service) CancelActiveRun(context.Context, CancelRequest) (CancelRespons
 	return CancelResponse{Status: "cancel_requested"}, nil
 }
 
-// Status returns a defensive status snapshot.
+// Status 는 defensive status snapshot을 반환한다.
 func (s *Service) Status() StatusResponse {
 	s.mu.Lock()
 	active := s.active
@@ -187,7 +187,7 @@ func (s *Service) Status() StatusResponse {
 	}
 }
 
-// Report returns the latest timestamp-free report projection.
+// Report 는 최신 timestamp-free report 프로젝션을 반환한다.
 func (s *Service) Report() (ReportNode, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -283,7 +283,7 @@ func validateRunID(value string) error {
 	return nil
 }
 
-// NewRouter wires the Gin operations API.
+// NewRouter 는 Gin operations API를 연결한다.
 func NewRouter(service *Service) (*gin.Engine, error) {
 	if service == nil {
 		service = NewService(ServiceOptions{})
@@ -386,7 +386,7 @@ type staticLeaderGate struct {
 	held bool
 }
 
-// NewStaticLeaderGate creates a deterministic demo leader gate.
+// NewStaticLeaderGate 는 결정적인 데모 leader gate를 만든다.
 func NewStaticLeaderGate(held bool) LeaderGate {
 	return staticLeaderGate{held: held}
 }
@@ -405,13 +405,13 @@ func (g staticLeaderGate) LeaderHeld() bool {
 	return g.held
 }
 
-// ElectorLeaderGate adapts a bluetape-go leader elector.
+// ElectorLeaderGate 는 bluetape-go leader elector를 adapter로 감싼다.
 type ElectorLeaderGate struct {
 	elector        leader.Elector
 	cleanupTimeout time.Duration
 }
 
-// NewElectorLeaderGate creates a bounded-cleanup leader gate adapter.
+// NewElectorLeaderGate 는 cleanup 시간이 제한된 leader gate adapter를 만든다.
 func NewElectorLeaderGate(elector leader.Elector, cleanupTimeout time.Duration) (*ElectorLeaderGate, error) {
 	if elector == nil {
 		return nil, fmt.Errorf("leader elector must not be nil")
@@ -422,7 +422,7 @@ func NewElectorLeaderGate(elector leader.Elector, cleanupTimeout time.Duration) 
 	return &ElectorLeaderGate{elector: elector, cleanupTimeout: cleanupTimeout}, nil
 }
 
-// RunIfLeader executes run only while this process holds leader ownership.
+// RunIfLeader 는 이 process가 leader 소유권을 보유한 동안에만 run을 실행한다.
 func (g *ElectorLeaderGate) RunIfLeader(ctx context.Context, run func(context.Context) (RunResponse, error)) (RunResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return RunResponse{}, err
@@ -452,7 +452,7 @@ func (g *ElectorLeaderGate) RunIfLeader(ctx context.Context, run func(context.Co
 	return response, runErr
 }
 
-// LeaderHeld reports whether this process currently holds leader ownership.
+// LeaderHeld 는 이 process가 현재 leader 소유권을 보유하는지 보고한다.
 func (g *ElectorLeaderGate) LeaderHeld() bool {
 	if g == nil || g.elector == nil {
 		return false

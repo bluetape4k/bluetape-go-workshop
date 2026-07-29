@@ -1,39 +1,38 @@
-# DynamoDB conditional repository example
+# DynamoDB conditional repository 예제
 
 Issue: #61
 
-## Decision
+## 결정
 
-Use a focused DynamoDB repository example to teach conditional writes before
-combining DynamoDB with S3 or SQS workflow orchestration. The example keeps the
-application surface small: create a catalog item if absent, update its name only
-when the caller has the current version, and query the tenant partition.
+DynamoDB를 S3 또는 SQS workflow orchestration과 조합하기 전에 focused DynamoDB repository
+example로 conditional write를 설명한다. 예제는 application surface를 작게 유지한다. catalog
+item이 없을 때 생성하고, caller가 current version을 가진 경우에만 name을 update하며,
+tenant partition을 query한다.
 
-## Why
+## 이유
 
-DynamoDB conditional write failures are not ordinary infrastructure failures.
-They usually mean the business predicate was false: a row already exists, or the
-caller is stale. If every caller assembles key attributes, condition
-expressions, and conflict handling, the same consistency rule gets repeated and
-eventually diverges.
+DynamoDB conditional write failure는 일반적인 infrastructure failure가 아니다. 보통 row가
+이미 있거나 caller가 stale하다는 business predicate 실패를 뜻한다. 모든 caller가 key
+attribute, condition expression, conflict handling을 조립하면 같은 consistency rule이
+반복되고 결국 divergence가 생긴다.
 
-The example therefore makes the repository own:
+따라서 예제는 repository가 다음을 소유하게 한다.
 
-- `TENANT#...` / `ITEM#...` key construction;
-- create-if-absent and expected-version condition expressions;
-- `ErrConditionalConflict` as the application conflict signal;
-- typed AWS SDK error preservation for diagnostics;
-- tenant query shape with `pk` equality and `begins_with(sk, ITEM#)`.
+- `TENANT#...` / `ITEM#...` key construction.
+- create-if-absent 및 expected-version 조건식.
+- application conflict signal인 `ErrConditionalConflict`.
+- 진단을 위한 타입 있는 AWS SDK 오류 보존.
+- `pk` equality와 `begins_with(sk, ITEM#)`를 사용하는 tenant query shape.
 
-## Verification shape
+## 검증 형태
 
-- Deterministic fake-client tests assert the exact `PutItem`, `UpdateItem`, and
-  `Query` expressions.
-- Conflict tests assert AWS SDK `ConditionalCheckFailedException` is still
-  discoverable with `errors.As` after wrapping.
-- Cancellation and validation tests prove caller-owned failures stop before the
-  DynamoDB client boundary.
-- README diagrams explain the ownership boundary separately from the runtime
-  success, conflict, and query sequence.
-- The Floci smoke test remains opt-in because it starts Docker-backed DynamoDB
-  emulation and should run serially with other container suites.
+- deterministic fake-client test는 정확한 `PutItem`, `UpdateItem`, `Query` expression을
+  assert한다.
+- conflict test는 wrapping 뒤에도 AWS SDK `ConditionalCheckFailedException`을 `errors.As`로
+  찾을 수 있음을 assert한다.
+- cancellation 및 validation test는 caller-owned failure가 DynamoDB client boundary 전에
+  멈춤을 증명한다.
+- README diagram은 ownership boundary를 runtime success/conflict/query sequence와 분리해
+  설명한다.
+- Floci smoke test는 Docker-backed DynamoDB emulation을 시작하고 다른 container suite와
+  serial로 실행되어야 하므로 opt-in으로 남긴다.

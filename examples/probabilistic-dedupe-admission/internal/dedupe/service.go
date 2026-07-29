@@ -1,4 +1,4 @@
-// Package dedupe implements the probabilistic admission workshop example.
+// Package dedupe 는 확률적 입장 판단 워크숍 예제를 구현한다.
 package dedupe
 
 import (
@@ -15,50 +15,50 @@ import (
 const maxJSONBodySize = 8 << 10
 
 var (
-	// ErrInvalidRequest reports invalid request JSON or fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("dedupe: invalid request")
-	// ErrFilter reports unexpected Bloom filter setup or runtime failures.
+	// ErrFilter 는 예상하지 못한 Bloom filter 설정 또는 런타임 실패를 나타낸다.
 	ErrFilter = errors.New("dedupe: filter error")
 )
 
-// Decision is the public admission decision.
+// Decision 은 공개 입장 판단 값이다.
 type Decision string
 
 const (
-	// DecisionAdmit means the event ID was definitely not present before insertion.
+	// DecisionAdmit 은 이벤트 ID가 삽입 전에는 확실히 없었음을 의미한다.
 	DecisionAdmit Decision = "admit"
-	// DecisionProbablySeen means the event ID might have been seen before.
+	// DecisionProbablySeen 은 이벤트 ID가 이전에 관측됐을 가능성이 있음을 의미한다.
 	DecisionProbablySeen Decision = "probably_seen"
 )
 
 const (
-	// ReasonDefinitelyNew describes the no-false-negative Bloom filter path.
+	// ReasonDefinitelyNew 는 false negative 가 없는 Bloom filter 경로를 설명한다.
 	ReasonDefinitelyNew = "definitely_new"
-	// ReasonMightBeDuplicate describes the possible duplicate or false-positive path.
+	// ReasonMightBeDuplicate 는 중복 가능성 또는 false positive 경로를 설명한다.
 	ReasonMightBeDuplicate = "might_be_duplicate_or_false_positive"
 )
 
-// Config customizes the demo service.
+// Config 는 데모 서비스를 조정한다.
 type Config struct {
 	ExpectedInsertions       uint64
 	FalsePositiveProbability float64
 	ScenarioName             string
 }
 
-// Service owns the in-memory Bloom filter used by the example.
+// Service 는 예제가 사용하는 인메모리 Bloom filter를 소유한다.
 type Service struct {
 	mu           sync.Mutex
 	filter       probabilistic.BloomFilter[string]
 	scenarioName string
 }
 
-// EventRequest is the HTTP and service request for one event admission.
+// EventRequest 는 하나의 이벤트 입장을 위한 HTTP 및 서비스 요청이다.
 type EventRequest struct {
 	EventID string `json:"event_id"`
 	Source  string `json:"source"`
 }
 
-// AdmitResponse is the stable public admission projection.
+// AdmitResponse 는 안정적으로 공개되는 입장 판단 응답 표현이다.
 type AdmitResponse struct {
 	EventID  string      `json:"event_id"`
 	Source   string      `json:"source,omitempty"`
@@ -69,7 +69,7 @@ type AdmitResponse struct {
 	Stats    FilterStats `json:"stats"`
 }
 
-// FilterStats reports approximate Bloom filter state.
+// FilterStats 는 근사적인 Bloom filter 상태를 보고한다.
 type FilterStats struct {
 	ExpectedInsertions                 uint64  `json:"expected_insertions"`
 	TargetFalsePositiveProbability     float64 `json:"target_false_positive_probability"`
@@ -81,13 +81,13 @@ type FilterStats struct {
 	ProbabilisticFalsePositivePossible bool    `json:"probabilistic_false_positive_possible"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적으로 공개되는 오류 응답 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService creates a deterministic in-memory Bloom admission service.
+// NewService 는 결정적인 인메모리 Bloom 입장 판단 서비스를 생성한다.
 func NewService(config Config) (*Service, error) {
 	expectedInsertions := config.ExpectedInsertions
 	if expectedInsertions == 0 {
@@ -115,7 +115,7 @@ func NewService(config Config) (*Service, error) {
 	}, nil
 }
 
-// Admit evaluates and inserts one event ID through the Bloom prefilter.
+// Admit 은 Bloom prefilter 로 이벤트 ID 하나를 평가하고 삽입한다.
 func (s *Service) Admit(request EventRequest) (AdmitResponse, error) {
 	if s == nil || s.filter == nil {
 		return AdmitResponse{}, fmt.Errorf("%w: service is not initialized", ErrFilter)
@@ -154,7 +154,7 @@ func (s *Service) Admit(request EventRequest) (AdmitResponse, error) {
 	}, nil
 }
 
-// Stats returns approximate current Bloom filter state.
+// Stats 는 현재 Bloom filter 상태의 근사값을 반환한다.
 func (s *Service) Stats() FilterStats {
 	if s == nil || s.filter == nil {
 		return FilterStats{DurableAuthoritativeStoreRequired: true, ProbabilisticFalsePositivePossible: true}
@@ -177,7 +177,7 @@ func (s *Service) statsLocked() FilterStats {
 	}
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

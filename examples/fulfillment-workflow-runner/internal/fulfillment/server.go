@@ -1,4 +1,4 @@
-// Package fulfillment exposes a request-scoped fulfillment workflow runner over Gin.
+// Package fulfillment 는 Gin 위에 request-scoped fulfillment workflow runner를 노출한다.
 package fulfillment
 
 import (
@@ -19,27 +19,27 @@ const (
 )
 
 var (
-	// ErrInventoryUnavailable reports that fulfillment cannot reserve stock.
+	// ErrInventoryUnavailable 은 fulfillment가 재고를 예약할 수 없음을 나타낸다.
 	ErrInventoryUnavailable = errors.New("inventory is unavailable")
-	// ErrPaymentDeclined reports that payment authorization failed.
+	// ErrPaymentDeclined 는 결제 승인이 실패했음을 나타낸다.
 	ErrPaymentDeclined = errors.New("payment authorization declined")
 
 	errInvalidOrderID        = errors.New("order_id is required")
 	errInvalidInventoryDelay = errors.New("inventory_delay_ms must be between 0 and the configured maximum")
 )
 
-// Options configures the fulfillment workflow API server.
+// Options 는 fulfillment workflow API server를 설정한다.
 type Options struct {
 	MaxInventoryDelay time.Duration
 }
 
-// Server exposes a request-scoped fulfillment workflow over HTTP.
+// Server 는 HTTP 위에 request-scoped fulfillment workflow를 노출한다.
 type Server struct {
 	router            *gin.Engine
 	maxInventoryDelay time.Duration
 }
 
-// RunRequest describes one fulfillment workflow scenario.
+// RunRequest 는 fulfillment workflow scenario 하나를 설명한다.
 type RunRequest struct {
 	OrderID           string `json:"order_id" binding:"required"`
 	StockAvailable    bool   `json:"stock_available"`
@@ -78,7 +78,7 @@ type fulfillmentRun struct {
 	shipmentSkipped  bool
 }
 
-// NewServer creates the fulfillment workflow API.
+// NewServer 는 fulfillment workflow API를 만든다.
 func NewServer(options Options) (*Server, error) {
 	maxInventoryDelay := options.MaxInventoryDelay
 	if maxInventoryDelay <= 0 {
@@ -98,7 +98,7 @@ func NewServer(options Options) (*Server, error) {
 	return server, nil
 }
 
-// ServeHTTP dispatches requests to the Gin router.
+// ServeHTTP 는 요청을 Gin router로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

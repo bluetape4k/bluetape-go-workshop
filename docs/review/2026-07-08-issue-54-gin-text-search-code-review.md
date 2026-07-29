@@ -1,35 +1,37 @@
-# Issue #54 Gin Text Search Service Code Review
+# Issue #54 Gin 텍스트 검색 서비스 코드 리뷰
 
-Scope: `examples/gin-text-search-service`, root README catalog entries, README
-diagram assets, and the #54 lessons/review artifacts.
+범위: `examples/gin-text-search-service`, 루트 README 카탈로그 항목, README
+다이어그램 자산, #54 lesson/review 산출물.
 
-Baseline: local branch `feat/issue-54-gin-text-search` against `origin/develop`.
+기준선: `origin/develop` 대비 로컬 브랜치
+`feat/issue-54-gin-text-search`.
 
-## Findings
+## 발견 사항
 
 P0=0 P1=0
 
-No blocking findings remain.
+남아 있는 차단 이슈는 없다.
 
-## Evidence
+## 검증 자료
 
-- `NewServer` wires only `/healthz` and `POST /text/search-mask`; the handler
-  binds JSON, maps errors, and delegates search behavior to `Service.SearchMask`:
+- `NewServer`는 `/healthz`와 `POST /text/search-mask`만 연결한다.
+  handler는 JSON을 bind하고 오류를 매핑한 뒤 검색 동작을
+  `Service.SearchMask`에 위임한다:
   `examples/gin-text-search-service/internal/searchapi/service.go:183`.
-- `Service.SearchMask` validates request shape, enforces a one-rune mask,
-  searches the compiled `textsearch.Matcher`, masks exact original spans, and
-  returns summary counts plus Unicode caveats:
+- `Service.SearchMask`는 요청 형태를 검증하고 1-rune mask를 강제하며,
+  컴파일된 `textsearch.Matcher`로 검색하고 원문 span만 정확히 마스킹한다.
+  또한 요약 count와 Unicode caveat를 반환한다:
   `examples/gin-text-search-service/internal/searchapi/service.go:137`.
-- Domain tests cover Korean text, leftmost-longest overlap, Unicode boundary
-  behavior, custom mask output, and byte-span evidence:
+- 도메인 테스트는 한국어 텍스트, leftmost-longest 겹침, Unicode 경계 동작,
+  사용자 지정 mask 출력, byte-span 증거를 다룬다:
   `examples/gin-text-search-service/internal/searchapi/service_test.go:13`.
-- HTTP tests cover success response shape and stable validation errors:
+- HTTP 테스트는 성공 응답 형태와 안정적인 검증 오류를 다룬다:
   `examples/gin-text-search-service/internal/searchapi/service_test.go:43`.
-- README files include curl examples, endpoint contract, Unicode caveats,
-  architecture/sequence diagrams, and focused test commands:
+- README 파일은 curl 예제, endpoint contract, Unicode caveat,
+  architecture/sequence 다이어그램, 집중 테스트 명령을 포함한다:
   `examples/gin-text-search-service/README.md:8`.
 
-## Validation
+## 검증
 
 - `go test -count=1 ./examples/gin-text-search-service/...`
 - `go test -race -count=1 ./examples/gin-text-search-service/...`
@@ -45,28 +47,27 @@ No blocking findings remain.
 - Full-size PNG inspection for both diagrams
 - `git diff --check`
 
-## Validation Gaps
+## 검증 공백
 
-No Testcontainers run is required for this issue. The example has no database,
-queue, model, or external service dependency; HTTP behavior is covered with
-`httptest` and domain behavior is covered with deterministic unit tests.
+이 이슈에는 Testcontainers 실행이 필요하지 않다. 예제는 데이터베이스,
+queue, 모델, 외부 서비스 의존성이 없다. HTTP 동작은 `httptest`로
+검증되고 도메인 동작은 결정적인 단위 테스트로 검증된다.
 
-## Post-Merge Diagram Re-Audit
+## 병합 후 다이어그램 재감사
 
-Scope: `docs/images/readme-diagrams/gin-text-search-service-architecture.*`
-and `docs/images/readme-diagrams/gin-text-search-service-sequence.*`.
+범위: `docs/images/readme-diagrams/gin-text-search-service-architecture.*`
+및 `docs/images/readme-diagrams/gin-text-search-service-sequence.*`.
 
-Findings fixed:
+수정된 발견 사항:
 
-- SVG marker shapes now use fixed `userSpaceOnUse` filled-triangle paths with
-  `stroke="none"` and `stroke-dasharray="none"` so CairoSVG PNG output keeps
-  arrowhead direction and shape stable.
-- Sequence message labels now sit 10px above their call/return lines instead
-  of touching the line.
-- Sequence participant, header, label, and message classes now match the local
-  sequence-style audit contract.
+- SVG marker shape는 이제 고정 `userSpaceOnUse` filled-triangle path와
+  `stroke="none"`, `stroke-dasharray="none"`을 사용한다. 그래서 CairoSVG
+  PNG 출력에서 arrowhead 방향과 형태가 안정적으로 유지된다.
+- Sequence message label은 call/return line에 닿지 않고 10px 위에 놓인다.
+- Sequence participant, header, label, message class는 로컬 sequence-style
+  audit contract와 일치한다.
 
-Validation:
+검증:
 
 - `xmllint --noout docs/images/readme-diagrams/gin-text-search-service-architecture.svg docs/images/readme-diagrams/gin-text-search-service-sequence.svg`
 - `cairosvg docs/images/readme-diagrams/gin-text-search-service-architecture.svg -o docs/images/readme-diagrams/gin-text-search-service-architecture.png`
@@ -80,24 +81,24 @@ Validation:
 - Full-size PNG inspection for both regenerated PNG files
 - `git diff --check`
 
-### Follow-Up Boundary Arrow Correction
+### 후속 Boundary 화살표 수정
 
-The PR #158 audit still missed the rendered direction/readability problem on
-the `Boundary -> Original byte spans` connector. Root cause: the previous route
-forced a dogleg with a terminal curve because the `Original byte spans` card
-ended 5px left of the `Boundary` centerline. CairoSVG rendered a technically
-valid marker, but the PNG did not read as a clean downward relationship.
+PR #158 audit는 `Boundary -> Original byte spans` connector의 렌더링 방향성과
+가독성 문제를 여전히 놓쳤다. 원인은 이전 route가 `Original byte spans`
+card를 `Boundary` centerline보다 5px 왼쪽에서 끝내면서 terminal curve가
+있는 dogleg를 강제한 것이다. CairoSVG는 기술적으로 유효한 marker를
+렌더링했지만, PNG에서는 깔끔한 하향 관계로 읽히지 않았다.
 
-Correction:
+수정:
 
-- Widened `Original byte spans` from 335px to 365px so the `Boundary` centerline
-  lands inside the target card's top edge.
-- Replaced the dogleg route with a single vertical helper connector:
+- `Boundary` centerline이 대상 card의 top edge 안에 들어오도록
+  `Original byte spans`를 335px에서 365px로 넓혔다.
+- dogleg route를 단일 수직 helper connector로 대체했다:
   `M 1535 730 V 785`.
-- Verified the rendered PNG crop and full-size PNG show a clear downward
-  arrowhead from `Boundary` to `Original byte spans`.
+- 렌더링된 PNG crop과 full-size PNG에서 `Boundary`에서
+  `Original byte spans`로 향하는 명확한 하향 arrowhead를 확인했다.
 
-Validation:
+검증:
 
 - `xmllint --noout docs/images/readme-diagrams/gin-text-search-service-architecture.svg`
 - `cairosvg docs/images/readme-diagrams/gin-text-search-service-architecture.svg -o docs/images/readme-diagrams/gin-text-search-service-architecture.png -s 2`

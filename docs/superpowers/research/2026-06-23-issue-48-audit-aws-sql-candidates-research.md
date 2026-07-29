@@ -1,404 +1,391 @@
-# Issue #48 Research: Audit, AWS, and SQL Workshop Candidates
+# Issue #48 리서치: Audit, AWS, SQL 워크숍 후보
 
-## Scope
+## 범위
 
-- Repository: `bluetape4k/bluetape-go-workshop`
-- Issue: #48 `[v0.7.0] Research audit AWS and SQL workshop candidates`
-- Parent track: #31 `[v0.7.0] Plan post-utility workshop tracks`
-- Parent roadmap epic: #27
-- Milestone: `0.7.0`
-- Work type: Type E - Research / Maintenance
+- 저장소: `bluetape4k/bluetape-go-workshop`
+- 이슈: #48 `[v0.7.0] Research audit AWS and SQL workshop candidates`
+- 상위 track: #31 `[v0.7.0] Plan post-utility workshop tracks`
+- 상위 roadmap epic: #27
+- 마일스톤: `0.7.0`
+- 작업 유형: Type E - Research / Maintenance
 
-## Sources Checked
+## 확인한 출처
 
-- GitHub issue #48, parent #31, and follow-up workshop issues:
+- GitHub issue #48, 상위 #31, follow-up workshop issue:
   - SQL: #32, #62, #63, #64, #65
   - AWS: #33, #59, #60, #61, #66
   - Audit/outbox: #35, #56, #57, #58, #68
-- Upstream bluetape-go research:
+- upstream bluetape-go research:
   - `/Users/debop/work/bluetape4k/bluetape-go/docs/research/2026-06-01-milestone-0.8.0-sql-research.md`
   - `/Users/debop/work/bluetape4k/bluetape-go/docs/research/2026-06-01-milestone-0.9.0-aws-research.md`
   - `/Users/debop/work/bluetape4k/bluetape-go/docs/research/2026-06-01-milestone-0.11.0-audit-javers-research.md`
-- Kotlin workshop examples:
+- Kotlin workshop example:
   - `/Users/debop/work/bluetape4k/bluetape4k-workshop/exposed/mvc-jdbc/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-workshop/exposed/webflux-r2dbc/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-workshop/exposed/javers-audit/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-workshop/messaging/transactional-outbox/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-workshop/aws/s3-spring-cloud/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-workshop/aws/storage-abstraction/README.md`
-- Upstream package references:
+- upstream package reference:
   - `/Users/debop/work/bluetape4k/bluetape4k-exposed/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-aws/README.md`
   - `/Users/debop/work/bluetape4k/bluetape4k-javers/README.md`
-- Retrieval:
-  - Context-mode search for #48 / audit / AWS / SQL workshop history.
+- 검색:
+  - #48 / audit / AWS / SQL workshop history에 대한 context-mode search.
   - `gno query "bluetape-go-workshop issue 48 audit AWS SQL candidates #32 #33 #35" -c bluetape4k-github --fast --no-rerank`
   - `gno query "bluetape-go 0.8.0 SQL 0.9.0 AWS 0.11.0 audit research" -c bluetape4k-docs --no-rerank`
 
-## Current Evidence
+## 현재 근거
 
-Issue #48 asks for candidate selection before implementation. Parent #31 now
-maps the relevant tracks as:
+#48은 구현 전 candidate selection을 요구한다. 상위 #31은 현재 관련 track을 다음과 같이
+매핑한다.
 
 - 0.8.0 SQL DSL and repository helpers (#32)
 - 0.9.0 AWS helper packages and Floci-backed examples (#33)
 - 0.11.0 audit/event packages and outbox-style workflows (#35)
 
-The upstream bluetape-go research already sets the guardrails:
+upstream bluetape-go research는 이미 guardrail을 정했다.
 
-- SQL should keep SQL visible, avoid a full ORM layer, avoid a Kotlin Exposed
-  clone, and focus on `context.Context`, transactions, explicit errors, and safe
-  query construction.
-- AWS should stay helper/example driven, avoid wrapping AWS SDK for Go v2
-  without repeated-service evidence, and use Floci/Testcontainers for local AWS
-  behavior.
-- Audit should port concepts, not JaVers internals, and start with a
-  storage-neutral audit/event model before durable publisher adapters.
+- SQL은 SQL을 보이게 유지하고, full ORM layer와 Kotlin Exposed clone을 피하며,
+  `context.Context`, transaction, explicit error, safe query construction에
+  집중해야 한다.
+- AWS는 helper/example driven으로 유지하고, repeated-service evidence 없이 AWS SDK for
+  Go v2를 감싸지 않으며, local AWS behavior에는 Floci/Testcontainers를 사용해야 한다.
+- Audit은 JaVers internal이 아니라 concept를 port하고, durable publisher adapter 전에
+  storage-neutral audit/event model로 시작해야 한다.
 
-Some upstream research issue references are stale because the workshop issue
-map has since changed. This note uses the current workshop issues from #31,
-#32, #33, and #35 as the source of truth.
+일부 upstream research issue reference는 이후 workshop issue map이 바뀌어 stale하다.
+이 note는 #31, #32, #33, #35의 현재 workshop issue를 source of truth로 사용한다.
 
-## Accepted SQL Candidates
+## 채택한 SQL 후보
 
 ### #62 SQL Order Repository
 
-Accept as the first SQL workshop example.
+첫 SQL workshop example로 채택한다.
 
-Reasons:
+이유:
 
-- It maps cleanly to Kotlin `exposed/mvc-jdbc`, where repositories own table
-  access and services keep transaction boundaries visible.
-- It can teach insert, find, filtered list, and not-found behavior without
-  forcing a broad ORM abstraction.
-- It fits the upstream Go direction: package-first SQL helpers, visible SQL,
-  explicit errors, and context ownership.
+- repository가 table access를 소유하고 service가 transaction boundary를 보이게 유지하는
+  Kotlin `exposed/mvc-jdbc`에 깔끔하게 매핑된다.
+- 넓은 ORM abstraction을 강제하지 않고 insert, find, filtered list, not-found behavior를
+  가르칠 수 있다.
+- package-first SQL helper, visible SQL, explicit error, context ownership이라는
+  upstream Go 방향에 맞는다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Medium. Use Postgres/Testcontainers only if the upstream SQL helper requires
-  real database semantics. If sqlite or a package-provided in-memory fixture can
-  prove the same repository contract, keep the first pass Docker-free.
+- 중간. upstream SQL helper가 real database semantic을 요구할 때만
+  Postgres/Testcontainers를 사용한다. sqlite 또는 package-provided in-memory fixture가
+  같은 repository contract를 증명할 수 있으면 첫 pass는 Docker-free로 유지한다.
 
-Implementation boundary:
+구현 경계:
 
-- Do not assert behavior only through SQL string snapshots.
-- Keep direct `database/sql` comparison in README, but put package helper usage
-  in the example code.
+- SQL string snapshot만으로 동작을 assert하지 않는다.
+- README에는 직접 `database/sql` 비교를 유지하되, example code에는 package helper
+  사용을 둔다.
 
 ### #63 SQL Transaction Boundary
 
-Accept after #62.
+#62 뒤에 채택한다.
 
-Reasons:
+이유:
 
-- It maps to the order placement flow in `exposed/mvc-jdbc` and
-  `exposed/webflux-r2dbc`: order header, lines, product stock, lock ordering,
-  and rollback on stock conflict.
-- It teaches the most important production contract for SQL helpers:
-  transaction ownership belongs in the service boundary.
-- It gives the track a concrete failure case instead of CRUD-only behavior.
+- `exposed/mvc-jdbc`와 `exposed/webflux-r2dbc`의 order placement flow에 매핑된다.
+  여기에는 order header, line, product stock, lock ordering, stock conflict 시 rollback이
+  포함된다.
+- SQL helper의 가장 중요한 production contract인 transaction ownership이 service
+  boundary에 있다는 점을 가르친다.
+- CRUD-only behavior 대신 concrete failure case를 track에 제공한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Medium to high. Rollback and lock behavior are stronger with a real database.
-  If row locking is in scope, Postgres/Testcontainers should be used and tests
-  should run serially.
+- 중간에서 높음. rollback과 lock behavior는 real database에서 더 강하게 증명된다. row
+  locking이 범위에 있으면 Postgres/Testcontainers를 사용하고 test를 순차 실행해야 한다.
 
-Implementation boundary:
+구현 경계:
 
-- Keep transaction lifetime explicit.
-- Include context cancellation notes in README.
-- Do not invent a heavy unit-of-work or ORM layer.
+- transaction lifetime을 명시적으로 유지한다.
+- README에 context cancellation note를 포함한다.
+- heavy unit-of-work 또는 ORM layer를 만들지 않는다.
 
 ### #64 Gin SQL CRUD API
 
-Accept as the HTTP wrapper after #62.
+#62 뒤 HTTP wrapper로 채택한다.
 
-Reasons:
+이유:
 
-- It gives the SQL repository a public API shape while keeping Gin isolated at
-  the HTTP boundary.
-- It can reuse the same order repository behavior instead of creating another
-  persistence lesson.
-- It aligns with the workshop convention that public HTTP examples use Gin
-  unless the issue requires `net/http`.
+- Gin을 HTTP boundary에 격리하면서 SQL repository에 public API shape를 제공한다.
+- 다른 persistence lesson을 만들지 않고 같은 order repository behavior를 재사용할 수
+  있다.
+- 이슈가 `net/http`를 요구하지 않는 한 public HTTP example은 Gin을 사용한다는 워크숍
+  관례와 맞는다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Medium if it reuses the repository's real database tests. Keep handler-only
-  tests fast by using package-level interfaces or local test stores when the
-  repository contract is already proven elsewhere.
+- repository의 real database test를 재사용하면 중간 수준이다. repository contract가
+  다른 곳에서 이미 증명되었다면 package-level interface 또는 local test store를 사용해
+  handler-only test를 빠르게 유지한다.
 
-Implementation boundary:
+구현 경계:
 
-- Handlers should validate and project responses; repositories must remain
-  usable without Gin.
-- README should include migration/setup notes and curl examples.
+- handler는 validate와 response projection을 담당하고, repository는 Gin 없이도 사용할 수
+  있어야 한다.
+- README에는 migration/setup note와 curl example을 포함해야 한다.
 
 ### #65 Gin SQL Order Service Integration
 
-Accept as the 0.8.0 integration example after #62, #63, and #64.
+#62, #63, #64 뒤 0.8.0 integration example로 채택한다.
 
-Reasons:
+이유:
 
-- It combines repository modeling, transaction boundaries, and HTTP API without
-  duplicating each focused lesson.
-- It is scenario-shaped: order creation, status lookup, item updates, and
-  rollback/failure behavior.
-- It should explain how it differs from the smaller SQL examples.
+- 각 focused lesson을 반복하지 않고 repository modeling, transaction boundary, HTTP API를
+  조합한다.
+- order creation, status lookup, item update, rollback/failure behavior를 다루는
+  scenario-shaped example이다.
+- 더 작은 SQL example과 어떻게 다른지 설명해야 한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Medium to high. If the integrated example covers multi-table writes and
-  rollback, prefer a real database-backed test. Keep the suite bounded and run
-  Testcontainers serially.
+- 중간에서 높음. integrated example이 multi-table write와 rollback을 다루면 real
+  database-backed test를 선호한다. suite를 bounded하게 유지하고 Testcontainers를 순차
+  실행한다.
 
-Implementation boundary:
+구현 경계:
 
-- Do not expand into inventory, fulfillment, payment, or outbox behavior.
-- Link README prerequisites to #62, #63, and #64.
+- inventory, fulfillment, payment, outbox behavior로 확장하지 않는다.
+- README prerequisite를 #62, #63, #64에 연결한다.
 
-## Deferred or Rejected SQL Candidates
+## 보류하거나 거부한 SQL 후보
 
-- Reject a Kotlin Exposed clone. The upstream Go SQL research explicitly says
-  to avoid a full ORM layer and keep Go APIs runtime-first.
-- Reject mandatory code generation for the workshop path until upstream SQL
-  research proves it is the smallest safe path.
-- Defer R2DBC/coroutine-style ports. Go examples should use Go context and
-  database contracts, not mirror Kotlin coroutine architecture.
+- Kotlin Exposed clone은 거부한다. upstream Go SQL research는 full ORM layer를 피하고
+  Go API를 runtime-first로 유지하라고 명시한다.
+- upstream SQL research가 가장 작은 안전한 경로임을 증명할 때까지 workshop path의
+  mandatory code generation은 거부한다.
+- R2DBC/coroutine-style port는 보류한다. Go example은 Kotlin coroutine architecture를
+  모방하지 말고 Go context와 database contract를 사용해야 한다.
 
-## Accepted AWS Candidates
+## 채택한 AWS 후보
 
 ### #59 S3 Floci Storage
 
-Accept as the first AWS workshop example.
+첫 AWS workshop example로 채택한다.
 
-Reasons:
+이유:
 
-- It maps directly to Kotlin `aws/s3-spring-cloud` and the S3 profile in
-  `aws/storage-abstraction`.
-- S3 object lifecycle is the smallest useful AWS behavior: bucket/object setup,
-  upload, download, list, delete, and optionally pre-signed URL behavior.
-- It keeps AWS credentials local-only through Floci and SDK endpoint overrides.
+- Kotlin `aws/s3-spring-cloud`와 `aws/storage-abstraction`의 S3 profile에 직접
+  매핑된다.
+- S3 object lifecycle은 bucket/object setup, upload, download, list, delete, 선택적
+  pre-signed URL behavior를 포함하는 가장 작은 유용한 AWS behavior다.
+- Floci와 SDK endpoint override를 통해 AWS credential을 local-only로 유지한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- High but intentional. #59 requires Floci/Testcontainers-only tests. The README
-  must state Docker is required, no real AWS credentials are used, and real AWS
-  differences are outside the local proof.
+- 높지만 의도된 비용이다. #59는 Floci/Testcontainers-only test를 요구한다. README는
+  Docker가 필요하고, real AWS credential을 사용하지 않으며, real AWS 차이는 local proof
+  밖이라고 명시해야 한다.
 
-Implementation boundary:
+구현 경계:
 
-- Use caller-owned AWS SDK clients.
-- Keep the storage abstraction small and avoid wrapping the whole AWS SDK.
+- caller-owned AWS SDK client를 사용한다.
+- storage abstraction을 작게 유지하고 전체 AWS SDK를 감싸지 않는다.
 
 ### #60 SQS Floci Worker
 
-Accept after #59 proves the Floci fixture.
+#59가 Floci fixture를 증명한 뒤 채택한다.
 
-Reasons:
+이유:
 
-- It maps to the AWS helper track and gives a concrete producer/consumer lesson.
-- It can teach message round trip, handler success, retry-visible failure, and
-  idempotency requirements.
-- It should stay independent from S3/DynamoDB until the integration issue.
+- AWS helper track에 매핑되며 concrete producer/consumer lesson을 제공한다.
+- message round trip, handler success, retry-visible failure, idempotency
+  requirement를 가르칠 수 있다.
+- integration issue 전까지는 S3/DynamoDB와 독립적으로 유지해야 한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- High. SQS behavior should be verified through Floci/Testcontainers. Tests
-  must be serial when sharing the emulator.
+- 높음. SQS behavior는 Floci/Testcontainers로 검증해야 한다. emulator를 공유할 때 test는
+  순차 실행해야 한다.
 
-Implementation boundary:
+구현 경계:
 
-- README must state delivery semantics and idempotency requirements.
-- Dead-letter or parking-lot behavior should be documented only if the upstream
-  helper/emulator support is clear.
+- README는 delivery semantic과 idempotency requirement를 명시해야 한다.
+- dead-letter 또는 parking-lot behavior는 upstream helper/emulator support가 명확할 때만
+  문서화한다.
 
 ### #61 DynamoDB Conditional Repository
 
-Accept as the AWS persistence-focused example.
+AWS persistence-focused example로 채택한다.
 
-Reasons:
+이유:
 
-- It targets a bluetape-specific pain point: conditional writes, optimistic
-  updates, partition-key query behavior, and conflict mapping.
-- It complements S3 and SQS without creating one oversized demo.
-- It gives #66 a deterministic idempotency state store.
+- conditional write, optimistic update, partition-key query behavior, conflict
+  mapping이라는 bluetape-specific pain point를 target한다.
+- 하나의 oversized demo를 만들지 않고 S3와 SQS를 보완한다.
+- #66에 deterministic idempotency state store를 제공한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- High. Conditional writes need emulator-backed behavior; use Floci/local
-  emulator tests and avoid real credentials.
+- 높음. conditional write에는 emulator-backed behavior가 필요하다. Floci/local emulator
+  test를 사용하고 real credential은 피한다.
 
-Implementation boundary:
+구현 경계:
 
-- Keep key design and consistency caveats in README.
-- Do not combine this with S3/SQS before #66.
+- README에 key design과 consistency caveat를 유지한다.
+- #66 전에는 이것을 S3/SQS와 결합하지 않는다.
 
 ### #66 S3-SQS-DynamoDB Document Workflow Integration
 
-Accept as the 0.9.0 integration example after #59, #60, and #61.
+#59, #60, #61 뒤 0.9.0 integration example로 채택한다.
 
-Reasons:
+이유:
 
-- It composes the focused AWS examples into one realistic local workflow:
-  upload object, enqueue processing, and record idempotent state.
-- It can prove retry-safe message processing and conditional write behavior.
-- It gives the AWS milestone an integration spine rather than three disconnected
-  service snippets.
+- focused AWS example을 object upload, processing enqueue, idempotent state 기록이라는
+  하나의 현실적인 local workflow로 조합한다.
+- retry-safe message processing과 conditional write behavior를 증명할 수 있다.
+- AWS milestone에 세 개의 분리된 service snippet이 아니라 integration spine을 제공한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Very high. It uses multiple AWS-compatible services in one emulator-backed
-  suite. Keep fixtures small, run serially, and document startup cost.
+- 매우 높음. 하나의 emulator-backed suite에서 여러 AWS-compatible service를 사용한다.
+  fixture를 작게 유지하고, 순차 실행하며, startup cost를 문서화한다.
 
-Implementation boundary:
+구현 경계:
 
-- Do not add real cloud deployment, IAM provisioning, or production credential
-  setup.
-- README should link #59, #60, and #61 as prerequisites.
+- real cloud deployment, IAM provisioning, production credential setup을 추가하지 않는다.
+- README는 #59, #60, #61을 prerequisite로 연결해야 한다.
 
-## Deferred or Rejected AWS Candidates
+## 보류하거나 거부한 AWS 후보
 
-- Reject a broad AWS SDK wrapper. Upstream research says helpers should exist
-  only where repeated-service benefit is clear.
-- Reject real AWS integration tests for workshop DoD. Local deterministic
-  Floci/Testcontainers tests are the required proof.
-- Defer LocalStack-specific paths unless compatibility with Floci is the issue
-  under test.
-- Defer IAM, STS, Lambda, or deployment examples. They introduce credential and
-  cloud-account scope that #48 does not authorize.
+- 넓은 AWS SDK wrapper는 거부한다. upstream research는 repeated-service benefit이 명확한
+  곳에만 helper가 있어야 한다고 말한다.
+- workshop DoD의 real AWS integration test는 거부한다. local deterministic
+  Floci/Testcontainers test가 required proof다.
+- Floci compatibility가 테스트 대상 이슈가 아닌 한 LocalStack-specific path는 보류한다.
+- IAM, STS, Lambda, deployment example은 보류한다. 이들은 #48이 승인하지 않은
+  credential과 cloud-account scope를 도입한다.
 
-## Accepted Audit / Outbox Candidates
+## 채택한 Audit / Outbox 후보
 
 ### #56 Audit Order History
 
-Accept as the first audit workshop example.
+첫 audit workshop example로 채택한다.
 
-Reasons:
+이유:
 
-- It maps to Kotlin `exposed/javers-audit`, but keeps the Go lesson focused on
-  audit concepts rather than JaVers internals.
-- It can show append order, aggregate history queries, mutable current state
-  versus immutable audit history, and retention/schema migration gaps.
-- It is the smallest useful audit/event example before outbox and HTTP query
-  wrappers.
+- Kotlin `exposed/javers-audit`에 매핑되지만, Go lesson은 JaVers internal이 아니라 audit
+  concept에 집중하게 한다.
+- append order, aggregate history query, mutable current state와 immutable audit
+  history의 차이, retention/schema migration gap을 보여 줄 수 있다.
+- outbox와 HTTP query wrapper 전에 가장 작은 유용한 audit/event example이다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Low for the first pass if the upstream audit model is storage-neutral and can
-  be proven with in-memory conformance tests. Medium if durable SQL storage is
-  required by the upstream package.
+- upstream audit model이 storage-neutral이고 in-memory conformance test로 증명할 수
+  있으면 첫 pass에서는 낮음. upstream package가 durable SQL storage를 요구하면 중간.
 
-Implementation boundary:
+구현 경계:
 
-- README must distinguish audit history from event sourcing.
-- Do not model a full event-sourced aggregate unless a later issue asks for it.
+- README는 audit history와 event sourcing을 구분해야 한다.
+- 이후 이슈가 요구하지 않는 한 full event-sourced aggregate를 모델링하지 않는다.
 
 ### #57 Transactional Outbox Publisher
 
-Accept after #56 or once the upstream audit/outbox primitives are stable.
+#56 뒤 또는 upstream audit/outbox primitive가 안정되면 채택한다.
 
-Reasons:
+이유:
 
-- It maps directly to Kotlin `messaging/transactional-outbox`, including atomic
-  domain write + outbox append, publisher claim, retry, idempotency, and
-  dead-letter states.
-- It teaches the dual-write failure boundary that generic logging examples miss.
-- It creates the durable publisher behavior needed by #68.
+- atomic domain write + outbox append, publisher claim, retry, idempotency,
+  dead-letter state를 포함하는 Kotlin `messaging/transactional-outbox`에 직접 매핑된다.
+- generic logging example이 놓치는 dual-write failure boundary를 가르친다.
+- #68에 필요한 durable publisher behavior를 만든다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Medium to very high depending on scope. A storage-only outbox claim/retry
-  example may need only Postgres/Testcontainers. Adding Kafka-like publishing
-  raises the cost and should be deferred unless the upstream package requires
-  it.
+- scope에 따라 중간에서 매우 높음. storage-only outbox claim/retry example은
+  Postgres/Testcontainers만 필요할 수 있다. Kafka-like publishing을 추가하면 비용이
+  커지므로 upstream package가 요구하지 않는 한 보류해야 한다.
 
-Implementation boundary:
+구현 경계:
 
-- Use Testcontainers only if durable storage behavior needs it.
-- README must explain operator replay and poison-message gaps.
+- durable storage behavior에 필요할 때만 Testcontainers를 사용한다.
+- README는 operator replay와 poison-message gap을 설명해야 한다.
 
 ### #58 Gin Audit Query API
 
-Accept as the public API wrapper after #56.
+#56 뒤 public API wrapper로 채택한다.
 
-Reasons:
+이유:
 
-- It exposes audit history and event detail endpoints without making Gin part of
-  the storage/query model.
-- It tests useful user-facing behavior: not-found, pagination/filter inputs,
-  successful query shape, and trust-boundary notes.
+- Gin을 storage/query model의 일부로 만들지 않고 audit history와 event detail endpoint를
+  노출한다.
+- not-found, pagination/filter input, successful query shape, trust-boundary note라는
+  유용한 user-facing behavior를 테스트한다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Low to medium. Handler tests can stay local if #56 already proves storage
-  behavior. Use durable storage only if the query package requires it.
+- 낮음에서 중간. #56이 storage behavior를 이미 증명했다면 handler test는 local로
+  유지할 수 있다. query package가 요구할 때만 durable storage를 사용한다.
 
-Implementation boundary:
+구현 경계:
 
-- Do not hide audit package errors behind generic HTTP responses.
-- Keep storage/query logic framework-independent.
+- audit package error를 generic HTTP response 뒤에 숨기지 않는다.
+- storage/query logic을 framework-independent하게 유지한다.
 
 ### #68 Audited Order Workflow Outbox Integration
 
-Accept as the 0.11.0 integration example after #56, #57, and #58.
+#56, #57, #58 뒤 0.11.0 integration example로 채택한다.
 
-Reasons:
+이유:
 
-- It joins domain state changes, audit trail, outbox records, publisher handoff,
-  and read API in one scenario-shaped workflow.
-- It should demonstrate consistency between audit rows and outbox rows.
-- It can link back to the focused audit examples instead of re-explaining all
-  primitives.
+- domain state change, audit trail, outbox record, publisher handoff, read API를
+  하나의 scenario-shaped workflow로 연결한다.
+- audit row와 outbox row 사이의 consistency를 보여 주어야 한다.
+- 모든 primitive를 다시 설명하지 않고 focused audit example로 다시 연결할 수 있다.
 
-Docker/Testcontainers cost:
+Docker/Testcontainers 비용:
 
-- Medium to high. Durable storage is likely necessary. External broker
-  emulation should be added only if #57 has already proven it is required and
-  manageable.
+- 중간에서 높음. durable storage가 필요할 가능성이 높다. external broker emulation은
+  #57이 이미 필요성과 관리 가능성을 증명한 경우에만 추가한다.
 
-Implementation boundary:
+구현 경계:
 
-- Keep publisher retry or skipped-delivery behavior deterministic.
-- Link README prerequisites to #56, #57, and #58.
+- publisher retry 또는 skipped-delivery behavior를 deterministic하게 유지한다.
+- README prerequisite를 #56, #57, #58에 연결한다.
 
-## Deferred or Rejected Audit / Outbox Candidates
+## 보류하거나 거부한 Audit / Outbox 후보
 
-- Reject a JaVers clone. Upstream Go research says to port concepts, not the
-  implementation.
-- Reject generic application logging examples. #35 requires event/audit
-  semantics, not log aggregation.
-- Defer Kafka-backed publisher tests until the storage/outbox claim contract is
-  stable. The Kotlin example uses Kafka, but Go workshop cost should remain
-  proportional to the package surface.
-- Defer event-sourcing claims. Audit history can be append-only without owning
-  aggregate reconstruction semantics.
+- JaVers clone은 거부한다. upstream Go research는 implementation이 아니라 concept를
+  port하라고 말한다.
+- generic application logging example은 거부한다. #35는 log aggregation이 아니라
+  event/audit semantic을 요구한다.
+- storage/outbox claim contract가 안정될 때까지 Kafka-backed publisher test는 보류한다.
+  Kotlin example은 Kafka를 사용하지만 Go workshop 비용은 package surface에 비례해야
+  한다.
+- event-sourcing claim은 보류한다. audit history는 aggregate reconstruction semantic을
+  소유하지 않고도 append-only일 수 있다.
 
-## Recommended Sequence
+## 권장 순서
 
-1. Implement #62 before the rest of the SQL track.
-2. Implement #63 as the transaction/failure lesson.
-3. Implement #64 as the HTTP wrapper over SQL repository behavior.
-4. Implement #65 as the SQL integration example.
-5. Implement #59 before the rest of the AWS track to establish Floci fixture
-   shape and README environment guidance.
-6. Implement #60 and #61 independently.
-7. Implement #66 as the AWS integration example.
-8. Implement #56 before outbox or query API examples.
-9. Implement #57 when storage/outbox primitives are available.
-10. Implement #58 as the public audit query wrapper.
-11. Implement #68 as the audit/outbox integration example.
+1. SQL track의 나머지보다 #62를 먼저 구현한다.
+2. #63을 transaction/failure lesson으로 구현한다.
+3. #64를 SQL repository behavior 위의 HTTP wrapper로 구현한다.
+4. #65를 SQL integration example로 구현한다.
+5. AWS track의 나머지보다 #59를 먼저 구현해 Floci fixture shape와 README environment
+   guidance를 확립한다.
+6. #60과 #61은 독립적으로 구현한다.
+7. #66을 AWS integration example로 구현한다.
+8. outbox 또는 query API example보다 #56을 먼저 구현한다.
+9. storage/outbox primitive를 사용할 수 있으면 #57을 구현한다.
+10. #58을 public audit query wrapper로 구현한다.
+11. #68을 audit/outbox integration example로 구현한다.
 
-## DoD Evidence For #48
+## #48 DoD 근거
 
-- Concrete source paths are listed in `Sources Checked`.
-- Follow-up issue links are added for every accepted candidate:
+- 구체적인 source path는 `확인한 출처`에 나열했다.
+- 모든 accepted candidate에 follow-up issue link를 추가했다.
   - SQL: #62, #63, #64, #65
   - AWS: #59, #60, #61, #66
   - Audit/outbox: #56, #57, #58, #68
-- Docker/Testcontainers cost is called out per accepted candidate.
-- Deferred and rejected candidates are listed with reasons.
-- Stale upstream issue numbering is resolved against the current parent #31
-  milestone mapping and current umbrella issues #32, #33, and #35.
+- Docker/Testcontainers 비용은 accepted candidate별로 명시했다.
+- 보류하거나 거부한 candidate는 이유와 함께 나열했다.
+- stale upstream issue numbering은 현재 parent #31 milestone mapping과 현재 umbrella
+  issue #32, #33, #35 기준으로 해소했다.

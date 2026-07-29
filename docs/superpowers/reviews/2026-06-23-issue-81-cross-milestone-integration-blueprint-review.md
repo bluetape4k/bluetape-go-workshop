@@ -1,56 +1,55 @@
-# Issue #81 Review: Cross-Milestone Integration Blueprint
+# Issue #81 리뷰: Cross-Milestone Integration Blueprint
 
-## Scope Reviewed
+## 검토 범위
 
 - Issue: #81 `[v0.7.0] Add cross milestone workshop integration blueprint`
-- Artifacts:
+- artifact:
   - `docs/superpowers/plans/2026-06-23-issue-81-cross-milestone-integration-blueprint.md`
   - `README.md`
   - `README.ko.md`
-- Work type: Type E - Planning / Maintenance
+- work type: Type E - Planning / Maintenance
 
-## Findings
+## finding
 
 P0=0 P1=0
 
-## Coverage Checks
+## coverage 점검
 
-- Foundation integration examples are linked:
+- foundation integration example이 link되어 있다.
   - #72 order fulfillment workflow integration
   - #75 customer migration batch integration
   - #78 checkout guard integration
-- Future integration examples are linked:
+- future integration example이 link되어 있다.
   - #65 SQL order service integration
   - #66 S3-SQS-DynamoDB document workflow integration
   - #67 content moderation workflow integration
   - #68 audited order workflow/outbox integration
   - #69 graph risk intelligence integration
-- Shared nouns are mapped: order, customer, document, account, risk event, and
+- shared noun이 매핑되어 있다: order, customer, document, account, risk event,
   idempotency key.
-- Sequencing rules point to #31, #79, and #80.
-- Root README navigation adds planning links without adding future examples to
-  the runnable example table.
-- English and Korean README planning links are synchronized.
+- sequencing rule은 #31, #79, #80을 가리킨다.
+- root README navigation은 future example을 runnable example table에 추가하지 않고 planning link를
+  추가한다.
+- English/Korean README planning link는 동기화되어 있다.
 
-## Acceptance Criteria Mapping
+## Acceptance Criteria 매핑
 
-| #81 acceptance criterion | Status | Evidence |
+| #81 acceptance criterion | 상태 | 근거 |
 |---|---|---|
-| Blueprint artifact exists in the repo or linked planning docs. | PASS | `docs/superpowers/plans/2026-06-23-issue-81-cross-milestone-integration-blueprint.md` |
-| The blueprint links #72, #75, #78, #65, #66, #67, #68, and #69. | PASS | `Foundation Integration Anchors` and `Future Integration Path` sections. |
-| Epic #27 and README roadmap can point to this as the integration spine. | PASS | `README Roadmap Placement`; root `README.md` and `README.ko.md` `Roadmap Planning` links. |
+| blueprint artifact가 repo 또는 linked planning docs에 존재한다. | PASS | `docs/superpowers/plans/2026-06-23-issue-81-cross-milestone-integration-blueprint.md` |
+| blueprint는 #72, #75, #78, #65, #66, #67, #68, #69를 link한다. | PASS | `Foundation Integration Anchors`와 `Future Integration Path` section. |
+| Epic #27과 README roadmap은 이를 integration spine으로 가리킬 수 있다. | PASS | `README Roadmap Placement`, root `README.md`와 `README.ko.md`의 `Roadmap Planning` link. |
 
-## Verification Commands
+## 검증 명령
 
 ```bash
 git diff --check
 rg -n "#65|#66|#67|#68|#69|#72|#75|#78|#27|#31|#49|#79|#80|Roadmap Planning|order|customer|document|account|risk event|idempotency" docs/superpowers/plans/2026-06-23-issue-81-cross-milestone-integration-blueprint.md README.md README.ko.md
 ```
 
-## Residual Risk
+## 잔여 위험
 
-- This PR defines the integration spine, not implementation proof for #65-#69.
-  Each later runnable example still needs its own tests, README pair, review,
-  and CI evidence.
-- Root README links planning artifacts only. It still should not list future
-  examples as runnable until their `examples/` directories exist.
+- 이 PR은 integration spine을 정의할 뿐 #65-#69의 implementation proof는 아니다. 이후 각
+  runnable example에는 여전히 자체 test, README pair, review, CI evidence가 필요하다.
+- root README는 planning artifact만 link한다. 해당 `examples/` directory가 존재하기 전까지 future
+  example을 runnable로 나열하면 안 된다.

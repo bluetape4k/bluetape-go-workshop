@@ -2,24 +2,24 @@
 
 ## Verdict
 
-P0=0 P1=0. The checkout guard integration example is ready for PR after the
-HTTP `invalid_claims` public-error test was added.
+P0=0 P1=0. HTTP `invalid_claims` public-error test를 추가한 뒤 checkout guard integration
+example은 PR 준비가 완료된 상태다.
 
-## Scope Reviewed
+## 검토 범위
 
 - `examples/checkout-guard-integration`
-- Root README updates
-- Issue #78 spec, plan, spec review, and lesson notes
+- root README update
+- Issue #78 spec, plan, spec review, lesson notes
 
-## Findings
+## 발견 사항
 
 | Severity | Finding | Resolution |
 |---|---|---|
-| P2 | HTTP error mapping tests did not explicitly cover `403 invalid_claims`. | Added an under-scoped token case to `TestRouterMapsPublicErrors`. |
+| P2 | HTTP error mapping test가 `403 invalid_claims`를 명시적으로 다루지 않았다. | `TestRouterMapsPublicErrors`에 under-scoped token case를 추가했다. |
 
-No P0/P1 correctness, security, API, or documentation blockers were found.
+P0/P1 correctness, security, API, documentation blocker는 발견되지 않았다.
 
-## Verification
+## 검증
 
 ```bash
 go test -count=1 ./examples/checkout-guard-integration/...
@@ -27,7 +27,7 @@ go test -race -count=1 ./examples/checkout-guard-integration/...
 git diff --check
 ```
 
-Earlier full-branch verification before the P2 test-only addition also passed:
+P2 test-only addition 전의 earlier full-branch verification도 통과했다.
 
 ```bash
 go test -p 1 -count=1 ./...

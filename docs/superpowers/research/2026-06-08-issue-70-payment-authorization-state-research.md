@@ -1,48 +1,47 @@
-# Issue #70 Research: Payment Authorization State Transition Example
+# Issue #70 리서치: Payment Authorization State Transition 예제
 
-## Context
+## 맥락
 
-- Issue: `#70 [v0.4.0] Add payment authorization state transition example`
-- Umbrella: `#28 [v0.4.0] Add state machine and workflow workshop examples`
-- Parent roadmap epic: `#27`
-- Current completed focused examples:
+- 이슈: `#70 [v0.4.0] Add payment authorization state transition example`
+- umbrella: `#28 [v0.4.0] Add state machine and workflow workshop examples`
+- 상위 roadmap epic: `#27`
+- 현재 완료된 focused example:
   - `#38` order lifecycle state API
   - `#39` fulfillment workflow runner
   - `#40` operations report policy
 
-## Repository Evidence
+## 저장소 근거
 
-- `examples/order-lifecycle-state-api` already teaches a general order finite
-  state machine with Gin routes, allowed events, guard rejection, final-state
-  rejection, and concurrent transition tests.
-- The #70 example should not duplicate the entire order lifecycle API. It should
-  narrow the domain to payment authorization and add one new application concern:
-  idempotent command retry behavior around `state.Machine`.
-- Root README now groups v0.4.0 under state/workflow/report examples, so #70 can
-  be added as a payment-specific state example under the same lane.
+- `examples/order-lifecycle-state-api`는 이미 Gin route, allowed event, guard
+  rejection, final-state rejection, concurrent transition test로 일반적인 order
+  finite state machine을 가르친다.
+- #70 예제는 전체 order lifecycle API를 반복하지 않아야 한다. domain을 payment
+  authorization으로 좁히고, `state.Machine` 주변의 idempotent command retry 동작이라는
+  새 application concern 하나를 추가해야 한다.
+- 루트 README는 이제 v0.4.0을 state/workflow/report example로 묶으므로, #70은 같은
+  lane 아래 payment-specific state example로 추가할 수 있다.
 
-## Library Evidence
+## 라이브러리 근거
 
-Observed in `github.com/bluetape4k/bluetape-go@v0.5.1/state`:
+`github.com/bluetape4k/bluetape-go@v0.5.1/state`에서 확인한 내용은 다음과 같다.
 
-- `state.Machine` is concurrency-safe.
+- `state.Machine`은 concurrency-safe하다.
 - `Transition(ctx, event)`:
-  - checks context before lookup and before commit
-  - evaluates guards before acquiring the write lock
-  - rejects stale concurrent transitions with `ErrConcurrentTransition`
-- `CanTransition(ctx, event)` evaluates guards but never mutates state.
-- `AllowedEvents()` returns registered events for the current state and does not
-  evaluate guards.
-- Final states reject further transitions through `ErrFinalState`.
-- The package does not implement idempotency. Idempotent retry behavior must live
-  at the application boundary.
+  - lookup 전과 commit 전에 context를 확인한다.
+  - write lock을 얻기 전에 guard를 평가한다.
+  - stale concurrent transition을 `ErrConcurrentTransition`으로 거부한다.
+- `CanTransition(ctx, event)`는 guard를 평가하지만 state를 변경하지 않는다.
+- `AllowedEvents()`는 현재 state에 등록된 event를 반환하며 guard를 평가하지 않는다.
+- final state는 추가 transition을 `ErrFinalState`로 거부한다.
+- 패키지는 idempotency를 구현하지 않는다. idempotent retry 동작은 application
+  boundary에 있어야 한다.
 
-## Scenario Decision
+## 시나리오 결정
 
-Build `examples/payment-authorization-state`, a Gin API for a single in-memory
-payment authorization.
+단일 in-memory payment authorization용 Gin API인 `examples/payment-authorization-state`를
+만든다.
 
-States:
+상태:
 
 - `requested`
 - `authorized`
@@ -50,46 +49,43 @@ States:
 - `failed`
 - `cancelled`
 
-Events:
+이벤트:
 
-- `authorize`: `requested -> authorized`, guarded by positive amount.
+- `authorize`: `requested -> authorized`, positive amount로 guard한다.
 - `capture`: `authorized -> captured`.
-- `fail`: `requested -> failed` and `authorized -> failed`.
-- `cancel`: `requested -> cancelled` and `authorized -> cancelled`.
+- `fail`: `requested -> failed`, `authorized -> failed`.
+- `cancel`: `requested -> cancelled`, `authorized -> cancelled`.
 
-Final states:
+최종 상태:
 
 - `captured`
 - `failed`
 - `cancelled`
 
-Idempotency:
+멱등성:
 
-- Transition commands accept an `idempotency_key`.
-- A successful command stores its response by key.
-- Repeating the same key and event returns the stored transition response with
-  `idempotent_replay=true` and does not mutate state.
-- Reusing a key with a different event returns `409 Conflict`.
-- Invalid or guard-rejected transitions are not stored as successful idempotent
-  results.
+- transition command는 `idempotency_key`를 받는다.
+- 성공한 command는 key별로 response를 저장한다.
+- 같은 key와 event를 반복하면 저장된 transition response를 `idempotent_replay=true`로
+  반환하고 state를 변경하지 않는다.
+- 같은 key를 다른 event로 재사용하면 `409 Conflict`를 반환한다.
+- invalid 또는 guard-rejected transition은 successful idempotent result로 저장하지 않는다.
 
-## Rejected Directions
+## 거부한 방향
 
-- Calling an external payment gateway: unnecessary infrastructure for the state
-  package lesson.
-- Encoding gateway approval as request-scoped mutable state inside a guard:
-  guards should remain safe for `CanTransition` calls.
-- Reusing the order lifecycle example path: #70 should be readable as a separate
-  payment-domain lesson and should link #38 as a prerequisite.
-- Building a durable idempotency store: out of scope; README should call out that
-  production idempotency needs durable storage.
+- 외부 payment gateway 호출: state package lesson에는 불필요한 infrastructure다.
+- guard 내부에 request-scoped mutable state로 gateway approval 인코딩: guard는
+  `CanTransition` 호출에도 안전해야 한다.
+- order lifecycle 예제 path 재사용: #70은 별도의 payment-domain lesson으로 읽혀야
+  하며 #38을 prerequisite로 연결해야 한다.
+- durable idempotency store 구축: 범위 밖이다. README는 production idempotency에
+  durable storage가 필요하다고 명시해야 한다.
 
-## Acceptance Mapping
+## 인수 기준 매핑
 
-- Runnable example under `examples/`: add `examples/payment-authorization-state`.
-- Valid transitions: tests cover authorize, capture, fail, and cancel paths.
-- Invalid transitions: tests cover capture before authorize and final-state
-  rejection.
-- Retry/idempotency: tests cover same-key replay and key reuse conflict.
-- README prerequisite: README links `examples/order-lifecycle-state-api`.
-- README sync: add English and Korean READMEs and root navigation.
+- `examples/` 아래 runnable example: `examples/payment-authorization-state`를 추가한다.
+- valid transition: 테스트가 authorize, capture, fail, cancel path를 다룬다.
+- invalid transition: 테스트가 authorize 전 capture와 final-state rejection을 다룬다.
+- retry/idempotency: 테스트가 same-key replay와 key reuse conflict를 다룬다.
+- README prerequisite: README가 `examples/order-lifecycle-state-api`를 연결한다.
+- README sync: English와 Korean README 및 root navigation을 추가한다.

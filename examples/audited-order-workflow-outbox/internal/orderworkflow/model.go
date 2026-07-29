@@ -22,43 +22,43 @@ const (
 )
 
 var (
-	// ErrInvalidConfig reports a missing or unsafe runtime dependency or option.
+	// ErrInvalidConfig 는 런타임 의존성 또는 옵션이 없거나 안전하지 않음을 나타낸다.
 	ErrInvalidConfig = errors.New("orderworkflow: invalid config")
-	// ErrInvalidCommand reports a command that fails the public input contract.
+	// ErrInvalidCommand 는 공개 입력 계약을 만족하지 못한 명령을 나타낸다.
 	ErrInvalidCommand = errors.New("orderworkflow: invalid command")
-	// ErrInvalidEntry reports corrupt or inconsistent durable audit data.
+	// ErrInvalidEntry 는 손상되었거나 일관되지 않은 영속 감사 데이터를 나타낸다.
 	ErrInvalidEntry = errors.New("orderworkflow: invalid entry")
-	// ErrNotFound reports an order or audit record that does not exist.
+	// ErrNotFound 는 존재하지 않는 주문 또는 감사 레코드를 나타낸다.
 	ErrNotFound = errors.New("orderworkflow: not found")
-	// ErrConflict reports command reuse or an invalid state transition.
+	// ErrConflict 는 명령 재사용 또는 유효하지 않은 상태 전이를 나타낸다.
 	ErrConflict = errors.New("orderworkflow: conflict")
 
 	identifierPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)
 )
 
-// Status is the durable state of an order projection.
+// Status 는 주문 프로젝션에 영속화되는 상태다.
 type Status string
 
 const (
-	// StatusPending accepts confirmation or cancellation.
+	// StatusPending 은 확정 또는 취소 전이를 허용한다.
 	StatusPending Status = "pending"
-	// StatusConfirmed accepts cancellation but not another confirmation.
+	// StatusConfirmed 는 취소 전이는 허용하지만 추가 확정은 허용하지 않는다.
 	StatusConfirmed Status = "confirmed"
-	// StatusCancelled is terminal.
+	// StatusCancelled 는 더 이상 전이할 수 없는 최종 상태다.
 	StatusCancelled Status = "cancelled"
 )
 
-// Action names a supported order state transition.
+// Action 은 지원되는 주문 상태 전이의 이름이다.
 type Action string
 
 const (
-	// ActionConfirm moves a pending order to confirmed.
+	// ActionConfirm 은 대기 중인 주문을 확정 상태로 이동한다.
 	ActionConfirm Action = "confirm"
-	// ActionCancel moves a pending or confirmed order to cancelled.
+	// ActionCancel 은 대기 또는 확정 상태의 주문을 취소 상태로 이동한다.
 	ActionCancel Action = "cancel"
 )
 
-// Order is the current durable projection returned to HTTP callers.
+// Order 는 HTTP 호출자에게 반환되는 현재 영속 주문 프로젝션이다.
 type Order struct {
 	OrderID   string         `json:"order_id"`
 	Status    Status         `json:"status"`
@@ -66,14 +66,14 @@ type Order struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 }
 
-// CreateCommand carries the canonical identity and metadata for order creation.
+// CreateCommand 는 주문 생성에 필요한 표준 식별자와 메타데이터를 담는다.
 type CreateCommand struct {
 	OrderID   string
 	CommandID string
 	Metadata  audit.Metadata
 }
 
-// TransitionCommand carries one canonical order state transition intent.
+// TransitionCommand 는 하나의 표준 주문 상태 전이 의도를 담는다.
 type TransitionCommand struct {
 	OrderID   string
 	CommandID string

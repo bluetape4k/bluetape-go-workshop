@@ -1,4 +1,4 @@
-// Package uploadguard implements the safe decompression upload example.
+// Package uploadguard 는 안전한 압축 해제 업로드 예제를 구현한다.
 package uploadguard
 
 import (
@@ -23,45 +23,45 @@ const (
 )
 
 var (
-	// ErrInvalidRequest reports invalid HTTP headers or upload fields.
+	// ErrInvalidRequest 는 HTTP 헤더 또는 업로드 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("uploadguard: invalid request")
-	// ErrUnsupportedCompression reports an unknown compression algorithm.
+	// ErrUnsupportedCompression 은 알 수 없는 압축 알고리즘을 나타낸다.
 	ErrUnsupportedCompression = errors.New("uploadguard: unsupported compression")
-	// ErrMalformedCompressedPayload reports bytes that the selected compressor cannot decode.
+	// ErrMalformedCompressedPayload 는 선택된 압축기가 디코딩할 수 없는 바이트를 나타낸다.
 	ErrMalformedCompressedPayload = errors.New("uploadguard: malformed compressed payload")
-	// ErrDecompressedPayloadTooLarge reports an expanded payload beyond the configured limit.
+	// ErrDecompressedPayloadTooLarge 는 압축 해제 후 payload 가 설정 한도를 넘었음을 나타낸다.
 	ErrDecompressedPayloadTooLarge = errors.New("uploadguard: decompressed payload too large")
-	// ErrCompressedRequestTooLarge reports a compressed HTTP request body beyond the transport limit.
+	// ErrCompressedRequestTooLarge 는 압축된 HTTP 요청 본문이 전송 한도를 넘었음을 나타낸다.
 	ErrCompressedRequestTooLarge = errors.New("uploadguard: compressed request too large")
 )
 
-// Config controls body limits for the upload guard.
+// Config 는 업로드 guard 의 본문 한도를 제어한다.
 type Config struct {
 	CompressedBodyLimitBytes   int64
 	DecompressedBodyLimitBytes int64
 }
 
-// Service owns upload decompression policy.
+// Service 는 업로드 압축 해제 정책을 소유한다.
 type Service struct {
 	compressedBodyLimit   int64
 	decompressedBodyLimit int64
 	compressors           map[string]compression.Compressor
 }
 
-// UploadDocument is the trusted JSON shape after decompression.
+// UploadDocument 는 압축 해제 후 신뢰되는 JSON 형태다.
 type UploadDocument struct {
 	DocumentID string `json:"document_id"`
 	Tenant     string `json:"tenant"`
 	Body       string `json:"body"`
 }
 
-// IngestRequest carries one compressed upload into the service.
+// IngestRequest 는 압축 업로드 하나를 서비스로 전달한다.
 type IngestRequest struct {
 	Algorithm string
 	Data      []byte
 }
 
-// IngestResponse is the stable public upload result.
+// IngestResponse 는 안정적으로 공개되는 업로드 결과다.
 type IngestResponse struct {
 	DocumentID                   string `json:"document_id"`
 	Tenant                       string `json:"tenant"`
@@ -75,13 +75,13 @@ type IngestResponse struct {
 	AuthoritativeScanStillNeeded bool   `json:"authoritative_scan_still_needed"`
 }
 
-// ErrorResponse is the stable public HTTP error shape.
+// ErrorResponse 는 안정적으로 공개되는 HTTP 오류 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService creates an upload decompression guard.
+// NewService 는 업로드 압축 해제 guard 를 생성한다.
 func NewService(config Config) (*Service, error) {
 	compressedLimit := config.CompressedBodyLimitBytes
 	if compressedLimit == 0 {
@@ -107,7 +107,7 @@ func NewService(config Config) (*Service, error) {
 	}, nil
 }
 
-// CompressedBodyLimitBytes returns the HTTP compressed request body limit.
+// CompressedBodyLimitBytes 는 HTTP 압축 요청 본문 한도를 반환한다.
 func (s *Service) CompressedBodyLimitBytes() int64 {
 	if s == nil || s.compressedBodyLimit == 0 {
 		return defaultCompressedBodyLimit
@@ -115,7 +115,7 @@ func (s *Service) CompressedBodyLimitBytes() int64 {
 	return s.compressedBodyLimit
 }
 
-// DecompressedBodyLimitBytes returns the post-decompression payload limit.
+// DecompressedBodyLimitBytes 는 압축 해제 후 payload 한도를 반환한다.
 func (s *Service) DecompressedBodyLimitBytes() int64 {
 	if s == nil || s.decompressedBodyLimit == 0 {
 		return defaultDecompressedBodyLimit
@@ -123,7 +123,7 @@ func (s *Service) DecompressedBodyLimitBytes() int64 {
 	return s.decompressedBodyLimit
 }
 
-// Ingest decompresses, bounds, validates, and projects one upload.
+// Ingest 는 업로드 하나를 압축 해제하고 한도 검사, 검증, 응답 변환을 수행한다.
 func (s *Service) Ingest(ctx context.Context, request IngestRequest) (IngestResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return IngestResponse{}, err
@@ -179,7 +179,7 @@ func (s *Service) Ingest(ctx context.Context, request IngestRequest) (IngestResp
 	}, nil
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

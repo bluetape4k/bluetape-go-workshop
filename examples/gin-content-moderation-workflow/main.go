@@ -1,4 +1,4 @@
-// Package main runs the Gin content moderation workflow example.
+// Package main 은 Gin content moderation workflow 예제를 실행한다.
 package main
 
 import (
@@ -25,7 +25,7 @@ const (
 	shutdownTimeout = 5 * time.Second
 )
 
-// HTTPServer is the narrow server lifecycle used by RunServer.
+// HTTPServer 는 RunServer가 사용하는 좁은 server lifecycle 계약이다.
 type HTTPServer interface {
 	ListenAndServe() error
 	Shutdown(context.Context) error
@@ -84,7 +84,7 @@ func resolveHTTPAddr(value string, allowUnauthenticatedRemote bool) (string, err
 	return value, nil
 }
 
-// NewHTTPServer applies the example's fixed network timeouts.
+// NewHTTPServer 는 예제의 고정 network timeout을 적용한다.
 func NewHTTPServer(address string, handler http.Handler) *http.Server {
 	return &http.Server{
 		Addr:              address,
@@ -96,7 +96,7 @@ func NewHTTPServer(address string, handler http.Handler) *http.Server {
 	}
 }
 
-// RunServer owns one listen goroutine and joins it after bounded shutdown.
+// RunServer 는 listen goroutine 하나를 소유하고 제한된 shutdown 뒤에 합류한다.
 func RunServer(ctx context.Context, server HTTPServer, logger *log.Logger) error {
 	if ctx == nil || server == nil || logger == nil {
 		return errors.New("invalid server lifecycle dependency")

@@ -1,4 +1,4 @@
-// Package main runs the fulfillment workflow runner example.
+// Package main 은 fulfillment workflow runner 예제를 실행한다.
 package main
 
 import (

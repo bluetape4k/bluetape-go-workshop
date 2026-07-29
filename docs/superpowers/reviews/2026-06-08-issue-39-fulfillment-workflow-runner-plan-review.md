@@ -1,34 +1,34 @@
-# Issue 39 Fulfillment Workflow Runner Plan Review
+# Issue 39 Fulfillment Workflow Runner 계획 리뷰
 
-## Scope
+## 범위
 
-- Plan:
+- 계획:
   `docs/superpowers/plans/2026-06-08-issue-39-fulfillment-workflow-runner-plan.md`
-- Spec:
+- 명세:
   `docs/superpowers/specs/2026-06-08-issue-39-fulfillment-workflow-runner-design.md`
-- Research:
+- 리서치:
   `docs/superpowers/research/2026-06-08-issue-39-fulfillment-workflow-runner-research.md`
-- Review gate: `bluetape4k-full-feature` Step 3-R.
-- Required references loaded:
+- review gate: `bluetape4k-full-feature` Step 3-R.
+- 로드한 필수 reference:
   - `/Users/debop/.codex/skills/bluetape4k-full-feature/references/step-3r-plan-review-perspectives.md`
   - `/Users/debop/.codex/skills/bluetape4k-full-feature/references/step-3r-plan-review.md`
 
-## Iteration Log
+## 반복 기록
 
-### Iteration 1
+### 반복 1
 
-No P0/P1 findings. The plan maps every issue and spec acceptance criterion to a
-concrete task and keeps implementation, tests, diagrams, docs, validation,
-review, lessons, PR, and CI gates ordered.
+P0/P1 finding은 없다. plan은 모든 issue와 spec acceptance criterion을 concrete task에
+매핑하고 implementation, test, diagram, docs, validation, review, lesson, PR, CI gate를
+정렬된 상태로 유지한다.
 
-## Four-Perspective Review
+## 네 관점 리뷰
 
 | Perspective | P0 | P1 | P2 | P3 | Evidence |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Implementer | 0 | 0 | 0 | 0 | Tasks are ordered from planning commit to server, main, tests, diagrams, README, validation, review, lessons, PR, and CI. |
-| Test engineer | 0 | 0 | 0 | 0 | Success, step failure, conditional skip, sibling cancellation, caller cancellation, bad JSON, invalid request, targeted test, and race validation are assigned. |
-| Architect | 0 | 0 | 0 | 0 | Scope is contained to one request-scoped Gin example plus README pair and generated diagram assets. |
-| Delivery | 0 | 0 | 0 | 0 | EN/KO README, root README pair, lessons, PR body DoD, PR review, diagram inspection, and CI gates are assigned. |
+| Implementer | 0 | 0 | 0 | 0 | task는 planning commit에서 server, main, test, diagram, README, validation, review, lesson, PR, CI 순서로 정렬되어 있다. |
+| Test engineer | 0 | 0 | 0 | 0 | success, step failure, conditional skip, sibling cancellation, caller cancellation, bad JSON, invalid request, targeted test, race validation이 배정되어 있다. |
+| Architect | 0 | 0 | 0 | 0 | scope는 하나의 request-scoped Gin example, README pair, generated diagram asset으로 제한된다. |
+| Delivery | 0 | 0 | 0 | 0 | EN/KO README, root README pair, lesson, PR body DoD, PR review, diagram inspection, CI gate가 배정되어 있다. |
 
 ## Local 7-Tier Risk Review
 
@@ -46,17 +46,15 @@ review, lessons, PR, and CI gates ordered.
 
 | Severity | Count | Status |
 | --- | ---: | --- |
-| P0 | 0 | Clear |
-| P1 | 0 | Clear |
-| P2 | 0 | Clear |
-| P3 | 0 | Clear |
+| P0 | 0 | clear |
+| P1 | 0 | clear |
+| P2 | 0 | clear |
+| P3 | 0 | clear |
 
-No open user questions remain. The plan is bounded to issue #39 and rejects
-durable workflow state, retries, persistence, external services, and unrelated
-dependencies.
+남은 user question은 없다. plan은 #39로 bounded하며 durable workflow state, retry,
+persistence, external service, unrelated dependency를 거부한다.
 
-## Step 3-R Verdict
+## Step 3-R 판정
 
-PASS. The plan is ready for Step 4 only after the planning artifacts are
-committed. `P0=0 P1=0`.
-
+PASS. planning artifact가 commit된 뒤에만 plan은 Step 4로 넘어갈 준비가 된다.
+`P0=0 P1=0`.

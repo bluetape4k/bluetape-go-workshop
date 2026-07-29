@@ -1,4 +1,4 @@
-// Package main prints the Japanese search preparation preview.
+// Package main 은 Japanese search preparation preview를 출력한다.
 package main
 
 import (

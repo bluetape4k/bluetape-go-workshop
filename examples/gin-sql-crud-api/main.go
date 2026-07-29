@@ -1,4 +1,4 @@
-// Package main runs the Gin SQL CRUD API example service.
+// Package main 은 Gin SQL CRUD API 예제 서비스를 실행한다.
 package main
 
 import (

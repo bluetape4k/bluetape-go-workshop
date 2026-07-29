@@ -1,4 +1,4 @@
-// Package enrichment demonstrates context-aware product fan-out.
+// Package enrichment 는 컨텍스트 인지 상품 fan-out 흐름을 보여준다.
 package enrichment
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/bluetape4k/bluetape-go/concurrency"
 )
 
-// Product is the enriched product detail view.
+// Product 는 보강된 상품 상세 보기다.
 type Product struct {
 	ID              string
 	PriceCents      int
@@ -19,7 +19,7 @@ type Product struct {
 	OptionalErrors  []error
 }
 
-// Providers groups downstream product enrichment functions.
+// Providers 는 다운스트림 상품 보강 함수를 묶는다.
 type Providers struct {
 	Price           func(context.Context, string) (int, error)
 	Inventory       func(context.Context, string) (int, error)
@@ -27,7 +27,7 @@ type Providers struct {
 	ReviewSummary   func(context.Context, string) (string, error)
 }
 
-// Enrich builds a product view from required and optional providers.
+// Enrich 는 필수 및 선택 provider 결과로 상품 보기를 구성한다.
 func Enrich(ctx context.Context, id string, providers Providers) (Product, error) {
 	result := Product{ID: id}
 	group := concurrency.NewGroup(ctx)

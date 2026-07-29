@@ -1,36 +1,23 @@
-# Catalog Near-Cache Redis Example Lessons
+# Catalog Near-Cache Redis 예제 교훈
 
 Issue: `#15 [v0.3.0] Add Redis near-cache and stampede coordination catalog example`
 
-## What Worked
+## 효과가 있었던 점
 
-- A thin example-local `Peer` boundary was enough to demonstrate
-  `cache.NewMemory`, `redisnear.NewPubSub`, and `rediscoord.NewStampedeCache`
-  without creating reusable catalog infrastructure.
-- `Store.LoadCount` made cache behavior observable. It proved both peer
-  invalidation reloads and cross-peer cold-miss coordination.
-- Replacing `bluetape-go/testing` with an example-local polling helper preserved
-  the issue's no-new-dependencies acceptance criterion.
-- Redis Testcontainers readiness needed a client `PING` after fixture startup.
-  The fixture log wait alone was not always enough under race-test timing.
+- 얇은 example-local `Peer` boundary만으로도 재사용 catalog infrastructure를 만들지 않고 `cache.NewMemory`, `redisnear.NewPubSub`, `rediscoord.NewStampedeCache`를 보여 줄 수 있었다.
+- `Store.LoadCount`는 cache 동작을 관찰 가능하게 만들었다. peer invalidation reload와 cross-peer cold-miss coordination을 모두 증명했다.
+- `bluetape-go/testing`을 example-local polling helper로 바꾸면서 issue의 no-new-dependencies acceptance criterion을 지켰다.
+- Redis Testcontainers readiness에는 fixture startup 뒤 client `PING`이 필요했다. fixture log wait만으로는 race-test timing에서 항상 충분하지 않았다.
 
-## Diagram Notes
+## Diagram 메모
 
-- The README diagrams share English labels across `README.md` and
-  `README.ko.md`.
-- Each node-and-connector diagram keeps the final editable SVG and rendered PNG
-  pair as the README asset source.
-- `Architects Daughter` and `Comic Mono` are explicitly loaded in the final SVG
-  assets with `@font-face` to avoid renderer font fallback.
-- Visual inspection caught route/card overlap in early scenario and architecture
-  renders; final SVGs were patched directly after layout review established the
-  structure.
-- Later visual review caught avoidable connector crossings in the split
-  cold-miss and invalidation scenarios. Separate request and response corridors
-  first, then reserve enough final straight segment before each card for the
-  rendered arrowhead.
+- README diagram은 `README.md`와 `README.ko.md`에서 English label을 공유한다.
+- 각 node-and-connector diagram은 final editable SVG와 rendered PNG pair를 README asset source로 유지한다.
+- `Architects Daughter`와 `Comic Mono`는 renderer font fallback을 피하기 위해 final SVG asset에 `@font-face`로 명시적으로 load된다.
+- visual inspection은 초기 scenario와 architecture render의 route/card overlap을 잡아냈다. layout review로 구조를 확정한 뒤 final SVG를 직접 patch했다.
+- 이후 visual review는 split cold-miss와 invalidation scenario에서 피할 수 있는 connector crossing을 다시 잡았다. 먼저 request/response corridor를 분리하고, rendered arrowhead 앞에는 충분한 final straight segment를 남겨야 한다.
 
-## Verification Notes
+## 검증 메모
 
 - `go test -count=1 ./examples/catalog-near-cache-redis/...`
 - `go test -race -count=1 ./examples/catalog-near-cache-redis/...`
@@ -39,17 +26,10 @@ Issue: `#15 [v0.3.0] Add Redis near-cache and stampede coordination catalog exam
 - `golangci-lint cache clean && make ci`
 - `git diff --check`
 
-Initial `make ci` failed because golangci-lint cache referenced a deleted
-sibling worktree. Cleaning the lint cache and rerunning the same command passed.
+초기 `make ci`는 golangci-lint cache가 삭제된 sibling worktree를 참조해서 실패했다. lint cache를 정리하고 같은 명령을 다시 실행하자 통과했다.
 
-## Future Guidance
+## 이후 지침
 
-- For Redis-backed workshop examples, keep Testcontainers-backed commands
-  serial and add a cheap client-level readiness check when the package opens
-  Pub/Sub or lock connections immediately.
-- If an example imports a bluetape-go test helper, run `go mod tidy` before
-  committing and verify that no extra indirect requirements enter `go.mod`
-  unless the issue explicitly permits them.
-- For README SVG routes, run a simple H/V segment crossing sweep before
-  accepting the PNG. If a line can avoid crossing by changing its port or
-  corridor, fix the route instead of treating the crossing as acceptable.
+- Redis-backed workshop 예제에서는 Testcontainers-backed 명령을 serial로 실행하고, package가 Pub/Sub 또는 lock connection을 즉시 열면 저렴한 client-level readiness check를 추가한다.
+- 예제가 bluetape-go test helper를 import한다면 commit 전에 `go mod tidy`를 실행하고, issue가 명시적으로 허용하지 않는 한 `go.mod`에 추가 indirect requirement가 들어가지 않았는지 확인한다.
+- README SVG route는 PNG를 승인하기 전에 단순 H/V segment crossing sweep을 실행한다. port나 corridor 변경으로 crossing을 피할 수 있다면, crossing을 허용 가능한 것으로 처리하지 말고 route를 고친다.

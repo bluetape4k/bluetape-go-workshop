@@ -1,12 +1,12 @@
 # Issue #68 Audited Order Workflow with SQL Outbox Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **agentic worker 대상:** REQUIRED SUB-SKILL: 이 계획은 task 단위로 구현한다. `superpowers:subagent-driven-development` 사용을 권장하며, 대안으로 `superpowers:executing-plans`를 사용할 수 있다. 진행 추적은 checkbox (`- [ ]`) syntax를 사용한다.
 
-**Goal:** Build a runnable Gin order workflow whose order state, immutable PostgreSQL audit history, and official SQL outbox record commit atomically, with POST JSON audit queries and asynchronous Redis Streams delivery.
+**Goal:** order state, immutable PostgreSQL audit history, official SQL outbox record를 atomic하게 commit하는 runnable Gin order workflow를 만든다. POST JSON audit query와 asynchronous Redis Streams delivery를 함께 제공한다.
 
-**Architecture:** `orderworkflow.Service` owns validation and one `sqlkit.WithTx` boundary across the order row, application-owned `HistoryStore`, and released `sqloutbox.Store`. Gin exposes strict POST JSON commands and history queries; a supervised background `sqloutbox.Relay` publishes through the released Redis Streams adapter while readiness preserves the durable PostgreSQL boundary. `main` owns bounded clients, server lifecycle, delivery diagnostics, and shutdown.
+**Architecture:** `orderworkflow.Service`는 validation과 order row, application-owned `HistoryStore`, released `sqloutbox.Store`를 감싸는 `sqlkit.WithTx` boundary 하나를 소유한다. Gin은 strict POST JSON command와 history query를 노출한다. supervised background `sqloutbox.Relay`는 released Redis Streams adapter로 publish하고, readiness는 durable PostgreSQL boundary를 보존한다. `main`은 bounded client, server lifecycle, delivery diagnostic, shutdown을 소유한다.
 
-**Tech Stack:** Go 1.26.3, Gin, `database/sql` with pgx v5, bluetape-go v0.18.0 `audit`, `audit/sqloutbox`, `audit/sqloutbox/sqloutboxtest`, `audit/sqloutbox/redisstreams`, `sqlkit`, go-redis v9, repository PostgreSQL/Redis Testcontainers fixtures, SVG/CairoSVG diagram tooling.
+**Tech Stack:** Go 1.26.3, Gin, pgx v5를 사용하는 `database/sql`, bluetape-go v0.18.0 `audit`, `audit/sqloutbox`, `audit/sqloutbox/sqloutboxtest`, `audit/sqloutbox/redisstreams`, `sqlkit`, go-redis v9, repository PostgreSQL/Redis Testcontainers fixture, SVG/CairoSVG diagram tooling.
 
 ---
 
@@ -14,42 +14,41 @@
 
 | File | Responsibility |
 |---|---|
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/model.go` | Status values, commands, canonical intent, response values, validation, and audit entry construction. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/schema.go` | Fixed order/history DDL and official outbox schema delegation. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store.go` | Transactional history insert, command lookup, full `audit.HistoryReader`, and safe delivery status query. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store_test.go` | Reader semantics, precision/parity, corruption, bounded plans, and status diagnostics. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/service.go` | Create/transition state machine, row locking, atomic writes, and idempotent conflict recovery. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/service_test.go` | Validation, state transitions, rollback, replay, ambiguous commit, and concurrency proof. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler.go` | Strict Gin JSON adapter, error mapping, health/readiness/status, and concurrency cap. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler_test.go` | POST JSON, cursor, overload, redaction, dependency isolation, and timeout proof. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/runtime.go` | Bounded client/server configuration, relay observation, readiness state, and coordinated shutdown. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/relay_test.go` | Retry/dead-letter/duplicate/order-limit, safe signals, cancellation, and unexpected-exit proof. |
-| `examples/audited-order-workflow-outbox/internal/orderworkflow/integration_test.go` | Sequential PostgreSQL/Redis, real stream envelope, restart, backlog, and pool-limit proof. |
-| `examples/audited-order-workflow-outbox/main.go` | Environment parsing, dependency construction, schema bootstrap, signal lifecycle, and server start. |
-| `examples/audited-order-workflow-outbox/main_test.go` | Loopback/configuration, startup failure, server smoke, and close/join proof. |
-| `examples/audited-order-workflow-outbox/smoke_test.go` | Parses and executes the checked-in HTTP scenario against sequential real backends. |
-| `examples/audited-order-workflow-outbox/requests.http` | Complete create/replay/search/detail/cancel/409 POST JSON scenario. |
-| `examples/audited-order-workflow-outbox/README.md`, `README.ko.md` | Bilingual lesson, curl scenario, delivery semantics, and operator runbook. |
-| `examples/transactional-outbox-publisher/README.md`, `README.ko.md` | Correct current-locale language-switch rendering. |
-| `README.md`, `README.ko.md` | Root example navigation and run commands. |
-| `docs/images/readme-diagrams/audited-order-workflow-outbox-architecture.{svg,png}` | Static transaction, history, relay, and transport ownership. |
-| `docs/images/readme-diagrams/audited-order-workflow-outbox-sequence.{svg,png}` | Commit-before-response, later delivery, replay, and query sequence. |
-| `docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md` | Final spec/plan/checklist and review evidence. |
-| `docs/lessons/2026-07-14-issue-68-audited-order-workflow-outbox.md` | Durable implementation, Docker, relay, and diagram lessons. |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/model.go` | status value, command, canonical intent, response value, validation, audit entry construction |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/schema.go` | fixed order/history DDL 및 official outbox schema delegation |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store.go` | transactional history insert, command lookup, full `audit.HistoryReader`, safe delivery status query |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/history_store_test.go` | reader semantic, precision/parity, corruption, bounded plan, status diagnostic |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/service.go` | create/transition state machine, row locking, atomic write, idempotent conflict recovery |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/service_test.go` | validation, state transition, rollback, replay, ambiguous commit, concurrency proof |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler.go` | strict Gin JSON adapter, error mapping, health/readiness/status, concurrency cap |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/handler_test.go` | POST JSON, cursor, overload, redaction, dependency isolation, timeout proof |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/runtime.go` | bounded client/server configuration, relay observation, readiness state, coordinated shutdown |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/relay_test.go` | retry/dead-letter/duplicate/order-limit, safe signal, cancellation, unexpected-exit proof |
+| `examples/audited-order-workflow-outbox/internal/orderworkflow/integration_test.go` | sequential PostgreSQL/Redis, real stream envelope, restart, backlog, pool-limit proof |
+| `examples/audited-order-workflow-outbox/main.go` | environment parsing, dependency construction, schema bootstrap, signal lifecycle, server start |
+| `examples/audited-order-workflow-outbox/main_test.go` | loopback/configuration, startup failure, server smoke, close/join proof |
+| `examples/audited-order-workflow-outbox/smoke_test.go` | checked-in HTTP scenario를 parse하고 sequential real backend에 실행 |
+| `examples/audited-order-workflow-outbox/requests.http` | complete create/replay/search/detail/cancel/409 POST JSON scenario |
+| `examples/audited-order-workflow-outbox/README.md`, `README.ko.md` | bilingual lesson, curl scenario, delivery semantic, operator runbook |
+| `examples/transactional-outbox-publisher/README.md`, `README.ko.md` | current-locale language-switch rendering 교정 |
+| `README.md`, `README.ko.md` | root example navigation 및 run command |
+| `docs/images/readme-diagrams/audited-order-workflow-outbox-architecture.{svg,png}` | static transaction, history, relay, transport ownership |
+| `docs/images/readme-diagrams/audited-order-workflow-outbox-sequence.{svg,png}` | commit-before-response, later delivery, replay, query sequence |
+| `docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md` | final spec/plan/checklist 및 review evidence |
+| `docs/lessons/2026-07-14-issue-68-audited-order-workflow-outbox.md` | durable implementation, Docker, relay, diagram lesson |
 
-No `go.mod`, `go.sum`, workflow, dependency, public bluetape-go API, changelog,
-or module registration change is planned. Any such diff stops implementation
-for scope review.
+`go.mod`, `go.sum`, workflow, dependency, public bluetape-go API, changelog,
+module registration change는 계획하지 않는다. 이런 diff가 생기면 scope review를 위해 implementation을 중단한다.
 
-## Task 1: Define the domain, validation, and audit projection
+## Task 1: domain, validation, audit projection 정의
 
 **Complexity:** Medium. **Depends on:** approved design spec. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `model.go`, `service_test.go`.
 
-- [ ] **Step 1: Write failing table tests for every domain constraint**
+- [ ] **Step 1: 모든 domain constraint에 대한 failing table test 작성**
 
-Create tests for identifier grammar, actions, state transitions, reason length,
-metadata key/value/count bounds, nil clock, UTC microsecond normalization,
-revision overflow, canonical intent equality, and payload round-trip.
+identifier grammar, action, state transition, reason length, metadata key/value/count bound,
+nil clock, UTC microsecond normalization, revision overflow, canonical intent equality,
+payload round-trip test를 만든다.
 
 ```go
 func TestNormalizeIdentifier(t *testing.T) {
@@ -69,13 +68,13 @@ func TestNormalizeIdentifier(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Normalize|Validate|BuildEntry|CanonicalIntent)'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Normalize|Validate|BuildEntry|CanonicalIntent)'`
 
-Expected: FAIL because the package and domain functions do not exist.
+기대값: package와 domain function이 없으므로 FAIL한다.
 
-- [ ] **Step 3: Implement minimal domain values and validation**
+- [ ] **Step 3: minimal domain value 및 validation 구현**
 
 ```go
 type Status string
@@ -104,19 +103,19 @@ type TransitionCommand struct {
 }
 ```
 
-Use `regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)`, validate at
-most 32 metadata entries with 64-rune keys and 512-rune values, and normalize
-one injected clock value with `UTC().Truncate(time.Microsecond)`.
+`regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)`를 사용한다.
+metadata entry는 최대 32개, key는 64 rune, value는 512 rune으로 validate한다.
+injected clock value 하나는 `UTC().Truncate(time.Microsecond)`로 normalize한다.
 
-- [ ] **Step 4: Build one canonical audit entry per accepted command**
+- [ ] **Step 4: accepted command마다 canonical audit entry 하나 생성**
 
-Call `audit.NewAggregateID`, `audit.NewDomainEvent`, and `audit.NewEntry`.
-Use command ID for event and idempotency identity, the resulting revision,
-event type `order.created|confirmed|cancelled`, copied metadata, and a JSON
-payload containing `intent` plus the original resulting `order` projection.
-Decode that same payload for replay comparison; never compare raw request JSON.
+`audit.NewAggregateID`, `audit.NewDomainEvent`, `audit.NewEntry`를 호출한다.
+event 및 idempotency identity에는 command ID를 사용하고, resulting revision,
+event type `order.created|confirmed|cancelled`, copied metadata,
+`intent`와 original resulting `order` projection을 담은 JSON payload를 사용한다.
+replay comparison에는 같은 payload를 decode해서 사용한다. raw request JSON은 절대 compare하지 않는다.
 
-- [ ] **Step 5: Run GREEN, format, and commit**
+- [ ] **Step 5: GREEN, format, commit 실행**
 
 ```bash
 gofmt -w examples/audited-order-workflow-outbox/internal/orderworkflow/*.go
@@ -126,25 +125,22 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: define audited order workflow domain"
 ```
 
-Expected: focused tests PASS, timestamps contain no sub-microsecond remainder,
-and the commit contains domain/test files only.
+기대값: focused test가 PASS하고 timestamp에 sub-microsecond remainder가 없으며,
+commit에는 domain/test file만 포함된다.
 
-## Task 2: Implement the durable SQL history store
+## Task 2: durable SQL history store 구현
 
 **Complexity:** High. **Depends on:** Task 1. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `schema.go`, `history_store.go`, `history_store_test.go`.
 
-- [ ] **Step 1: Write reader-contract and schema tests against one PostgreSQL fixture**
+- [ ] **Step 1: PostgreSQL fixture 하나를 대상으로 reader-contract 및 schema test 작성**
 
-Start `postgrestestcontainer.Start` once under a 90-second context, never use
-`t.Parallel`, and test idempotent DDL, `Insert`, command lookup, zero/all and
-filtered `audit.Query`, `NewestFirst`, inclusive bounds, limit, `LoadHistory`,
-`Latest`, both snapshot methods, absent values, cancellation, nil sessions, and
-1 MiB encoding rejection. Create a deliberately incompatible pre-existing
-orders/history schema and require bootstrap to fail without altering or dropping
-it. Repeat the incompatibility case for the official outbox table, using the
-released v0.18.0 table/index contract as authority. Every mismatch must fail
-startup redacted and non-destructively; retry a deliberately interrupted partial
-bootstrap and require convergence.
+90-second context 아래에서 `postgrestestcontainer.Start`를 한 번만 시작하고 `t.Parallel`은 절대 사용하지 않는다.
+idempotent DDL, `Insert`, command lookup, zero/all 및 filtered `audit.Query`, `NewestFirst`,
+inclusive bound, limit, `LoadHistory`, `Latest`, 두 snapshot method, absent value, cancellation,
+nil session, 1 MiB encoding rejection을 test한다. 일부러 incompatible pre-existing orders/history schema를 만들고,
+alter/drop 없이 bootstrap이 fail해야 한다. official outbox table에도 released v0.18.0 table/index contract를 authority로 삼아
+같은 incompatibility case를 반복한다. 모든 mismatch는 startup에서 redacted/non-destructive 방식으로 fail해야 한다.
+일부러 interrupted partial bootstrap을 retry하고 convergence를 요구한다.
 
 ```go
 var _ audit.HistoryReader = (*HistoryStore)(nil)
@@ -157,27 +153,24 @@ if err != nil || len(entries) != 2 || entries[0].Revision != 1 {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **Step 2: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHistoryStore'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHistoryStore'`
 
-Expected: FAIL because `HistoryStore` and schema functions do not exist.
+기대값: `HistoryStore`와 schema function이 없으므로 FAIL한다.
 
-- [ ] **Step 3: Add fixed idempotent DDL and transactional insert**
+- [ ] **Step 3: fixed idempotent DDL 및 transactional insert 추가**
 
-Create `audited_order_workflow_orders`, the identity-position history table,
-the aggregate/time index, and delegate to an official store configured with
-`Table: "audited_order_workflow_outbox_records"`. `Insert` takes
-`sqlkit.Execer`, validates the entry, `json.Marshal`s it, enforces 1 MiB, and
-inserts scalar guards plus `entry_json` without owning a transaction.
+`audited_order_workflow_orders`, identity-position history table, aggregate/time index를 만든다.
+`Table: "audited_order_workflow_outbox_records"`로 configured official store에 delegate한다.
+`Insert`는 `sqlkit.Execer`를 받고 entry를 validate하며 `json.Marshal`을 수행하고 1 MiB를 enforce한 뒤,
+transaction을 소유하지 않고 scalar guard와 `entry_json`을 insert한다.
 
-After idempotent creation, verify required columns, PostgreSQL types,
-nullability, primary/unique constraints, and the aggregate/time index through
-`pg_catalog`. This is a fixed single-version compatibility check, not a migration
-engine; unexpected shape returns a redacted startup error and never issues
-`ALTER` or `DROP`. Verify the official outbox table's required columns, types,
-unique identities, primary key, and claim index through the same read-only
-catalog check after `Store.CreateSchema`.
+idempotent creation 뒤 required column, PostgreSQL type, nullability, primary/unique constraint,
+aggregate/time index를 `pg_catalog`로 verify한다. 이는 migration engine이 아니라 fixed single-version compatibility check다.
+unexpected shape는 redacted startup error를 반환하고 `ALTER` 또는 `DROP`을 절대 실행하지 않는다.
+`Store.CreateSchema` 뒤 같은 read-only catalog check로 official outbox table의 required column, type,
+unique identity, primary key, claim index를 verify한다.
 
 ```go
 func (s *HistoryStore) Insert(ctx context.Context, db sqlkit.Execer, entry audit.Entry) error {
@@ -193,27 +186,22 @@ func (s *HistoryStore) Insert(ctx context.Context, db sqlkit.Execer, entry audit
 }
 ```
 
-- [ ] **Step 4: Implement the exact v0.18.0 reader surface**
+- [ ] **Step 4: exact v0.18.0 reader surface 구현**
 
-Use `sqlkit.Session` internally for rows and row queries. `Find` starts with
-`audit.Query.Validate`, uses placeholders only, orders global queries by
-`position` and exact-aggregate queries consistently with their revision order,
-and decodes via `audit.DecodeEntryJSON`. Verify every scalar field, including
-microsecond timestamp equality, before returning. Construct history with
-`audit.NewHistory`; return `(zero, false, nil)` for missing latest/snapshot.
+row 및 row query에는 내부적으로 `sqlkit.Session`을 사용한다. `Find`는 `audit.Query.Validate`로 시작하고,
+placeholder만 사용하며, global query는 `position` 기준으로 정렬하고 exact-aggregate query는 revision order와 일관되게 정렬한다.
+decode는 `audit.DecodeEntryJSON`으로 수행한다. 반환 전에 microsecond timestamp equality를 포함한 모든 scalar field를 verify한다.
+history는 `audit.NewHistory`로 construct한다. missing latest/snapshot에는 `(zero, false, nil)`을 반환한다.
 
-- [ ] **Step 5: Add corruption, plan, and status diagnostics proof**
+- [ ] **Step 5: corruption, plan, status diagnostic proof 추가**
 
-Insert controlled scalar/JSON mismatch rows with test SQL and require a closed
-error. Commit at least 5,000 entries for the exact hot aggregate plus 5,000
-distractor entries across other aggregates, run `ANALYZE` after seeding, then
-run `EXPLAIN (FORMAT JSON)` for canonical revision and time searches. Assert the
-plan contains the intended primary-key or aggregate/time index and bounded
-`Limit` with no sequential scan or unbounded sort. Add a fixed 250 ms outbox
-status query returning only pending/retrying/claimed/published/dead-letter
-counts and oldest-pending seconds.
+test SQL로 controlled scalar/JSON mismatch row를 insert하고 closed error를 요구한다.
+exact hot aggregate에 최소 5,000 entry, 다른 aggregate에 distractor entry 5,000개를 commit한다.
+seeding 뒤 `ANALYZE`를 실행한 다음 canonical revision 및 time search에 대해 `EXPLAIN (FORMAT JSON)`을 실행한다.
+plan에 intended primary-key 또는 aggregate/time index와 bounded `Limit`가 있고 sequential scan 또는 unbounded sort가 없는지 assert한다.
+pending/retrying/claimed/published/dead-letter count와 oldest-pending seconds만 반환하는 fixed 250 ms outbox status query를 추가한다.
 
-- [ ] **Step 6: Run GREEN and commit**
+- [ ] **Step 6: GREEN 및 commit 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHistoryStore'
@@ -223,18 +211,17 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: add durable audit history store"
 ```
 
-Expected: reader contract, corruption, query-plan, and race assertions PASS.
+기대값: reader contract, corruption, query-plan, race assertion이 PASS한다.
 
-## Task 3: Commit create and transition state atomically
+## Task 3: create 및 transition state를 atomic하게 commit
 
 **Complexity:** High. **Depends on:** Tasks 1-2. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `service.go`, `service_test.go`.
 
-- [ ] **Step 1: Write atomic create and transition tests first**
+- [ ] **Step 1: atomic create 및 transition test를 먼저 작성**
 
-Under the existing PostgreSQL fixture, prove create gives pending revision 1,
-confirm gives revision 2, cancel accepts pending/confirmed, invalid transitions
-conflict, missing order is not found, and each accepted command leaves exactly
-one matching order/history/outbox projection.
+existing PostgreSQL fixture 아래에서 create는 pending revision 1을 만들고 confirm은 revision 2를 만들며,
+cancel은 pending/confirmed를 accept하고 invalid transition은 conflict가 되며 missing order는 not found인지 증명한다.
+accepted command마다 matching order/history/outbox projection이 정확히 하나씩 남아야 한다.
 
 ```go
 created, replayed, err := service.Create(ctx, CreateCommand{
@@ -246,53 +233,41 @@ if err != nil || replayed || created.Status != StatusPending || created.Revision
 }
 ```
 
-- [ ] **Step 2: Add rollback and race tests before implementation**
+- [ ] **Step 2: implementation 전에 rollback 및 race test 추가**
 
-Inject a history uniqueness failure after the order write and an outbox identity
-failure after the history write; assert all three tables remain unchanged.
-Run two same-order transitions concurrently and require one valid next revision.
-Run identical creates concurrently for the same order, plus identical and
-conflicting command IDs across different orders. The same-order loser may hit
-the order primary key before history identity; it must still reload and replay
-the winner when canonical intent matches. Install a package-private transaction
-runner whose first call delegates to a real successful `sqlkit.WithTx` and then
-returns a synthetic deadline error. Require the first service call to return the
-error after commit, then retry through the normal runner and require the original
-projection with no new history/outbox row.
-Hold the order row lock in a separate transaction, call a competing transition
-with a 100 ms test deadline, require `context.DeadlineExceeded`, unchanged table
-counts, and released pool capacity, then release the lock and require a fresh
-transition to succeed. This is the deterministic fast analogue of the 2-second
-HTTP operation deadline.
+order write 뒤 history uniqueness failure를, history write 뒤 outbox identity failure를 inject한다.
+세 table이 모두 unchanged인지 assert한다. 같은 order transition 두 개를 concurrently 실행하고 valid next revision 하나만 요구한다.
+same order에 대한 identical create, 다른 order 간 identical/conflicting command ID도 concurrently 실행한다.
+same-order loser는 history identity 전에 order primary key를 먼저 맞을 수 있지만, canonical intent가 match하면 winner를 reload하고 replay해야 한다.
+첫 call은 real successful `sqlkit.WithTx`에 delegate한 뒤 synthetic deadline error를 반환하는 package-private transaction runner를 설치한다.
+첫 service call은 commit 이후 error를 반환해야 하며, normal runner로 retry하면 새 history/outbox row 없이 original projection을 반환해야 한다.
+별도 transaction에서 order row lock을 잡고 100 ms test deadline으로 competing transition을 호출한다.
+`context.DeadlineExceeded`, unchanged table count, released pool capacity를 요구한 뒤 lock을 release하고 fresh transition 성공을 요구한다.
+이는 2-second HTTP operation deadline의 deterministic fast analogue다.
 
-- [ ] **Step 3: Run RED**
+- [ ] **Step 3: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestService(Create|Transition|Rollback|Concurrent|Ambiguous)'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestService(Create|Transition|Rollback|Concurrent|Ambiguous)'`
 
-Expected: FAIL because service methods are absent.
+기대값: service method가 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement create with replay recovery**
+- [ ] **Step 4: replay recovery가 있는 create 구현**
 
-Validate before `sqlkit.WithTx`; inside it check command identity, insert the
-order, build one entry, call `HistoryStore.Insert(ctx, tx, entry)`, then
-`outbox.Enqueue(ctx, tx, entry)`. On an event/idempotency unique violation,
-allow `WithTx` to roll back completely and load the winner in a fresh database
-operation. Return the original payload projection only when canonical intent
-matches; otherwise return `ErrConflict`. Detect only PostgreSQL SQLSTATE `23505`
-for the named order primary-key and event/idempotency constraints through
-`errors.As`; all other database failures remain wrapped storage errors. Store a
-package-private `runTx` function on the service, defaulting exactly to
-`sqlkit.WithTx`; tests may replace it only to return an error after a real
-successful delegate call.
+`sqlkit.WithTx` 전에 validate한다. 내부에서는 command identity를 check하고 order를 insert한 뒤 entry 하나를 build하고
+`HistoryStore.Insert(ctx, tx, entry)`, `outbox.Enqueue(ctx, tx, entry)`를 순서대로 호출한다.
+event/idempotency unique violation이 발생하면 `WithTx`가 완전히 roll back하게 두고 fresh database operation에서 winner를 load한다.
+canonical intent가 match할 때만 original payload projection을 반환하고, 그렇지 않으면 `ErrConflict`를 반환한다.
+named order primary-key 및 event/idempotency constraint에 대한 PostgreSQL SQLSTATE `23505`만 `errors.As`로 detect한다.
+다른 database failure는 wrapped storage error로 남긴다. service에는 package-private `runTx` function을 두고 default는 정확히 `sqlkit.WithTx`로 둔다.
+test는 real successful delegate call 뒤 error를 반환하는 경우에만 이를 replace할 수 있다.
 
-- [ ] **Step 5: Implement locked transitions**
+- [ ] **Step 5: locked transition 구현**
 
-Inside one `sqlkit.WithTx`, `SELECT ... FOR UPDATE`, check command identity
-before state validation, compute `Revision.Next`, update with prior revision as
-a guard, insert history, and enqueue the same entry. Redis calls are forbidden
-in this file. Preserve cancellation and wrap errors with stage plus `%w`.
+`sqlkit.WithTx` 하나 안에서 `SELECT ... FOR UPDATE`를 실행하고, state validation 전에 command identity를 check한다.
+`Revision.Next`를 계산하고 prior revision을 guard로 update한 뒤 history를 insert하고 같은 entry를 enqueue한다.
+이 file에서는 Redis call이 금지된다. cancellation을 보존하고 error는 stage와 `%w`로 wrap한다.
 
-- [ ] **Step 6: Run GREEN, race, and commit**
+- [ ] **Step 6: GREEN, race, commit 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestService'
@@ -301,24 +276,20 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: add atomic audited order workflow"
 ```
 
-Expected: table-count/parity checks PASS and no duplicate logical revision is
-committed under `-race`.
+기대값: table-count/parity check가 PASS하고 `-race` 아래에서 duplicate logical revision이 commit되지 않는다.
 
-## Task 4: Expose strict POST JSON commands and audit queries
+## Task 4: strict POST JSON command 및 audit query 노출
 
 **Complexity:** High. **Depends on:** Task 3. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `handler.go`, `handler_test.go`.
 
-- [ ] **Step 1: Write strict decoder and route tests first**
+- [ ] **Step 1: strict decoder 및 route test를 먼저 작성**
 
-Borrow the proven token-walking duplicate-key detector from
-`gin-audit-query-api`; do not import its `internal` package. Cover exact media
-type, optional UTF-8 charset, identity encoding, 32 KiB limit, invalid UTF-8,
-duplicate nested keys, unknown fields, trailing values, arrays/scalars, empty
-body, body closure, 404, and 405. Explicitly reject gzip, br, deflate, and
-multiple `Content-Encoding` values as 415 without calling a handler. Configure
-the token and typed decoders with `UseNumber`; test exact int64 boundaries,
-overflow, fraction, exponent, and negative/zero revision and limit values so no
-float conversion can silently lose precision.
+`gin-audit-query-api`에서 proven token-walking duplicate-key detector를 가져오되 그 `internal` package는 import하지 않는다.
+exact media type, optional UTF-8 charset, identity encoding, 32 KiB limit, invalid UTF-8,
+duplicate nested key, unknown field, trailing value, array/scalar, empty body, body closure, 404, 405를 cover한다.
+gzip, br, deflate, multiple `Content-Encoding` value는 handler를 호출하지 않고 415로 명시적으로 reject한다.
+token 및 typed decoder는 `UseNumber`로 configure한다. float conversion이 precision을 silently lose하지 않도록 exact int64 boundary,
+overflow, fraction, exponent, negative/zero revision 및 limit value를 test한다.
 
 Add an explicit registration table and assert each method/path pair:
 
@@ -332,39 +303,33 @@ GET  /readyz
 GET  /statusz
 ```
 
-For every path, assert the registered method succeeds through its stub and an
-unsupported method is 405; an unknown path is 404.
+모든 path에 대해 registered method는 stub을 통해 succeed하고 unsupported method는 405이며 unknown path는 404인지 assert한다.
 
-- [ ] **Step 2: Write command/response/error tests**
+- [ ] **Step 2: command/response/error test 작성**
 
-Assert POST `/orders` returns 201 then 200 replay, transitions return 200,
-`replayed` and `delivery: asynchronous` are exact, invalid transitions are 409,
-missing orders are 404, server deadlines are 408, over-limit is 413, media
-errors are 415, storage errors are redacted 500, and request IDs exist.
+POST `/orders`가 201 이후 replay에서는 200을 반환하고 transition은 200을 반환하는지 assert한다.
+`replayed`와 `delivery: asynchronous`는 exact해야 한다. invalid transition은 409, missing order는 404,
+server deadline은 408, over-limit은 413, media error는 415, storage error는 redacted 500이어야 하며 request ID가 있어야 한다.
 
-- [ ] **Step 3: Write query/cursor and overload tests**
+- [ ] **Step 3: query/cursor 및 overload test 작성**
 
-POST the canonical search/detail bodies. With revisions 1 and 2 and limit 1,
-require page one to return revision 1/cursor 2 and page two to return revision
-2/null. A fake reader that panics on Redis access proves queries use history
-only. Fill a 32-slot semaphore, assert the next request gets 429,
-`Retry-After: 1`, `Connection: close`, a closed body, and no service call.
-Assert `GET /statusz` returns only Redis/relay state, bounded outbox counts, and
-rounded oldest-pending seconds; a 250 ms status-query timeout becomes a degraded
-safe response. Seed identity, payload, metadata, endpoint, and provider markers
-and require every marker absent from the HTTP body.
-Decode the complete error envelope for representative 400/404/408/409/413/415,
-429, and 500 responses. Require request ID, exact stable code, safe message, no
-`data`, `invalid_transition` for the state conflict, and
-`too_many_requests` for overload.
+canonical search/detail body를 POST한다. revision 1과 2, limit 1일 때 page one은 revision 1/cursor 2를,
+page two는 revision 2/null을 반환해야 한다. Redis access에서 panic하는 fake reader로 query가 history만 사용하는지 증명한다.
+32-slot semaphore를 채우고 다음 request가 429, `Retry-After: 1`, `Connection: close`, closed body,
+service call 없음 을 받는지 assert한다. `GET /statusz`는 Redis/relay state, bounded outbox count,
+rounded oldest-pending seconds만 반환해야 한다. 250 ms status-query timeout은 degraded safe response가 된다.
+identity, payload, metadata, endpoint, provider marker를 seed하고 HTTP body에 어떤 marker도 없어야 한다.
+대표 400/404/408/409/413/415, 429, 500 response의 complete error envelope를 decode한다.
+request ID, exact stable code, safe message, `data` 없음, state conflict의 `invalid_transition`,
+overload의 `too_many_requests`를 요구한다.
 
-- [ ] **Step 4: Run RED**
+- [ ] **Step 4: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHTTP'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHTTP'`
 
-Expected: FAIL because `NewEngine` and transport types are absent.
+기대값: `NewEngine`과 transport type이 없으므로 FAIL한다.
 
-- [ ] **Step 5: Implement the minimal Gin adapter**
+- [ ] **Step 5: minimal Gin adapter 구현**
 
 ```go
 func NewEngine(service CommandService, reader audit.HistoryReader,
@@ -380,12 +345,11 @@ func NewEngine(service CommandService, reader audit.HistoryReader,
 }
 ```
 
-Use `http.MaxBytesReader`, `json.Decoder.DisallowUnknownFields`, explicit EOF,
-duplicate-key walking, operation contexts, stable success/error envelopes, and
-safe structured fields only. GET routes are limited to health/readiness/status;
-all user commands and queries remain POST JSON.
+`http.MaxBytesReader`, `json.Decoder.DisallowUnknownFields`, explicit EOF,
+duplicate-key walking, operation context, stable success/error envelope, safe structured field만 사용한다.
+GET route는 health/readiness/status로 제한하고 모든 user command 및 query는 POST JSON으로 유지한다.
 
-- [ ] **Step 6: Run GREEN, race, and commit**
+- [ ] **Step 6: GREEN, race, commit 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'TestHTTP'
@@ -394,75 +358,63 @@ git add examples/audited-order-workflow-outbox/internal/orderworkflow
 git commit -m "feat: expose audited workflow HTTP API"
 ```
 
-## Task 5: Supervise the continuous relay and server lifecycle
+## Task 5: continuous relay 및 server lifecycle supervise
 
 **Complexity:** High. **Depends on:** Tasks 3-4. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `runtime.go`, `relay_test.go`, `main.go`, `main_test.go`.
 
-- [ ] **Step 1: Write deterministic relay and signal tests**
+- [ ] **Step 1: deterministic relay 및 signal test 작성**
 
-Use `sqloutboxtest.RecordingPublisher`, a mutable clock, and
-`PublisherFunc` to prove success, one retry after exactly 250 ms, three-attempt
-dead-letter, duplicate physical attempts with stable identity, caller
-cancellation leaving a lease-recoverable claim, and later-revision blocking only
-while an earlier record is pending/claimed. After publish cancellation, verify
-claimed state, advance the shared clock beyond the official 30-second lease,
-start a fresh relay, reclaim the same event/idempotency identity, publish it,
-join lifecycle, and require final published state.
+`sqloutboxtest.RecordingPublisher`, mutable clock, `PublisherFunc`로 success,
+정확히 250 ms 뒤 retry 한 번, three-attempt dead-letter, stable identity를 가진 duplicate physical attempt,
+lease-recoverable claim을 남기는 caller cancellation, earlier record가 pending/claimed인 동안만 later-revision이 block되는지 증명한다.
+publish cancellation 뒤 claimed state를 verify하고 shared clock을 official 30-second lease 뒤로 advance한다.
+fresh relay를 시작해 같은 event/idempotency identity를 reclaim/publish하고 lifecycle을 join한 뒤 final published state를 요구한다.
 
-- [ ] **Step 2: Write lifecycle tests before runtime code**
+- [ ] **Step 2: runtime code 전에 lifecycle test 작성**
 
-Prove expected cancellation joins cleanly; unexpected `Relay.Run` failure
-marks readiness false, logs one redacted lifecycle transition, shuts down HTTP,
-and returns failure. Redis outage keeps readiness HTTP 200 with degraded
-delivery, while database failure or a stopped relay returns 503. Assert idle
-relay loops do not emit logs; official `Relay.Run` intentionally provides no
-per-batch result, so `/statusz` owns current delivery counts. Use a
-real listener with stalled-header and stalled-body clients to prove header/read
-timeouts release connections. With short injected test durations, prove
-oversized headers, write timeout, idle timeout, and graceful-shutdown deadline.
-Exhaust PostgreSQL and Redis pools and require their configured ceilings and
-bounded timeout behavior. Add table tests accepting IPv4/IPv6 loopback literals
-and rejecting IPv4/IPv6 wildcards, `localhost`, hostname-only, non-loopback,
-malformed, missing-port, and zone-scoped addresses. Test Redis stream default,
-blank, invalid UTF-8, and more than 256 bytes. Inject recognizable secret
-markers at config, open, ping, schema, relay, HTTP serve, and close stages;
-require one centralized safe projection with stage and stable class only, and
-assert markers are absent from both logs and top-level returned errors.
+expected cancellation이 clean하게 join되는지 증명한다. unexpected `Relay.Run` failure는 readiness false로 mark하고,
+redacted lifecycle transition 하나를 log하며 HTTP를 shutdown하고 failure를 반환해야 한다.
+Redis outage는 degraded delivery와 함께 readiness HTTP 200을 유지하고, database failure 또는 stopped relay는 503을 반환한다.
+idle relay loop가 log를 emit하지 않는지 assert한다. official `Relay.Run`은 의도적으로 per-batch result를 제공하지 않으므로
+current delivery count는 `/statusz`가 소유한다. stalled-header 및 stalled-body client를 가진 real listener로
+header/read timeout이 connection을 release하는지 증명한다. 짧은 injected test duration으로 oversized header,
+write timeout, idle timeout, graceful-shutdown deadline을 증명한다. PostgreSQL 및 Redis pool을 exhaust하고
+configured ceiling과 bounded timeout behavior를 요구한다. IPv4/IPv6 loopback literal은 accept하고,
+IPv4/IPv6 wildcard, `localhost`, hostname-only, non-loopback, malformed, missing-port, zone-scoped address는 reject하는 table test를 추가한다.
+Redis stream default, blank, invalid UTF-8, 256 byte 초과를 test한다. config, open, ping, schema, relay,
+HTTP serve, close stage에 recognizable secret marker를 inject한다. stage와 stable class만 담은 centralized safe projection 하나를 요구하고,
+log와 top-level returned error 양쪽에서 marker가 없는지 assert한다.
 
-- [ ] **Step 3: Run RED**
+- [ ] **Step 3: RED 실행**
 
-Run: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Relay|Lifecycle|Readiness|Status)'`
+실행: `go test -count=1 ./examples/audited-order-workflow-outbox/internal/orderworkflow -run 'Test(Relay|Lifecycle|Readiness|Status)'`
 
-Expected: FAIL because runtime ownership is absent.
+기대값: runtime ownership이 없으므로 FAIL한다.
 
-- [ ] **Step 4: Implement bounded resources and runtime configuration**
+- [ ] **Step 4: bounded resource 및 runtime configuration 구현**
 
-Set PostgreSQL `MaxOpenConns(8)`, `MaxIdleConns(8)`, 5-minute idle and
-30-minute lifetime. Configure Redis pool size 8, minimum idle 1, pool timeout
-2 seconds. Build `http.Server` with 2-second header, 5-second read/write,
-30-second idle, 16 KiB header, and 5-second shutdown limits. Relay options are
-claim 16, attempts 3, retry 250 ms, idle 50 ms.
+PostgreSQL은 `MaxOpenConns(8)`, `MaxIdleConns(8)`, 5-minute idle, 30-minute lifetime으로 설정한다.
+Redis는 pool size 8, minimum idle 1, pool timeout 2 seconds로 configure한다.
+`http.Server`는 2-second header, 5-second read/write, 30-second idle, 16 KiB header,
+5-second shutdown limit로 만든다. Relay option은 claim 16, attempts 3, retry 250 ms, idle 50 ms다.
 
-- [ ] **Step 5: Implement supervision and safe observations**
+- [ ] **Step 5: supervision 및 safe observation 구현**
 
-Own the relay context and result channel in one lifecycle function. Make early
-`context.Canceled` unexpected, mark readiness false before server shutdown, and
-join independent close errors. Call the official `Relay.Run` directly and
-report only delivery-degradation and lifecycle transitions through an injected
-observer; never log records, endpoints, provider errors, or metadata.
+lifecycle function 하나가 relay context와 result channel을 소유한다. early `context.Canceled`는 unexpected로 처리하고,
+server shutdown 전에 readiness false를 mark하며 independent close error를 join한다.
+official `Relay.Run`을 직접 호출하고 injected observer를 통해 delivery-degradation 및 lifecycle transition만 report한다.
+record, endpoint, provider error, metadata는 절대 log하지 않는다.
 
-- [ ] **Step 6: Implement loopback-only configuration and `main`**
+- [ ] **Step 6: loopback-only configuration 및 `main` 구현**
 
-Require `DATABASE_URL` and `REDIS_ADDR`; accept optional `REDIS_STREAM` and an
-IP-literal `HTTP_ADDR`. Parse with `net.SplitHostPort`, then `net.ParseIP`
-without DNS resolution, and reject nil IP, wildcard, zone, or
-`!ip.IsLoopback()`. Centralize public errors in `safeStageError(stage, class)`;
-never return a wrapped provider/configuration value to `main`. Startup order is
-parse, open, bounded ping, schema bootstrap, publisher/relay construction,
-listener, relay, HTTP. Shutdown order is HTTP drain, relay cancel/join, Redis
-close, database close.
+`DATABASE_URL`과 `REDIS_ADDR`는 required다. optional `REDIS_STREAM`과 IP-literal `HTTP_ADDR`를 accept한다.
+DNS resolution 없이 `net.SplitHostPort`, 그다음 `net.ParseIP`로 parse하고 nil IP, wildcard, zone,
+`!ip.IsLoopback()`은 reject한다. public error는 `safeStageError(stage, class)`에 centralize한다.
+wrapped provider/configuration value를 `main`으로 반환하지 않는다. startup order는 parse, open, bounded ping,
+schema bootstrap, publisher/relay construction, listener, relay, HTTP다.
+shutdown order는 HTTP drain, relay cancel/join, Redis close, database close다.
 
-- [ ] **Step 7: Run GREEN, race, and commit**
+- [ ] **Step 7: GREEN, race, commit 실행**
 
 ```bash
 gofmt -w $(rg --files examples/audited-order-workflow-outbox -g '*.go')
@@ -473,56 +425,51 @@ git add examples/audited-order-workflow-outbox
 git commit -m "feat: run supervised audit outbox relay"
 ```
 
-## Task 6: Prove PostgreSQL and Redis integration sequentially
+## Task 6: PostgreSQL 및 Redis integration을 순차 증명
 
 **Complexity:** High. **Depends on:** Task 5. **Pattern skills:** `test-driven-development`, `bluetape-go-patterns`. **Write scope:** `integration_test.go` and test helpers only.
 
-- [ ] **Step 1: Add one sequential end-to-end fixture**
+- [ ] **Step 1: sequential end-to-end fixture 하나 추가**
 
-Start PostgreSQL first, complete schema/command/history/restart assertions, then
-start Redis. Do not use `t.Parallel`. Publish created and confirmed events via
-`redisstreams.New` and require the documented 13 fields, exact event and
-idempotency identity, valid `entry_json`, and tolerance of duplicate physical
-stream entries.
+PostgreSQL을 먼저 시작하고 schema/command/history/restart assertion을 완료한 뒤 Redis를 시작한다.
+`t.Parallel`은 사용하지 않는다. created 및 confirmed event를 `redisstreams.New`로 publish하고
+documented 13 field, exact event 및 idempotency identity, valid `entry_json`,
+duplicate physical stream entry에 대한 tolerance를 요구한다.
 
-- [ ] **Step 2: Add restart, outage, lease, and backlog cases**
+- [ ] **Step 2: restart, outage, lease, backlog case 추가**
 
-Recreate service/store/runtime objects over the same databases and prove state,
-history, replay, and pending rows persist. Stop/unavailable Redis must not roll
-back commands. Recover the client, drain multiple 16-record batches while
-writers continue, assert counts/deadline, `db.Stats().MaxOpenConnections == 8`,
-and no later record bypasses an earlier pending/claimed record. Sample
-`db.Stats()` every 10 ms: peak `InUse` must not exceed 8, every writer must
-finish within its 2-second operation deadline, the backlog must drain within the
-fixed test deadline, and total `WaitDuration` must stay below
-`2 seconds * writerCount` so relay monopolization cannot pass silently.
+같은 database 위에서 service/store/runtime object를 recreate하고 state, history, replay, pending row가 persist하는지 증명한다.
+stopped/unavailable Redis는 command를 roll back하면 안 된다. client를 recover하고 writer가 계속되는 동안 multiple 16-record batch를 drain한다.
+count/deadline, `db.Stats().MaxOpenConnections == 8`, later record가 earlier pending/claimed record를 bypass하지 않음을 assert한다.
+`db.Stats()`를 10 ms마다 sample한다. peak `InUse`는 8을 넘으면 안 되고, 모든 writer는 2-second operation deadline 안에 finish해야 하며,
+backlog는 fixed test deadline 안에 drain되어야 한다. relay monopolization이 조용히 pass하지 못하도록 total `WaitDuration`은
+`2 seconds * writerCount` 아래여야 한다.
 
-- [ ] **Step 3: Run the sequential package proof**
+- [ ] **Step 3: sequential package proof 실행**
 
 ```bash
 go test -count=1 -p 1 ./examples/audited-order-workflow-outbox/... -run 'TestIntegration'
 go test -race -count=1 -p 1 ./examples/audited-order-workflow-outbox/... -run 'TestIntegration(Relay|Concurrent)'
 ```
 
-Expected: PostgreSQL then Redis cases PASS with fresh exit 0 and no parallel
-container startup.
+기대값: PostgreSQL 이후 Redis case가 fresh exit 0으로 PASS하고 parallel container startup이 없다.
 
-- [ ] **Step 4: Commit integration proof**
+- [ ] **Step 4: integration proof commit**
 
 ```bash
 git add examples/audited-order-workflow-outbox/internal/orderworkflow/integration_test.go
 git commit -m "test: prove audited workflow delivery integration"
 ```
 
-## Task 7: Add runnable POST JSON documentation
+## Task 7: runnable POST JSON documentation 추가
 
 **Complexity:** Medium. **Depends on:** Tasks 4-6. **Pattern skills:** `bluetape-writer`, `bluetape-go-patterns`. **Write scope:** example README pair, `requests.http`, root README pair, issue #57 README pair.
 
-- [ ] **Step 1: Write `requests.http` as the executable source contract**
+- [ ] **Step 1: `requests.http`를 executable source contract로 작성**
 
-Include variables and complete JSON for create, confirm, identical replay,
-two-page search, detail revision 2, second-order cancel with reason, and rejected
-post-cancel confirm. Every request includes method, URL, content type, and body.
+create, confirm, identical replay, two-page search, detail revision 2, reason이 있는 second-order cancel,
+rejected post-cancel confirm에 대한 variable 및 complete JSON을 포함한다.
+모든 request는 method, URL, content type, body를 포함한다.
 
 ```http
 ### Create order
@@ -532,28 +479,26 @@ Content-Type: application/json
 {"order_id":"order-1001","command_id":"cmd-create-1001","metadata":{"channel":"workshop"}}
 ```
 
-- [ ] **Step 2: Write source-equivalent English and Korean READMEs**
+- [ ] **Step 2: source-equivalent English 및 Korean README 작성**
 
-Use `English | [한국어](README.ko.md)` and
-`[English](README.md) | 한국어`. Explain architecture, transaction boundary,
-history versus transport, loopback-only startup, at-least-once and reordering,
-status/readiness, exact curl bodies, expected replay/cursor/409/429 results, and
-shutdown. Require copy-paste curl commands, not abbreviated JSON.
+`English | [한국어](README.ko.md)`와 `[English](README.md) | 한국어`를 사용한다.
+architecture, transaction boundary, history versus transport, loopback-only startup, at-least-once 및 reordering,
+status/readiness, exact curl body, expected replay/cursor/409/429 result, shutdown을 설명한다.
+abbreviated JSON이 아니라 copy-paste 가능한 curl command를 요구한다.
 
-- [ ] **Step 3: Add the operator runbook and schema boundary**
+- [ ] **Step 3: operator runbook 및 schema boundary 추가**
 
-Document safe status inspection, Redis outage/recovery, lease wait, dead-letter
-diagnosis, partial-startup restart, and an explicitly destructive local reset.
-State that startup DDL is a single-version workshop bootstrap, not migration or
-production rollback tooling.
+safe status inspection, Redis outage/recovery, lease wait, dead-letter diagnosis,
+partial-startup restart, explicitly destructive local reset을 document한다.
+startup DDL은 migration 또는 production rollback tooling이 아니라 single-version workshop bootstrap이라고 명시한다.
 
-- [ ] **Step 4: Update navigation and fix issue #57 language switches**
+- [ ] **Step 4: navigation 업데이트 및 issue #57 language switch 수정**
 
-Add the new example to both root README tables/run sections. Change only the
-language switch lines in the issue #57 README pair so the current locale is
-plain text. Preserve all other issue #57 content.
+두 root README table/run section에 새 example을 추가한다.
+issue #57 README pair에서는 current locale이 plain text가 되도록 language switch line만 바꾼다.
+다른 issue #57 content는 모두 보존한다.
 
-- [ ] **Step 5: Validate locale and request parity, then commit**
+- [ ] **Step 5: locale 및 request parity 검증 후 commit**
 
 ```bash
 rg -n '^POST |Content-Type: application/json|replayed|next_from_revision|too_many_requests|invalid_transition' examples/audited-order-workflow-outbox/{requests.http,README.md,README.ko.md}
@@ -563,55 +508,49 @@ git add README.md README.ko.md examples/audited-order-workflow-outbox examples/t
 git commit -m "docs: add audited workflow POST JSON guide"
 ```
 
-Expected: every scenario marker exists in all three artifacts and locale
-switches have no current-locale self-link. `TestDocumentationParity` extracts
-normalized scenario names, method, URL, JSON body, expected status, replay/cursor
-expectations, warnings, runbook steps, and unsupported behavior from the English
-README, Korean README, and `requests.http`; it requires structural equality, not
-marker presence alone.
+기대값: 모든 scenario marker가 세 artifact 모두에 있고 locale switch에 current-locale self-link가 없다.
+`TestDocumentationParity`는 English README, Korean README, `requests.http`에서 normalized scenario name,
+method, URL, JSON body, expected status, replay/cursor expectation, warning, runbook step,
+unsupported behavior를 extract한다. marker presence만이 아니라 structural equality를 요구한다.
 
-- [ ] **Step 6: Execute the checked-in HTTP scenario against real backends**
+- [ ] **Step 6: checked-in HTTP scenario를 real backend에 실행**
 
-Create `smoke_test.go` that starts PostgreSQL then Redis through the repository
-fixtures, starts the loopback application, waits for `/readyz`, parses
-`requests.http`, substitutes `{{baseURL}}`, and sends each checked-in request.
-Scenario annotations define expected status and response assertions. Require
-201 create, 200 confirm, 200 replay with `replayed: true`, page cursor 2 then
-null, detail revision 2, cancellation, and stable 409 after cancellation. Always
-stop HTTP and containers through bounded cleanup.
+repository fixture로 PostgreSQL을 먼저 시작한 뒤 Redis를 시작하고, loopback application을 시작하며,
+`/readyz`를 기다리고 `requests.http`를 parse해 `{{baseURL}}`을 substitute한 다음 checked-in request를 각각 보내는 `smoke_test.go`를 만든다.
+scenario annotation은 expected status 및 response assertion을 정의한다. 201 create, 200 confirm,
+`replayed: true`를 가진 200 replay, page cursor 2 이후 null, detail revision 2, cancellation,
+cancellation 이후 stable 409를 요구한다. HTTP와 container는 항상 bounded cleanup으로 stop한다.
 
 Run:
 `go test -count=1 -p 1 ./examples/audited-order-workflow-outbox -run 'TestRequestsHTTPSmoke'`
 
-Expected: PASS using the actual checked-in request bodies and fresh exit 0.
+기대값: actual checked-in request body를 사용해 fresh exit 0으로 PASS한다.
 
-## Task 8: Create and visually verify architecture and sequence diagrams
+## Task 8: architecture 및 sequence diagram 생성/시각 검증
 
-**Complexity:** High. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-diagram`. **Write scope:** four canonical image assets and README image references.
+**Complexity:** High. **Depends on:** Tasks 5-7. **Pattern skills:** `bluetape-diagram`. **Write scope:** canonical image asset 네 개와 README image reference.
 
-- [ ] **Step 1: Load the diagram checklist and best-practice references**
+- [ ] **Step 1: diagram checklist 및 best-practice reference load**
 
-Follow `bluetape-diagram` completely. Reuse repository visual grammar and draw
-generated SVG directly; Mermaid is not a final artifact. Architecture must show
-routes, service, one transaction, three PostgreSQL tables, supervised relay,
-Redis, and the history-query bypass. Sequence must show validate/lock, three
-writes, commit, response, later relay, replay, and query.
+`bluetape-diagram`을 완전히 따른다. repository visual grammar를 재사용하고 generated SVG를 직접 그린다.
+Mermaid는 final artifact가 아니다. Architecture는 route, service, transaction 하나, PostgreSQL table 세 개,
+supervised relay, Redis, history-query bypass를 보여줘야 한다.
+Sequence는 validate/lock, write 세 번, commit, response, later relay, replay, query를 보여줘야 한다.
 
-- [ ] **Step 2: Render SVG to PNG and run automated diagram audits**
+- [ ] **Step 2: SVG를 PNG로 render하고 automated diagram audit 실행**
 
-Use the skill-provided rendering/audit commands. Require connector endpoint,
-intrusion, crossing, mixed-corner, sequence-style, clipping, and text checks to
-pass for both diagrams. Re-render twice and require deterministic PNG hashes.
+skill-provided rendering/audit command를 사용한다. 두 diagram 모두 connector endpoint, intrusion, crossing,
+mixed-corner, sequence-style, clipping, text check가 pass해야 한다.
+두 번 re-render하고 deterministic PNG hash를 요구한다.
 
-- [ ] **Step 3: Perform mandatory SVG and PNG eye inspection**
+- [ ] **Step 3: mandatory SVG 및 PNG eye inspection 수행**
 
-Open all four files at original detail. Explicitly verify arrowhead direction
-after SVG-to-PNG conversion, arrowhead size/clearance at bends and card edges,
-horizontal routing opportunities, no connector through text/cards, no clipping,
-legible labels, and SVG/PNG correspondence. Adjust bend coordinates rather than
-accepting a technically valid but visually wrong render.
+네 file 모두 original detail로 연다. SVG-to-PNG conversion 뒤 arrowhead direction,
+bend와 card edge에서 arrowhead size/clearance, horizontal routing opportunity,
+text/card를 통과하는 connector 없음, clipping 없음, 읽을 수 있는 label, SVG/PNG correspondence를 명시적으로 verify한다.
+기술적으로 valid하지만 visually wrong인 render를 accept하지 말고 bend coordinate를 조정한다.
 
-- [ ] **Step 4: Link both diagrams in both locale READMEs and commit**
+- [ ] **Step 4: 두 locale README에 두 diagram link 후 commit**
 
 ```bash
 git diff --check
@@ -619,14 +558,14 @@ git add docs/images/readme-diagrams/audited-order-workflow-outbox-* examples/aud
 git commit -m "docs: diagram audited workflow integration"
 ```
 
-Expected: four assets are tracked, audits PASS, manual inspection is recorded,
-and both locale READMEs reference the PNG renders.
+기대값: 네 asset이 tracked되고 audit이 PASS하며 manual inspection이 기록된다.
+두 locale README는 PNG render를 reference한다.
 
-## Task 9: Run risk gates, full verification, review, and lessons
+## Task 9: risk gate, full verification, review, lesson 실행
 
-**Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-full-feature`, `bluetape-go-patterns`. **Write scope:** fixes within prior scopes, review artifact, lesson artifact.
+**Complexity:** High. **Depends on:** Tasks 1-8. **Pattern skills:** `verification-before-completion`, `bluetape-full-feature`, `bluetape-go-patterns`. **Write scope:** prior scope 안의 fix, review artifact, lesson artifact.
 
-- [ ] **Step 1: Run targeted and resource-bounded gates from scratch**
+- [ ] **Step 1: targeted 및 resource-bounded gate를 처음부터 실행**
 
 ```bash
 go test -count=1 ./examples/audited-order-workflow-outbox/...
@@ -643,37 +582,31 @@ make ci
 git diff --check origin/develop
 ```
 
-Expected: every command has a fresh observed exit 0. If full parallel Docker
-tests time out, preserve raw evidence, diagnose container/resource state, rerun
-the isolated failing package, and repair the cause; an isolated retry does not
-replace the required final fresh `make ci` pass.
+기대값: 모든 command가 fresh observed exit 0을 가진다. full parallel Docker test가 timeout되면 raw evidence를 보존하고
+container/resource state를 diagnose하며 isolated failing package를 rerun하고 원인을 repair한다.
+isolated retry는 required final fresh `make ci` pass를 대체하지 않는다.
 
-- [ ] **Step 2: Execute the triggered performance/stability scan**
+- [ ] **Step 2: triggered performance/stability scan 실행**
 
-Inspect request allocation/body bounds, query plans, row-lock duration, pool
-contention, relay polling/backlog, goroutine ownership, cancellation, leases,
-Testcontainers cleanup, and shutdown. Fix P0/P1 and rerun every affected focused
-and broad gate.
+request allocation/body bound, query plan, row-lock duration, pool contention, relay polling/backlog,
+goroutine ownership, cancellation, lease, Testcontainers cleanup, shutdown을 inspect한다.
+P0/P1을 fix하고 affected focused/broad gate를 모두 rerun한다.
 
-- [ ] **Step 3: Verify every approved spec and plan item**
+- [ ] **Step 3: approved spec 및 plan item 전체 verify**
 
-Use the Step 5 verifier checklist against the exact spec, this plan, branch
-diff, tests, READMEs, HTTP file, and four diagrams. Record a traceable PASS or
-return to the owning task; do not reinterpret a missing item as optional.
+exact spec, 이 plan, branch diff, test, README, HTTP file, 네 diagram을 대상으로 Step 5 verifier checklist를 사용한다.
+traceable PASS를 기록하거나 owning task로 돌아간다. missing item을 optional로 reinterpret하지 않는다.
 
-- [ ] **Step 4: Run six pre-PR review lenses and integrate findings**
+- [ ] **Step 4: six pre-PR review lens 실행 및 finding integrate**
 
-Review performance, stability, security, operator/Ops, developer/API, and
-user/caller independently. Fix P0/P1, resolve/defer P2/P3 with rationale, rerun
-affected tests and lanes, and write
-`docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md` only after the
-latest result is P0=0/P1=0.
+performance, stability, security, operator/Ops, developer/API, user/caller를 independent하게 review한다.
+P0/P1을 fix하고 P2/P3는 rationale과 함께 resolve/defer하며 affected test와 lane을 rerun한다.
+latest result가 P0=0/P1=0이 된 뒤에만 `docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md`를 작성한다.
 
-- [ ] **Step 5: Commit the review artifact and durable lesson**
+- [ ] **Step 5: review artifact 및 durable lesson commit**
 
-The lesson records context, chosen history/outbox split, replay and readiness
-decisions, Docker baseline contention, relay/diagram surprises, proof, review
-misses, and future guards.
+lesson은 context, chosen history/outbox split, replay 및 readiness decision,
+Docker baseline contention, relay/diagram surprise, proof, review miss, future guard를 기록한다.
 
 ```bash
 git add docs/review/2026-07-14-issue-68-audited-order-workflow-outbox.md docs/lessons/2026-07-14-issue-68-audited-order-workflow-outbox.md
@@ -681,89 +614,79 @@ git commit -m "docs: record audited workflow verification lessons"
 git status --short
 ```
 
-Expected: worktree clean and the lesson is committed before PR creation.
+기대값: worktree가 clean하고 lesson은 PR creation 전에 commit되어 있다.
 
-## Task 10: Create the PR and stop at the merge approval gate
+## Task 10: PR 생성 후 merge approval gate에서 중지
 
-**Complexity:** Medium. **Depends on:** Task 9. **Pattern skills:** `bluetape-workflow`. **Write scope:** no repository files unless live review requires an approved repair. **External effects:** push and PR are authorized by the approved workflow; merge is not.
+**Complexity:** Medium. **Depends on:** Task 9. **Pattern skills:** `bluetape-workflow`. **Write scope:** live review가 approved repair를 요구하지 않는 한 repository file 없음. **External effects:** push와 PR은 approved workflow로 authorized되지만 merge는 아니다.
 
-- [ ] **Step 1: Re-read issue #68 metadata and push the feature branch**
+- [ ] **Step 1: issue #68 metadata를 다시 읽고 feature branch push**
 
-Confirm assignee `debop`, milestone `0.9.0`, labels, dependencies, and issue
-state. Push only the clean feature branch.
+assignee `debop`, milestone `0.9.0`, label, dependency, issue state를 confirm한다.
+clean feature branch만 push한다.
 
-- [ ] **Step 2: Create and verify the English PR**
+- [ ] **Step 2: English PR 생성 및 verify**
 
-Use the central template, explain why before what, include complete validation
-and diagram eye-inspection evidence, close #68, and end with `## DoD Status`.
-Assign `debop`, mirror milestone and labels, then verify live metadata with
-`gh pr view`.
+central template을 사용하고 what보다 why를 먼저 설명한다. complete validation 및 diagram eye-inspection evidence를 포함하고,
+#68을 close하며 `## DoD Status`로 끝낸다. `debop`을 assign하고 milestone/label을 mirror한 뒤 `gh pr view`로 live metadata를 verify한다.
 
-- [ ] **Step 3: Run the live PR review and CI gate**
+- [ ] **Step 3: live PR review 및 CI gate 실행**
 
-Review the actual PR diff through all six perspectives, resolve threads, and
-wait in bounded intervals until every required check is successful. Never treat
-pending, skipped, stale, or missing checks as green.
+actual PR diff를 six perspective 전체로 review하고 thread를 resolve하며 모든 required check가 successful이 될 때까지 bounded interval로 wait한다.
+pending, skipped, stale, missing check를 green으로 취급하지 않는다.
 
-- [ ] **Step 4: Report the exact merge-ready state and stop**
+- [ ] **Step 4: exact merge-ready state 보고 후 중지**
 
-Report PR URL, head/base SHAs, review convergence, required checks X/Y, clean
-local state, and remaining risks. Do not merge, delete the worktree, or sync
-`develop` until the user explicitly approves merge.
+PR URL, head/base SHA, review convergence, required check X/Y, clean local state, remaining risk를 보고한다.
+user가 merge를 명시적으로 approve하기 전까지 merge, worktree delete, `develop` sync를 하지 않는다.
 
-## Plan Review Convergence
+## plan review convergence
 
 | Perspective | Result | Resolved focus |
 |---|---|---|
-| Performance | P0=0, P1=0 | Hot-aggregate plan evidence, pool contention metrics, and deterministic lock timeout/recovery are ordered. |
-| Stability | P0=0, P1=0 | Same-order create races, post-commit error injection, replay, lease recovery, and lifecycle reruns are explicit. |
-| Security | P0=0, P1=0 | Loopback/stream validation, all-stage redaction, slow-client/pool limits, and lossless JSON negatives precede implementation. |
-| Operator/Ops | P0=0, P1=0 | All three schemas, readiness/status, recovery/runbook, and non-destructive compatibility failure are owned. |
-| Developer/API | P0=0, P1=0 | v0.18.0 `Relay.Run`, reader signatures, seven routes, commands, and task dependencies are implementable. |
-| User/caller | P0=0, P1=0 | Exact envelopes, request-file smoke, bilingual structural parity, replay, cursor, overload, and 409 paths are executable. |
+| Performance | P0=0, P1=0 | hot-aggregate plan evidence, pool contention metric, deterministic lock timeout/recovery가 ordered 상태다. |
+| Stability | P0=0, P1=0 | same-order create race, post-commit error injection, replay, lease recovery, lifecycle rerun이 explicit하다. |
+| Security | P0=0, P1=0 | loopback/stream validation, all-stage redaction, slow-client/pool limit, lossless JSON negative가 implementation보다 앞선다. |
+| Operator/Ops | P0=0, P1=0 | schema 세 개, readiness/status, recovery/runbook, non-destructive compatibility failure를 소유한다. |
+| Developer/API | P0=0, P1=0 | v0.18.0 `Relay.Run`, reader signature, route 일곱 개, command, task dependency가 implementable하다. |
+| User/caller | P0=0, P1=0 | exact envelope, request-file smoke, bilingual structural parity, replay, cursor, overload, 409 path가 executable하다. |
 
-Every review finding was fixed in this plan or the non-material v0.18.0
-observability correction in the approved specification. Each affected lane was
-rerun against the integrated artifacts and returned clear; no P2/P3 item is
-deferred.
+모든 review finding은 이 plan 또는 approved specification의 non-material v0.18.0 observability correction에서 fix했다.
+affected lane은 integrated artifact를 대상으로 rerun했고 clear로 돌아왔다. deferred P2/P3 item은 없다.
 
-## Acceptance Traceability
+## 인수 추적성
 
-| Spec acceptance | Owning task | Fresh evidence |
+| spec acceptance | owning task | fresh evidence |
 |---|---|---|
-| Atomic order/history/outbox commit | Tasks 2-3 | PostgreSQL rollback, parity, and concurrency tests |
-| Durable history independent of transport | Tasks 2, 4 | Full reader contract and Redis-free query tests |
-| Official continuous SQL outbox to Redis | Tasks 5-6 | Deterministic relay plus real 13-field stream proof |
-| Strict POST JSON for user operations | Task 4 | Decoder, route, cursor, detail, status, and overload tests |
-| Complete curl and HTTP request scenario | Task 7 | Locale/request marker parity and smoke execution |
-| Bilingual architecture/sequence diagrams | Task 8 | Automated audits, deterministic renders, four-file eye check |
-| Issue #57 language switch correction | Task 7 | Focused two-line diff inspection |
-| Targeted/race/integration/full gates | Task 9 | Fresh exit 0 for every listed command |
-| PR metadata, green CI, merge approval stop | Task 10 | Live `gh` evidence and no merge side effect |
+| Atomic order/history/outbox commit | Tasks 2-3 | PostgreSQL rollback, parity, concurrency test |
+| Durable history independent of transport | Tasks 2, 4 | full reader contract 및 Redis-free query test |
+| Official continuous SQL outbox to Redis | Tasks 5-6 | deterministic relay 및 real 13-field stream proof |
+| Strict POST JSON for user operations | Task 4 | decoder, route, cursor, detail, status, overload test |
+| Complete curl and HTTP request scenario | Task 7 | locale/request marker parity 및 smoke execution |
+| Bilingual architecture/sequence diagrams | Task 8 | automated audit, deterministic render, four-file eye check |
+| Issue #57 language switch correction | Task 7 | focused two-line diff inspection |
+| Targeted/race/integration/full gates | Task 9 | listed command별 fresh exit 0 |
+| PR metadata, green CI, merge approval stop | Task 10 | live `gh` evidence 및 merge side effect 없음 |
 
-## Risk Prediction and Rerun Points
+## 위험 예측 및 rerun 지점
 
-| Risk | Signal | Mitigation | Rollback or rerun point |
+| risk | signal | mitigation | rollback 또는 rerun 지점 |
 |---|---|---|---|
-| Partial dual-write despite intended atomicity | Table counts or identities diverge after injected failure | One `sqlkit.WithTx`, same entry value, failure-after-each-write tests | Revert Task 3 commit or rerun Tasks 2-3 from RED |
-| Duplicate command race returns wrong state | Replay differs from original projection or adds revision | Lock-before-state-check, fresh post-rollback lookup, canonical payload intent | Reopen Task 3 and rerun concurrency/race tests |
-| PostgreSQL time precision corrupts parity | Normal entry fails scalar/JSON comparison | Normalize one UTC microsecond clock value before all writes | Reopen Tasks 1-2 and run sub-microsecond test |
-| Redis outage defeats outbox availability | `/readyz` returns 503 only for Redis | Treat Redis as degraded delivery; DB/relay remain hard readiness | Reopen Task 5 readiness/lifecycle tests |
-| Relay dies while HTTP stays ready | Relay result arrives without server stop | Supervised result channel, readiness transition, bounded shutdown | Reopen Task 5 unexpected-exit test |
-| Backlog/pool contention starves requests | Deadline miss, pool exceeds 8, backlog fails to drain | Fixed pools, request cap, bounded batch/poll, concurrent-writer test | Reopen Tasks 5-6 and rerun race/backlog proof |
-| Container host contention produces flaky full gate | PostgreSQL wait strategy times out under package parallelism | Sequential example fixture and `go test -p 1`; diagnose before retry | Rerun isolated package, then resource-bounded suite and fresh `make ci` |
-| Diagram arrowheads reverse or collide after PNG render | Eye check differs from SVG intent | Follow `bluetape-diagram`, adjust bend/endpoint coordinates, inspect all four | Return to Task 8; rerender and re-audit both formats |
-| Scope drifts into library/dependency/workflow changes | Diff includes go.mod, workflow, or bluetape-go API | Stop and request scope approval | Reset only new task-owned changes; preserve prior commits |
+| intended atomicity에도 partial dual-write 발생 | injected failure 뒤 table count 또는 identity가 diverge | `sqlkit.WithTx` 하나, 같은 entry value, failure-after-each-write test | Task 3 commit revert 또는 Tasks 2-3을 RED부터 rerun |
+| duplicate command race가 wrong state 반환 | replay가 original projection과 다르거나 revision을 추가 | lock-before-state-check, fresh post-rollback lookup, canonical payload intent | Task 3 reopen 후 concurrency/race test rerun |
+| PostgreSQL time precision이 parity 손상 | normal entry가 scalar/JSON comparison 실패 | 모든 write 전에 UTC microsecond clock value 하나로 normalize | Tasks 1-2 reopen 후 sub-microsecond test 실행 |
+| Redis outage가 outbox availability 저해 | `/readyz`가 Redis만으로 503 반환 | Redis는 degraded delivery로 취급하고 DB/relay는 hard readiness로 유지 | Task 5 readiness/lifecycle test reopen |
+| HTTP ready 중 relay 사망 | server stop 없이 relay result 도착 | supervised result channel, readiness transition, bounded shutdown | Task 5 unexpected-exit test reopen |
+| backlog/pool contention이 request를 starve | deadline miss, pool 8 초과, backlog drain 실패 | fixed pool, request cap, bounded batch/poll, concurrent-writer test | Tasks 5-6 reopen 후 race/backlog proof rerun |
+| container host contention으로 flaky full gate 발생 | package parallelism 아래 PostgreSQL wait strategy timeout | sequential example fixture 및 `go test -p 1`; retry 전 diagnose | isolated package rerun 뒤 resource-bounded suite와 fresh `make ci` |
+| PNG render 뒤 diagram arrowhead reverse/collision | eye check가 SVG intent와 다름 | `bluetape-diagram`을 따르고 bend/endpoint coordinate를 조정하며 네 file 모두 inspect | Task 8로 돌아가 rerender 및 두 format re-audit |
+| scope가 library/dependency/workflow change로 drift | diff에 go.mod, workflow, bluetape-go API 포함 | stop하고 scope approval 요청 | new task-owned change만 reset하고 prior commit 보존 |
 
-## Repository Hazard Decisions
+## repository hazard decision
 
-- New module/catalog/BOM/coverage registration: N/A; this is a package inside
-  the existing workshop module.
-- Dependency and `go.mod`/`go.sum`: N/A; every required package already exists.
-- Workflow/nightly changes: N/A; `make ci` and existing `go test ./...` discover
-  the example automatically.
-- Changelog/release note: N/A; workshop examples use README navigation and issue
-  closure rather than a published library changelog.
-- Testcontainers: triggered; PostgreSQL and Redis start sequentially and the
-  repository-wide resource-bounded lane runs before the authoritative full gate.
-- README locales and diagrams: triggered and owned by Tasks 7-8.
+- New module/catalog/BOM/coverage registration: N/A; existing workshop module 안의 package다.
+- Dependency 및 `go.mod`/`go.sum`: N/A; required package는 모두 이미 존재한다.
+- Workflow/nightly change: N/A; `make ci`와 existing `go test ./...`가 example을 자동으로 discover한다.
+- Changelog/release note: N/A; workshop example은 published library changelog가 아니라 README navigation과 issue closure를 사용한다.
+- Testcontainers: triggered; PostgreSQL과 Redis는 sequential하게 시작하고 repository-wide resource-bounded lane은 authoritative full gate 전에 실행한다.
+- README locale 및 diagram: triggered이며 Tasks 7-8이 소유한다.

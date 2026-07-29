@@ -1,24 +1,23 @@
-# Issue #71 Plan: Compensation Workflow Example
+# Issue #71 계획: Compensation Workflow 예제
 
-## Work Type
+## 작업 유형
 
 Type A - Full Feature.
 
-Reason: new runnable example directory, Go implementation, tests, bilingual
-READMEs, generated diagrams, root navigation, review artifacts, lesson, PR, and
-CI.
+이유: 새 runnable example directory, Go implementation, test, bilingual README,
+generated diagram, root navigation, review artifact, lesson, PR, CI가 필요하다.
 
-## Implementation Tasks
+## 구현 작업
 
 1. Add `examples/compensation-workflow/main.go` with `HTTP_ADDR` default
    `:8087`.
-2. Add `examples/compensation-workflow/internal/compensation/server.go`.
+2. `examples/compensation-workflow/internal/compensation/server.go`를 추가한다.
    - Gin routes: `GET /healthz`, `POST /compensation/fulfillment`.
-   - Request validation and stable error responses.
+   - request validation 및 stable error response.
    - Forward `workflow.Sequential` for inventory, payment, shipment.
-   - Reverse-order compensation stack for successful reversible steps.
-   - Top-level report preserving the original forward error.
-3. Add `server_test.go`.
+   - 성공한 reversible step에 대한 reverse-order compensation stack.
+   - original forward error를 보존하는 top-level report.
+3. `server_test.go`를 추가한다.
    - success
    - shipment failure with reverse compensation order
    - payment failure with inventory release only
@@ -27,22 +26,22 @@ CI.
    - inventory failure without compensation
    - caller cancellation
    - bad requests
-4. Add English/Korean READMEs.
+4. English/Korean README를 추가한다.
    - scenario
    - architecture
    - sequence
    - API examples
    - compensation vs state transition guidance
    - production hardening notes
-5. Add `scripts/generate-compensation-workflow-diagrams.sh`.
+5. `scripts/generate-compensation-workflow-diagrams.sh`를 추가한다.
    - DOT/plain/Graphviz SVG/PNG evidence.
    - final SVG/PNG assets.
    - deterministic gate summary with zero bad geometry/font counts.
-6. Update root README navigation and run section.
-7. Regenerate workshop example map to include `compensation-workflow`.
-8. Add lesson and Step 6-R review/verifier artifacts.
+6. root README navigation 및 run section을 갱신한다.
+7. `compensation-workflow`를 포함하도록 workshop example map을 재생성한다.
+8. lesson 및 Step 6-R review/verifier artifact를 추가한다.
 
-## Validation Plan
+## 검증 계획
 
 - `bash scripts/generate-compensation-workflow-diagrams.sh`
 - visual inspection of changed PNG assets
@@ -54,12 +53,11 @@ CI.
 - `golangci-lint cache clean && make ci`
 - GitHub PR checks
 
-## Risks and Mitigations
+## 위험과 완화
 
-| Risk | Mitigation |
+| 위험 | 완화 |
 |---|---|
-| Example overclaims durable saga behavior | README and code comments call compensation an app-layer request-scoped teaching boundary. |
-| Original error hidden by compensation failure | Response has `original_error`; top-level report keeps original error; tests assert it. |
-| Compensation order unclear | Tests assert `void-payment` before `release-inventory`; diagram shows reverse order. |
-| Diagram layout regression | Use Graphviz evidence, generated PNG pairs, geometry gate output, and visual preview. |
-
+| 예제가 durable saga behavior를 과장 | README와 code comment에서 compensation을 app-layer request-scoped teaching boundary로 명명한다. |
+| compensation failure가 original error를 숨김 | response에 `original_error`가 있고 top-level report는 original error를 유지하며 test가 이를 assert한다. |
+| compensation order가 불명확 | test가 `release-inventory` 전 `void-payment`를 assert하고 diagram은 reverse order를 보여 준다. |
+| diagram layout regression | Graphviz evidence, generated PNG pair, geometry gate output, visual preview를 사용한다. |

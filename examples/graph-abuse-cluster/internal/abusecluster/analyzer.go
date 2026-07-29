@@ -21,7 +21,7 @@ type logicalRelationship struct {
 	label string
 }
 
-// Analyze validates backend-loaded graph values and returns deterministic abuse clusters.
+// Analyze 는 backend에서 로딩한 graph value를 검증하고 결정적인 abuse cluster를 반환한다.
 func Analyze(vertices []graph.Vertex, edges []graph.Edge) (Report, error) {
 	if len(vertices) > MaxVertices || len(edges) > MaxEdges {
 		return Report{}, fmt.Errorf("%w: limit exceeded", ErrGraphTooLarge)

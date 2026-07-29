@@ -11,14 +11,14 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// Server exposes leader election operations as HTTP handlers.
+// Server 는 리더 선출 작업을 HTTP 핸들러로 노출한다.
 type Server struct {
 	elector leader.Elector
 	member  string
 	router  chi.Router
 }
 
-// NewServer creates a server for one election member.
+// NewServer 는 하나의 선출 멤버를 위한 서버를 생성한다.
 func NewServer(elector leader.Elector, member string) *Server {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
@@ -40,7 +40,7 @@ func NewServer(elector leader.Elector, member string) *Server {
 	return server
 }
 
-// ServeHTTP dispatches requests to the leader web API.
+// ServeHTTP 는 요청을 리더 웹 API로 전달한다.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }

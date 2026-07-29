@@ -1,4 +1,4 @@
-// Package shippingquote implements the measured shipping quote workshop example.
+// Package shippingquote 는 계측 기반 배송 견적 워크숍 예제를 구현한다.
 package shippingquote
 
 import (
@@ -21,13 +21,13 @@ const (
 )
 
 var (
-	// ErrInvalidRequest reports invalid request JSON or required fields.
+	// ErrInvalidRequest 는 요청 JSON 또는 필수 필드가 유효하지 않음을 나타낸다.
 	ErrInvalidRequest = errors.New("shippingquote: invalid request")
-	// ErrInvalidMeasure reports a measure parse or value failure.
+	// ErrInvalidMeasure 는 측정값 파싱 또는 값 검증 실패를 나타낸다.
 	ErrInvalidMeasure = errors.New("shippingquote: invalid measure")
-	// ErrIncompatibleUnit reports a syntactically valid value with the wrong dimension.
+	// ErrIncompatibleUnit 는 문법은 올바르지만 차원이 맞지 않는 단위를 나타낸다.
 	ErrIncompatibleUnit = errors.New("shippingquote: incompatible unit")
-	// ErrInvalidDivisor reports an invalid dimensional-weight divisor.
+	// ErrInvalidDivisor 는 부피 무게 제수가 유효하지 않음을 나타낸다.
 	ErrInvalidDivisor = errors.New("shippingquote: invalid dimensional divisor")
 )
 
@@ -36,10 +36,10 @@ var (
 	shippingMassUnit = measure.MustRegistry(measure.MassGram(), measure.MassKilogram(), measure.MassTon(), massPound)
 )
 
-// Service produces deterministic shipping measurement quotes.
+// Service 는 결정적인 배송 측정 견적을 생성한다.
 type Service struct{}
 
-// QuoteRequest is the public request for one parcel measurement quote.
+// QuoteRequest 는 하나의 소포 측정 견적을 요청하는 공개 입력이다.
 type QuoteRequest struct {
 	QuoteID             string   `json:"quote_id"`
 	DestinationZone     string   `json:"destination_zone"`
@@ -52,7 +52,7 @@ type QuoteRequest struct {
 	PreferredLengthUnit string   `json:"preferred_length_unit,omitempty"`
 }
 
-// QuoteResponse is the stable public quote projection.
+// QuoteResponse 는 안정적으로 공개되는 견적 응답 표현이다.
 type QuoteResponse struct {
 	QuoteID            string             `json:"quote_id"`
 	DestinationZone    string             `json:"destination_zone"`
@@ -66,7 +66,7 @@ type QuoteResponse struct {
 	Policy             PolicyDecision     `json:"policy"`
 }
 
-// DimensionSummary groups parsed and derived parcel dimensions.
+// DimensionSummary 는 파싱된 소포 치수와 파생 치수를 묶는다.
 type DimensionSummary struct {
 	Width       MeasurementValue `json:"width"`
 	Height      MeasurementValue `json:"height"`
@@ -76,38 +76,38 @@ type DimensionSummary struct {
 	Volume      MeasurementValue `json:"volume"`
 }
 
-// MeasurementValue is the example's stable JSON shape for a typed measurement.
+// MeasurementValue 는 타입이 지정된 측정값을 위한 예제의 안정적인 JSON 형태다.
 type MeasurementValue struct {
 	Amount  float64 `json:"amount"`
 	Unit    string  `json:"unit"`
 	Display string  `json:"display"`
 }
 
-// DimensionalDivisor documents how volume becomes dimensional weight.
+// DimensionalDivisor 는 부피가 부피 무게로 변환되는 기준을 문서화한다.
 type DimensionalDivisor struct {
 	Amount float64 `json:"amount"`
 	Unit   string  `json:"unit"`
 }
 
-// PolicyDecision records the business interpretation of the measurements.
+// PolicyDecision 은 측정값에 대한 비즈니스 해석을 기록한다.
 type PolicyDecision struct {
 	Accepted bool   `json:"accepted"`
 	Code     string `json:"code"`
 	Message  string `json:"message"`
 }
 
-// ErrorResponse is the stable public error shape.
+// ErrorResponse 는 안정적으로 공개되는 오류 응답 형태다.
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
 
-// NewService creates a measured quote service.
+// NewService 는 측정 견적 서비스를 생성한다.
 func NewService() *Service {
 	return &Service{}
 }
 
-// Quote parses caller-facing units and returns derived shipping measurements.
+// Quote 는 호출자가 보낸 단위를 파싱하고 파생 배송 측정값을 반환한다.
 func (s *Service) Quote(request QuoteRequest) (QuoteResponse, error) {
 	if s == nil {
 		return QuoteResponse{}, fmt.Errorf("%w: service is nil", ErrInvalidRequest)
@@ -215,7 +215,7 @@ func (s *Service) Quote(request QuoteRequest) (QuoteResponse, error) {
 	}, nil
 }
 
-// NewRouter creates the HTTP router for the example.
+// NewRouter 는 예제용 HTTP 라우터를 생성한다.
 func NewRouter(service *Service) http.Handler {
 	router := gin.New()
 	router.Use(gin.Recovery())

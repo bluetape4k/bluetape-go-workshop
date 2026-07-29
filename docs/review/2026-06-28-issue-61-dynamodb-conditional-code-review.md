@@ -1,32 +1,29 @@
 # Code review: issue #61 DynamoDB conditional repository
 
-## Scope
+## 범위
 
-- New runnable example: `examples/dynamodb-conditional-repository`
-- New README diagrams for repository ownership and conditional-write sequence
-- Root README navigation and focused run/test instructions
-- Lesson note for DynamoDB conditional write boundary selection
+- 새 runnable example: `examples/dynamodb-conditional-repository`
+- repository ownership과 conditional-write sequence를 위한 새 README diagram
+- root README navigation과 focused run/test instruction
+- DynamoDB conditional write boundary selection lesson note
 
-## Findings
+## 발견 사항
 
-No P0/P1 findings in the local review pass.
+local review pass에서 P0/P1 finding은 없다.
 
-## Checks
+## 점검
 
-- Repository API keeps callers away from DynamoDB expression assembly.
-- `CreateIfAbsent` uses `attribute_not_exists(pk)` and
-  `attribute_not_exists(sk)`.
-- `UpdateName` checks the caller's expected `version` and returns the updated
-  item.
-- Conditional conflicts become `ErrConditionalConflict` while preserving the
-  typed AWS SDK error.
-- `QueryTenant` uses the tenant partition key and `ITEM#` sort-key prefix.
-- Context cancellation is checked before the client call boundary.
-- Floci-backed DynamoDB smoke coverage stays opt-in and serial-friendly.
-- README diagrams render as PNG and keep ownership boundaries separate from the
-  runtime success/conflict/query sequence.
+- repository API는 caller가 DynamoDB expression assembly를 직접 다루지 않게 한다.
+- `CreateIfAbsent`는 `attribute_not_exists(pk)`와 `attribute_not_exists(sk)`를 사용한다.
+- `UpdateName`은 caller의 expected `version`을 확인하고 updated item을 반환한다.
+- conditional conflict는 typed AWS SDK error를 보존하면서 `ErrConditionalConflict`가 된다.
+- `QueryTenant`는 tenant partition key와 `ITEM#` sort-key prefix를 사용한다.
+- context cancellation은 client call boundary 전에 확인된다.
+- Floci-backed DynamoDB smoke coverage는 opt-in이고 serial-friendly로 남는다.
+- README diagram은 PNG로 render되며 ownership boundary를 runtime success/conflict/query
+  sequence와 분리한다.
 
-## Validation evidence
+## 검증 Evidence
 
 - `go run ./examples/dynamodb-conditional-repository`
 - `go test -count=1 ./examples/dynamodb-conditional-repository/...`
@@ -35,21 +32,18 @@ No P0/P1 findings in the local review pass.
 - SVG XML parse plus CairoSVG render for
   `dynamodb-conditional-repository-architecture.svg` and
   `dynamodb-conditional-repository-sequence.svg`
-- Local link/image existence check for root README files and the new example
-  README pair
+- root README files와 새 example README pair에 대한 local link/image existence check
 - `git diff --check`
 
-## Residual risk
+## 잔여 Risk
 
-The example does not model S3/SQS document orchestration, provisioned capacity
-tuning, global secondary indexes, IAM policy, or production alarms. Those are
-downstream workflow concerns and are deliberately documented as out of scope so
-this example stays focused on repository-level conditional consistency.
+예제는 S3/SQS document orchestration, provisioned capacity tuning, global secondary index,
+IAM policy, production alarm을 모델링하지 않는다. 이들은 downstream workflow concern으로
+문서화되어 있으며, 예제는 repository-level conditional consistency에 집중한다.
 
-The optional diagram geometry and endpoint audit helper scripts referenced by
-the local diagram skill were not present at the installed path, so the diagram
-gate used XML parsing, CairoSVG rendering, marker inspection, and full-size PNG
-inspection instead.
+local diagram skill이 참조한 optional diagram geometry 및 endpoint audit helper script가 설치된
+경로에 없었기 때문에 diagram gate는 XML parsing, CairoSVG rendering, marker inspection,
+full-size PNG inspection을 사용했다.
 
 ## P0/P1 Gate
 

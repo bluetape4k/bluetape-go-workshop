@@ -1,29 +1,27 @@
 # Code review: issue #116 DynamoDB batch write materializer
 
-## Scope
+## 범위
 
-- New runnable example: `examples/dynamodb-batchwrite-materializer`
-- New README diagrams for architecture and retry sequencing
-- Root README navigation and focused run instructions
-- Lesson note for DynamoDB batch-write boundary selection
+- 새 runnable example: `examples/dynamodb-batchwrite-materializer`
+- architecture와 retry sequencing을 위한 새 README diagram
+- root README navigation과 focused run instruction
+- DynamoDB batch-write boundary selection lesson note
 
-## Findings
+## 발견 사항
 
-No P0/P1 findings in the local review pass.
+local review pass에서 P0/P1 finding은 없다.
 
-## Checks
+## 점검
 
-- Application code owns document event validation and DynamoDB item shape.
-- `batchwrite.WriteAll` owns 25-item chunking and retries only returned
-  `UnprocessedItems`.
-- Retry exhaustion is separated from typed AWS SDK service errors and still
-  preserves `batchwrite.UnprocessedItemsError`.
-- Context cancellation is propagated through the retry path.
-- Floci-backed DynamoDB smoke coverage stays opt-in and serial-friendly.
-- README diagrams render as PNG and keep ownership boundaries separate from the
-  runtime retry sequence.
+- application code는 document event validation과 DynamoDB item shape를 소유한다.
+- `batchwrite.WriteAll`은 25-item chunking을 소유하고, 반환된 `UnprocessedItems`만 retry한다.
+- retry exhaustion은 typed AWS SDK service error와 분리되며
+  `batchwrite.UnprocessedItemsError`를 계속 보존한다.
+- context cancellation은 retry path를 통해 전파된다.
+- Floci-backed DynamoDB smoke coverage는 opt-in이고 serial-friendly로 남는다.
+- README diagram은 PNG로 render되며 ownership boundary와 runtime retry sequence를 분리한다.
 
-## Validation evidence
+## 검증 Evidence
 
 - `go run ./examples/dynamodb-batchwrite-materializer`
 - `go test -count=1 ./examples/dynamodb-batchwrite-materializer/...`
@@ -32,21 +30,18 @@ No P0/P1 findings in the local review pass.
 - SVG XML parse plus CairoSVG render for
   `dynamodb-batchwrite-materializer-architecture.svg` and
   `dynamodb-batchwrite-materializer-retry-sequence.svg`
-- Local link/image existence check for root README files and the new example
-  README pair
+- root README files와 새 example README pair에 대한 local link/image existence check
 - `git diff --check`
 
-## Residual risk
+## 잔여 Risk
 
-The example does not model S3/SQS ingestion, provisioned capacity tuning,
-dead-letter replay, IAM policy, or production alarms. Those are downstream
-workflow concerns and are deliberately documented as infrastructure handoff
-points so this example stays focused on `dynamodb/batchwrite`.
+예제는 S3/SQS ingestion, provisioned capacity tuning, dead-letter replay, IAM policy,
+production alarm을 모델링하지 않는다. 이들은 downstream workflow concern이며, 예제가
+`dynamodb/batchwrite`에 집중하도록 infrastructure handoff point로 문서화되어 있다.
 
-The optional diagram geometry and endpoint audit helper scripts referenced by
-the local diagram skill were not present at the installed path, so the diagram
-gate used XML parsing, CairoSVG rendering, marker inspection, and full-size PNG
-inspection instead.
+local diagram skill이 참조한 optional diagram geometry 및 endpoint audit helper script가 설치된
+경로에 없었기 때문에 diagram gate는 XML parsing, CairoSVG rendering, marker inspection,
+full-size PNG inspection을 사용했다.
 
 ## P0/P1 Gate
 

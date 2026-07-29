@@ -1,31 +1,31 @@
-# Issue #40 Spec Review
+# Issue #40 명세 리뷰
 
-## Verdict
+## 판정
 
 - Gate: PASS
 - P0: 0
 - P1: 0
-- Reviewer stance: Step 2-R spec review against issue #40, parent #28, v0.4.0
-  milestone constraints, and existing workshop patterns.
+- reviewer stance: issue #40, parent #28, v0.4.0 milestone constraint, existing
+  workshop pattern을 기준으로 한 Step 2-R spec review.
 
-## Findings
+## finding
 
-No P0/P1 blockers found.
+P0/P1 blocker는 발견되지 않았다.
 
-## Checks
+## 점검
 
-| Check | Result | Evidence |
+| 점검 | 결과 | 근거 |
 |---|---|---|
-| Issue acceptance covered | PASS | Design maps deterministic output, retry, skip, fail-fast, README fields, and tests. |
-| Scope bounded | PASS | Non-goals exclude durable engine, queue, database, scheduler, and observability dependency. |
-| Package lesson clear | PASS | Design uses `workreport.Aggregate` directly instead of wrapping another workflow runner example. |
-| API deterministic | PASS | Stable DTO omits runtime timestamps and defines status mapping. |
-| Diagram requirement | PASS | Scenario, architecture, and sequence PNG/SVG assets are explicitly required. |
-| Testability | PASS | Focused endpoint, policy, retry, skip, cancellation, and race checks are listed. |
+| issue acceptance 포함 | PASS | design은 deterministic output, retry, skip, fail-fast, README field, test를 매핑한다. |
+| scope bounded | PASS | non-goal은 durable engine, queue, database, scheduler, observability dependency를 제외한다. |
+| package lesson 명확성 | PASS | design은 다른 workflow runner example을 감싸지 않고 `workreport.Aggregate`를 직접 사용한다. |
+| API deterministic | PASS | stable DTO는 runtime timestamp를 생략하고 status mapping을 정의한다. |
+| diagram requirement | PASS | scenario, architecture, sequence PNG/SVG asset이 명시적으로 요구된다. |
+| testability | PASS | focused endpoint, policy, retry, skip, cancellation, race check가 나열되어 있다. |
 
-## Residual Risks
+## 잔여 위험
 
-- HTTP `207 Multi-Status` is less common than `200` or `409`; README must explain
-  that the report body remains the source of truth for partial runs.
-- `aborted` is used for caller-skipped work because `workreport` has no `skipped`
-  status; README must make that mapping explicit.
+- HTTP `207 Multi-Status`는 `200`이나 `409`보다 덜 일반적이다. README는 partial run에서
+  report body가 계속 source of truth임을 설명해야 한다.
+- `workreport`에는 `skipped` status가 없으므로 caller-skipped work에는 `aborted`를
+  사용한다. README는 이 mapping을 명시해야 한다.

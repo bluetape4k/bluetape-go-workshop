@@ -21,14 +21,14 @@ const defaultSearchLimit = 20
 
 var contentIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
 
-// ServiceOption customizes service-owned infrastructure.
+// ServiceOption 은 service가 소유하는 infrastructure를 조정한다.
 type ServiceOption func(*serviceOptions) error
 
 type serviceOptions struct {
 	clock func() time.Time
 }
 
-// WithClock injects the non-blocking clock used while committing records.
+// WithClock 은 record commit 중 사용할 non-blocking clock을 주입한다.
 func WithClock(clock func() time.Time) ServiceOption {
 	return func(options *serviceOptions) error {
 		if clock == nil {
@@ -39,7 +39,7 @@ func WithClock(clock func() time.Time) ServiceOption {
 	}
 }
 
-// Service reuses immutable text processors and owns a bounded in-memory store.
+// Service 는 불변 text processor를 재사용하고 제한된 in-memory store를 소유한다.
 type Service struct {
 	config            ServiceConfig
 	detector          *language.Detector
@@ -53,7 +53,7 @@ type Service struct {
 	records map[string]*Record
 }
 
-// NewService validates configuration and builds application-owned processors.
+// NewService 는 configuration을 검증하고 애플리케이션 소유 processor를 만든다.
 func NewService(config ServiceConfig, options ...ServiceOption) (*Service, error) {
 	if err := validateServiceConfig(config); err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func defaultBlockwordEntries() []textsearch.BlockwordEntry {
 	}
 }
 
-// Create routes, moderates, prepares, and atomically stores one content record.
+// Create 는 content record 하나를 routing, moderation, preparation한 뒤 원자적으로 저장한다.
 func (s *Service) Create(ctx context.Context, request CreateRequest) (Record, error) {
 	if !s.ready() {
 		return Record{}, ErrInvalidConfig
@@ -207,7 +207,7 @@ func (s *Service) Create(ctx context.Context, request CreateRequest) (Record, er
 	return cloneRecord(stored), nil
 }
 
-// Get returns one record by canonical content ID.
+// Get 은 표준 content ID로 record 하나를 반환한다.
 func (s *Service) Get(ctx context.Context, contentID string) (Record, error) {
 	if !s.ready() {
 		return Record{}, ErrInvalidConfig
@@ -230,7 +230,7 @@ func (s *Service) Get(ctx context.Context, contentID string) (Record, error) {
 	return result, nil
 }
 
-// Search returns accepted records matching all prepared terms and metadata filters.
+// Search 는 준비된 모든 term과 metadata filter에 일치하는 accepted record를 반환한다.
 func (s *Service) Search(ctx context.Context, request SearchRequest) (SearchResponse, error) {
 	if !s.ready() {
 		return SearchResponse{}, ErrInvalidConfig

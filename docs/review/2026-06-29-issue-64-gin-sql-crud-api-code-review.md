@@ -1,16 +1,16 @@
 # Code review: issue #64 Gin SQL CRUD API
 
-## Scope
+## 범위
 
-- New runnable example: `examples/gin-sql-crud-api`
-- New README diagrams for the HTTP/SQL architecture and CRUD request sequence
-- Root README navigation and run instructions
+- 새 runnable example: `examples/gin-sql-crud-api`
+- HTTP/SQL architecture와 CRUD request sequence를 위한 새 README diagram
+- root README navigation과 run instruction
 
-## Findings
+## 발견 사항
 
 P0=0 P1=0
 
-## Evidence
+## 검증 자료
 
 - `go run ./examples/gin-sql-crud-api`
 - `go test -count=1 ./examples/gin-sql-crud-api/...`
@@ -20,22 +20,19 @@ P0=0 P1=0
 - CairoSVG render for:
   - `docs/images/readme-diagrams/gin-sql-crud-api-architecture.png`
   - `docs/images/readme-diagrams/gin-sql-crud-api-sequence.png`
-- PNG inspection for clipping/overlap after render
+- render 이후 clipping/overlap에 대한 PNG inspection
 - README local link/image check: `checked 284 local markdown links/images across 4 files`
 
-## Notes
+## 메모
 
-- Gin handlers own request parsing, timeouts, response projection, and stable
-  public errors.
-- `Repository` remains usable without Gin and accepts `sqlkit` query/execution
-  interfaces so a later service boundary can pass either `*sql.DB` or `*sql.Tx`.
-- The diagram skill helper scripts referenced by local guidance were not present
-  at `references/diagram-geometry-audit.py` and
-  `references/diagram-endpoint-audit.py`; SVG XML validation, CairoSVG render,
-  and PNG inspection were used as fallback evidence.
+- Gin handler는 request parsing, timeout, response projection, stable public error를 소유한다.
+- `Repository`는 Gin 없이도 사용할 수 있고 `sqlkit` query/execution interface를 받으므로, 이후
+  service boundary가 `*sql.DB` 또는 `*sql.Tx`를 전달할 수 있다.
+- local guidance가 참조한 diagram skill helper script는 `references/diagram-geometry-audit.py`와
+  `references/diagram-endpoint-audit.py`에 없었다. fallback evidence로 SVG XML validation,
+  CairoSVG render, PNG inspection을 사용했다.
 
-## Residual Risk
+## 잔여 Risk
 
-- Authentication, authorization, stable pagination tokens, optimistic
-  versioning, and external migration orchestration are documented production
-  follow-ups rather than #64 implementation scope.
+- authentication, authorization, stable pagination token, optimistic versioning, external
+  migration orchestration은 #64 implementation scope가 아니라 문서화된 production follow-up이다.

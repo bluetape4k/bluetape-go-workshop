@@ -1,45 +1,45 @@
-# Issue #41 Design: Batch Migration Checkpoint Restart Example
+# Issue #41 설계: Batch Migration Checkpoint Restart 예제
 
-## Goal
+## 목표
 
-Add a focused milestone 0.5.0 batch example that teaches checkpoint restore for
-an account migration job. The example must prove that a completed chunk is not
-reprocessed after restart.
+Account migration job에서 checkpoint restore를 설명하는 집중 milestone 0.5.0
+batch 예제를 추가한다. 이 예제는 restart 이후 완료된 chunk가 다시 처리되지
+않는다는 점을 증명해야 한다.
 
-## Non-Goals
+## 비목표
 
 - Durable queue processing.
-- Distributed scheduling or leader election.
+- Distributed scheduling 또는 leader election.
 - HTTP/Gin operations API.
 - Database-backed checkpoint storage.
-- Partial writer side-effect replay; that is covered by
-  `chunked-csv-import-checkpoint`.
+- Partial writer side-effect replay. 이는 `chunked-csv-import-checkpoint`에서
+  다룬다.
 
-## Example
+## 예제
 
-Path:
+경로:
 
 - `examples/account-migration-checkpoint-restart`
 
-Domain:
+도메인:
 
-- `LegacyAccount`: deterministic input row.
-- `TargetAccount`: normalized migrated row.
+- `LegacyAccount`: 결정적 input row.
+- `TargetAccount`: 정규화된 migrated row.
 - `MigrationCheckpoint`: `{next_index}` cursor.
-- `RecordingCheckpointStore`: small in-memory `batch.CheckpointStore` wrapper
-  that records load/save activity for demo output and tests.
-- `TargetAccountStore`: idempotent in-memory sink with write/read logs.
+- `RecordingCheckpointStore`: demo output과 테스트를 위해 load/save activity를
+  기록하는 작은 in-memory `batch.CheckpointStore` wrapper.
+- `TargetAccountStore`: write/read log를 가진 idempotent in-memory sink.
 
-Constants:
+상수:
 
 - `JobName = "account-migration"`
 - `StepName = "legacy-account-migration"`
 - `DefaultCheckpointKey = "account-migration-v1"`
 - `DefaultChunkSize = 2`
 
-## Scenario Contract
+## 시나리오 계약
 
-Input accounts:
+입력 account:
 
 - `acct-1001`
 - `acct-1002`
@@ -47,102 +47,103 @@ Input accounts:
 - `acct-1004`
 - `acct-1005`
 
-First run:
+첫 번째 실행:
 
-- reads and writes `acct-1001`, `acct-1002`,
-- saves checkpoint `next_index=2`,
-- fails while processing `acct-1003`,
-- leaves target store with two migrated accounts.
+- `acct-1001`, `acct-1002`를 읽고 쓴다.
+- checkpoint `next_index=2`를 저장한다.
+- `acct-1003` 처리 중 실패한다.
+- target store에는 migrated account 두 개가 남는다.
 
-Restart run:
+Restart 실행:
 
-- loads checkpoint `next_index=2`,
-- starts from `acct-1003`,
-- writes `acct-1003`, `acct-1004`, `acct-1005`,
-- saves final checkpoint `next_index=5`,
-- proves `acct-1001`, `acct-1002` were not read or written again.
+- checkpoint `next_index=2`를 load한다.
+- `acct-1003`부터 시작한다.
+- `acct-1003`, `acct-1004`, `acct-1005`를 쓴다.
+- final checkpoint `next_index=5`를 저장한다.
+- `acct-1001`, `acct-1002`가 다시 읽히거나 쓰이지 않았음을 증명한다.
 
-## API and Error Contract
+## API 및 오류 계약
 
-Public package API should stay example-sized:
+Public package API는 예제 크기를 유지해야 한다.
 
 - `RunDemo(ctx context.Context) (DemoResult, error)`
 - `RunMigration(ctx context.Context, options RunOptions) (MigrationRun, error)`
-- constructors for reader/store/sink where tests need them.
+- 테스트에 필요한 reader/store/sink constructor.
 
-Sentinel errors:
+Sentinel error:
 
 - `ErrInvalidAccount`
 - `ErrMigrationCrash`
 - `ErrInvalidCheckpoint`
 - `ErrDuplicateAccount`
 
-Errors returned from processor, reader restore, and writer must wrap sentinels
-with `%w` so tests and callers can use `errors.Is`.
+Processor, reader restore, writer가 반환하는 error는 테스트와 caller가
+`errors.Is`를 사용할 수 있도록 sentinel을 `%w`로 wrap해야 한다.
 
-`nil` context is normalized to `context.Background()`.
+`nil` context는 `context.Background()`로 정규화한다.
 
-## Checkpoint Contract
+## Checkpoint 계약
 
-- The checkpoint value must be a typed `MigrationCheckpoint`.
-- The stored value must include only `NextIndex`.
-- `Restore` must reject wrong types and out-of-range cursor values.
-- Checkpoint save must happen only through `batch.Step` after successful chunk
-  writes or safe filtered/skipped items.
-- `RunMigration` must accept any `batch.CheckpointStore`; the demo uses
-  `RecordingCheckpointStore`.
+- Checkpoint 값은 typed `MigrationCheckpoint`여야 한다.
+- 저장된 값은 `NextIndex`만 포함해야 한다.
+- `Restore`는 잘못된 type과 범위를 벗어난 cursor 값을 거부해야 한다.
+- Checkpoint save는 성공한 chunk write 또는 안전하게 filtered/skipped 된 item
+  이후 `batch.Step`을 통해서만 일어나야 한다.
+- `RunMigration`은 어떤 `batch.CheckpointStore`도 받을 수 있어야 하며, demo는
+  `RecordingCheckpointStore`를 사용한다.
 
-## Concurrency and Stress Contract
+## 동시성 및 Stress 계약
 
-The example has shared mutable state in the checkpoint store and target store,
-so tests must include bounded stress coverage:
+이 예제는 checkpoint store와 target store에 공유 mutable state가 있으므로,
+테스트는 bounded stress coverage를 포함해야 한다.
 
-- concurrent complete demo runs with independent stores/sinks,
-- concurrent store/sink access with uniqueness and ordering assertions,
-- stress tests pass under normal `go test`,
-- the same stress tests pass under `go test -race`.
+- 독립 store/sink를 사용하는 동시 complete demo run.
+- uniqueness와 ordering assertion을 포함한 concurrent store/sink access.
+- stress test가 일반 `go test`에서 통과한다.
+- 같은 stress test가 `go test -race`에서도 통과한다.
 
-## Documentation and Diagram Contract
+## 문서 및 다이어그램 계약
 
-Example README files must include:
+예제 README 파일은 다음을 포함해야 한다.
 
 - Example Scenario,
 - Architecture,
 - Sequence Diagram,
-- checkpoint key and chunk size,
+- checkpoint key와 chunk size,
 - restart contract,
-- tests and production hardening.
+- test와 production hardening.
 
-Diagram assets:
+다이어그램 자산:
 
 - `account-migration-checkpoint-restart-scenario.{dot,plain,svg,png}`
 - `account-migration-checkpoint-restart-architecture.{dot,plain,svg,png}`
 - `account-migration-checkpoint-restart-sequence.{dot,plain,svg,png}`
 - matching `*-graphviz.svg/png` evidence files.
 
-Final README embeds must use PNG only.
+최종 README embed는 PNG만 사용해야 한다.
 
-## Acceptance Tests
+## Acceptance Test
 
-Required tests:
+필수 테스트:
 
-- first run fails after checkpointed first chunk and restart completes,
-- completed first chunk is not reprocessed on restart,
-- final checkpoint is `next_index=5`,
-- invalid checkpoint type and range fail with `ErrInvalidCheckpoint`,
-- cancellation before work returns `batch.StatusCancelled` and leaves no writes,
-- cancellation during processing returns cancelled status and does not retry,
-- duplicate target write fails with `ErrDuplicateAccount`,
-- report projection omits runtime timestamps,
+- 첫 번째 실행은 checkpoint된 첫 chunk 이후 실패하고 restart는 완료된다.
+- 완료된 첫 chunk는 restart에서 다시 처리되지 않는다.
+- final checkpoint는 `next_index=5`다.
+- 잘못된 checkpoint type과 range는 `ErrInvalidCheckpoint`로 실패한다.
+- 작업 전 cancellation은 `batch.StatusCancelled`를 반환하고 write를 남기지
+  않는다.
+- 처리 중 cancellation은 cancelled status를 반환하고 retry하지 않는다.
+- duplicate target write는 `ErrDuplicateAccount`로 실패한다.
+- report projection은 런타임 timestamp를 생략한다.
 - bounded stress normal/race coverage.
 
-## Step 2 Checklist Completion Report
+## Step 2 Checklist 완료 보고
 
-| Item | Status | Notes |
+| 항목 | 상태 | 메모 |
 |------|--------|-------|
-| Target repository confirmed | Done | `bluetape4k/bluetape-go-workshop` worktree on `origin/develop`. |
-| Relevant memory/GNO searched | Done | GNO found bluetape-go #5/#30/#153 and workshop #73 artifacts. |
-| User intent and boundaries clear | Done | User asked to continue next example; #41 is the next focused prerequisite before #75. |
-| Existing APIs inspected | Done | `batch.Step`, `CheckpointReader`, `CheckpointStore`, `MemoryCheckpointStore`. |
-| Race/stress expectations explicit | Done | Required in spec for shared state, checkpoint, ordering, and uniqueness contracts. |
-| Diagram requirements explicit | Done | Scenario, Architecture, Sequence Diagram with PNG embeds and Graphviz evidence. |
+| Target repository confirmed | 완료 | `origin/develop` 기준 `bluetape4k/bluetape-go-workshop` worktree. |
+| Relevant memory/GNO searched | 완료 | GNO에서 bluetape-go #5/#30/#153 및 workshop #73 산출물을 확인했다. |
+| User intent and boundaries clear | 완료 | 사용자는 다음 예제 진행을 요청했고, #41은 #75 이전의 다음 집중 prerequisite이다. |
+| Existing APIs inspected | 완료 | `batch.Step`, `CheckpointReader`, `CheckpointStore`, `MemoryCheckpointStore`. |
+| Race/stress expectations explicit | 완료 | 공유 상태, checkpoint, ordering, uniqueness 계약에 필요하다고 spec에 명시했다. |
+| Diagram requirements explicit | 완료 | PNG embed와 Graphviz evidence를 포함한 Scenario, Architecture, Sequence Diagram. |

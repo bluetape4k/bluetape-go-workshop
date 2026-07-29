@@ -1,58 +1,52 @@
-# Issue #56 Audit Order History Lessons
+# Issue #56 Audit Order History Lesson
 
-## Context
+## 맥락
 
-The first 0.9.0-track workshop example needed to teach immutable order audit
-history without absorbing the HTTP, SQL outbox, or Redis Streams lessons owned
-by later issues. bluetape-go v0.18.0 already supplies validated audit events,
-entries, in-memory storage, revision checks, duplicate detection, and queries.
+첫 0.9.0-track workshop example은 이후 issue가 담당하는 HTTP, SQL outbox, Redis Streams
+lesson을 흡수하지 않고 immutable order audit history를 설명해야 했다. bluetape-go v0.18.0은
+이미 validated audit event, entry, in-memory storage, revision check, duplicate detection,
+query를 제공한다.
 
-## Decision
+## 결정
 
-The service keeps a mutable teaching projection and appends one audit entry
-before every state mutation. It holds a service mutex across the in-memory
-append so revision selection, append, and projection assignment form one visible
-critical section. Append success is the commit point: cancellation is checked
-before and during append, never between successful append and the infallible map
-assignment.
+service는 mutable teaching projection을 유지하고 모든 state mutation 전에 audit entry 하나를
+append한다. in-memory append 동안 service mutex를 잡아 revision selection, append, projection
+assignment가 하나의 보이는 critical section이 되게 한다. append success가 commit point다.
+cancellation은 append 전과 append 중에만 확인하고, successful append와 실패하지 않는 map
+assignment 사이에서는 확인하지 않는다.
 
-Stable caller-owned command IDs become both event IDs and idempotency keys.
-Duplicate local retries return an `audit.ValidationError` compatible with both
-`errors.Is(err, audit.ErrRevisionConflict)` and `errors.As`, matching
-repository-originated conflicts.
+stable caller-owned command ID는 event ID와 idempotency key가 모두 된다. duplicate local retry는
+repository-originated conflict와 맞게 `errors.Is(err, audit.ErrRevisionConflict)` 및
+`errors.As`와 호환되는 `audit.ValidationError`를 반환한다.
 
-## Surprise and Review Miss
+## 의외였던 점과 Review 누락
 
-The first command implementation validated input before checking whether the
-service was configured. A zero-value service therefore returned
-`ErrInvalidCommand` for malformed commands instead of the approved
-`ErrInvalidConfig`. Pre-PR review found the ordering mismatch; a RED test fixed
-the contract for zero values and nil receivers.
+첫 command implementation은 service configured 여부를 확인하기 전에 input을 validate했다.
+따라서 zero-value service는 malformed command에 대해 승인된 `ErrInvalidConfig` 대신
+`ErrInvalidCommand`를 반환했다. pre-PR review가 ordering mismatch를 찾았고, RED test가
+zero value와 nil receiver contract를 고쳤다.
 
-The first concurrency command matched only one of two intended tests and the
-unrelated-order case asserted errors without checking every projection/history.
-Both tests now share `^TestServiceConcurrent`, assert exact 16-goroutine
-outcomes, and run 20 times before race detection.
+첫 concurrency command는 의도한 test 두 개 중 하나만 match했고 unrelated-order case는 모든
+projection/history를 확인하지 않고 error만 assert했다. 두 test는 이제 `^TestServiceConcurrent`를
+공유하고 정확한 16-goroutine outcome을 assert하며 race detection 전에 20회 실행한다.
 
-The first `make ci` run failed at `revive` with 22 missing package/export doc
-comments. The repository requires a comment for every exported error and status
-constant, not only the surrounding block. Adding precise English API comments
-reduced the result to `0 issues` before the full gate was rerun.
+첫 `make ci` run은 package/export doc comment 22개 누락으로 `revive`에서 실패했다. 이
+repository는 surrounding block뿐 아니라 모든 exported error와 status constant에 comment를
+요구한다. precise English API comment를 추가해 결과를 `0 issues`로 줄인 뒤 full gate를 다시
+실행했다.
 
-## Outcome and Proof
+## 결과와 Proof
 
-- Lifecycle, invalid transition, duplicate, repository failure, cancellation,
-  defensive copy, bounded query, and concurrent reuse tests pass.
-- The exact CLI JSON is protected by a golden file and a writer-error test.
-- English and Korean READMEs state the same commands, behavior, and production
-  limits.
-- Focused tests, 20 stress repetitions, focused race tests, `go run`, diff
-  checks, and repository-wide `make ci` provide the validation chain.
+- lifecycle, invalid transition, duplicate, repository failure, cancellation,
+  defensive copy, bounded query, concurrent reuse test가 통과한다.
+- exact CLI JSON은 golden file과 writer-error test로 보호된다.
+- 영어/한국어 README는 같은 command, behavior, production limit를 설명한다.
+- focused test, 20회 stress repetition, focused race test, `go run`, diff check,
+  repository-wide `make ci`가 validation chain을 제공한다.
 
-## Future Guard
+## 향후 Guard
 
-Do not copy the process-wide lock into a durable adapter. Database-backed order
-state and audit delivery need a caller-owned SQL transaction/outbox boundary,
-storage pagination, retention, migration, access-control, and redaction policy.
-Treat a query limit as a returned-cardinality bound only: the v0.18.0 memory
-repository still scans and copies O(total stored entries).
+process-wide lock을 durable adapter로 복사하지 않는다. database-backed order state와 audit
+delivery에는 caller-owned SQL transaction/outbox boundary, storage pagination, retention,
+migration, access-control, redaction policy가 필요하다. query limit는 returned-cardinality
+bound로만 취급한다. v0.18.0 memory repository는 여전히 O(total stored entries)를 scan/copy한다.

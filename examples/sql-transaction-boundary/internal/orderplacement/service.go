@@ -1,4 +1,4 @@
-// Package orderplacement demonstrates an explicit SQL transaction boundary.
+// Package orderplacement 는 명시적인 SQL 트랜잭션 경계를 보여준다.
 package orderplacement
 
 import (
@@ -19,15 +19,15 @@ const (
 )
 
 var (
-	// ErrInvalidOrder reports invalid order placement input.
+	// ErrInvalidOrder 는 유효하지 않은 주문 생성 입력을 나타낸다.
 	ErrInvalidOrder = errors.New("orderplacement: invalid order")
-	// ErrInsufficientStock reports a product stock conflict inside the transaction.
+	// ErrInsufficientStock 은 트랜잭션 내부의 상품 재고 충돌을 나타낸다.
 	ErrInsufficientStock = errors.New("orderplacement: insufficient stock")
-	// ErrPaymentRejected simulates a downstream failure after stock has been debited.
+	// ErrPaymentRejected 는 재고 차감 후 발생한 다운스트림 실패를 시뮬레이션한다.
 	ErrPaymentRejected = errors.New("orderplacement: payment rejected")
 )
 
-// Product is the stock row read and updated inside the transaction.
+// Product 는 트랜잭션 안에서 읽고 갱신하는 재고 행이다.
 type Product struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
@@ -35,13 +35,13 @@ type Product struct {
 	PriceCents int64  `json:"price_cents"`
 }
 
-// LineRequest is one requested order line.
+// LineRequest 는 요청된 주문 품목 한 줄이다.
 type LineRequest struct {
 	ProductID string `json:"product_id"`
 	Quantity  int    `json:"quantity"`
 }
 
-// PlaceOrderRequest is the service input.
+// PlaceOrderRequest 는 서비스 입력이다.
 type PlaceOrderRequest struct {
 	OrderID       string        `json:"order_id"`
 	CustomerID    string        `json:"customer_id"`
@@ -50,21 +50,21 @@ type PlaceOrderRequest struct {
 	RejectPayment bool          `json:"reject_payment"`
 }
 
-// PlacedOrder is returned only after the transaction commits.
+// PlacedOrder 는 트랜잭션이 commit 된 뒤에만 반환된다.
 type PlacedOrder struct {
 	OrderID    string `json:"order_id"`
 	LineCount  int    `json:"line_count"`
 	TotalCents int64  `json:"total_cents"`
 }
 
-// StatementSnapshot is an inspectable SQL statement plus ordered arguments.
+// StatementSnapshot 은 검토 가능한 SQL 문과 순서가 있는 인자 목록이다.
 type StatementSnapshot struct {
 	Name string `json:"name"`
 	SQL  string `json:"sql"`
 	Args []any  `json:"args,omitempty"`
 }
 
-// Preview documents the runnable transaction lesson.
+// Preview 는 실행 가능한 트랜잭션 학습 내용을 문서화한다.
 type Preview struct {
 	Scenario     string              `json:"scenario"`
 	Boundary     string              `json:"transaction_boundary"`
@@ -75,13 +75,13 @@ type Preview struct {
 	TestCommand  string              `json:"test_command"`
 }
 
-// Service owns transaction lifetime and orchestrates narrow repositories.
+// Service 는 트랜잭션 수명을 소유하고 좁은 repository 들을 오케스트레이션한다.
 type Service struct {
 	products ProductRepository
 	orders   OrderRepository
 }
 
-// NewService returns a transaction-bound order placement service.
+// NewService 는 트랜잭션 경계가 있는 주문 생성 서비스를 반환한다.
 func NewService() Service {
 	return Service{
 		products: ProductRepository{},
@@ -89,7 +89,7 @@ func NewService() Service {
 	}
 }
 
-// NewPreview builds a readable transaction contract snapshot.
+// NewPreview 는 읽기 쉬운 트랜잭션 계약 snapshot 을 구성한다.
 func NewPreview() (Preview, error) {
 	products := ProductRepository{}
 	orders := OrderRepository{}
@@ -137,7 +137,7 @@ func NewPreview() (Preview, error) {
 	}, nil
 }
 
-// PlaceOrder commits stock debit and order rows together or rolls all changes back.
+// PlaceOrder 는 재고 차감과 주문 행을 함께 commit 하거나 모든 변경을 rollback 한다.
 func (svc Service) PlaceOrder(ctx context.Context, db *sql.DB, req PlaceOrderRequest) (PlacedOrder, error) {
 	if err := validateRequest(req); err != nil {
 		return PlacedOrder{}, err
@@ -191,10 +191,10 @@ func (svc Service) PlaceOrder(ctx context.Context, db *sql.DB, req PlaceOrderReq
 	return placed, nil
 }
 
-// ProductRepository owns product row locking and stock updates.
+// ProductRepository 는 상품 행 잠금과 재고 갱신을 소유한다.
 type ProductRepository struct{}
 
-// LockByID locks product rows in deterministic product_id order.
+// LockByID 는 결정적인 product_id 순서로 상품 행을 잠근다.
 func (repo ProductRepository) LockByID(ctx context.Context, db sqlkit.Queryer, ids []string) ([]Product, error) {
 	stmt, err := repo.lockSQL(ids)
 	if err != nil {
@@ -203,7 +203,7 @@ func (repo ProductRepository) LockByID(ctx context.Context, db sqlkit.Queryer, i
 	return sqlkit.QueryAll(ctx, db, stmt.SQL, scanProduct, stmt.Args...)
 }
 
-// Debit decrements product stock.
+// Debit 는 상품 재고를 차감한다.
 func (repo ProductRepository) Debit(ctx context.Context, db sqlkit.Execer, id string, quantity int) error {
 	stmt, err := repo.debitSQL(id, quantity)
 	if err != nil {
@@ -213,13 +213,13 @@ func (repo ProductRepository) Debit(ctx context.Context, db sqlkit.Execer, id st
 	return err
 }
 
-// LockStatement returns the product lock SQL shown by the preview.
+// LockStatement 는 미리보기에 표시되는 상품 잠금 SQL을 반환한다.
 func (repo ProductRepository) LockStatement(ids []string) (StatementSnapshot, error) {
 	stmt, err := repo.lockSQL(ids)
 	return snapshot("products.lock_for_update", stmt, err)
 }
 
-// DebitStatement returns the product debit SQL shown by the preview.
+// DebitStatement 는 미리보기에 표시되는 상품 차감 SQL을 반환한다.
 func (repo ProductRepository) DebitStatement(id string, quantity int) (StatementSnapshot, error) {
 	stmt, err := repo.debitSQL(id, quantity)
 	return snapshot("products.debit_stock", stmt, err)
@@ -254,10 +254,10 @@ func (ProductRepository) debitSQL(id string, quantity int) (sqlkit.Statement, er
 	return sqlkit.NewStatement(`update sql_transaction_products set stock = stock - $1 where id = $2`, quantity, id), nil
 }
 
-// OrderRepository owns order header and line inserts.
+// OrderRepository 는 주문 header 와 line insert 를 소유한다.
 type OrderRepository struct{}
 
-// CreateOrder inserts an order header.
+// CreateOrder 는 주문 header 를 삽입한다.
 func (repo OrderRepository) CreateOrder(ctx context.Context, db sqlkit.Execer, orderID, customerID string, totalCents int64, createdAt time.Time) error {
 	stmt, err := repo.createOrderSQL(orderID, customerID, totalCents, createdAt)
 	if err != nil {
@@ -267,7 +267,7 @@ func (repo OrderRepository) CreateOrder(ctx context.Context, db sqlkit.Execer, o
 	return err
 }
 
-// CreateLine inserts an order line.
+// CreateLine 은 주문 line 을 삽입한다.
 func (repo OrderRepository) CreateLine(ctx context.Context, db sqlkit.Execer, orderID string, line LineRequest, unitPriceCents int64) error {
 	stmt, err := repo.createLineSQL(orderID, line, unitPriceCents)
 	if err != nil {
@@ -277,13 +277,13 @@ func (repo OrderRepository) CreateLine(ctx context.Context, db sqlkit.Execer, or
 	return err
 }
 
-// CreateOrderStatement returns the order insert SQL shown by the preview.
+// CreateOrderStatement 는 미리보기에 표시되는 주문 insert SQL을 반환한다.
 func (repo OrderRepository) CreateOrderStatement(orderID, customerID string, totalCents int64, createdAt time.Time) (StatementSnapshot, error) {
 	stmt, err := repo.createOrderSQL(orderID, customerID, totalCents, createdAt)
 	return snapshot("orders.create_header", stmt, err)
 }
 
-// CreateLineStatement returns the line insert SQL shown by the preview.
+// CreateLineStatement 는 미리보기에 표시되는 line insert SQL을 반환한다.
 func (repo OrderRepository) CreateLineStatement(orderID string, line LineRequest, unitPriceCents int64) (StatementSnapshot, error) {
 	stmt, err := repo.createLineSQL(orderID, line, unitPriceCents)
 	return snapshot("orders.create_line", stmt, err)

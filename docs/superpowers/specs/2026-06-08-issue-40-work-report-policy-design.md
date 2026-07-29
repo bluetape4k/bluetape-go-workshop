@@ -1,34 +1,35 @@
-# Issue #40 Design: Operations Report Policy Example
+# Issue #40 설계: Operations Report Policy 예제
 
-## Goal
+## 목표
 
-Add a v0.4.0 workshop example that teaches how to build deterministic
-application-facing output from `workreport.Report` and how
-`workreport.FailurePolicy` changes aggregate behavior.
+`workreport.Report`에서 결정적인 애플리케이션-facing 출력을 만드는 방법과
+`workreport.FailurePolicy`가 aggregate 동작을 어떻게 바꾸는지 설명하는
+v0.4.0 워크숍 예제를 추가한다.
 
-## Non-Goals
+## 비목표
 
-- Do not introduce a durable workflow engine, retry scheduler, queue, database,
-  or observability dependency.
-- Do not re-teach workflow runner composition from issue #39.
-- Do not mutate `workreport.Report` or expose runtime timestamps as API contract.
+- durable workflow engine, retry scheduler, queue, database, observability
+  의존성을 도입하지 않는다.
+- issue #39에서 다룬 workflow runner composition을 다시 설명하지 않는다.
+- `workreport.Report`를 변경하거나 런타임 timestamp를 API contract로 노출하지
+  않는다.
 
-## Example
+## 예제
 
-- Path: `examples/operations-report-policy`
-- Package: `internal/operations`
+- 경로: `examples/operations-report-policy`
+- 패키지: `internal/operations`
 - HTTP framework: Gin
-- Default port: `:8085`
+- 기본 포트: `:8085`
 
 ## API
 
 ### `GET /healthz`
 
-Returns `200 OK` with `{"status":"ok"}`.
+`{"status":"ok"}`와 함께 `200 OK`를 반환한다.
 
 ### `POST /operations/report`
 
-Request:
+요청:
 
 ```json
 {
@@ -40,18 +41,18 @@ Request:
 }
 ```
 
-Rules:
+규칙:
 
-- `run_id` is required after trimming whitespace.
-- `policy` accepts `stop_on_failure` and `continue_on_failure`.
-- `products_valid=false` makes `validate-products` fail.
-- `retry_partner_notification=true` makes `notify-partner` preserve a failed
-  first attempt and a completed retry as a nested partial report.
-- `skip_search_index=true` records `refresh-search-index` as `aborted` with a
-  caller-skip reason.
-- A pre-cancelled request context returns a cancelled root report.
+- `run_id`는 공백 trim 이후 필수다.
+- `policy`는 `stop_on_failure`와 `continue_on_failure`를 허용한다.
+- `products_valid=false`는 `validate-products`를 실패시킨다.
+- `retry_partner_notification=true`는 `notify-partner`가 실패한 첫 시도와
+  완료된 retry를 nested partial report로 보존하게 한다.
+- `skip_search_index=true`는 caller-skip reason과 함께 `refresh-search-index`를
+  `aborted`로 기록한다.
+- 미리 취소된 request context는 cancelled root report를 반환한다.
 
-Response:
+응답:
 
 ```json
 {
@@ -87,7 +88,7 @@ HTTP status mapping:
 
 ## Report Projection
 
-The response uses a stable DTO:
+응답은 안정적인 DTO를 사용한다.
 
 - `name`
 - `status`
@@ -99,40 +100,40 @@ The response uses a stable DTO:
 - `cancelled`
 - `children`
 
-The DTO omits `StartedAt` and `EndedAt` because they are runtime facts and make
-example assertions noisy.
+`StartedAt`과 `EndedAt`은 런타임 사실이며 예제 assertion을 불안정하게 만들기
+때문에 DTO에서 제외한다.
 
-## Diagrams
+## 다이어그램
 
-Generate and commit PNG plus SVG assets under `docs/images/readme-diagrams/`:
+`docs/images/readme-diagrams/` 아래에 PNG와 SVG 자산을 생성하고 commit한다.
 
 - `operations-report-policy-scenario`
 - `operations-report-policy-architecture`
 - `operations-report-policy-sequence`
 
-READMEs embed PNG only and keep labels in English for generated diagrams.
+README는 PNG만 embed하고, 생성된 다이어그램의 label은 영어로 유지한다.
 
-## Tests
+## 테스트
 
-Focused tests must cover:
+집중 테스트는 다음을 다뤄야 한다.
 
 - health endpoint
 - completed run
-- continue-on-failure preserves validation failure, retry evidence, skip report,
-  and deterministic summary counts
-- stop-on-failure truncates children after the first failed child
-- retry report structure
-- invalid policy and invalid request bodies
-- pre-cancelled request context mapping to cancelled report
-- race test over the example package
+- continue-on-failure가 validation failure, retry evidence, skip report,
+  결정적 summary count를 보존하는지
+- stop-on-failure가 첫 failed child 이후 children을 자르는지
+- retry report 구조
+- 유효하지 않은 policy와 request body
+- 미리 취소된 request context가 cancelled report로 mapping되는지
+- 예제 package 대상 race test
 
-## Production Hardening Notes
+## 운영 환경 Hardening 메모
 
-README hardening gaps must call out:
+README hardening gap은 다음을 명시해야 한다.
 
-- persist reports if callers need audit history
-- assign operation IDs/correlation IDs beyond the demo `run_id`
-- connect report DTOs to logs/metrics/traces at the service boundary
-- use a real retry policy/scheduler when retries cross request boundaries
-- distinguish caller-skipped work from operator-aborted work if the domain needs
-  separate status categories
+- 호출자가 audit history를 필요로 하면 report를 영속화한다.
+- demo `run_id`를 넘어서는 operation ID/correlation ID를 부여한다.
+- service boundary에서 report DTO를 log/metric/trace와 연결한다.
+- retry가 요청 경계를 넘는다면 실제 retry policy/scheduler를 사용한다.
+- 도메인에 별도 상태 범주가 필요하면 caller-skipped work와 operator-aborted
+  work를 구분한다.

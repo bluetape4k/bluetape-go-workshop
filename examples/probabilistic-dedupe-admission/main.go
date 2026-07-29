@@ -1,4 +1,4 @@
-// Package main runs the probabilistic dedupe admission example service.
+// Package main 은 확률적 중복 제거 입장 예제 서비스를 실행한다.
 package main
 
 import (

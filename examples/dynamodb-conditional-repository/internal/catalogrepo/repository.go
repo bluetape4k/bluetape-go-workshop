@@ -1,4 +1,4 @@
-// Package catalogrepo demonstrates DynamoDB conditional repository writes.
+// Package catalogrepo 는 DynamoDB conditional repository write를 보여준다.
 package catalogrepo
 
 import (
@@ -12,22 +12,22 @@ import (
 )
 
 var (
-	// ErrInvalidItem reports an item that cannot be stored as a catalog row.
+	// ErrInvalidItem 은 catalog row로 저장할 수 없는 item을 나타낸다.
 	ErrInvalidItem = errors.New("catalogrepo: invalid item")
-	// ErrConditionalConflict reports DynamoDB conditional write conflicts.
+	// ErrConditionalConflict 는 DynamoDB conditional write conflict를 나타낸다.
 	ErrConditionalConflict = errors.New("catalogrepo: conditional conflict")
-	// ErrDecodeItem reports a DynamoDB item shape that no longer matches the repository contract.
+	// ErrDecodeItem 은 repository 계약과 더 이상 맞지 않는 DynamoDB item shape를 나타낸다.
 	ErrDecodeItem = errors.New("catalogrepo: decode item")
 )
 
-// Client is the narrow DynamoDB client surface needed by Repository.
+// Client 는 Repository에 필요한 좁은 DynamoDB client surface다.
 type Client interface {
 	PutItem(context.Context, *dynamodb.PutItemInput, ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
 	UpdateItem(context.Context, *dynamodb.UpdateItemInput, ...func(*dynamodb.Options)) (*dynamodb.UpdateItemOutput, error)
 	Query(context.Context, *dynamodb.QueryInput, ...func(*dynamodb.Options)) (*dynamodb.QueryOutput, error)
 }
 
-// CatalogItem is the application-owned item shape stored in DynamoDB.
+// CatalogItem 은 DynamoDB에 저장되는 애플리케이션 소유 item shape다.
 type CatalogItem struct {
 	TenantID  string `json:"tenant_id"`
 	SKU       string `json:"sku"`
@@ -36,12 +36,12 @@ type CatalogItem struct {
 	UpdatedBy string `json:"updated_by"`
 }
 
-// Repository owns catalog conditional-write expressions and item mapping.
+// Repository 는 catalog conditional-write expression과 item mapping을 소유한다.
 type Repository struct {
 	Table string
 }
 
-// Preview describes the repository contract without contacting DynamoDB.
+// Preview 는 DynamoDB에 접속하지 않고 repository 계약을 설명한다.
 type Preview struct {
 	Table         string   `json:"table"`
 	ItemCount     int      `json:"item_count"`
@@ -52,7 +52,7 @@ type Preview struct {
 	SmokeTest     string   `json:"smoke_test"`
 }
 
-// NewRepository creates a DynamoDB catalog repository.
+// NewRepository 는 DynamoDB catalog repository를 만든다.
 func NewRepository(table string) (Repository, error) {
 	if table == "" {
 		return Repository{}, fmt.Errorf("%w: table is required", ErrInvalidItem)
@@ -60,7 +60,7 @@ func NewRepository(table string) (Repository, error) {
 	return Repository{Table: table}, nil
 }
 
-// NewPreview builds an inspectable local preview for README and go run output.
+// NewPreview 는 README와 go run 출력에서 확인할 수 있는 local preview를 만든다.
 func NewPreview(table string, items []CatalogItem) (Preview, error) {
 	if _, err := NewRepository(table); err != nil {
 		return Preview{}, err
@@ -89,7 +89,7 @@ func NewPreview(table string, items []CatalogItem) (Preview, error) {
 	}, nil
 }
 
-// CreateIfAbsent writes an item only when the pk/sk pair does not exist.
+// CreateIfAbsent 는 pk/sk 쌍이 없을 때만 item을 쓴다.
 func (r Repository) CreateIfAbsent(ctx context.Context, client Client, item CatalogItem) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -120,7 +120,7 @@ func (r Repository) CreateIfAbsent(ctx context.Context, client Client, item Cata
 	return fmt.Errorf("create catalog item %s/%s: %w", item.TenantID, item.SKU, err)
 }
 
-// UpdateName performs an optimistic item update using the expected version.
+// UpdateName 은 expected version을 사용해 optimistic item update를 수행한다.
 func (r Repository) UpdateName(ctx context.Context, client Client, tenantID, sku string, expectedVersion int, name, updatedBy string) (CatalogItem, error) {
 	if err := ctx.Err(); err != nil {
 		return CatalogItem{}, err
@@ -166,7 +166,7 @@ func (r Repository) UpdateName(ctx context.Context, client Client, tenantID, sku
 	return item, nil
 }
 
-// QueryTenant reads all catalog items for one tenant partition.
+// QueryTenant 는 tenant partition 하나의 모든 catalog item을 읽는다.
 func (r Repository) QueryTenant(ctx context.Context, client Client, tenantID string) ([]CatalogItem, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -204,7 +204,7 @@ func (r Repository) QueryTenant(ctx context.Context, client Client, tenantID str
 	return items, nil
 }
 
-// SampleItems returns enough data to demonstrate partition-key query behavior.
+// SampleItems 는 partition-key query 동작을 보여주기에 충분한 데이터를 반환한다.
 func SampleItems() []CatalogItem {
 	return []CatalogItem{
 		{TenantID: "tenant-alpha", SKU: "sku-1001", Name: "Road bike", Version: 1, UpdatedBy: "seed"},

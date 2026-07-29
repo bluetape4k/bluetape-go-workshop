@@ -1,37 +1,37 @@
-# Issue 38 Order Lifecycle State API Spec Review
+# Issue 38 Order Lifecycle State API 명세 리뷰
 
-## Scope
+## 범위
 
-- Spec:
+- 명세:
   `docs/superpowers/specs/2026-06-08-issue-38-order-lifecycle-state-api-design.md`
-- Research:
+- 리서치:
   `docs/superpowers/research/2026-06-08-issue-38-order-lifecycle-state-api-research.md`
-- Issue: #38, v0.4.0 Gin order lifecycle state API example.
-- Review gate: `bluetape4k-full-feature` Step 2-R.
-- Required reference loaded:
+- 이슈: #38, v0.4.0 Gin order lifecycle state API 예제.
+- review gate: `bluetape4k-full-feature` Step 2-R.
+- 로드한 필수 reference:
   `/Users/debop/.codex/skills/bluetape4k-full-feature/references/step-2r-spec-review.md`
 
-## Iteration Log
+## 반복 기록
 
-### Iteration 1
+### 반복 1
 
 | Lane | Finding | Severity | Resolution |
 | --- | --- | --- | --- |
-| Developer | Research said Gin was already available in `go.mod`, while current `go.mod` only has chi and no Gin dependency. | P1 | Updated research and spec to state that Gin is a deliberate new dependency allowed by issue #38 and the roadmap; unrelated dependencies remain rejected. |
-| User/caller | The spec's "no new dependencies" non-goal contradicted the explicit Gin requirement. | P1 | Changed the non-goal to allow Gin only. |
+| Developer | research는 Gin이 이미 `go.mod`에 있다고 했지만, 현재 `go.mod`에는 chi만 있고 Gin dependency가 없었다. | P1 | #38과 roadmap이 허용한 deliberate new dependency가 Gin이라고 research와 spec에 명시했다. unrelated dependency는 계속 거부한다. |
+| User/caller | spec의 "no new dependencies" non-goal이 explicit Gin requirement와 충돌했다. | P1 | non-goal을 Gin만 허용하도록 바꿨다. |
 
-### Iteration 2
+### 반복 2
 
-Re-reviewed the edited spec and research. No remaining P0/P1 findings.
+수정된 spec과 research를 다시 검토했다. 남은 P0/P1 finding은 없다.
 
-## Four-Perspective Review
+## 네 관점 리뷰
 
 | Perspective | P0 | P1 | P2 | P3 | Evidence |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Developer | 0 | 0 | 0 | 0 | Spec now scopes implementation to one Gin example directory, `state` only, and explicit dependency handling. |
-| Security | 0 | 0 | 0 | 0 | API has no auth claim, no payment secrets, no persistence, and maps malformed JSON separately from state conflicts. |
-| Ops/SRE | 0 | 0 | 0 | 0 | Spec includes health endpoint, request-context use, server timeout expectation through existing example pattern, and no external resources. |
-| User/caller | 0 | 0 | 0 | 0 | README tasks, unsupported production persistence caveat, finite-state-machine-vs-workflow explanation, and stable HTTP responses are specified. |
+| Developer | 0 | 0 | 0 | 0 | spec은 implementation을 하나의 Gin example directory, `state` only, explicit dependency handling으로 제한한다. |
+| Security | 0 | 0 | 0 | 0 | API에는 auth claim, payment secret, persistence가 없고 malformed JSON을 state conflict와 별도로 매핑한다. |
+| Ops/SRE | 0 | 0 | 0 | 0 | spec은 health endpoint, request-context use, 기존 example pattern을 통한 server timeout expectation, external resource 없음 등을 포함한다. |
+| User/caller | 0 | 0 | 0 | 0 | README task, unsupported production persistence caveat, finite-state-machine-vs-workflow explanation, stable HTTP response가 명시되어 있다. |
 
 ## Local 7-Tier Risk Review
 
@@ -49,14 +49,13 @@ Re-reviewed the edited spec and research. No remaining P0/P1 findings.
 
 | Severity | Count | Status |
 | --- | ---: | --- |
-| P0 | 0 | Clear |
-| P1 | 0 | Clear after Gin dependency contradiction was fixed |
-| P2 | 0 | Clear |
-| P3 | 0 | Clear |
+| P0 | 0 | clear |
+| P1 | 0 | Gin dependency contradiction 수정 뒤 clear |
+| P2 | 0 | clear |
+| P3 | 0 | clear |
 
-The spec is internally consistent after the dependency correction. No open
-questions remain for the user.
+dependency correction 뒤 spec은 내부적으로 일관된다. 사용자에게 남은 open question은 없다.
 
-## Step 2-R Verdict
+## Step 2-R 판정
 
-PASS. The spec is ready for Step 3 planning with `P0=0 P1=0`.
+PASS. spec은 `P0=0 P1=0` 상태로 Step 3 planning을 진행할 준비가 되었다.
