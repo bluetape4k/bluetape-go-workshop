@@ -13,9 +13,9 @@
       .life{stroke:#94a3b8;stroke-width:3;stroke-dasharray:12 14}.sep{stroke:#cbd5e1;stroke-width:3;stroke-dasharray:14 16}
       .arrow{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:5}
     </style>
-    <marker id="blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 Z" fill="#2563eb" stroke="#2563eb"/></marker>
-    <marker id="green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 Z" fill="#059669" stroke="#059669"/></marker>
-    <marker id="red" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 Z" fill="#dc2626" stroke="#dc2626"/></marker>
+    <marker id="blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none"/></marker>
+    <marker id="green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 Z" fill="#059669" stroke="#059669" stroke-dasharray="none"/></marker>
+    <marker id="red" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none"/></marker>
   </defs>
   <rect width="1800" height="1320" fill="#f8fafc"/>
   <text x="90" y="86" class="title">SQS Floci worker sequence</text>

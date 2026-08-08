@@ -21,19 +21,19 @@
       .msgOrange { stroke: #c2410c; stroke-width: 3; fill: none; marker-end: url(#arrowOrange); stroke-linecap: round; stroke-linejoin: round; }
       .return { stroke: #64748b; stroke-width: 2.5; fill: none; stroke-dasharray: 8 7; marker-end: url(#arrowGrey); stroke-linecap: round; stroke-linejoin: round; }
     </style>
-    <marker id="arrowBlue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="arrowBlue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M2,2 L14,8 L2,14 Z" fill="#334155" stroke="#334155" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="arrowGreen" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="arrowGreen" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M2,2 L14,8 L2,14 Z" fill="#047857" stroke="#047857" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="arrowCyan" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="arrowCyan" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M2,2 L14,8 L2,14 Z" fill="#0e7490" stroke="#0e7490" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="arrowOrange" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="arrowOrange" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M2,2 L14,8 L2,14 Z" fill="#c2410c" stroke="#c2410c" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="arrowGrey" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="arrowGrey" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M2,2 L14,8 L2,14 Z" fill="#64748b" stroke="#64748b" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
   </defs>

@@ -2,13 +2,13 @@
   <title id="title">Distributed JWT issue verify rotate sequence</title>
   <desc id="desc">Sequence of issuing a token, verifying it on another instance, rotating the key, and verifying the retained old token.</desc>
   <defs>
-    <marker id="seq-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 16 8 L 0 16 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="seq-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 16 8 L 0 16 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="seq-purple" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-purple" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 16 8 L 0 16 Z" fill="#7c3aed" stroke="#7c3aed" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
     <style>

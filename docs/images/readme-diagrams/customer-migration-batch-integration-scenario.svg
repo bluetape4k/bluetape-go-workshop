@@ -5,17 +5,17 @@
     <filter id="shadow" x="-10%" y="-18%" width="120%" height="145%">
       <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#203040" flood-opacity="0.10"/>
     </filter>
-    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#4f83bf"/>
+    <marker id="arrow-blue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="primary" data-tip-direction="positive-x">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#4f83bf" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-red" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#b85f68"/>
+    <marker id="arrow-red" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="primary" data-tip-direction="positive-x">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#b85f68" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-violet" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#755bc6"/>
+    <marker id="arrow-violet" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="primary" data-tip-direction="positive-x">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#755bc6" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-olive" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#6f8b45"/>
+    <marker id="arrow-olive" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="primary" data-tip-direction="positive-x">
+      <path d="M 2 2 L 12 7 L 2 12 Z" fill="#6f8b45" stroke-dasharray="none"/>
     </marker>
     <style>
       .canvas { fill: #f6f9fc; }
