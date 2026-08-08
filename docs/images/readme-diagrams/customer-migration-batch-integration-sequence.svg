@@ -5,20 +5,20 @@
     <filter id="shadow" x="-10%" y="-18%" width="120%" height="145%">
       <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#203040" flood-opacity="0.10"/>
     </filter>
-    <marker id="arrow-call" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3f7d9c"/>
+    <marker id="arrow-call" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 13 13" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3f7d9c" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-state" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#6e8f4f"/>
+    <marker id="arrow-state" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 13 13" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#6e8f4f" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-schedule" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#755bc6"/>
+    <marker id="arrow-schedule" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 13 13" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#755bc6" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-fail" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b86868"/>
+    <marker id="arrow-fail" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 13 13" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b86868" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-skip" markerWidth="13" markerHeight="13" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b9851b"/>
+    <marker id="arrow-skip" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 13 13" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b9851b" stroke-dasharray="none"/>
     </marker>
     <style>
       .canvas { fill: #fbfcf8; }

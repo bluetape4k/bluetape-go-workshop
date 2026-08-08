@@ -18,17 +18,17 @@
       .relay-flow { stroke: #4d75a3; marker-end: url(#arrow-relay); }
       .redis-flow { stroke: #b64b4b; marker-end: url(#arrow-redis); }
     </style>
-    <marker id="arrow-neutral" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2 2 L12 7 L2 12 Z" fill="#47616f"/>
+    <marker id="arrow-neutral" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#47616f" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-sql" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2 2 L12 7 L2 12 Z" fill="#4f7f68"/>
+    <marker id="arrow-sql" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#4f7f68" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-relay" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2 2 L12 7 L2 12 Z" fill="#4d75a3"/>
+    <marker id="arrow-relay" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#4d75a3" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrow-redis" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2 2 L12 7 L2 12 Z" fill="#b64b4b"/>
+    <marker id="arrow-redis" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x">
+      <path d="M2 2 L12 7 L2 12 Z" fill="#b64b4b" stroke-dasharray="none"/>
     </marker>
   </defs>
 

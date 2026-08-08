@@ -2,13 +2,13 @@
   <title id="title">DynamoDB batch write retry sequence</title>
   <desc id="desc">Sequence showing 25-item chunking, unprocessed-item retry, retry exhaustion, context cancellation, and typed AWS service errors.</desc>
   <defs>
-    <marker id="seq-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <marker id="seq-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="seq-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <marker id="seq-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="seq-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <marker id="seq-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#dc2626" stroke="#dc2626" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
   </defs>
