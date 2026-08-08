@@ -29,11 +29,11 @@
       .frame-label { fill: #ffffff; stroke: #f59e0b; stroke-width: 2; }
       .note { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; }
     </style>
-    <marker id="arrow-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#2563eb"/></marker>
-    <marker id="arrow-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#15803d"/></marker>
-    <marker id="arrow-amber" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#b45309"/></marker>
-    <marker id="arrow-teal" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#0f766e"/></marker>
-    <marker id="arrow-red" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 16 8 L 0 16 z" fill="#dc2626"/></marker>
+    <marker id="arrow-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 z" fill="#2563eb" stroke-dasharray="none"/></marker>
+    <marker id="arrow-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 z" fill="#15803d" stroke-dasharray="none"/></marker>
+    <marker id="arrow-amber" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 z" fill="#b45309" stroke-dasharray="none"/></marker>
+    <marker id="arrow-teal" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 z" fill="#0f766e" stroke-dasharray="none"/></marker>
+    <marker id="arrow-red" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x"><path d="M 0 0 L 16 8 L 0 16 z" fill="#dc2626" stroke-dasharray="none"/></marker>
   </defs>
 
   <rect width="1800" height="1500" fill="#f8fafc"/>

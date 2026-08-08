@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1480" height="840" viewBox="0 0 1480 840">
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#64748b"/></marker></defs>
+<defs><marker id="arrow" viewBox="0 0 14.2857 14.2857" refX="8" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse" data-role="secondary" data-tip-direction="positive-x"><path d="M 1.1429 1.4286 L 13.1428 7.1429 L 1.1429 12.8571 Z" fill="#64748b" stroke="#64748b" stroke-width="0" stroke-dasharray="none"/></marker></defs>
 <rect x="0" y="0" width="1480" height="840" rx="0" fill="#fffdf8" stroke="#fffdf8" stroke-width="0"/>
 <path d="M 90 92 L 90 760" fill="none" stroke="#f1f5f9" stroke-width="1" stroke-linecap="round"/>
 <path d="M 180 92 L 180 760" fill="none" stroke="#f1f5f9" stroke-width="1" stroke-linecap="round"/>

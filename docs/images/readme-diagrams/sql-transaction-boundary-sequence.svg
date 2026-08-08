@@ -15,14 +15,14 @@
       .err { stroke: #b91c1c; stroke-width: 3; fill: none; marker-end: url(#arrowRed); }
       .note { fill: #fefce8; stroke: #a16207; stroke-width: 2; rx: 8; }
     </style>
-    <marker id="arrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2,2 L12,7 L2,12 Z" fill="#334155"/>
+    <marker id="arrow" markerWidth="16" markerHeight="16" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#334155" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrowGreen" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2,2 L12,7 L2,12 Z" fill="#047857"/>
+    <marker id="arrowGreen" markerWidth="16" markerHeight="16" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#047857" stroke-dasharray="none"/>
     </marker>
-    <marker id="arrowRed" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M2,2 L12,7 L2,12 Z" fill="#b91c1c"/>
+    <marker id="arrowRed" markerWidth="16" markerHeight="16" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 14 14" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#b91c1c" stroke-dasharray="none"/>
     </marker>
   </defs>
   <rect class="bg" width="1320" height="800"/>

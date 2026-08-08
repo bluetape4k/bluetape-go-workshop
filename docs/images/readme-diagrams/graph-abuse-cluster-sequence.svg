@@ -52,22 +52,22 @@
       path.amber { stroke: #b07a35; marker-end: url(#seq-amber); }
       .error { stroke: #bd4b4b; stroke-dasharray: 7 6; marker-end: url(#seq-red); }
     </style>
-    <marker id="seq-blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-blue" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#3e7b9f" stroke="#3e7b9f" stroke-dasharray="none"/>
     </marker>
-    <marker id="seq-green" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-green" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#4f8b63" stroke="#4f8b63" stroke-dasharray="none"/>
     </marker>
-    <marker id="seq-teal" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-teal" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2f8f89" stroke="#2f8f89" stroke-dasharray="none"/>
     </marker>
-    <marker id="seq-purple" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-purple" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#8a5ca8" stroke="#8a5ca8" stroke-dasharray="none"/>
     </marker>
-    <marker id="seq-amber" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-amber" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b07a35" stroke="#b07a35" stroke-dasharray="none"/>
     </marker>
-    <marker id="seq-red" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="seq-red" viewBox="0 0 10 10" markerWidth="16" markerHeight="16" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse" data-role="sequence" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#bd4b4b" stroke="#bd4b4b" stroke-dasharray="none"/>
     </marker>
   </defs>

@@ -2,13 +2,13 @@
   <title id="title">SQL access strategy decision architecture</title>
   <desc id="desc">A workshop example comparing direct database/sql, sqlkit, generated SQL tools, and migration tooling boundaries.</desc>
   <defs>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto" data-role="primary" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto" data-role="primary" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
-    <marker id="arrow-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <marker id="arrow-slate" viewBox="0 0 12.7273 12.7273" refX="9" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto" data-role="primary" data-tip-direction="positive-x">
       <path d="M 0 0 L 10 5 L 0 10 Z" fill="#475569" stroke="#475569" stroke-dasharray="none" style="stroke-dasharray:none"/>
     </marker>
     <symbol id="postgresql-icon" viewBox="0 0 24 24">

@@ -2,11 +2,11 @@
   <title id="title">Measured shipping quote request sequence</title>
   <desc id="desc">Sequence diagram for parsing measurements, deriving volume and dimensional weight, then returning a quote.</desc>
   <defs>
-    <marker id="seq-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 16 8 L 0 16 Z" fill="#2563eb" stroke="#2563eb"/>
+    <marker id="seq-blue" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 16 8 L 0 16 Z" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none"/>
     </marker>
-    <marker id="seq-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M 0 0 L 16 8 L 0 16 Z" fill="#047857" stroke="#047857"/>
+    <marker id="seq-green" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 16 16" data-role="sequence" data-tip-direction="positive-x">
+      <path d="M 0 0 L 16 8 L 0 16 Z" fill="#047857" stroke="#047857" stroke-dasharray="none"/>
     </marker>
     <style>
       .canvas { fill: #f8fafc; }

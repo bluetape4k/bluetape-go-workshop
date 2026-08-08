@@ -2,10 +2,10 @@
   <title id="title">Account Migration Checkpoint Restart Architecture</title>
   <desc id="desc">Architecture for the local batch account migration using batch.Job, batch.Step, a checkpoint reader, account processor, target writer, checkpoint store, and target store.</desc>
   <defs>
-    <marker id="arch-blue" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#3f6f8f"/></marker>
-    <marker id="arch-green" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#5d8a62"/></marker>
-    <marker id="arch-purple" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#8a6bb0"/></marker>
-    <marker id="arch-amber" viewBox="0 0 8 8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="1,1 7,4 1,7" fill="#c07a42"/></marker>
+    <marker id="arch-blue" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse" data-role="secondary" data-tip-direction="positive-x"><path d="M 0.8 1 L 9.2 5 L 0.8 9 Z" fill="#3f6f8f" stroke="#3f6f8f" stroke-width="0" stroke-dasharray="none"/></marker>
+    <marker id="arch-green" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse" data-role="secondary" data-tip-direction="positive-x"><path d="M 0.8 1 L 9.2 5 L 0.8 9 Z" fill="#5d8a62" stroke="#5d8a62" stroke-width="0" stroke-dasharray="none"/></marker>
+    <marker id="arch-purple" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse" data-role="secondary" data-tip-direction="positive-x"><path d="M 0.8 1 L 9.2 5 L 0.8 9 Z" fill="#8a6bb0" stroke="#8a6bb0" stroke-width="0" stroke-dasharray="none"/></marker>
+    <marker id="arch-amber" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse" data-role="secondary" data-tip-direction="positive-x"><path d="M 0.8 1 L 9.2 5 L 0.8 9 Z" fill="#c07a42" stroke="#c07a42" stroke-width="0" stroke-dasharray="none"/></marker>
     <style>
       @font-face { font-family: 'Architects Daughter'; src: url('file:///Users/debop/Library/Fonts/ArchitectsDaughter-Regular.ttf') format('truetype'); }
       @font-face { font-family: 'Comic Mono'; src: url('file:///Users/debop/Library/Fonts/ComicMono.ttf') format('truetype'); }

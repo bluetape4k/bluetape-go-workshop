@@ -2,119 +2,119 @@
 <title id="title">bluetape-go-workshop example map</title>
 <desc id="desc">Repository overview of runnable Go examples grouped by learning route and runtime concern.</desc>
 <defs>
-<marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#2563eb" stroke="#2563eb" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
-<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#059669" stroke="#059669" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
-<marker id="arrowOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#ea580c" stroke="#ea580c" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
-<marker id="arrowPurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#7c3aed" stroke="#7c3aed" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
-<marker id="arrowRose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#e11d48" stroke="#e11d48" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
-<marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0,0 10,5 0,10" fill="#64748b" stroke="#64748b" stroke-dasharray="none" style="stroke-dasharray:none"/></marker>
+<marker id="arrowBlue" viewBox="0 0 11.6667 11.6667" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x"><path d="M 0.9333 1.1667 L 10.7334 5.8334 L 0.9333 10.5 Z" fill="#2563eb" stroke="#2563eb" stroke-width="0" stroke-dasharray="none" /></marker>
+<marker id="arrowGreen" viewBox="0 0 11.6667 11.6667" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x"><path d="M 0.9333 1.1667 L 10.7334 5.8334 L 0.9333 10.5 Z" fill="#059669" stroke="#059669" stroke-width="0" stroke-dasharray="none" /></marker>
+<marker id="arrowOrange" viewBox="0 0 11.6667 11.6667" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x"><path d="M 0.9333 1.1667 L 10.7334 5.8334 L 0.9333 10.5 Z" fill="#ea580c" stroke="#ea580c" stroke-width="0" stroke-dasharray="none" /></marker>
+<marker id="arrowPurple" viewBox="0 0 11.6667 11.6667" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x"><path d="M 0.9333 1.1667 L 10.7334 5.8334 L 0.9333 10.5 Z" fill="#7c3aed" stroke="#7c3aed" stroke-width="0" stroke-dasharray="none" /></marker>
+<marker id="arrowRose" viewBox="0 0 11.6667 11.6667" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x"><path d="M 0.9333 1.1667 L 10.7334 5.8334 L 0.9333 10.5 Z" fill="#e11d48" stroke="#e11d48" stroke-width="0" stroke-dasharray="none" /></marker>
+<marker id="arrowGray" viewBox="0 0 11.6667 11.6667" refX="9" refY="5" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse" data-role="primary" data-tip-direction="positive-x"><path d="M 0.9333 1.1667 L 10.7334 5.8334 L 0.9333 10.5 Z" fill="#64748b" stroke="#64748b" stroke-width="0" stroke-dasharray="none" /></marker>
 </defs>
 <style>text{letter-spacing:0}</style>
-<rect x="0" y="0" width="1280" height="920" rx="0" fill="#fffdf8" stroke="#fffdf8" stroke-width="0"/>
-<rect x="30" y="30" width="1220" height="860" rx="28" fill="#ffffff" stroke="#d8e2ea" stroke-width="2.4"/>
+<rect x="0" y="0" width="1280" height="920" rx="0" fill="#fffdf8" stroke="#fffdf8" stroke-width="0" />
+<rect x="30" y="30" width="1220" height="860" rx="28" fill="#ffffff" stroke="#d8e2ea" stroke-width="2.4" />
 <text x="640" y="74" font-family="Architects Daughter" font-size="34" font-weight="700" fill="#1f3448" text-anchor="middle">bluetape-go-workshop Example Map</text>
 <text x="640" y="104" font-family="Comic Mono" font-size="16" font-weight="400" fill="#4b6074" text-anchor="middle">Runnable applications that turn bluetape-go packages into realistic HTTP, cache, leadership, workflow, and batch scenarios.</text>
-<rect x="480" y="142" width="320" height="124" rx="16" fill="#f8fafc" stroke="#91a8b8" stroke-width="2.2"/>
-<path d="M 496,142 H 784 Q 800,142 800,158 V 184 H 480 V 158 Q 480,142 496,142 Z" fill="#9ec5d7" opacity="0.22"/>
+<rect x="480" y="142" width="320" height="124" rx="16" fill="#f8fafc" stroke="#91a8b8" stroke-width="2.2" />
+<path d="M 496,142 H 784 Q 800,142 800,158 V 184 H 480 V 158 Q 480,142 496,142 Z" fill="#9ec5d7" opacity="0.22" />
 <text x="498" y="171" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Workshop Contract</text>
 <text x="498" y="207" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">each example is runnable</text>
 <text x="498" y="225" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">README pair: English + Korean</text>
 <text x="498" y="243" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">diagrams explain source-backed behavior</text>
-<rect x="900" y="142" width="300" height="116" rx="18" fill="#f8fafc" stroke="#cad7e2" stroke-width="1.8"/>
+<rect x="900" y="142" width="300" height="116" rx="18" fill="#f8fafc" stroke="#cad7e2" stroke-width="1.8" />
 <text x="922" y="174" font-family="Architects Daughter" font-size="22" font-weight="700" fill="#263645" text-anchor="start">How to read it</text>
 <text x="922" y="202" font-family="Comic Mono" font-size="13" font-weight="400" fill="#52677c" text-anchor="start">Cards are runnable examples.</text>
 <text x="922" y="220" font-family="Comic Mono" font-size="13" font-weight="400" fill="#52677c" text-anchor="start">Arrows show learning routes.</text>
 <text x="922" y="238" font-family="Comic Mono" font-size="13" font-weight="400" fill="#52677c" text-anchor="start">Module READMEs own deeper diagrams.</text>
-<rect x="58" y="316" width="368" height="232" rx="22" fill="#eef7f4" stroke="#9fd0bf" stroke-width="2.2"/>
+<rect x="58" y="316" width="368" height="232" rx="22" fill="#eef7f4" stroke="#9fd0bf" stroke-width="2.2" />
 <text x="80" y="350" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">Data and Cache</text>
-<rect x="456" y="316" width="368" height="232" rx="22" fill="#f8f2e7" stroke="#d8bd80" stroke-width="2.2"/>
+<rect x="456" y="316" width="368" height="232" rx="22" fill="#f8f2e7" stroke="#d8bd80" stroke-width="2.2" />
 <text x="478" y="350" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">Runtime Coordination</text>
-<rect x="854" y="316" width="368" height="232" rx="22" fill="#f6eef9" stroke="#c6a4d4" stroke-width="2.2"/>
+<rect x="854" y="316" width="368" height="232" rx="22" fill="#f6eef9" stroke="#c6a4d4" stroke-width="2.2" />
 <text x="876" y="350" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">State and Workflow</text>
-<rect x="58" y="612" width="558" height="230" rx="22" fill="#eef4fb" stroke="#9abbe0" stroke-width="2.2"/>
+<rect x="58" y="612" width="558" height="230" rx="22" fill="#eef4fb" stroke="#9abbe0" stroke-width="2.2" />
 <text x="80" y="646" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">Integration and Batch</text>
-<rect x="664" y="612" width="558" height="230" rx="22" fill="#fff1f2" stroke="#e6a6ae" stroke-width="2.2"/>
+<rect x="664" y="612" width="558" height="230" rx="22" fill="#fff1f2" stroke="#e6a6ae" stroke-width="2.2" />
 <text x="686" y="646" font-family="Architects Daughter" font-size="24" font-weight="700" fill="#263645" text-anchor="start">HTTP Resilience and Operations</text>
-<path d="M 520,266 V 286 Q 520,298 508,298 H 222 Q 210,298 210,310 V 316" fill="none" stroke="#059669" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGreen)"/>
-<path d="M 592,266 V 316" fill="none" stroke="#ea580c" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowOrange)"/>
-<path d="M 760,266 V 286 Q 760,298 772,298 H 1026 Q 1038,298 1038,310 V 316" fill="none" stroke="#7c3aed" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowPurple)"/>
-<path d="M 544,266 V 286 Q 544,298 532,298 H 450 Q 438,298 438,310 V 570 Q 438,582 426,582 H 350 Q 338,582 338,594 V 612" fill="none" stroke="#2563eb" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)"/>
-<path d="M 736,266 V 286 Q 736,298 748,298 H 826 Q 838,298 838,310 V 570 Q 838,582 850,582 H 928 Q 940,582 940,594 V 612" fill="none" stroke="#e11d48" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowRose)"/>
-<rect x="84" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#74b79b" stroke-width="2.2"/>
-<path d="M 100,374 H 218 Q 234,374 234,390 V 416 H 84 V 390 Q 84,374 100,374 Z" fill="#bbf7d0" opacity="0.22"/>
+<path d="M 520,266 V 286 Q 520,298 508,298 H 222 Q 210,293 210,301 V 316" fill="none" stroke="#059669" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGreen)" />
+<path d="M 592,266 V 316" fill="none" stroke="#ea580c" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowOrange)" />
+<path d="M 760,266 V 286 Q 760,298 772,298 H 1026 Q 1038,293 1038,301 V 316" fill="none" stroke="#7c3aed" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowPurple)" />
+<path d="M 544,266 V 286 Q 544,298 532,298 H 450 Q 438,298 438,310 V 570 Q 438,582 426,582 H 350 Q 338,582 338,594 V 612" fill="none" stroke="#2563eb" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)" />
+<path d="M 736,266 V 286 Q 736,298 748,298 H 826 Q 838,298 838,310 V 570 Q 838,582 850,582 H 928 Q 940,582 940,594 V 612" fill="none" stroke="#e11d48" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowRose)" />
+<rect x="84" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#74b79b" stroke-width="2.2" />
+<path d="M 100,374 H 218 Q 234,374 234,390 V 416 H 84 V 390 Q 84,374 100,374 Z" fill="#bbf7d0" opacity="0.22" />
 <text x="102" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Feed Cleanup</text>
 <text x="102" y="439" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">order intake</text>
 <text x="102" y="457" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">invitation codecs</text>
 <text x="102" y="475" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">snapshot codecs</text>
-<rect x="250" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#74b79b" stroke-width="2.2"/>
-<path d="M 266,374 H 384 Q 400,374 400,390 V 416 H 250 V 390 Q 250,374 266,374 Z" fill="#bbf7d0" opacity="0.22"/>
+<rect x="250" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#74b79b" stroke-width="2.2" />
+<path d="M 266,374 H 384 Q 400,374 400,390 V 416 H 250 V 390 Q 250,374 266,374 Z" fill="#bbf7d0" opacity="0.22" />
 <text x="268" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Near Cache</text>
 <text x="268" y="439" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">Redis invalidation</text>
 <text x="268" y="457" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">cold miss lock</text>
 <text x="268" y="475" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">snapshot envelope</text>
-<rect x="482" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#c59f5d" stroke-width="2.2"/>
-<path d="M 498,374 H 616 Q 632,374 632,390 V 416 H 482 V 390 Q 482,374 498,374 Z" fill="#fde68a" opacity="0.22"/>
+<rect x="482" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#c59f5d" stroke-width="2.2" />
+<path d="M 498,374 H 616 Q 632,374 632,390 V 416 H 482 V 390 Q 482,374 498,374 Z" fill="#fde68a" opacity="0.22" />
 <text x="500" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Leader Jobs</text>
 <text x="500" y="439" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">Redis election</text>
 <text x="500" y="457" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">single owner job</text>
 <text x="500" y="475" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">group leaders</text>
-<rect x="648" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#c59f5d" stroke-width="2.2"/>
-<path d="M 664,374 H 782 Q 798,374 798,390 V 416 H 648 V 390 Q 648,374 664,374 Z" fill="#fde68a" opacity="0.22"/>
+<rect x="648" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#c59f5d" stroke-width="2.2" />
+<path d="M 664,374 H 782 Q 798,374 798,390 V 416 H 648 V 390 Q 648,374 664,374 Z" fill="#fde68a" opacity="0.22" />
 <text x="666" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Concurrency</text>
 <text x="666" y="439" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">bounded fanout</text>
 <text x="666" y="457" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">cancellation</text>
 <text x="666" y="475" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">race evidence</text>
-<rect x="880" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#a980bd" stroke-width="2.2"/>
-<path d="M 896,374 H 1014 Q 1030,374 1030,390 V 416 H 880 V 390 Q 880,374 896,374 Z" fill="#e9d5ff" opacity="0.22"/>
+<rect x="880" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#a980bd" stroke-width="2.2" />
+<path d="M 896,374 H 1014 Q 1030,374 1030,390 V 416 H 880 V 390 Q 880,374 896,374 Z" fill="#e9d5ff" opacity="0.22" />
 <text x="898" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">State APIs</text>
 <text x="898" y="439" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">order lifecycle</text>
 <text x="898" y="457" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">payment auth</text>
 <text x="898" y="475" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">idempotent retry</text>
-<rect x="1046" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#a980bd" stroke-width="2.2"/>
-<path d="M 1062,374 H 1180 Q 1196,374 1196,390 V 416 H 1046 V 390 Q 1046,374 1062,374 Z" fill="#e9d5ff" opacity="0.22"/>
+<rect x="1046" y="374" width="150" height="116" rx="16" fill="#ffffff" stroke="#a980bd" stroke-width="2.2" />
+<path d="M 1062,374 H 1180 Q 1196,374 1196,390 V 416 H 1046 V 390 Q 1046,374 1062,374 Z" fill="#e9d5ff" opacity="0.22" />
 <text x="1064" y="403" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Workflow APIs</text>
 <text x="1064" y="439" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">fulfillment run</text>
 <text x="1064" y="457" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">compensation</text>
 <text x="1064" y="475" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">work reports</text>
-<rect x="86" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#6fa3d8" stroke-width="2.2"/>
-<path d="M 102,676 H 230 Q 246,676 246,692 V 718 H 86 V 692 Q 86,676 102,676 Z" fill="#bfdbfe" opacity="0.22"/>
+<rect x="86" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#6fa3d8" stroke-width="2.2" />
+<path d="M 102,676 H 230 Q 246,676 246,692 V 718 H 86 V 692 Q 86,676 102,676 Z" fill="#bfdbfe" opacity="0.22" />
 <text x="104" y="705" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Testcontainers</text>
 <text x="104" y="741" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">Postgres</text>
 <text x="104" y="759" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">Redis</text>
 <text x="104" y="777" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">NATS pipeline</text>
-<rect x="274" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#6fa3d8" stroke-width="2.2"/>
-<path d="M 290,676 H 418 Q 434,676 434,692 V 718 H 274 V 692 Q 274,676 290,676 Z" fill="#bfdbfe" opacity="0.22"/>
+<rect x="274" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#6fa3d8" stroke-width="2.2" />
+<path d="M 290,676 H 418 Q 434,676 434,692 V 718 H 274 V 692 Q 274,676 290,676 Z" fill="#bfdbfe" opacity="0.22" />
 <text x="292" y="705" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Checkpoint Batch</text>
 <text x="292" y="741" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">CSV import</text>
 <text x="292" y="759" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">account migration</text>
 <text x="292" y="777" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">restart safety</text>
-<rect x="462" y="676" width="128" height="116" rx="16" fill="#ffffff" stroke="#6fa3d8" stroke-width="2.2"/>
-<path d="M 478,676 H 574 Q 590,676 590,692 V 718 H 462 V 692 Q 462,676 478,676 Z" fill="#bfdbfe" opacity="0.22"/>
+<rect x="462" y="676" width="128" height="116" rx="16" fill="#ffffff" stroke="#6fa3d8" stroke-width="2.2" />
+<path d="M 478,676 H 574 Q 590,676 590,692 V 718 H 462 V 692 Q 462,676 478,676 Z" fill="#bfdbfe" opacity="0.22" />
 <text x="480" y="705" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">DLQ Batch</text>
 <text x="480" y="741" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">retry tickets</text>
 <text x="480" y="759" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">dead letters</text>
-<rect x="690" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#d98d98" stroke-width="2.2"/>
-<path d="M 706,676 H 834 Q 850,676 850,692 V 718 H 690 V 692 Q 690,676 706,676 Z" fill="#fecdd3" opacity="0.22"/>
+<rect x="690" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#d98d98" stroke-width="2.2" />
+<path d="M 706,676 H 834 Q 850,676 850,692 V 718 H 690 V 692 Q 690,676 706,676 Z" fill="#fecdd3" opacity="0.22" />
 <text x="708" y="705" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Resilience Web</text>
 <text x="708" y="741" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">retry timeout</text>
 <text x="708" y="759" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">bulkhead</text>
 <text x="708" y="777" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">circuit breaker</text>
-<rect x="878" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#d98d98" stroke-width="2.2"/>
-<path d="M 894,676 H 1022 Q 1038,676 1038,692 V 718 H 878 V 692 Q 878,676 894,676 Z" fill="#fecdd3" opacity="0.22"/>
+<rect x="878" y="676" width="160" height="116" rx="16" fill="#ffffff" stroke="#d98d98" stroke-width="2.2" />
+<path d="M 894,676 H 1022 Q 1038,676 1038,692 V 718 H 878 V 692 Q 878,676 894,676 Z" fill="#fecdd3" opacity="0.22" />
 <text x="896" y="705" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Guarded Payment</text>
 <text x="896" y="741" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">policy outcomes</text>
 <text x="896" y="759" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">event stream</text>
-<rect x="1066" y="676" width="128" height="116" rx="16" fill="#ffffff" stroke="#d98d98" stroke-width="2.2"/>
-<path d="M 1082,676 H 1178 Q 1194,676 1194,692 V 718 H 1066 V 692 Q 1066,676 1082,676 Z" fill="#fecdd3" opacity="0.22"/>
+<rect x="1066" y="676" width="128" height="116" rx="16" fill="#ffffff" stroke="#d98d98" stroke-width="2.2" />
+<path d="M 1082,676 H 1178 Q 1194,676 1194,692 V 718 H 1066 V 692 Q 1066,676 1082,676 Z" fill="#fecdd3" opacity="0.22" />
 <text x="1084" y="705" font-family="Architects Daughter" font-size="20" font-weight="700" fill="#263645" text-anchor="start">Ops Policy</text>
 <text x="1084" y="741" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">stable report</text>
 <text x="1084" y="759" font-family="Comic Mono" font-size="13.5" font-weight="400" fill="#405367" text-anchor="start">failure policy</text>
-<path d="M 234,432 L 250,432" fill="none" stroke="#059669" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGreen)"/>
-<path d="M 632,432 L 648,432" fill="none" stroke="#ea580c" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowOrange)"/>
-<path d="M 1030,432 L 1046,432" fill="none" stroke="#7c3aed" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowPurple)"/>
-<path d="M 246,734 L 274,734" fill="none" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)"/>
-<path d="M 434,734 L 462,734" fill="none" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)"/>
-<path d="M 850,734 L 878,734" fill="none" stroke="#64748b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGray)"/>
-<path d="M 1038,734 L 1066,734" fill="none" stroke="#64748b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGray)"/>
+<path d="M 234,432 L 250,432" fill="none" stroke="#059669" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGreen)" />
+<path d="M 632,432 L 648,432" fill="none" stroke="#ea580c" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowOrange)" />
+<path d="M 1030,432 L 1046,432" fill="none" stroke="#7c3aed" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowPurple)" />
+<path d="M 246,734 L 274,734" fill="none" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)" />
+<path d="M 434,734 L 462,734" fill="none" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)" />
+<path d="M 850,734 L 878,734" fill="none" stroke="#64748b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGray)" />
+<path d="M 1038,734 L 1066,734" fill="none" stroke="#64748b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowGray)" />
 <text x="640" y="866" font-family="Comic Mono" font-size="15" font-weight="400" fill="#52677c" text-anchor="middle">Use the map to pick a scenario, then open the example README for architecture, sequence, and flow details.</text>
 </svg>
