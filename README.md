@@ -65,6 +65,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/transactional-outbox-publisher`](examples/transactional-outbox-publisher) | [English](examples/transactional-outbox-publisher/README.md) \| [한국어](examples/transactional-outbox-publisher/README.ko.md) | PostgreSQL order and audit-event commit followed by at-least-once publication through the released SQL outbox relay and Redis Streams adapter. | `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/audited-order-workflow-outbox`](examples/audited-order-workflow-outbox) | [English](examples/audited-order-workflow-outbox/README.md) \| [한국어](examples/audited-order-workflow-outbox/README.ko.md) | Gin order state, immutable PostgreSQL audit history, strict POST JSON queries, and supervised Redis Streams delivery over the official SQL outbox. | `gin`, `audit`, `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/graph-abuse-cluster`](examples/graph-abuse-cluster) | [English](examples/graph-abuse-cluster/README.md) \| [한국어](examples/graph-abuse-cluster/README.ko.md) | Neo4j fixture persistence, bounded graph adaptation, and deterministic connected-component risk projection in Go. | `graph`, `graph/neo4j`, Neo4j Testcontainers |
+| [`examples/graph-recommendation`](examples/graph-recommendation) | [English](examples/graph-recommendation/README.md) \| [한국어](examples/graph-recommendation/README.ko.md) | Caller-owned graph model example that traverses explainable product and follow candidates with deterministic scoring. | `graph` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -260,6 +261,26 @@ weights, and local-only trust boundary.
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster/...
 go test -p 1 -race -count=1 ./examples/graph-abuse-cluster/...
+```
+
+## Run the Graph Recommendation Example
+
+Print the deterministic in-memory recommendation report:
+
+```bash
+go run ./examples/graph-recommendation
+```
+
+The [example README](examples/graph-recommendation/README.md) documents the
+`graph.Path` evidence, two-hop traversal, score components, tie-breaking,
+already-purchased/already-followed exclusions, the `graph-recommendation-v1`
+fixture namespace, and the non-production boundary.
+
+Run the focused tests:
+
+```bash
+go test -count=1 ./examples/graph-recommendation/...
+go test -race -count=1 ./examples/graph-recommendation/...
 ```
 
 ## Run the S3 Floci Storage Example

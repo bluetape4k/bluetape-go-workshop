@@ -65,6 +65,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/transactional-outbox-publisher`](examples/transactional-outbox-publisher/README.ko.md) | [English](examples/transactional-outbox-publisher/README.md) \| [한국어](examples/transactional-outbox-publisher/README.ko.md) | PostgreSQL order와 audit event를 함께 commit한 뒤 릴리스된 SQL outbox relay와 Redis Streams adapter로 at-least-once 발행하는 예제입니다. | `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/audited-order-workflow-outbox`](examples/audited-order-workflow-outbox/README.ko.md) | [English](examples/audited-order-workflow-outbox/README.md) \| [한국어](examples/audited-order-workflow-outbox/README.ko.md) | Gin 주문 상태, 불변 PostgreSQL audit history, strict POST JSON 조회, 공식 SQL outbox 기반 Redis Streams 감독형 전송을 합친 예제입니다. | `gin`, `audit`, `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/graph-abuse-cluster`](examples/graph-abuse-cluster/README.ko.md) | [English](examples/graph-abuse-cluster/README.md) \| [한국어](examples/graph-abuse-cluster/README.ko.md) | Neo4j에 fixture를 저장하고 제한된 graph 변환을 거쳐 Go에서 connected component와 위험 점수를 결정적으로 계산하는 예제입니다. | `graph`, `graph/neo4j`, Neo4j Testcontainers |
+| [`examples/graph-recommendation`](examples/graph-recommendation/README.ko.md) | [English](examples/graph-recommendation/README.md) \| [한국어](examples/graph-recommendation/README.ko.md) | 호출자가 소유한 graph model로 설명 가능한 상품·follow 후보를 순회하고 결정론적으로 점수화하는 예제입니다. | `graph` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -261,6 +262,26 @@ Docker 명령, 항상 같은 JSON report, graph schema, 점수 가중치, local-
 ```bash
 go test -count=1 ./examples/graph-abuse-cluster/...
 go test -p 1 -race -count=1 ./examples/graph-abuse-cluster/...
+```
+
+## Graph Recommendation 예제 실행
+
+결정론적인 메모리 내 recommendation report를 출력합니다.
+
+```bash
+go run ./examples/graph-recommendation
+```
+
+[예제 README](examples/graph-recommendation/README.ko.md)에서 `graph.Path`
+증거, 두 홉 순회, 점수 구성, 동률 정렬, 이미 구매했거나 이미 follow한
+후보의 제외, `graph-recommendation-v1` fixture namespace, 운영용이 아닌
+예제의 경계를 설명합니다.
+
+집중 테스트를 실행합니다.
+
+```bash
+go test -count=1 ./examples/graph-recommendation/...
+go test -race -count=1 ./examples/graph-recommendation/...
 ```
 
 ## S3 Floci Storage 예제 실행
