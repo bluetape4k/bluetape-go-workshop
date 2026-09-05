@@ -66,6 +66,7 @@ envelopes prevent a cold burst from stampeding the backing store.
 | [`examples/audited-order-workflow-outbox`](examples/audited-order-workflow-outbox) | [English](examples/audited-order-workflow-outbox/README.md) \| [한국어](examples/audited-order-workflow-outbox/README.ko.md) | Gin order state, immutable PostgreSQL audit history, strict POST JSON queries, and supervised Redis Streams delivery over the official SQL outbox. | `gin`, `audit`, `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/graph-abuse-cluster`](examples/graph-abuse-cluster) | [English](examples/graph-abuse-cluster/README.md) \| [한국어](examples/graph-abuse-cluster/README.ko.md) | Neo4j fixture persistence, bounded graph adaptation, and deterministic connected-component risk projection in Go. | `graph`, `graph/neo4j`, Neo4j Testcontainers |
 | [`examples/graph-recommendation`](examples/graph-recommendation) | [English](examples/graph-recommendation/README.md) \| [한국어](examples/graph-recommendation/README.ko.md) | Caller-owned graph model example that traverses explainable product and follow candidates with deterministic scoring. | `graph` |
+| [`examples/graph-import-export`](examples/graph-import-export) | [English](examples/graph-import-export/README.md) \| [한국어](examples/graph-import-export/README.ko.md) | Bounded NDJSON and named-partner GraphML import/export with scalar normalization, directed account/device validation, and comparable snapshots. | `graph/graphio`, `graph/graphio/graphml` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | Partner order feed cleanup with validation, defaults, filtering, deduplication, and grouping. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | Invitation links, callback state, and partner references with practical string codecs. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | Gin order intake boundary that verifies JWT claims and generates internal UUID v7 order IDs. | `id`, `jwt` |
@@ -281,6 +282,26 @@ Run the focused tests:
 ```bash
 go test -count=1 ./examples/graph-recommendation/...
 go test -race -count=1 ./examples/graph-recommendation/...
+```
+
+## Run the Graph Import/Export Example
+
+Print the bounded NDJSON/GraphML comparison report:
+
+```bash
+go run ./examples/graph-import-export
+```
+
+The [example README](examples/graph-import-export/README.md) documents the
+`risk-partner-acme-v1` fixture, scalar normalization, directed account/device
+subset, default byte/record limits, fail-closed GraphML constructs, and the
+normalized snapshot shared by both formats.
+
+Run the focused and race tests:
+
+```bash
+go test -count=1 ./examples/graph-import-export/...
+go test -race -count=1 ./examples/graph-import-export/...
 ```
 
 ## Run the S3 Floci Storage Example
