@@ -66,6 +66,7 @@ lock/result envelope는 cold burst가 backing store로 몰리는 일을 막습�
 | [`examples/audited-order-workflow-outbox`](examples/audited-order-workflow-outbox/README.ko.md) | [English](examples/audited-order-workflow-outbox/README.md) \| [한국어](examples/audited-order-workflow-outbox/README.ko.md) | Gin 주문 상태, 불변 PostgreSQL audit history, strict POST JSON 조회, 공식 SQL outbox 기반 Redis Streams 감독형 전송을 합친 예제입니다. | `gin`, `audit`, `audit/sqloutbox`, `audit/sqloutbox/redisstreams`, `testcontainers/postgres`, `testcontainers/redis` |
 | [`examples/graph-abuse-cluster`](examples/graph-abuse-cluster/README.ko.md) | [English](examples/graph-abuse-cluster/README.md) \| [한국어](examples/graph-abuse-cluster/README.ko.md) | Neo4j에 fixture를 저장하고 제한된 graph 변환을 거쳐 Go에서 connected component와 위험 점수를 결정적으로 계산하는 예제입니다. | `graph`, `graph/neo4j`, Neo4j Testcontainers |
 | [`examples/graph-recommendation`](examples/graph-recommendation/README.ko.md) | [English](examples/graph-recommendation/README.md) \| [한국어](examples/graph-recommendation/README.ko.md) | 호출자가 소유한 graph model로 설명 가능한 상품·follow 후보를 순회하고 결정론적으로 점수화하는 예제입니다. | `graph` |
+| [`examples/graph-import-export`](examples/graph-import-export/README.ko.md) | [English](examples/graph-import-export/README.md) \| [한국어](examples/graph-import-export/README.ko.md) | Bounded NDJSON와 named partner GraphML import/export, scalar 정규화, directed account/device 검증, format 간 기준 데이터 비교를 보여주는 예제입니다. | `graph/graphio`, `graph/graphio/graphml` |
 | [`examples/order-intake-cleanup`](examples/order-intake-cleanup/README.ko.md) | [English](examples/order-intake-cleanup/README.md) \| [한국어](examples/order-intake-cleanup/README.ko.md) | validation, default, filtering, deduplication, grouping으로 partner order feed를 정리하는 예제입니다. | `core`, `collections` |
 | [`examples/invitation-codecs`](examples/invitation-codecs/README.ko.md) | [English](examples/invitation-codecs/README.md) \| [한국어](examples/invitation-codecs/README.ko.md) | invitation link, callback state, partner reference를 실용적인 string codec으로 다루는 예제입니다. | `codec`, `core` |
 | [`examples/id-jwt-boundary`](examples/id-jwt-boundary/README.ko.md) | [English](examples/id-jwt-boundary/README.md) \| [한국어](examples/id-jwt-boundary/README.ko.md) | JWT claim을 검증하고 내부 UUID v7 order ID를 생성하는 Gin order intake boundary 예제입니다. | `id`, `jwt` |
@@ -282,6 +283,26 @@ go run ./examples/graph-recommendation
 ```bash
 go test -count=1 ./examples/graph-recommendation/...
 go test -race -count=1 ./examples/graph-recommendation/...
+```
+
+## Graph Import/Export 예제 실행
+
+Bounded NDJSON/GraphML 비교 report를 출력합니다.
+
+```bash
+go run ./examples/graph-import-export
+```
+
+[예제 README](examples/graph-import-export/README.ko.md)에서
+`risk-partner-acme-v1` fixture, scalar 정규화, directed account/device subset,
+기본 byte/record 상한, fail-closed GraphML construct, 두 format이 공유하는
+정규화된 그래프 기준 데이터를 설명합니다.
+
+집중 테스트와 race test를 실행합니다.
+
+```bash
+go test -count=1 ./examples/graph-import-export/...
+go test -race -count=1 ./examples/graph-import-export/...
 ```
 
 ## S3 Floci Storage 예제 실행
